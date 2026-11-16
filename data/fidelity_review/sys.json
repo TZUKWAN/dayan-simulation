@@ -1,0 +1,439 @@
+{
+ "module": "sys",
+ "reviews": [
+  {
+   "mid": "SYS002",
+   "class_name": "MMCQueueModel",
+   "fidelity": "full",
+   "basis": "泊松到达+指数服务的 M/M/c 队列模拟，Erlang-C 解析 Wq 对照",
+   "simplifications": [
+    "定步长 tick 内到达同刻入队，等待按 tick 粒度",
+    "单路径模拟，与解析期望对照非批量统计"
+   ],
+   "evidence": "sys_models.py:57 服务事件表+排队启动；sys_models.py:51 Erlang-C"
+  },
+  {
+   "mid": "SYS003",
+   "class_name": "ErlangBModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：SYS003 模拟侧阻塞计数+多服务台离开簿记（sim≈Erlang-B）；SYS009 均匀 scv=c_s²/3",
+   "simplifications": [
+    "step 从不递增 blocked，阻塞分支缺失",
+    "多路并发服务只记单个 busy_until，busy 回退不准",
+    "观测仅输出公式值"
+   ],
+   "evidence": "sys_models.py:100 递推公式；sys_models.py:108-118 模拟缺陷",
+   "fixed": true
+  },
+  {
+   "mid": "SYS006",
+   "class_name": "MMInfQueueModel",
+   "fidelity": "full",
+   "basis": "泊松到达+独立指数驻留的真实 M/M/∞ 模拟，L 与 λ/μ 对照",
+   "simplifications": [
+    "时间平均 L 为左端点离散积分",
+    "单路径对照"
+   ],
+   "evidence": "sys_models.py:193 逐客生成离开时刻并积分 L"
+  },
+  {
+   "mid": "SYS007",
+   "class_name": "MD1QueueModel",
+   "fidelity": "full",
+   "basis": "确定性服务 M/D/1 模拟，Wq 与 PK 精确式 ρ/(2μ(1−ρ)) 对照",
+   "simplifications": [
+    "每 tick 至多启动一个服务，靠后续 tick 追赶积压",
+    "等待记服务开始时刻"
+   ],
+   "evidence": "sys_models.py:229 服务期模拟；sys_models.py:244 解析对照"
+  },
+  {
+   "mid": "SYS010",
+   "class_name": "JacksonNetworkModel",
+   "fidelity": "full",
+   "basis": "两站开放 Jackson 网络模拟+流量方程，均值与 M/M/1 站公式对照",
+   "simplifications": [
+    "各站限单服务窗 min(n,1)，非一般 Jackson 站型",
+    "仅验证均值，未验证乘积形式分布",
+    "dest 变量死代码，外部到达硬编码入站 0"
+   ],
+   "evidence": "sys_models.py:281 路由与站服务；sys_models.py:267 流量方程"
+  },
+  {
+   "mid": "SYS013",
+   "class_name": "PriorityQModel",
+   "fidelity": "lite",
+   "basis": "两类优先队列模拟，非抢占分支成立，抢占分支丢顾客",
+   "simplifications": [
+    "抢占时被抢占低优顾客未回队也不计完成（顾客消失）",
+    "等待按开始服务时刻记录，完成不追踪",
+    "无优先级解析公式对照，仅 W_high<W_low 定性"
+   ],
+   "evidence": "sys_models.py:337-355 服务/抢占分支"
+  },
+  {
+   "mid": "SYS015",
+   "class_name": "PetriNetModel",
+   "fidelity": "lite",
+   "basis": "库所-变迁网使能/触发/守恒正确，但每 tick 仅触发首个使能变迁",
+   "simplifications": [
+    "使能选择固定取 en[0]，无随机/公平冲突策略",
+    "无时间语义"
+   ],
+   "evidence": "sys_models.py:387 使能判定；sys_models.py:390 触发"
+  },
+  {
+   "mid": "SYS017",
+   "class_name": "TimedPetriModel",
+   "fidelity": "lite",
+   "basis": "变迁延时 Petri（pre 即扣、post 延时回吐）机制正确",
+   "simplifications": [
+    "每 tick 至多一个变迁开始，使能取首序",
+    "无弧延时/容量/冲突策略"
+   ],
+   "evidence": "sys_models.py:421-432 延时回吐"
+  },
+  {
+   "mid": "SYS021",
+   "class_name": "AtomicDEVModel",
+   "fidelity": "lite",
+   "basis": "σ/相位时间推进的周期生成器，DEVS 原子核心子集",
+   "simplifications": [
+    "无外部转移/输出端口/汇合函数等完整 DEVS&S 语义",
+    "仅周期生成器单实例"
+   ],
+   "evidence": "sys_models.py:485 σ 递减与内事件重置"
+  },
+  {
+   "mid": "SYS022",
+   "class_name": "CoupledDEVModel",
+   "fidelity": "lite",
+   "basis": "生成器+处理器流水线守恒模拟，耦合为硬编码过程调用",
+   "simplifications": [
+    "docstring 声称的 transducer 未实现",
+    "无端口/耦合规范（EOC/IC），非耦合 DEVS 形式化"
+   ],
+   "evidence": "sys_models.py:524-536 硬编码耦合"
+  },
+  {
+   "mid": "SYS025",
+   "class_name": "CellDEVModel",
+   "fidelity": "prototype",
+   "basis": "仅周期边界邻域平均扩散（质量守恒），无 Cell-DEVS 时滞语义",
+   "simplifications": [
+    "声称的时滞转换未实现",
+    "new/out 计算为死代码，实际用 blend 平均"
+   ],
+   "evidence": "sys_models.py:564-574 死代码+最终混合规则"
+  },
+  {
+   "mid": "SYS028",
+   "class_name": "CTMCModel",
+   "fidelity": "full",
+   "basis": "Gillespie 直接法驱动的 CTMC（引擎已核），稳态分布线性求解对照",
+   "simplifications": [
+    "pi_sim 用进入计数而非驻留时间加权，与 π 口径有偏",
+    "默认仅两状态"
+   ],
+   "evidence": "sys_models.py:599 强度钩子；core.py:502 SSA"
+  },
+  {
+   "mid": "SYS029",
+   "class_name": "SemiMarkovModel",
+   "fidelity": "lite",
+   "basis": "两态均匀驻留的半马尔可夫模拟，驻留非指数特征成立",
+   "simplifications": [
+    "仅 2 状态、均匀驻留核",
+    "无一般嵌入链/更新方程解析对照"
+   ],
+   "evidence": "sys_models.py:643 驻留递减+转移"
+  },
+  {
+   "mid": "SYS030",
+   "class_name": "BirthDeathModel",
+   "fidelity": "full",
+   "basis": "线性生灭过程精确 SSA（强度 λn/μn），E[N(t)]=n0e^{(λ−μ)t} 对照",
+   "simplifications": [
+    "E 对照为单路径瞬时值",
+    "强度不含迁移项"
+   ],
+   "evidence": "sys_models.py:670 强度；sys_models.py:680 解析均值"
+  },
+  {
+   "mid": "SYS031",
+   "class_name": "PoissonProcessModel",
+   "fidelity": "full",
+   "basis": "齐次泊松按 tick 泊松增量计数，N(t) 分布精确，E/var 对照",
+   "simplifications": [
+    "未生成到达时刻/间隔序列，仅计数统计",
+    "单路径对照"
+   ],
+   "evidence": "sys_models.py:704 增量计数"
+  },
+  {
+   "mid": "SYS034",
+   "class_name": "GBMModel",
+   "fidelity": "lite",
+   "basis": "GBM 漂移/扩散形式忠实，引擎 Euler–Maruyama 离散有偏差",
+   "simplifications": [
+    "EM 加性更新可致 S<0（非对数精确格式）",
+    "E[S] 对照为单路径瞬时值"
+   ],
+   "evidence": "sys_models.py:765 drift/diffusion；core.py:458 EM"
+  },
+  {
+   "mid": "SYS035",
+   "class_name": "OUModel",
+   "fidelity": "full",
+   "basis": "OU 线性高斯扩散忠实，EM 为标准格式，平稳方差 σ²/(2θ) 对照",
+   "simplifications": [
+    "单路径瞬时值 vs 平稳方差",
+    "无精确转移抽样"
+   ],
+   "evidence": "sys_models.py:794 drift/diffusion；sys_models.py:801 解析方差"
+  },
+  {
+   "mid": "SYS036",
+   "class_name": "CIRModel",
+   "fidelity": "lite",
+   "basis": "CIR 平方根扩散忠实，正性靠 max(x,0) 截断而非精确转移",
+   "simplifications": [
+    "EM+截断，非非中心 χ² 精确抽样",
+    "Feller 条件仅检查不强制",
+    "边界吸收/反射语义未定义"
+   ],
+   "evidence": "sys_models.py:827 sqrt(max(x,0))；sys_models.py:831 Feller"
+  },
+  {
+   "mid": "SYS037",
+   "class_name": "HestonModel",
+   "fidelity": "lite",
+   "basis": "双因子 SDE 结构在但相关结构丢失：对角独立噪声，ρ 仅作幅度缩放",
+   "simplifications": [
+    "S 与 v 的布朗相关性 ρ 未实现（作者注明）",
+    "v 截断 max(v,0)，非 Full Truncation 等标准格式"
+   ],
+   "evidence": "sys_models.py:857-861 对角噪声注释"
+  },
+  {
+   "mid": "SYS038",
+   "class_name": "WienerModel",
+   "fidelity": "full",
+   "basis": "标准 Wiener：零漂移单位扩散，EM 下精确，Var=t 解析对照",
+   "simplifications": [
+    "单路径瞬时方差对照"
+   ],
+   "evidence": "sys_models.py:884 drift/diffusion；sys_models.py:891 Var=t"
+  },
+  {
+   "mid": "SYS039",
+   "class_name": "CompoundPoissonModel",
+   "fidelity": "full",
+   "basis": "复合泊松精确 SSA（事件率 λ+泊松型赔付），E[S]=λtE[Y] 对照",
+   "simplifications": [
+    "赔付限定 Poisson(y_mean)+1 正整数分布",
+    "E 对照为单路径瞬时值"
+   ],
+   "evidence": "sys_models.py:915 强度；sys_models.py:918 赔付"
+  },
+  {
+   "mid": "SYS042",
+   "class_name": "HMMModel",
+   "fidelity": "full",
+   "basis": "对数域前向似然+对数域 Viterbi，真实状态序列恢复率对照",
+   "simplifications": [
+    "无后向/Baum-Welch 学习",
+    "仅 2 状态固定 A/B，标签翻转容差 max(acc,1−acc)"
+   ],
+   "evidence": "sys_models.py:1019 前向；sys_models.py:1025 Viterbi"
+  },
+  {
+   "mid": "SYS044",
+   "class_name": "LinearGaussianSSMModel",
+   "fidelity": "full",
+   "basis": "随机游走+噪声观测的标量 Kalman 滤波，前后验 RMSE 与 P_final",
+   "simplifications": [
+    "标量状态/单位转移阵",
+    "无平滑/EM 参数估计"
+   ],
+   "evidence": "sys_models.py:1067-1076 预测-更新"
+  },
+  {
+   "mid": "SYS045",
+   "class_name": "DBNModel",
+   "fidelity": "lite",
+   "basis": "雨-伞两时片前向滤波，等价单隐变量 HMM 滤波",
+   "simplifications": [
+    "单隐变量链，无多变量联合/接口变量",
+    "无通用精确 DBN 推理与学习"
+   ],
+   "evidence": "sys_models.py:1116-1124 前向消息"
+  },
+  {
+   "mid": "SYS001",
+   "class_name": "SYS001MM1Model",
+   "fidelity": "full",
+   "basis": "真 DES 事件循环（FEL+指数到达/服务）的 M/M/1，委托 benchmarks 实现",
+   "simplifications": [
+    "观测仅 queue/served，未输出 L/W 解析对照（docstring 有式）",
+    "T≤200 且 2 万事件上限截断"
+   ],
+   "evidence": "app_final.py:27-37 DES 循环；benchmarks.py:110 handle_event"
+  },
+  {
+   "mid": "SYS004",
+   "class_name": "Sys004FiniteCapacityModel",
+   "fidelity": "full",
+   "basis": "委托 M/M/c/K 真实模拟（泊松到达、有限队列、弃队计数）",
+   "simplifications": [
+    "无 Erlang 损失率解析对照",
+    "validate 恒空"
+   ],
+   "evidence": "sys_extras.py:340 wrapper；sys_models.py:148 底层 step"
+  },
+  {
+   "mid": "SYS008",
+   "class_name": "Sys008DeterministicModel",
+   "fidelity": "full",
+   "basis": "委托 M/D/1 实现，与 SYS007 同机制同基准",
+   "simplifications": [
+    "继承 SYS007 的 tick 粒度简化"
+   ],
+   "evidence": "sys_extras.py:362 wrapper；sys_models.py:229 底层 step"
+  },
+  {
+   "mid": "SYS009",
+   "class_name": "GIG1QueueModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：SYS003 模拟侧阻塞计数+多服务台离开簿记（sim≈Erlang-B）；SYS009 均匀 scv=c_s²/3",
+   "simplifications": [
+    "均匀服务 scv 系数误写 c_s²·3/4，应为 c_s²/3",
+    "一般到达过程 GI 未实现",
+    "等待按服务开始时刻记录"
+   ],
+   "evidence": "sys_extras.py:62 cs2 错误；sys_extras.py:47 模拟",
+   "fixed": true
+  },
+  {
+   "mid": "SYS011",
+   "class_name": "GordonNewellModel",
+   "fidelity": "lite",
+   "basis": "闭环网络模拟+MVA 递推，但模拟环路由与 MVA visit 参数口径错位",
+   "simplifications": [
+    "确定性环游 (i+1)%k 隐含 visit 全 1，与 visit=(1.0,0.6) 不一致",
+    "服务率与队长无关（n≥1 恒 μ）"
+   ],
+   "evidence": "sys_extras.py:90 MVA；sys_extras.py:106 环路由"
+  },
+  {
+   "mid": "SYS012",
+   "class_name": "BCMPModel",
+   "fidelity": "prototype",
+   "basis": "名为 BCMP 处理器共享，实为两类独立计数，类间无共享耦合",
+   "simplifications": [
+    "服务率与占用无关（近似 M/M/∞），PS 机制未实现",
+    "L_ps 公式与模拟机制不匹配，对照无意义"
+   ],
+   "evidence": "sys_extras.py:141-148 独立到达/服务；sys_extras.py:150-154 公式"
+  },
+  {
+   "mid": "SYS016",
+   "class_name": "ColoredPetriModel",
+   "fidelity": "prototype",
+   "basis": "颜色 token 簿记存在，但触发与回收弧同 tick 抵消，标识恒定",
+   "simplifications": [
+    "无时间/使能冲突语义",
+    "per_color 守恒恒真（无实际流动）"
+   ],
+   "evidence": "sys_extras.py:177-188 同 tick 触发+回收"
+  },
+  {
+   "mid": "SYS018",
+   "class_name": "Sys018StochasticPetriModel",
+   "fidelity": "full",
+   "basis": "SYS019 同机制别名包装：指数变迁率 SPN 经引擎 Gillespie 执行",
+   "simplifications": [
+    "未在 model_index 注册（ALL_INDEX 无 SYS018，实测 None）",
+    "网规模固定两变迁"
+   ],
+   "evidence": "sys_extras.py:383 wrapper；model_index.py:139 仅 SYS019 绑定"
+  },
+  {
+   "mid": "SYS019",
+   "class_name": "Sys018StochasticPetriModel",
+   "fidelity": "full",
+   "basis": "广义随机 Petri 网：强度/跳变钩子经引擎 Gillespie 直接法执行",
+   "simplifications": [
+    "使能按全弧判定，无 inhibitor/优先级",
+    "默认两变迁小网"
+   ],
+   "evidence": "sys_models.py:449-455 底层钩子；core.py:502 SSA"
+  },
+  {
+   "mid": "SYS020",
+   "class_name": "Sys020TimedArcModel",
+   "fidelity": "prototype",
+   "basis": "名为定时弧 Petri，实复用变迁延时 TimedPetri，无弧延时/token 年龄",
+   "simplifications": [
+    "TAPN 的弧上延迟与 token 年龄约束未实现",
+    "继承 SYS017 首序触发简化"
+   ],
+   "evidence": "sys_extras.py:412 wrapper；sys_models.py:421 变迁延时机制"
+  },
+  {
+   "mid": "SYS023",
+   "class_name": "ParallelDEVModel",
+   "fidelity": "lite",
+   "basis": "σ 数组同刻并发触发+归并重推进，并发 DEVS 最小演示",
+   "simplifications": [
+    "无耦合/端口/事件消解规范",
+    "各原子同周期独立计数"
+   ],
+   "evidence": "sys_extras.py:219-224 并发归并"
+  },
+  {
+   "mid": "SYS024",
+   "class_name": "DynamicStructureDEVModel",
+   "fidelity": "lite",
+   "basis": "工作者按队列负载增减实现结构变化，队列+服务守恒可验",
+   "simplifications": [
+    "结构变化由 10s 定时器驱动而非事件触发",
+    "工作者数硬限 1-4"
+   ],
+   "evidence": "sys_extras.py:264-270 结构调整"
+  },
+  {
+   "mid": "SYS027",
+   "class_name": "Sys027DTMCModel",
+   "fidelity": "full",
+   "basis": "DTMC 轨迹频率与特征向量稳态对照，机制忠实",
+   "simplifications": [
+    "稳态取特征分解第一列，未显式定位 λ=1（排序风险）",
+    "访问计数不含最终转移"
+   ],
+   "evidence": "sys_extras.py:453 轨迹；sys_extras.py:458 eig 稳态"
+  },
+  {
+   "mid": "SYS033",
+   "class_name": "Sys033GaltonWatsonModel",
+   "fidelity": "full",
+   "basis": "泊松后代的 Galton–Watson 分枝模拟，E[Z_n]=n0·m^n 对照",
+   "simplifications": [
+    "每 step 一代，与 dt 无关",
+    "后代分布仅泊松"
+   ],
+   "evidence": "sys_extras.py:487-491 逐个体繁殖"
+  },
+  {
+   "mid": "SYS043",
+   "class_name": "HSMMModel",
+   "fidelity": "lite",
+   "basis": "生成侧显式几何驻留（HSMM 特征），推断退化为普通 HMM 前向滤波",
+   "simplifications": [
+    "作者自注驻留信息不显式建模（HSMM 近似）",
+    "无时长积分前向/Viterbi，仅 filter_acc"
+   ],
+   "evidence": "sys_extras.py:301-315 生成；sys_extras.py:316-327 HMM 滤波"
+  }
+ ]
+}

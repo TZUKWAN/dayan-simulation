@@ -1,0 +1,47 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
+<title>msim · 教学场景</title><style>
+body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; max-width: 1100px;
+       margin: 0 auto; padding: 2em; background: #0b0f19; color: #e7ecf5; line-height: 1.7; }
+h1 { color: #22d3ee; border-bottom: 2px solid #243049; padding-bottom: 0.3em; }
+h2 { color: #fbbf24; margin-top: 1.5em; }
+h3 { color: #34d399; }
+code { background: #131a2a; padding: 0.15em 0.4em; border-radius: 4px;
+       color: #facc15; font-size: 0.92em; }
+pre { background: #131a2a; padding: 1em; border-radius: 8px; overflow-x: auto;
+      border: 1px solid #243049; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #243049; padding: 0.5em 0.8em; text-align: left; }
+th { background: #131a2a; color: #22d3ee; }
+.badge { display: inline-block; padding: 0.15em 0.6em; border-radius: 12px;
+         font-size: 0.85em; margin-right: 0.5em; }
+.badge-green { background: #052e16; color: #34d399; border: 1px solid #34d399; }
+.badge-gray { background: #1e293b; color: #94a3b8; border: 1px solid #64748b; }
+.badge-cyan { background: #083344; color: #22d3ee; border: 1px solid #22d3ee; }
+a { color: #22d3ee; }
+.done { color: #34d399; } .todo { color: #94a3b8; }
+</style></head><body>
+<h1>教学场景包</h1>
+<p>预置 3 个课堂演示规约：改一个参数（阈值/选举规则/算法偏置），看宏观涌现如何翻转。</p>
+<h3>教学·Downs中位选民收敛</h3>
+<p><code>downs_median_voter.yaml</code> · 包：政治学包 ·
+40 ticks · 种子 7</p>
+<pre>两党空间竞争：败方逐期向胜方选民均值移动 → 平台收敛到中位选民。
+收敛度（胜方-中位距）0.018 ≈ 精确命中。
+课堂演示：改比例制，看有效政党数从1.0跳到2.84（Duverger）。
+</pre>
+<p>运行：<code>python experiments/run_spec.py --spec site/teachings/downs_median_voter.yaml --tag 教学演示</code></p><h3>教学·假新闻级联与算法偏置</h3>
+<p><code>fake_news_cascade.yaml</code> · 包：文化媒介包 ·
+200 ticks · 种子 7</p>
+<pre>同一人群：算法偏置0→0.8，假新闻级联放大3.2×；
+媒介所有制切public → 压制到0.31。
+课堂演示：回音室得分 0.794→0.852（同温层门控同化机制）。
+</pre>
+<p>运行：<code>python experiments/run_spec.py --spec site/teachings/fake_news_cascade.yaml --tag 教学演示</code></p><h3>教学·Schelling分异涌现</h3>
+<p><code>schelling_segregation.yaml</code> · 包：社会学包 ·
+60 ticks · 种子 7</p>
+<pre>微观容忍（只要50%同组邻居）→ 宏观分异（分异指数0.5→0.97）。
+个体无恶意，结构涌现恶性结果——社会学&quot; unintended consequences&quot;经典。
+课堂演示：改阈值 0.3（容忍）vs 0.6（不容忍），看分异速度。
+</pre>
+<p>运行：<code>python experiments/run_spec.py --spec site/teachings/schelling_segregation.yaml --tag 教学演示</code></p>
+<p><a href="../index.html">← 返回首页</a></p></body></html>

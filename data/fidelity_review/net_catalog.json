@@ -1,0 +1,459 @@
+{
+ "module": "net_catalog",
+ "reviews": [
+  {
+   "mid": "NET001",
+   "class_name": "Rule30Model",
+   "fidelity": "full",
+   "basis": "Wolfram 规则位索引与邻域编码符合标准约定，单点初始化正确",
+   "simplifications": [
+    "周期边界替代无限格点"
+   ],
+   "evidence": "net_catalog.py:33-38 (left<<2)|(s<<1)|right 标准编码"
+  },
+  {
+   "mid": "NET002",
+   "class_name": "Rule90Model",
+   "fidelity": "full",
+   "basis": "Rule90 异或更新生成 Sierpinski 结构，机制忠实",
+   "simplifications": [
+    "周期边界"
+   ],
+   "evidence": "net_catalog.py:71-77 复用 ElementaryCAModel._next"
+  },
+  {
+   "mid": "NET003",
+   "class_name": "Rule110Model",
+   "fidelity": "full",
+   "basis": "Rule110 更新编码正确，复杂动力学原样实现",
+   "simplifications": [
+    "周期边界"
+   ],
+   "evidence": "net_catalog.py:80-86"
+  },
+  {
+   "mid": "NET004",
+   "class_name": "Rule184Model",
+   "fidelity": "full",
+   "basis": "Rule184 确定性交通 CA 守恒机制忠实并自校验",
+   "simplifications": [
+    "初始均匀撒车密度0.5为演示设定"
+   ],
+   "evidence": "net_catalog.py:97-110 cars_conserved 守恒校验"
+  },
+  {
+   "mid": "NET005",
+   "class_name": "GameOfLifeModel",
+   "fidelity": "full",
+   "basis": "B3/S23 经 Moore 邻域计数并行更新，滑翔机初值",
+   "simplifications": [
+    "周期环面边界"
+   ],
+   "evidence": "net_catalog.py:132-137 (nb==3)|((g==1)&(nb==2))"
+  },
+  {
+   "mid": "NET006",
+   "class_name": "GreenbergHastingsModel",
+   "fidelity": "full",
+   "basis": "静息/激发/不应三态激发介质机制完整",
+   "simplifications": [
+    "Moore 8邻域（经典常用 von Neumann 4邻域）",
+    "不应期固定2步"
+   ],
+   "evidence": "net_catalog.py:163-174 三态转移与不应期衰减"
+  },
+  {
+   "mid": "NET007",
+   "class_name": "CyclicCAModel",
+   "fidelity": "lite",
+   "basis": "被前色邻居触发却进至后色，与经典被后色吃变后色错一相位",
+   "simplifications": [
+    "触发条件为邻居 c-1 而非 c+1（规则错位）",
+    "同步更新（经典常异步）"
+   ],
+   "evidence": "net_catalog.py:200-212 prey=(g+1)%k 且 nb==g 触发"
+  },
+  {
+   "mid": "NET008",
+   "class_name": "ForestFireModel",
+   "fidelity": "lite",
+   "basis": "生长p/雷击f/邻域蔓延核心在，但火灾单步瞬时烧尽全簇",
+   "simplifications": [
+    "连通簇一步烧尽（原模型逐时间步蔓延）",
+    "step 内 t 派生 rng 未用注入 rng"
+   ],
+   "evidence": "net_catalog.py:240-264 BFS 循环单步内完成全簇蔓延"
+  },
+  {
+   "mid": "NET016",
+   "class_name": "FisherKPPModel",
+   "fidelity": "full",
+   "basis": "D∇²u+r·u(1-u) 显式欧拉加五点拉普拉斯，方程忠实",
+   "simplifications": [
+    "未校验 2√(rD) 波前速度基准"
+   ],
+   "evidence": "net_catalog.py:513-519"
+  },
+  {
+   "mid": "NET051",
+   "class_name": "SIModel",
+   "fidelity": "full",
+   "basis": "SI 转移率 beta*S*I/N 标准均值场方程",
+   "simplifications": [],
+   "evidence": "net_catalog.py:310; epidemic.py:80-85 spec_SI"
+  },
+  {
+   "mid": "NET054",
+   "class_name": "SIRSNetModel",
+   "fidelity": "full",
+   "basis": "SIRS 三率结构含 R→S 免疫衰减 xi*R",
+   "simplifications": [],
+   "evidence": "net_catalog.py:311-312; epidemic.py:106-113"
+  },
+  {
+   "mid": "NET056",
+   "class_name": "SEIRSNetModel",
+   "fidelity": "full",
+   "basis": "SEIR 基础上补 R→S 衰减，链式构建正确",
+   "simplifications": [],
+   "evidence": "net_catalog.py:313-314; epidemic.py:127-131"
+  },
+  {
+   "mid": "NET057",
+   "class_name": "SEIRDNetModel",
+   "fidelity": "full",
+   "basis": "SEIRD 增 I→D 死亡流，守恒扩至五仓",
+   "simplifications": [],
+   "evidence": "net_catalog.py:315-316; epidemic.py:134-141"
+  },
+  {
+   "mid": "NET058",
+   "class_name": "SEIARNetModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：SEIAR 无症状传播+E 出流按 rho 分流；vital 出生死亡流真实进入动力学",
+   "simplifications": [
+    "S→E 感染力仅含 I，A 无传播力",
+    "E 双出流竞争致无症状占比 rho/(1+rho) 而非 rho"
+   ],
+   "evidence": "net_catalog.py:317-318; epidemic.py:144-157",
+   "fixed": true
+  },
+  {
+   "mid": "NET059",
+   "class_name": "SIRVitalNetModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：SEIAR 无症状传播+E 出流按 rho 分流；vital 出生死亡流真实进入动力学",
+   "simplifications": [
+    "mu 参数登记未使用，无出生/死亡转移"
+   ],
+   "evidence": "net_catalog.py:319-320; epidemic.py:177-185",
+   "fixed": true
+  },
+  {
+   "mid": "NET060",
+   "class_name": "SIRVNetModel",
+   "fidelity": "lite",
+   "basis": "名为 SEIRV 实为 SIRV，无潜伏仓室 E",
+   "simplifications": [
+    "缺 E 潜伏期",
+    "疫苗完全保护无突破感染（作者声明设计）"
+   ],
+   "evidence": "net_catalog.py:321-322; epidemic.py:160-174"
+  },
+  {
+   "mid": "NET063",
+   "class_name": "EdgeSIRModel",
+   "fidelity": "full",
+   "basis": "Gillespie 网络传播：总率=beta*SI边数+gamma*I，事件分解一致",
+   "simplifications": [
+    "__init__ 固定种子0建 ER 图且可能重复边",
+    "拓扑不随注入 rng 变化"
+   ],
+   "evidence": "net_catalog.py:353-372; core.py:502-516 引擎为标准 Gillespie"
+  },
+  {
+   "mid": "NET064",
+   "class_name": "MarkovSIRModel",
+   "fidelity": "full",
+   "basis": "链二项式离散 Markov SIR，binomial 抽样含守恒校验",
+   "simplifications": [],
+   "evidence": "net_catalog.py:398-411"
+  },
+  {
+   "mid": "NET066",
+   "class_name": "ErlangStageSIRModel",
+   "fidelity": "full",
+   "basis": "k 段感染期每段 γk 流出，线性链 Erlang 传染期实现",
+   "simplifications": [
+    "阶段流出顺序遍历有逐步推移数值细节"
+   ],
+   "evidence": "net_catalog.py:429-443"
+  },
+  {
+   "mid": "NET068",
+   "class_name": "RossMacdonaldModel",
+   "fidelity": "full",
+   "basis": "双宿主 b/c 叮咬率与媒介死亡平衡补充，基本 Ross–Macdonald 忠实",
+   "simplifications": [
+    "无外潜伏期 EIP",
+    "人类痊愈即回 S（基础版无免疫）"
+   ],
+   "evidence": "net_catalog.py:473-485"
+  },
+  {
+   "mid": "NET019",
+   "class_name": "ConfigurationModel",
+   "fidelity": "full",
+   "basis": "nx.configuration_model 随机配对机制完整，Poisson(3) 序列示例",
+   "simplifications": [
+    "度序列 Poisson(3) 未展示重尾场景",
+    "create_using=Graph 折叠自环重边微改度序列"
+   ],
+   "evidence": "net_catalog.py:566-574"
+  },
+  {
+   "mid": "NET021",
+   "class_name": "ChungLuModel",
+   "fidelity": "full",
+   "basis": "nx.expected_degree_graph 即 Chung–Lu 机制，重尾度示例",
+   "simplifications": [],
+   "evidence": "net_catalog.py:577-581"
+  },
+  {
+   "mid": "NET022",
+   "class_name": "RandomRegularModel",
+   "fidelity": "full",
+   "basis": "nx.random_regular_graph 精确 k 正则构造",
+   "simplifications": [],
+   "evidence": "net_catalog.py:582-584"
+  },
+  {
+   "mid": "NET024",
+   "class_name": "NewmanWattsModel",
+   "fidelity": "full",
+   "basis": "nx.newman_watts_strogatz 环格加捷径不删边",
+   "simplifications": [],
+   "evidence": "net_catalog.py:615-617"
+  },
+  {
+   "mid": "NET026",
+   "class_name": "HolmeKimModel",
+   "fidelity": "full",
+   "basis": "nx.powerlaw_cluster_graph 即 Holme–Kim PA+三角闭包",
+   "simplifications": [],
+   "evidence": "net_catalog.py:585-587"
+  },
+  {
+   "mid": "NET028",
+   "class_name": "RandomGeometricModel",
+   "fidelity": "full",
+   "basis": "nx.random_geometric_graph 硬阈值几何图",
+   "simplifications": [],
+   "evidence": "net_catalog.py:588-590"
+  },
+  {
+   "mid": "NET031",
+   "class_name": "WaxmanModel",
+   "fidelity": "full",
+   "basis": "nx.waxman_graph p=α·exp(-d/βL) 公式忠实",
+   "simplifications": [],
+   "evidence": "net_catalog.py:591-593"
+  },
+  {
+   "mid": "NET032",
+   "class_name": "SBMModel",
+   "fidelity": "full",
+   "basis": "nx.stochastic_block_model 三社团块概率矩阵",
+   "simplifications": [],
+   "evidence": "net_catalog.py:594-599"
+  },
+  {
+   "mid": "NET036",
+   "class_name": "KroneckerModel",
+   "fidelity": "prototype",
+   "basis": "BA 邻接确定性 Kronecker 积，非随机初始矩阵加概率采样的 SKG",
+   "simplifications": [
+    "阈值化 (A>0) 无 Bernoulli 采样",
+    "networks.py:287 stochastic_kronecker 未被调用"
+   ],
+   "evidence": "net_catalog.py:600-609"
+  },
+  {
+   "mid": "NET048",
+   "class_name": "ForestFireNetModel",
+   "fidelity": "prototype",
+   "basis": "挂 Forest Fire 名实为 BA 图生成，无火种燃烧机制",
+   "simplifications": [
+    "docstring 自认 BA 代理",
+    "networks.py:303 forest_fire 真实现未被调用"
+   ],
+   "evidence": "net_catalog.py:610-612"
+  },
+  {
+   "mid": "NET018",
+   "class_name": "GnmModel",
+   "fidelity": "full",
+   "basis": "nx.gnm_random_graph 固定边数 G(n,m) 标准实现",
+   "simplifications": [],
+   "evidence": "net_final16.py:23-27"
+  },
+  {
+   "mid": "NET020",
+   "class_name": "DirectedConfigModel",
+   "fidelity": "full",
+   "basis": "nx.directed_configuration_model 含入出度和平衡修正",
+   "simplifications": [
+    "Poisson(3) 度序列为示例设定"
+   ],
+   "evidence": "net_final16.py:37-49"
+  },
+  {
+   "mid": "NET027",
+   "class_name": "BianconiBarabasiModel",
+   "fidelity": "full",
+   "basis": "eta*度加权优先连接，适合度增长核心忠实",
+   "simplifications": [
+    "m 条边一次不放回加权抽取（原文逐条采样）"
+   ],
+   "evidence": "net_final16.py:59-79"
+  },
+  {
+   "mid": "NET029",
+   "class_name": "SoftRGGModel",
+   "fidelity": "full",
+   "basis": "p_max*exp(-(d/r0)^2) 平滑连接核，按定义自洽实现",
+   "simplifications": [
+    "非经典命名模型，参数自设示意"
+   ],
+   "evidence": "net_final16.py:91-102"
+  },
+  {
+   "mid": "NET030",
+   "class_name": "HyperbolicModel",
+   "fidelity": "lite",
+   "basis": "S1 零温极限硬阈值，缺 Fermi 连接概率与温度参数",
+   "simplifications": [
+    "硬阈值替代 Fermi–Dirac 连接概率",
+    "无温度/曲率参数与拟合"
+   ],
+   "evidence": "net_final16.py:112-123"
+  },
+  {
+   "mid": "NET033",
+   "class_name": "DCSBMModel",
+   "fidelity": "full",
+   "basis": "p=clip(θiθj·ω_gi,gj) 为 Karrer–Newman 度修正 SBM 形式",
+   "simplifications": [],
+   "evidence": "net_final16.py:133-143"
+  },
+  {
+   "mid": "NET034",
+   "class_name": "MMSBMModel",
+   "fidelity": "full",
+   "basis": "πᵢᵀBπⱼ 混合隶属边概率加 Dirichlet 隶属",
+   "simplifications": [
+    "按边际概率连边，未逐边抽隶属指示"
+   ],
+   "evidence": "net_final16.py:153-162"
+  },
+  {
+   "mid": "NET035",
+   "class_name": "LFRCatalogModel",
+   "fidelity": "full",
+   "basis": "nx.LFR_benchmark_graph 真实 LFR（τ1=3,τ2=1.5,μ=0.2）",
+   "simplifications": [
+    "seed=42 固定未用注入 rng"
+   ],
+   "evidence": "net_final16.py:172-181"
+  },
+  {
+   "mid": "NET037",
+   "class_name": "HoffLatentModel",
+   "fidelity": "full",
+   "basis": "logistic(3-2d) 潜在距离生成，Hoff 模型核心形式正确",
+   "simplifications": [
+    "固定参数无 MCMC 拟合环节"
+   ],
+   "evidence": "net_final16.py:191-201"
+  },
+  {
+   "mid": "NET038",
+   "class_name": "LatentClusterModel",
+   "fidelity": "full",
+   "basis": "高斯混合潜在位置加距离衰减连边，聚类潜在位置核心在",
+   "simplifications": [
+    "连接核 exp(-d) 非标准 logit 形式",
+    "无似然拟合"
+   ],
+   "evidence": "net_final16.py:211-224"
+  },
+  {
+   "mid": "NET061",
+   "class_name": "AgeContactSEIRModel",
+   "fidelity": "full",
+   "basis": "3 年龄组接触矩阵耦合 SEIR，力项 C@I/N 为标准形式",
+   "simplifications": [
+    "接触矩阵为示意数值非实测（POLYMOD）",
+    "等规模组下除数形式与标准式等价"
+   ],
+   "evidence": "net_final16.py:249-258"
+  },
+  {
+   "mid": "NET067",
+   "class_name": "RenewalEpidemicModel",
+   "fidelity": "full",
+   "basis": "I_t=Rt·Σg(τ)I_{t-τ} 核对齐正确，更新方程忠实",
+   "simplifications": [
+    "核截断30天",
+    "Erlang(3,gen_mean) 核实际均值3·gen_mean 与参数名不符",
+    "Rt 硬编码指数衰减情景"
+   ],
+   "evidence": "net_final16.py:280-287"
+  },
+  {
+   "mid": "NET069",
+   "class_name": "PairApproxSIRModel",
+   "fidelity": "prototype",
+   "basis": "名为成对近似实为均值场，[SI] 未演化且 SI_pair 是死字段",
+   "simplifications": [
+    "closure=S*I*k/N 即均值场感染力",
+    "无 [SS]/[SI]/[II] 对动态与三元组闭合"
+   ],
+   "evidence": "net_final16.py:315-322"
+  },
+  {
+   "mid": "NET070",
+   "class_name": "EdgeBasedSIRModel",
+   "fidelity": "method_demo",
+   "basis": "EBCM 名下仅静态解均值场终值方程，终尺寸公式非标准且虚高",
+   "simplifications": [
+    "step 为空无动力学过程",
+    "1−z^(R0+1) 无标准依据：R0=3 得 0.99999 vs 经典 0.9405"
+   ],
+   "evidence": "net_final16.py:336-346"
+  },
+  {
+   "mid": "NET071",
+   "class_name": "HarrisContactModel",
+   "fidelity": "prototype",
+   "basis": "出生率=birth*空格总数且落点均匀随机，接触邻接结构缺失",
+   "simplifications": [
+    "出生强度未按占邻居数计",
+    "出生可落在无占邻居空格，非接触过程"
+   ],
+   "evidence": "net_final16.py:366-385"
+  },
+  {
+   "mid": "NET072",
+   "class_name": "AdaptiveRewiringSISModel",
+   "fidelity": "lite",
+   "basis": "SIS加重连共演化在，但重连主体为感染节点而非原文易感节点",
+   "simplifications": [
+    "感染点重连脱病邻（Gross et al. 2006 为易感点重连）",
+    "逐点顺序扫描非按边均匀抽样",
+    "邻接表可累积重复边"
+   ],
+   "evidence": "net_final16.py:426-439"
+  }
+ ]
+}

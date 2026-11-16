@@ -1,0 +1,49 @@
+# Local credentials and machine configuration
+/dayan/config.json
+.env
+.env.*
+!.env.example
+.git-credentials
+.netrc
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Private agent conversations, credentials copied into audits, and local tools
+/.claude/
+/.codex/
+/.agents/
+/.dsh/
+
+# Generated runs, collected data, personal custom models, logs and snapshots
+/reports/
+/results/
+/archive/
+/data/*
+/dayan/data/
+!/data/dayan_catalog.json
+!/data/fidelity_review/
+!/data/calibration_targets.md
+!/data/targets.json
+*.log
+
+# Internal handoffs and machine-specific acceptance records
+/docs/AGENT_*.txt
+/docs/DAYAN_链路修复与实测验收_*.md
+/docs/DAYAN_对话绑定与分栏拖拽修复_*.md
+
+# Optional third-party checkouts are installed separately
+/external/
+
+# Python / Node environments and caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+node_modules/
+.DS_Store
+Thumbs.db

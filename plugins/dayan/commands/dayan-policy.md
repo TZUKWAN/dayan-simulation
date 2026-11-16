@@ -1,0 +1,5 @@
+# 政策研究
+
+先保留原始研究问题，区分用户设定、真实数据估计和机制假设。通过dayan schema获取search_models/get_capabilities/build_model/run/experiment的真实合同，按确切机制与显式政策臂执行。基线与政策使用配对种子，引用实际运行与来源。
+
+有可校准研究时使用research_create、research_calibrate，再按新的study_id生成research_report。趋势模型只能输出政策适用性边界，不构成政策因果。不拿旧人口报告、假定成本或平均排序冒充现实政策证据。未验证/未校准/无成本资料须如实记录。

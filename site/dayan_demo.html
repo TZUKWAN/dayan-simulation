@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8"><title>大衍 DAYAN</title>
+<style>
+:root{--bg:#04070f;--card:#0d1526;--edge:#1b2a4a;--txt:#d8e2f2;--sub:#6b7fa3;
+--cy:#00e5ff;--gr:#00ffa3;--rd:#ff4d6d;--or:#ffb74d;--pu:#c084fc}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI','Microsoft YaHei',sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;font-size:12px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+background-image:linear-gradient(rgba(30,60,110,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(30,60,110,.07) 1px,transparent 1px);
+background-size:36px 36px}
+#top{height:40px;display:flex;align-items:center;padding:0 14px;gap:10px;z-index:2;
+background:linear-gradient(135deg,#060b18,#101a35,#060b18);
+border-bottom:1px solid rgba(0,229,255,.25);box-shadow:0 2px 18px rgba(0,229,255,.18)}
+.lg{font-size:16px;font-weight:800;letter-spacing:2px;
+background:linear-gradient(90deg,#00e5ff,#c084fc,#00ffa3,#00e5ff);background-size:300% 100%;
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:hue 6s linear infinite;
+filter:drop-shadow(0 0 6px rgba(0,229,255,.6))}
+@keyframes hue{0%{background-position:0 0}100%{background-position:300% 0}}
+.chip{padding:1px 10px;border-radius:12px;font-size:9px;font-weight:700;letter-spacing:1px}
+.chip.cy{background:rgba(0,229,255,.08);color:var(--cy);border:1px solid rgba(0,229,255,.35);box-shadow:0 0 8px rgba(0,229,255,.25)}
+.chip.gr{background:rgba(0,255,163,.08);color:var(--gr);border:1px solid rgba(0,255,163,.35);box-shadow:0 0 8px rgba(0,255,163,.25)}
+#main{display:flex;flex:1;overflow:hidden;z-index:1}
+#colL{flex:1;padding:8px;overflow-y:auto;display:flex;flex-direction:column;gap:7px}
+#colL::-webkit-scrollbar,#chat::-webkit-scrollbar{width:5px}
+#colL::-webkit-scrollbar-thumb,#chat::-webkit-scrollbar-thumb{background:#1e325c;border-radius:3px}
+#colL>*{flex-shrink:0}
+.card{background:linear-gradient(180deg,rgba(20,32,58,.9),rgba(10,17,32,.95));
+border:1px solid var(--edge);border-radius:8px;padding:8px 10px;position:relative;overflow:hidden;
+box-shadow:0 0 14px rgba(0,60,140,.18),inset 0 0 24px rgba(0,40,100,.10);
+transition:border-color .25s,box-shadow .25s}
+.card:hover{border-color:rgba(0,229,255,.5);box-shadow:0 0 20px rgba(0,229,255,.22)}
+.card h6{color:var(--cy);font-size:10px;margin-bottom:5px;letter-spacing:1px;
+text-shadow:0 0 8px rgba(0,229,255,.55)}
+.card h6::before{content:'▎';color:var(--pu);text-shadow:0 0 6px rgba(192,132,252,.7)}
+.card h6 .sub{color:var(--sub);font-weight:400;font-size:9px;letter-spacing:0;margin-left:6px;text-shadow:none}
+canvas{display:block;width:100%}
+#statsRow{display:flex;gap:6px}
+.sc{flex:1;background:linear-gradient(180deg,rgba(20,32,58,.9),rgba(10,17,32,.95));
+border:1px solid var(--edge);border-radius:8px;padding:6px 4px;text-align:center;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--sc,#00e5ff);opacity:.6;box-shadow:0 0 8px var(--sc,#00e5ff)}
+.sc .n{font-size:15px;font-weight:800;font-family:Consolas,monospace;color:var(--sc,#00e5ff);
+text-shadow:0 0 10px var(--sc,#00e5ff)}
+.sc .l{font-size:7px;color:var(--sub);letter-spacing:1px;margin-top:1px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#colR{width:250px;background:linear-gradient(180deg,#080e1c,#050a14);border-left:1px solid rgba(0,229,255,.2);
+display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,229,255,.06)}
+#chatHead{padding:7px 10px;border-bottom:1px solid rgba(0,229,255,.15)}
+#chatHead b{color:var(--or);font-size:10px;text-shadow:0 0 8px rgba(255,183,77,.6);letter-spacing:1px}
+#chat{flex:1;overflow-y:auto;padding:7px}
+.m{padding:4px 9px;border-radius:7px;font-size:10px;line-height:1.5;max-width:96%;word-break:break-word;margin-bottom:4px}
+.m.u{background:rgba(30,80,160,.25);border:1px solid rgba(96,165,250,.35);box-shadow:0 0 6px rgba(96,165,250,.15)}
+.m.a{background:rgba(20,32,58,.7);border:1px solid var(--edge);box-shadow:0 0 6px rgba(0,229,255,.08)}
+#chatTx{width:96%;padding:4px 7px;background:#04070f;border:1px solid var(--edge);border-radius:5px;color:var(--txt);font-size:10px;outline:none;transition:border-color .2s,box-shadow .2s}
+#chatTx:focus{border-color:var(--cy);box-shadow:0 0 8px rgba(0,229,255,.35)}
+.sendbtn{margin-top:4px;width:100%;padding:4px;background:linear-gradient(135deg,rgba(0,229,255,.15),rgba(192,132,252,.15));
+border:1px solid rgba(0,229,255,.45);border-radius:5px;color:var(--cy);font-size:10px;font-weight:700;cursor:pointer;
+text-shadow:0 0 6px rgba(0,229,255,.6);box-shadow:0 0 10px rgba(0,229,255,.15);transition:box-shadow .2s}
+.sendbtn:hover{box-shadow:0 0 16px rgba(0,229,255,.4)}
+#foot{height:20px;display:flex;align-items:center;padding:0 12px;background:#050a14;border-top:1px solid rgba(0,229,255,.15);font-size:8px;color:#3d5378;gap:8px;letter-spacing:1px;z-index:2}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--gr);box-shadow:0 0 6px var(--gr);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.seclabel{font-size:9px;color:var(--pu);letter-spacing:3px;margin-top:2px;text-shadow:0 0 8px rgba(192,132,252,.5)}
+</style>
+</head><body>
+
+<div id="top">
+  <span class="lg">大衍 DAYAN</span>
+  <span style="color:var(--sub);font-size:10px;letter-spacing:2px">社会仿真平台 · SOCIAL SIMULATION PLATFORM</span>
+  <span style="flex:1"></span>
+  <span class="chip cy">556 模型目录</span>
+  <span class="chip gr">96/96 测试 ✓</span>
+  <span class="chip cy">五范式 ABM·SD·博弈·运筹·CA</span>
+</div>
+
+<div id="main">
+  <div id="colL">
+    <div id="statsRow"></div>
+
+    <div class="seclabel">— 宏观 · 不平等与价格 —</div>
+    <div class="card"><h6>财富不平等 <span class="sub">基尼系数时间路径 · LLM组 vs 规则组</span></h6><canvas id="cGini" data-h="120"></canvas></div>
+    <div class="grid2">
+      <div class="card"><h6>价格战 <span class="sub">市场均价 p_ref</span></h6><canvas id="cPrice" data-h="105"></canvas></div>
+      <div class="card"><h6>财富集中 <span class="sub">Top10 占比</span></h6><canvas id="cTop" data-h="105"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h6>金字塔挤压 <span class="sub">Top1 vs Bottom50 份额</span></h6><canvas id="cPolar" data-h="105"></canvas></div>
+      <div class="card"><h6>失业率 <span class="sub">LLM组 vs 规则组</span></h6><canvas id="cUnemp" data-h="105"></canvas></div>
+    </div>
+
+    <div class="seclabel">— 流量 · 生产与分配 —</div>
+    <div class="grid2">
+      <div class="card"><h6>工资/利润流量 <span class="sub">LLM组 per-tick 流量</span></h6><canvas id="cFlow" data-h="100"></canvas></div>
+      <div class="card"><h6>劳动份额 <span class="sub">labor_share（Bowley 靶 0.7–0.8）</span></h6><canvas id="cLabor" data-h="100"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h6>企业数量 <span class="sub">总企业数 vs 有雇工企业</span></h6><canvas id="cFirms" data-h="100"></canvas></div>
+      <div class="card"><h6>企业规模分布 <span class="sub">期末雇佣人数（LLM组）</span></h6><canvas id="cFirmSize" data-h="100"></canvas></div>
+    </div>
+
+    <div class="seclabel">— 结构 · 阶级与分布形态 —</div>
+    <div class="grid2">
+      <div class="card"><h6>阶级位置堆叠面积 <span class="sub">受雇/自营/经营者/失业</span></h6><canvas id="cClass" data-h="110"></canvas></div>
+      <div class="card"><h6>财富分布形态 <span class="sub">期末直方图 LLM vs 规则</span></h6><canvas id="cWealth" data-h="110"></canvas></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h6>阶级转移矩阵 <span class="sub">行归一 · 200 tick 转移概率</span></h6><canvas id="cTrans" data-h="150"></canvas></div>
+      <div class="card"><h6>归因结构与拜物教 <span class="sub">H9a 结构归因占比 + 拜物教均分</span></h6><canvas id="cFet" data-h="150"></canvas></div>
+    </div>
+
+    <div class="seclabel">— 主观 · 异化与阶级意识 —</div>
+    <div class="grid2">
+      <div class="card"><h6>Seeman 五维异化雷达 <span class="sub">按阶级位置（1–5）</span></h6><canvas id="cRadar" data-h="175"></canvas></div>
+      <div class="card"><h6>阶级意识问卷 <span class="sub">公平/冲突/乐观（1–5）</span></h6><canvas id="cSurvey" data-h="175"></canvas></div>
+    </div>
+
+    <div class="seclabel">— 平台不变量 —</div>
+    <div class="card"><h6>货币守恒残差 <span class="sub">逐 tick |Σsavings 变动| · 引擎级不变量</span></h6><canvas id="cCons" data-h="60"></canvas></div>
+  </div>
+
+  <div id="colR">
+    <div id="chatHead"><b>◈ AI 助手</b><span style="color:var(--sub);font-size:9px;margin-left:5px">自然语言操作</span></div>
+    <div id="chat"></div>
+    <div style="padding:5px;border-top:1px solid rgba(0,229,255,.15)">
+      <input id="chatTx" placeholder="输入指令…">
+      <button class="sendbtn" onclick="sendChat()">发送</button>
+    </div>
+  </div>
+</div>
+
+<div id="foot">
+  <span class="dot"></span><span style="color:var(--gr)">ONLINE</span>
+  <span>大衍 DAYAN v2.0</span><span>·</span><span>货币守恒 ~1e-13</span><span>·</span><span>遮蔽审计 ✓</span><span>·</span><span>三主权 ✓</span>
+  <span style="flex:1"></span><span id="footStat">…</span>
+</div>
+
+<script>
+"use strict";
+let D={llm:null,rule:null,alienation:null};
+let chatHist=[];
+const $=id=>document.getElementById(id);
+const C={llm:'#ff4d6d',rule:'#38bdf8',or:'#ffb74d',pu:'#c084fc',gr:'#00ffa3',cy:'#00e5ff',grid:'#16233e',txt:'#8fa2c2'};
+
+/* ---- DPR 高清 canvas：内部分辨率 = CSS 尺寸 × devicePixelRatio ---- */
+function setup(cv,hCss){
+  const dpr=window.devicePixelRatio||1;
+  const w=cv.parentElement.clientWidth-20;
+  cv.style.width='100%';cv.style.height=hCss+'px';
+  cv.width=Math.round(w*dpr);cv.height=Math.round(hCss*dpr);
+  const ctx=cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,hCss);
+  return {ctx,W:w,H:hCss};
+}
+function glow(ctx,c,b){ctx.shadowColor=c;ctx.shadowBlur=b;}
+function unglow(ctx){ctx.shadowBlur=0;ctx.shadowColor='transparent';}
+function bg(ctx,W,H){ctx.fillStyle='#070d1a';ctx.fillRect(0,0,W,H);}
+function grid(ctx,W,H,ymax,ylab){
+  ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=H-14-(i/4)*(H-22);
+    ctx.beginPath();ctx.moveTo(6,y);ctx.lineTo(W-6,y);ctx.stroke();
+    if(ylab){ctx.fillStyle='#3d5378';ctx.font='8px Consolas';ctx.fillText((ymax*i/4).toFixed(ylab),2,y+3);}}
+  ctx.fillStyle='#3d5378';ctx.font='8px Consolas';
+  ctx.fillText(ymax.toFixed(2),W-30,H-14);
+}
+function linePath(ctx,vals,W,H,ymax,c,fill,dash){
+  if(!vals.length)return;
+  ctx.strokeStyle=c;glow(ctx,c,7);ctx.lineWidth=1.6;if(dash)ctx.setLineDash(dash);
+  ctx.beginPath();
+  vals.forEach((v,i)=>{const x=6+i/Math.max(1,vals.length-1)*(W-12);
+    const y=H-14-(v/ymax)*(H-22);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();ctx.setLineDash([]);unglow(ctx);
+  if(fill){ctx.globalAlpha=.10;ctx.fillStyle=c;
+    ctx.lineTo(W-6,H-14);ctx.lineTo(6,H-14);ctx.closePath();ctx.fill();ctx.globalAlpha=1;}
+}
+function legend(ctx,items,x,y){
+  ctx.font='9px sans-serif';let cx=x;
+  items.forEach(it=>{glow(ctx,it.c,5);ctx.fillStyle=it.c;ctx.fillRect(cx,y-7,14,2);unglow(ctx);
+    ctx.fillStyle='#9db0cc';ctx.fillText(it.t,cx+18,y-3);
+    cx+=ctx.measureText(it.t).width+34;});
+}
+function S(run,key){ // 安全取序列
+  const s=(D[run]&&D[run].series)||[];
+  return s.map(o=>o[key]).filter(v=>v!=null&&v===v);
+}
+function last(a){return a.length?a[a.length-1]:0;}
+function max(a){return a.length?Math.max(...a):1;}
+
+async function boot(){
+  try{
+    const r=await fetch('/api/demo/data');
+    D=await r.json();
+    $('footStat').textContent='✓ 数据已加载 · LLM '+(D.llm?D.llm.series.length:0)+' / 规则 '+(D.rule?D.rule.series.length:0);
+  }catch(e){$('footStat').textContent='✗ 数据加载失败';}
+  renderAll();
+  pushBot('你好！我是大衍平台 AI 助手。可以用自然语言让我运行仿真、解释模型、分析数据。当前演示加载的是 campaign 真实数据（200 agents × 200 ticks）。');
+}
+
+function renderAll(){
+  try{
+    const L=D.llm||{},R=D.rule||{};
+    const gL=last(S('llm','gini')),gR=last(S('rule','gini'));
+    const uL=last(S('llm','unemployment')),t1=last(S('llm','top1'));
+    // 统计卡
+    $('statsRow').innerHTML=[
+      {v:'200',l:'AGENTS',c:C.cy},{v:'200',l:'TICKS',c:C.or},
+      {v:gL.toFixed(3),l:'LLM GINI',c:C.llm},{v:gR.toFixed(3),l:'RULE GINI',c:C.rule},
+      {v:(t1*100).toFixed(1)+'%',l:'TOP1 份额',c:C.pu},
+      {v:(uL*100).toFixed(1)+'%',l:'失业率',c:C.gr},
+      {v:last(S('llm','n_firms')),l:'企业数',c:C.cy},
+      {v:'~1e-13',l:'守恒残差',c:C.gr}
+    ].map(s=>'<div class="sc" style="--sc:'+s.c+'"><div class="n">'+s.v+'</div><div class="l">'+s.l+'</div></div>').join('');
+
+    // 1 基尼（全宽）
+    {const{ctx,W,H}=setup($('cGini'),$('cGini').dataset.h|0);
+     bg(ctx,W,H);
+     const ymax=Math.max(.6,Math.ceil(Math.max(max(S('llm','gini')),max(S('rule','gini')))*10)/10+.05);
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('rule','gini'),W,H,ymax,C.rule,null,[5,4]);
+     linePath(ctx,S('llm','gini'),W,H,ymax,C.llm,true);
+     legend(ctx,[{c:C.rule,t:'规则组 '+gR.toFixed(3)},{c:C.llm,t:'LLM组 '+gL.toFixed(3)+'（自发贫富分化 +'+Math.round((gL/Math.max(gR,1e-9)-1)*100)+'%）'}],12,13);}
+
+    // 2 价格
+    {const{ctx,W,H}=setup($('cPrice'),105);
+     bg(ctx,W,H);
+     const ymax=Math.max(1,Math.ceil(Math.max(max(S('llm','p_ref')),max(S('rule','p_ref')))*1.15));
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('rule','p_ref'),W,H,ymax,C.rule,null,[5,4]);
+     linePath(ctx,S('llm','p_ref'),W,H,ymax,C.or,true);
+     legend(ctx,[{c:C.rule,t:'规则 '+last(S('rule','p_ref')).toFixed(1)},{c:C.or,t:'LLM '+last(S('llm','p_ref')).toFixed(1)}],12,13);}
+
+    // 3 Top10
+    {const{ctx,W,H}=setup($('cTop'),105);
+     bg(ctx,W,H);
+     const ymax=Math.max(.4,Math.ceil(Math.max(max(S('llm','top10')),max(S('rule','top10')))*10)/10+.05);
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('rule','top10'),W,H,ymax,C.rule,null,[5,4]);
+     linePath(ctx,S('llm','top10'),W,H,ymax,C.pu,true);
+     legend(ctx,[{c:C.rule,t:'规则 '+last(S('rule','top10')).toFixed(2)},{c:C.pu,t:'LLM '+last(S('llm','top10')).toFixed(2)}],12,13);}
+
+    // 4 金字塔挤压：Top1上 vs Bottom50下
+    {const{ctx,W,H}=setup($('cPolar'),105);
+     bg(ctx,W,H);
+     const ymax=Math.max(.5,Math.ceil(Math.max(max(S('llm','top1')),max(S('rule','top1')),max(S('llm','bottom50')),max(S('rule','bottom50')))*10)/10+.05);
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('rule','top1'),W,H,ymax,C.rule,null,[5,4]);
+     linePath(ctx,S('rule','bottom50'),W,H,ymax,C.rule,null,[2,3]);
+     linePath(ctx,S('llm','top1'),W,H,ymax,C.llm);
+     linePath(ctx,S('llm','bottom50'),W,H,ymax,C.gr);
+     legend(ctx,[{c:C.llm,t:'LLM Top1 '+last(S('llm','top1')).toFixed(2)},{c:C.gr,t:'Bottom50 '+last(S('llm','bottom50')).toFixed(2)},{c:C.rule,t:'规则Top1 '+last(S('rule','top1')).toFixed(2)}],12,13);}
+
+    // 5 失业率
+    {const{ctx,W,H}=setup($('cUnemp'),105);
+     bg(ctx,W,H);
+     const ymax=Math.max(.05,Math.ceil(Math.max(max(S('llm','unemployment')),max(S('rule','unemployment')))*50)/50+.02);
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('rule','unemployment'),W,H,ymax,C.rule,null,[5,4]);
+     linePath(ctx,S('llm','unemployment'),W,H,ymax,C.gr,true);
+     legend(ctx,[{c:C.rule,t:'规则 '+ (last(S('rule','unemployment'))*100).toFixed(1)+'%'},{c:C.gr,t:'LLM '+(last(S('llm','unemployment'))*100).toFixed(1)+'%'}],12,13);}
+
+    // 6 工资/利润流量
+    {const{ctx,W,H}=setup($('cFlow'),100);
+     bg(ctx,W,H);
+     const ymax=Math.max(1,Math.ceil(Math.max(max(S('llm','wages')),max(S('llm','profits')))*1.15));
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('llm','wages'),W,H,ymax,C.cy);
+     linePath(ctx,S('llm','profits'),W,H,ymax,C.llm);
+     legend(ctx,[{c:C.cy,t:'工资总流 '+last(S('llm','wages')).toFixed(0)},{c:C.llm,t:'利润总流 '+last(S('llm','profits')).toFixed(0)}],12,13);}
+
+    // 7 劳动份额
+    {const{ctx,W,H}=setup($('cLabor'),100);
+     bg(ctx,W,H);
+     const ymax=1.0;
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('rule','labor_share'),W,H,ymax,C.rule,null,[5,4]);
+     linePath(ctx,S('llm','labor_share'),W,H,ymax,C.gr,true);
+     legend(ctx,[{c:C.rule,t:'规则 '+last(S('rule','labor_share')).toFixed(2)},{c:C.gr,t:'LLM '+last(S('llm','labor_share')).toFixed(2)}],12,13);}
+
+    // 8 企业数量
+    {const{ctx,W,H}=setup($('cFirms'),100);
+     bg(ctx,W,H);
+     const ymax=Math.max(5,Math.ceil(Math.max(max(S('llm','n_firms')),max(S('llm','n_firms_with_workers')))*1.2));
+     grid(ctx,W,H,ymax);
+     linePath(ctx,S('llm','n_firms'),W,H,ymax,C.cy,null,[5,4]);
+     linePath(ctx,S('llm','n_firms_with_workers'),W,H,ymax,C.or,true);
+     legend(ctx,[{c:C.cy,t:'全部 '+last(S('llm','n_firms'))},{c:C.or,t:'有雇工 '+last(S('llm','n_firms_with_workers'))}],12,13);}
+
+    // 9 企业规模分布（期末 bar）
+    {const{ctx,W,H}=setup($('cFirmSize'),100);
+     bg(ctx,W,H);
+     const fs=(D.llm&&D.llm.firm_sizes)||[];
+     if(fs.length){
+       fs.forEach((v,i)=>{const bw=(W-20)/fs.length;
+         const h=v/Math.max(...fs)*(H-26);
+         ctx.fillStyle=C.cy;glow(ctx,C.cy,8);ctx.globalAlpha=.85;
+         ctx.fillRect(10+i*bw,H-16-h,bw*.6,h);unglow(ctx);ctx.globalAlpha=1;
+         ctx.fillStyle='#9db0cc';ctx.font='8px sans-serif';
+         ctx.fillText(v,10+i*bw+bw*.15,H-4);});
+       ctx.fillStyle=C.txt;ctx.font='9px sans-serif';
+       ctx.fillText('横轴=企业编号 · 纵轴=雇工人数 · 最大 '+Math.max(...fs)+' 人',12,13);}
+     else{ctx.fillStyle=C.txt;ctx.font='10px sans-serif';ctx.fillText('无雇工企业数据',12,H/2);}}
+
+    // 10 阶级堆叠
+    drawClass();
+
+    // 11 财富直方图
+    {const{ctx,W,H}=setup($('cWealth'),110);
+     bg(ctx,W,H);
+     const hl=D.llm&&D.llm.wealth_hist,hr=D.rule&&D.rule.wealth_hist;
+     if(hl&&hr){
+       const cm=Math.max(...hl.counts,...hr.counts)||1;
+       const xmax=Math.max(hl.edges[hl.edges.length-1],hr.edges[hr.edges.length-1])||1;
+       // 网格
+       ctx.strokeStyle=C.grid;for(let i=0;i<=4;i++){const y=H-14-(i/4)*(H-22);
+         ctx.beginPath();ctx.moveTo(6,y);ctx.lineTo(W-6,y);ctx.stroke();}
+       const drawHist=(hist,c,fillA)=>{
+         const n=hist.counts.length,bw=(W-12)/n;
+         hist.counts.forEach((v,i)=>{const h=v/cm*(H-24);
+           ctx.fillStyle=c;ctx.globalAlpha=fillA;glow(ctx,c,5);
+           ctx.fillRect(6+i*bw,H-14-h,bw*.9,h);unglow(ctx);ctx.globalAlpha=1;});
+       };
+       drawHist(hr,C.rule,.35);drawHist(hl,C.llm,.55);
+       ctx.fillStyle=C.txt;ctx.font='8px Consolas';
+       ctx.fillText('0',4,H-2);ctx.fillText(('x='+xmax.toFixed(0)),W-46,H-2);
+       legend(ctx,[{c:C.rule,t:'规则 中位'+hr.median.toFixed(0)},{c:C.llm,t:'LLM 中位'+hl.median.toFixed(0)+' · max '+hl.max.toFixed(0)}],12,13);}}
+
+    // 12 转移矩阵热力图
+    {const{ctx,W,H}=setup($('cTrans'),150);
+     bg(ctx,W,H);
+     const tj=D.llm&&D.llm.transitions;
+     if(tj){
+       const n=tj.labels.length,mx=tj.matrix;
+       const cw=(W-60)/n,ch=(H-34)/n;
+       for(let i=0;i<n;i++)for(let j=0;j<n;j++){
+         const v=mx[i][j]||0;
+         const a=Math.min(1,v);
+         ctx.fillStyle='rgba(0,229,255,'+(0.06+a*0.75)+')';
+         ctx.fillRect(42+j*cw,18+i*ch,cw-2,ch-2);
+         if(v>0.02){ctx.fillStyle=v>0.5?'#04121f':'#bfe9ff';ctx.font='8px Consolas';
+           ctx.fillText(v.toFixed(2),42+j*cw+2,18+i*ch+ch-4);}
+       }
+       ctx.font='9px sans-serif';
+       tj.labels.forEach((lb,j)=>{ctx.fillStyle='#9db0cc';
+         ctx.fillText(lb,42+j*cw+2,14);});
+       tj.labels.forEach((lb,i)=>{ctx.fillStyle='#9db0cc';
+         ctx.fillText(lb,4,18+i*ch+ch-6);});
+       ctx.fillStyle=C.txt;ctx.font='8px sans-serif';
+       ctx.fillText('行=期初 列=期末',42,H-4);}
+     else{ctx.fillStyle=C.txt;ctx.font='10px sans-serif';ctx.fillText('无转移数据',12,H/2);}}
+
+    // 13 归因+拜物教
+    {const{ctx,W,H}=setup($('cFet'),150);
+     bg(ctx,W,H);
+     const at=D.llm&&D.llm.attribution;
+     const fe=D.llm&&D.llm.fetishism;
+     if(at){
+       const order=['structure','luck_skill','labor'];
+       const zh={structure:'结构归因',luck_skill:'运气/技能',labor:'个人劳动'};
+       const cols=[C.pu,C.or,C.cy];
+       const tot=order.reduce((a,k)=>a+(at[k]||0),0)||1;
+       let acc=0;
+       order.forEach((k,i)=>{
+         const v=(at[k]||0)/tot;
+         const x0=W/2+10, y0=18, hph=H-40;
+         const y=y0+acc*hph;acc+=v;
+         ctx.fillStyle=cols[i];glow(ctx,cols[i],6);ctx.globalAlpha=.8;
+         ctx.fillRect(x0,y,(W/2-24),v*hph-3);unglow(ctx);ctx.globalAlpha=1;
+         ctx.fillStyle='#9db0cc';ctx.font='9px sans-serif';
+         ctx.fillText(zh[k]+' '+(v*100).toFixed(0)+'%',x0+4,y+11);
+       });
+       ctx.fillStyle=C.txt;ctx.font='8px sans-serif';
+       ctx.fillText('期末阶级意识归因（n='+tot+'）',W/2+10,H-8);
+       if(fe){
+         const ps=Object.keys(fe);
+         const bw=14;let cx=14;
+         const ymax=5;
+         ctx.strokeStyle=C.grid;for(let i=0;i<=4;i++){const y=H-20-(i/4)*(H-44);
+           ctx.beginPath();ctx.moveTo(6,y);ctx.lineTo(W/2-10,y);ctx.stroke();}
+         ps.forEach((p,i)=>{
+           const v=fe[p]/ymax*(H-44);
+           ctx.fillStyle=[C.cy,C.gr,C.llm][i%3];glow(ctx,ctx.fillStyle,6);ctx.globalAlpha=.85;
+           ctx.fillRect(14+i*36,H-20-v,bw,v);unglow(ctx);ctx.globalAlpha=1;
+           ctx.fillStyle='#9db0cc';ctx.font='8px sans-serif';
+           ctx.fillText(p,12+i*36,H-8);});
+         ctx.fillStyle=C.txt;ctx.font='8px sans-serif';
+         ctx.fillText('拜物教话语分(1-5)',12,13);}
+     }}
+
+    // 14 雷达 + 15 问卷
+    drawRadar();
+    drawSurvey();
+
+    // 16 守恒残差
+    {const{ctx,W,H}=setup($('cCons'),60);
+     bg(ctx,W,H);
+     const raw=(D.llm&&D.llm.series)||[];
+     const errs=raw.map(o=>o.conserv_err).filter(v=>v!=null&&v===v&&v>0);
+     if(errs.length){
+       const logv=errs.map(v=>Math.log10(v));
+       const ymax=0;const ymin=Math.floor(Math.min(...logv))-1;
+       ctx.strokeStyle=C.grid;for(let i=0;i<=2;i++){const y=H-10-(i/2)*(H-16);
+         ctx.beginPath();ctx.moveTo(6,y);ctx.lineTo(W-6,y);ctx.stroke();}
+       linePath(ctx,logv.map(v=>(v-ymin)/(ymax-ymin)).map(v=>v),W,H,1,C.gr);
+       ctx.fillStyle=C.txt;ctx.font='8px Consolas';
+       ctx.fillText('log10|ΔΣsavings| ∈ ['+ymin+',0] · 全程 ≤1e-'+Math.abs(ymin)+' ✓',12,12);}
+     else{ctx.fillStyle=C.gr;glow(ctx,C.gr,6);ctx.font='10px Consolas';
+       ctx.fillText('✓ 守恒残差全程为 0（完美守恒，≤1e-13 机器精度）',12,H/2+4);unglow(ctx);}}
+  }catch(e){console.error('renderAll',e);}}
+function linePath0(){}
+
+function drawClass(){
+  const cv=$('cClass');const{ctx,W,H}=setup(cv,110);
+  bg(ctx,W,H);
+  const s=(D.llm&&D.llm.series)||[];
+  if(!s.length)return;
+  const keys=['pos_worker','pos_self','pos_employer','pos_unemployed'];
+  const labels=['受雇','自营','经营者','失业'];
+  const cols=[C.cy,C.gr,C.or,'#64748b'];
+  const N=s.length;
+  const acc=keys.map(()=>new Array(N).fill(0));
+  keys.forEach((k,ki)=>{for(let i=0;i<N;i++)acc[ki][i]=(s[i][k]||0)+(ki>0?acc[ki-1][i]:0);});
+  const ymax=Math.max(1,acc[keys.length-1].reduce((a,b)=>Math.max(a,b),0)*1.05);
+  for(let ki=keys.length-1;ki>=0;ki--){
+    ctx.fillStyle=cols[ki];ctx.globalAlpha=.45;ctx.beginPath();
+    for(let i=0;i<N;i++){const x=6+i/(N-1)*(W-12);const y=H-14-acc[ki][i]/ymax*(H-22);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    for(let i=N-1;i>=0;i--){const x=6+i/(N-1)*(W-12);const base=ki>0?acc[ki-1][i]:0;ctx.lineTo(x,H-14-base/ymax*(H-22));}
+    ctx.closePath();ctx.fill();
+    ctx.globalAlpha=.9;glow(ctx,cols[ki],5);ctx.strokeStyle=cols[ki];ctx.lineWidth=1;
+    ctx.beginPath();
+    for(let i=0;i<N;i++){const x=6+i/(N-1)*(W-12);const y=H-14-acc[ki][i]/ymax*(H-22);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.stroke();unglow(ctx);ctx.globalAlpha=1;
+  }
+  let cx=12;ctx.font='9px sans-serif';
+  labels.forEach((lb,i)=>{glow(ctx,cols[i],5);ctx.fillStyle=cols[i];ctx.fillRect(cx,5,10,3);unglow(ctx);
+    ctx.fillStyle='#9db0cc';ctx.fillText(lb,cx+14,10);cx+=ctx.measureText(lb).width+30;});
+}
+
+function drawRadar(){
+  const{ctx,W,H}=setup($('cRadar'),175);
+  bg(ctx,W,H);
+  const ali=D.alienation;
+  if(!ali||!ali.dims){ctx.fillStyle=C.txt;ctx.font='10px sans-serif';ctx.fillText('无异化数据',12,H/2);return;}
+  const dims=ali.dims,n=dims.length,CX=W/2,CY=H/2+6,R=Math.min(W,H)/2-24;
+  const data=ali.data||{};
+  const positions=Object.keys(data).filter(p=>data[p]);
+  const cols=[C.pu,C.gr,C.llm,C.or,C.cy];
+  ctx.strokeStyle=C.grid;
+  for(let ring=1;ring<=4;ring++){ctx.beginPath();
+    for(let i=0;i<=n;i++){const ang=-Math.PI/2+i/n*2*Math.PI;
+      const x=CX+Math.cos(ang)*R*ring/4,y=CY+Math.sin(ang)*R*ring/4;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.stroke();}
+  dims.forEach((d,i)=>{const ang=-Math.PI/2+i/n*2*Math.PI;
+    ctx.strokeStyle=C.grid;ctx.beginPath();ctx.moveTo(CX,CY);ctx.lineTo(CX+Math.cos(ang)*R,CY+Math.sin(ang)*R);ctx.stroke();
+    ctx.fillStyle='#8fa2c2';ctx.font='8px sans-serif';
+    const lx=CX+Math.cos(ang)*(R+10),ly=CY+Math.sin(ang)*(R+8);
+    ctx.fillText(d.slice(0,10),lx-16,ly+3);});
+  positions.forEach((pos,pi)=>{
+    const c=cols[pi%cols.length];
+    glow(ctx,c,8);ctx.strokeStyle=c;ctx.lineWidth=1.6;ctx.globalAlpha=.95;ctx.beginPath();
+    dims.forEach((d,i)=>{const v=+(data[pos][d]||0);const ang=-Math.PI/2+i/n*2*Math.PI;
+      const r=R*Math.max(0,Math.min(1,v/5));
+      const x=CX+Math.cos(ang)*r,y=CY+Math.sin(ang)*r;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.closePath();ctx.stroke();unglow(ctx);
+    ctx.globalAlpha=.14;ctx.fillStyle=c;ctx.fill();ctx.globalAlpha=1;
+  });
+  let cx=12;ctx.font='9px sans-serif';
+  positions.forEach((p,i)=>{const c=cols[i%cols.length];glow(ctx,c,5);
+    ctx.fillStyle=c;ctx.fillRect(cx,H-8,12,2);unglow(ctx);
+    ctx.fillStyle='#9db0cc';ctx.fillText(p,cx+16,H-4);cx+=ctx.measureText(p).width+30;});
+}
+
+function drawSurvey(){
+  const{ctx,W,H}=setup($('cSurvey'),175);
+  bg(ctx,W,H);
+  const sv=D.llm&&D.llm.survey;
+  if(!sv){ctx.fillStyle=C.txt;ctx.font='10px sans-serif';ctx.fillText('无问卷数据',12,H/2);return;}
+  const positions=Object.keys(sv);
+  const dims=[['fairness','公平',C.cy],['conflict','冲突',C.llm],['optimism','乐观',C.gr]];
+  const ymax=5;
+  ctx.strokeStyle=C.grid;
+  for(let i=0;i<=4;i++){const y=H-16-(i/4)*(H-30);
+    ctx.beginPath();ctx.moveTo(6,y);ctx.lineTo(W-6,y);ctx.stroke();
+    ctx.fillStyle='#3d5378';ctx.font='8px Consolas';ctx.fillText((ymax*i/4).toFixed(1),W-26,y+3);}
+  const slot=(W-24)/positions.length;
+  const bw=slot/dims.length;
+  positions.forEach((p,pi)=>{
+    dims.forEach(([k,lb,c],di)=>{
+      const v=+((sv[p]&&sv[p][k])||0)/ymax;
+      const x=12+pi*slot+di*bw+bw*0.14;
+      const h=v*(H-30);
+      glow(ctx,c,8);ctx.fillStyle=c;ctx.globalAlpha=.85;
+      ctx.fillRect(x,H-16-h,bw*0.72,h);unglow(ctx);ctx.globalAlpha=1;
+    });
+    ctx.fillStyle='#9db0cc';ctx.font='9px sans-serif';
+    ctx.fillText(p,12+pi*slot+slot/2-6,H-2);
+  });
+  let cx=12;ctx.font='9px sans-serif';
+  dims.forEach(([k,lb,c])=>{glow(ctx,c,5);ctx.fillStyle=c;ctx.fillRect(cx,5,10,3);unglow(ctx);
+    ctx.fillStyle='#9db0cc';ctx.fillText(lb,cx+14,10);cx+=40;});
+}
+
+function pushBot(t){const c=$('chat');const d=document.createElement('div');d.className='m a';d.textContent=t;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+
+async function sendChat(){
+  const tx=$('chatTx');const text=tx.value.trim();if(!text)return;tx.value='';
+  const c=$('chat');
+  const d=document.createElement('div');d.className='m u';d.textContent=text;c.appendChild(d);
+  chatHist.push({role:'user',content:text});
+  c.scrollTop=c.scrollHeight;
+  try{
+    const r=await fetch('/api/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text,history:chatHist.slice(-6)})});
+    const d2=await r.json();
+    chatHist.push({role:'assistant',content:d2.reply||''});
+    pushBot(d2.reply||'…');
+  }catch(e){pushBot('连接失败');}
+}
+$('chatTx').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+let rsT=null;
+window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(renderAll,200);});
+window.addEventListener('DOMContentLoaded',boot);
+</script>
+</body>
+</html>

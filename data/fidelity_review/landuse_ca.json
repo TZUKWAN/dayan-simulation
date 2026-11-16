@@ -1,0 +1,12 @@
+{
+  "module": "landuse_ca",
+  "reviews": [
+    {"mid": "NET009", "class_name": "WhiteEngelenModel", "fidelity": "prototype", "basis": "适宜性×邻城阈值单一转换规则，无多类转换潜势竞争、随机扰动项与自修改机制。", "simplifications": ["无按潜势最高的多类竞争转换", "无随机扰动项δ", "无自我修改(self-modification)增长率反馈", "单一规则单类城市扩张"], "evidence": "landuse_ca.py:39 类定义；55 转换规则"},
+    {"mid": "NET010", "class_name": "SLEUTHLiteModel", "fidelity": "lite", "basis": "自发/边缘/道路三规则可辨，扩散中心与种子规则、坡度层、五系数及自修改缺失。", "simplifications": ["仅实现自发/边缘/道路3规则，缺扩散中心与种子规则", "无坡度层(注释提及但未实现)", "无五系数(diffusion/breed/spread/slope/road gravity)与校准", "无系数自修改"], "evidence": "landuse_ca.py:65 类定义；82-87 三规则"},
+    {"mid": "NET011", "class_name": "CLUESLiteModel", "fidelity": "lite", "basis": "需求缺口驱动的邻城最多农地转城市，单类需求，无多类型竞争分配/弹性/回归适宜性。", "simplifications": ["仅城市单类需求目标，无多类型竞争分配", "无转换弹性参数", "无回归式location suitability，仅邻城计数排序", "一次性补齐缺口，无迭代比例分配"], "evidence": "landuse_ca.py:96 类定义；107-119 需求分配"},
+    {"mid": "NET012", "class_name": "DynaCLUEModel", "fidelity": "lite", "basis": "仅继承CLUE-lite并令城市需求逐年+0.005至0.25，动态需求机制对应，其余同NET011简化。", "simplifications": ["需求线性递增硬编码，无经济/政策需求模型", "继承NET011全部简化", "需求上限0.25人为截断"], "evidence": "landuse_ca.py:127 类定义；136-138 动态需求"},
+    {"mid": "NET013", "class_name": "FLUSModel", "fidelity": "prototype", "basis": "静态中心距离概率面随机转换，无ANN、自适应惯性与轮盘竞争(observe硬编码True虚标)。", "simplifications": ["概率面为固定中心距离函数，非ANN", "无自适应惯性系数", "无轮盘竞争分配(observe的roulette_allocation硬编码True)", "农地0.3折减因子无模型依据"], "evidence": "landuse_ca.py:146 类定义；154-166 概率面与转换；170 虚标"},
+    {"mid": "NET014", "class_name": "PLUSModel", "fidelity": "prototype", "basis": "随机种子+3步随机游走蔓延示意斑块生成，无Markov需求、RF概率面与多类型竞争。", "simplifications": ["斑块蔓延为随机游走3步，非LEI受限扩张", "无Markov总量需求约束", "无随机森林ANN概率面", "无多类型转换竞争"], "evidence": "landuse_ca.py:174 类定义；184-198 斑块生成"},
+    {"mid": "NET015", "class_name": "CAMarkovModel", "fidelity": "prototype", "basis": "Markov总量按错误类别向量计算(含空类、缺林类，增益取索引0)，语义失效，仅余邻域分配回路。", "simplifications": ["fracs只统计k=0..2：索引0为空类phantom，林(3)被排除", "gain_city误用索引0(空类)而非城市索引1，总量预测失真", "转移矩阵硬编码非从历史转移估计", "仅城市类空间化，农/林变化不落地，无滤膜/多目标分配"], "evidence": "landuse_ca.py:207 类定义；223-227 类别索引错位"}
+  ]
+}

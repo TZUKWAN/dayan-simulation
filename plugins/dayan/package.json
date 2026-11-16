@@ -1,0 +1,35 @@
+{
+  "name": "dayan",
+  "version": "1.1.0",
+  "private": true,
+  "description": "DSH原生AI调用大衍共享工具：真实采集、精确建模、数据绑定、校准留出与同源报告",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client/client.js",
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "dsh": ">=0.2.2-rc.1",
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "files": [
+    "index.js",
+    "client/",
+    "cordis.patch.yml",
+    "plugin.json",
+    "skills/",
+    "commands/",
+    "host/"
+  ]
+}

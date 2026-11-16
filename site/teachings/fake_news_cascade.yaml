@@ -1,0 +1,20 @@
+scenario: 教学·假新闻级联与算法偏置
+pack: 文化媒介包
+population:
+  n: 200
+institutions:
+  算法偏置: 0.8
+  媒介所有制: private
+measurement_plan: [cascade_mean, echo_chamber]
+validity_plan:
+  基线: 偏置0.0对照
+  种子: [7]
+claims_level:
+  机制主张: 仅探索
+  趋势主张: 允许
+教学要点: |
+  同一人群：算法偏置0→0.8，假新闻级联放大3.2×；
+  媒介所有制切public → 压制到0.31。
+  课堂演示：回音室得分 0.794→0.852（同温层门控同化机制）。
+ticks: 200
+seed: 7

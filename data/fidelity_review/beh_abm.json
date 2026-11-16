@@ -1,0 +1,862 @@
+{
+ "module": "beh_abm",
+ "reviews": [
+  {
+   "mid": "BEH001",
+   "class_name": "SchellingModel",
+   "fidelity": "full",
+   "basis": "Moore邻域相似度阈值+空位迁移+隔离指数，Schelling核心机制齐全。",
+   "simplifications": [
+    "不满者批量随机迁移而非顺序逐个"
+   ],
+   "evidence": "beh_abm.py:21 相似度阈值判定+随机空位交换；实测segregation 0.85"
+  },
+  {
+   "mid": "BEH002",
+   "class_name": "SchellingTippingModel",
+   "fidelity": "prototype",
+   "basis": "仅继承BEH001并改输出指标，无有界邻里倾覆阈值机制，动态与BEH001全同。",
+   "simplifications": [
+    "阈值不随邻里构成变化",
+    "无倾覆专属规则，仅加tipped布尔"
+   ],
+   "evidence": "beh_abm.py:75 仅覆写observe(80-83)"
+  },
+  {
+   "mid": "BEH003",
+   "class_name": "SugarscapeModel",
+   "fidelity": "lite",
+   "basis": "双峰糖地形+视野寻糖+代谢+基尼在，但agent不死、再生式退化为衰减。",
+   "simplifications": [
+    "财富≤0不死亡不移除",
+    "糖再生为0.95衰减+常数而非恢复至容量",
+    "无繁殖/继承/战斗"
+   ],
+   "evidence": "beh_abm.py:86 糖采集代谢(108-124)+gini(127-133)"
+  },
+  {
+   "mid": "BEH004",
+   "class_name": "SugarscapeTradeModel",
+   "fidelity": "prototype",
+   "basis": "香料无地形采集与代谢消耗，仅每步一对随机交易，价格机制示意。",
+   "simplifications": [
+    "spice_pos地形未用",
+    "香料不因代谢减少",
+    "每步仅一对交易",
+    "MRS定义自设"
+   ],
+   "evidence": "beh_abm.py:139 随机配对几何均价交易(151-162)"
+  },
+  {
+   "mid": "BEH005",
+   "class_name": "EpsteinViolenceModel",
+   "fidelity": "prototype",
+   "basis": "激活-逮捕回路在，但风险公式方向反、无刑期、grievance未按H(1-L)，常驻约49%暴力非间歇态。",
+   "simplifications": [
+    "risk=1-exp(-距警距离)方向与原模型相反",
+    "jailed数组未使用",
+    "grievance一次性采样不更新",
+    "警察随机游走"
+   ],
+   "evidence": "beh_abm.py:172 激活规则(210-215)+逮捕(200-207)；实测violence_frac≈0.49"
+  },
+  {
+   "mid": "BEH006",
+   "class_name": "AgentZeroModel",
+   "fidelity": "prototype",
+   "basis": "认知概率项恒不更新，传染用全局均值替代空间邻居，无消退机制。",
+   "simplifications": [
+    "cog_prob静态",
+    "情感全局均值回归非邻近传染",
+    "无事件采样/概率更新",
+    "无extinction"
+   ],
+   "evidence": "beh_abm.py:227 affect+prob>阈值(249-254)"
+  },
+  {
+   "mid": "BEH007",
+   "class_name": "ElFarolModel",
+   "fidelity": "prototype",
+   "basis": "无比照历史的预测器集，决策=个人随机阈值，出勤≈60%由阈值均值0.6直接垫定。",
+   "simplifications": [
+    "无Arthur记忆预测模型库",
+    "无预测器绩效比较",
+    "出勤率由初始化分布均值决定"
+   ],
+   "evidence": "game_catalog.py:916 策略为U(0.3,0.9)阈值(928-941)"
+  },
+  {
+   "mid": "BEH008",
+   "class_name": "MinorityGameModel",
+   "fidelity": "prototype",
+   "basis": "无历史策略表与绩效选择，静态个人偏好+随机游走，约50%结果平凡成立。",
+   "simplifications": [
+    "无策略库",
+    "无历史窗口",
+    "赢家更新为对称随机扰动"
+   ],
+   "evidence": "game_catalog.py:954 偏好扰动(968-976)"
+  },
+  {
+   "mid": "BEH009",
+   "class_name": "BonabeauModel",
+   "fidelity": "lite",
+   "basis": "softmax胜负+败者衰减+全体恢复在，密度反馈为固定常数而非动态变量。",
+   "simplifications": [
+    "dfb为常数参数",
+    "相遇率不随密度变化"
+   ],
+   "evidence": "beh_abm.py:267 胜负1/(1+e^(Δp/dfb))(285-291)"
+  },
+  {
+   "mid": "BEH010",
+   "class_name": "MarchExploitationModel",
+   "fidelity": "lite",
+   "basis": "探索高方差/利用小回报+向最优者模仿在，无组织邻域网络、知识单维。",
+   "simplifications": [
+    "模仿对象为全局最优",
+    "知识为标量",
+    "回报结构自设"
+   ],
+   "evidence": "beh_abm.py:304 探索N(0.05,0.3)/利用0.02(319-334)"
+  },
+  {
+   "mid": "BEH011",
+   "class_name": "GarbageCanModel",
+   "fidelity": "prototype",
+   "basis": "问题/方案/参与者/选择四流均未建模，仅随机能量注入随机问题，实测全部解题。",
+   "simplifications": [
+    "无选择机会与接入结构",
+    "无flight/oversight/revision",
+    "能量注入单一"
+   ],
+   "evidence": "beh_abm.py:345 能量随机注入(361-370)"
+  },
+  {
+   "mid": "BEH012",
+   "class_name": "NKLandscapeModel",
+   "fidelity": "full",
+   "basis": "N位K环状邻接贡献表+适应度均值+单点变异接受更优，标准NK实现。",
+   "simplifications": [
+    "单基因组爬山而非种群搜索"
+   ],
+   "evidence": "beh_abm.py:380 贡献表(393)+环状K邻接fitness(397-405)"
+  },
+  {
+   "mid": "BEH013",
+   "class_name": "LazerFriedmanModel",
+   "fidelity": "prototype",
+   "basis": "解向量为邻居均值混合而非更优模仿，探索率按多样性启发衰减，实测explore_decay=false。",
+   "simplifications": [
+    "无接受更优解爬山判定",
+    "探索衰减为自设函数非涌现"
+   ],
+   "evidence": "beh_abm.py:422 均值混合(446-456)+多样性驱动(453-455)"
+  },
+  {
+   "mid": "BEH014",
+   "class_name": "GranovetterModel",
+   "fidelity": "full",
+   "basis": "阈值分布+参与率反馈+初始煽动者，忠实Granovetter阈值级联。",
+   "simplifications": [
+    "阈值用正态分布近似"
+   ],
+   "evidence": "game_catalog.py:987 thresholds≤share激活(1004-1007)；实测cascade=true"
+  },
+  {
+   "mid": "BEH021",
+   "class_name": "NoiseVoterModel(alias→opinion.NoisyVoter)",
+   "fidelity": "prototype",
+   "basis": "更新为采纳全局多数而非复制随机邻居，非选民模型规则（别名类自报BEH025）。",
+   "simplifications": [
+    "全局多数替代局部复制",
+    "无交互网络"
+   ],
+   "evidence": "game_catalog.py:875 alias；opinion.py:142-148 nb.mean()>0.5"
+  },
+  {
+   "mid": "BEH033",
+   "class_name": "AxelrodCultureModel",
+   "fidelity": "full",
+   "basis": "F×Q特征+交互概率∝相似度+采纳异特征，忠实Axelrod文化传播。",
+   "simplifications": [
+    "每步单次交互"
+   ],
+   "evidence": "game_catalog.py:877 相似度门控采纳(893-904)"
+  },
+  {
+   "mid": "BEH041",
+   "class_name": "BoydRichersonModel",
+   "fidelity": "prototype",
+   "basis": "组适应度随规范频率单调增，无组内利他成本，群体选择张力缺失。",
+   "simplifications": [
+    "无组内个体/文化传播",
+    "无组内成本项",
+    "更新式自设"
+   ],
+   "evidence": "beh_abm.py:474 fitness=1+0.4f-0.15f²(489-493)"
+  },
+  {
+   "mid": "BEH042",
+   "class_name": "AokiCoevolutionModel",
+   "fidelity": "lite",
+   "basis": "基因-文化频率依赖双向logit耦合骨架在，系数自设，长程收敛可复现。",
+   "simplifications": [
+    "无群体结构/时滞",
+    "耦合系数自设",
+    "收敛极慢(2000tick才coevolved)"
+   ],
+   "evidence": "beh_abm.py:504 互促logistic耦合(517-523)"
+  },
+  {
+   "mid": "BEH043",
+   "class_name": "EthnocentrismModel",
+   "fidelity": "prototype",
+   "basis": "同异族条件合作+PD+替换在，但无格点、复制规则偏离繁殖机制，实测中心主义不占优(0.175)。",
+   "simplifications": [
+    "无空间格点",
+    "弱者被随机个体文化复制而非适应度繁殖",
+    "每步一次交互"
+   ],
+   "evidence": "beh_abm.py:533 策略四型+替换(550-569)"
+  },
+  {
+   "mid": "BEH044",
+   "class_name": "UlloaCoevolutionModel",
+   "fidelity": "prototype",
+   "basis": "仅两标量互相趋近的自设ODE，未见原模型结构，legitimacy定义任意。",
+   "simplifications": [
+    "无群体/个体层",
+    "合法性=1-|差|自设"
+   ],
+   "evidence": "beh_abm.py:582 两式耦合(595-601)"
+  },
+  {
+   "mid": "BEH047",
+   "class_name": "BilingualCompetitionModel",
+   "fidelity": "prototype",
+   "basis": "实为Abrams-Strogatz单变量方程且指数自设0.6，无双语者第三状态。",
+   "simplifications": [
+    "无双语人群变量",
+    "非Castelló扩展",
+    "c=0.6非原文"
+   ],
+   "evidence": "beh_abm.py:612 AS方程(624-629)"
+  },
+  {
+   "mid": "BEH048",
+   "class_name": "BayesianIteratedLearningModel",
+   "fidelity": "prototype",
+   "basis": "瓶颈+后验采样在，但先验均匀无正则化偏好，组合性涌现机制缺失（实测未涌现）。",
+   "simplifications": [
+    "先验均匀",
+    "每代仅6条数据",
+    "组合性=恒等映射率"
+   ],
+   "evidence": "beh_abm.py:639 计数后验(664-674)；structured_emerged=false"
+  },
+  {
+   "mid": "BEH049",
+   "class_name": "PrisonerDilemmaEvo",
+   "fidelity": "full",
+   "basis": "正典PD收益(R3,T5,S0,P1)+复制动态，背叛占优复现。",
+   "simplifications": [],
+   "evidence": "game_catalog.py:140；game_lib.py:18-21；实测C→0.098"
+  },
+  {
+   "mid": "BEH050",
+   "class_name": "HawkDoveEvo",
+   "fidelity": "full",
+   "basis": "正典鹰鸽收益[[(V-C)/2,V],[0,V/2]]+复制动态，混合均衡x*=V/C复现。",
+   "simplifications": [],
+   "evidence": "game_catalog.py:142；game_lib.py:23-26；实测鹰0.69≈4/6"
+  },
+  {
+   "mid": "BEH051",
+   "class_name": "StagHuntEvo",
+   "fidelity": "full",
+   "basis": "正典猎鹿收益[[r,0],[s,p]]+复制动态，双稳态协调复现。",
+   "simplifications": [],
+   "evidence": "game_catalog.py:144；game_lib.py:29-33"
+  },
+  {
+   "mid": "BEH052",
+   "class_name": "LinearPGEvo",
+   "fidelity": "full",
+   "basis": "2026-11-12 机制修复：正典 2 人公共品（m=1.6），搭便车严格占优复现",
+   "simplifications": [
+    "收益非由公共品公式推导",
+    "贡献反而占优"
+   ],
+   "evidence": "game_catalog.py:146 [[1,0.2],[1.4,0.6]]；game_lib.py:35",
+   "fixed": true
+  },
+  {
+   "mid": "BEH053",
+   "class_name": "PunishPGEvo",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：收益矩阵/更新规则已修为正典形式（见 tests/test_dayan_mechfix.py）",
+   "simplifications": [
+    "惩罚效应硬编码且方向错",
+    "无组规模/罚款参数"
+   ],
+   "evidence": "game_catalog.py:149 [[1,0.2],[0.9,0.3]]",
+   "fixed": true
+  },
+  {
+   "mid": "BEH054",
+   "class_name": "VolunteerDilemmaEvo",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：收益矩阵/更新规则已修为正典形式（见 tests/test_dayan_mechfix.py）",
+   "simplifications": [
+    "volunteer-vs-shirk单元与定义相反"
+   ],
+   "evidence": "game_catalog.py:152 [[0.8,1],[1,0]]；game_lib.py:42",
+   "fixed": true
+  },
+  {
+   "mid": "BEH055",
+   "class_name": "VolunteerDilemmaSim",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：收益矩阵/更新规则已修为正典形式（见 tests/test_dayan_mechfix.py）",
+   "simplifications": [
+    "同BEH054收益反转",
+    "Moran漂移至角点"
+   ],
+   "evidence": "game_catalog.py:164",
+   "fixed": true
+  },
+  {
+   "mid": "BEH056",
+   "class_name": "CPREvo",
+   "fidelity": "lite",
+   "basis": "过度占用占优且共占用最差的2×2结构合理，混合均衡复现，但外部性函数cpr_appropriation未用。",
+   "simplifications": [
+    "2×2缩减",
+    "无资源存量动态"
+   ],
+   "evidence": "game_catalog.py:156 [[1,0.8],[1.1,0.6]]；game_lib.py:51"
+  },
+  {
+   "mid": "BEH057",
+   "class_name": "UltimatumEvo",
+   "fidelity": "prototype",
+   "basis": "非对称提议-回应博弈压成任意对称2×2，无拒绝阈值机制，收益数字任意。",
+   "simplifications": [
+    "无提议者/回应者角色",
+    "无阈值接受结构"
+   ],
+   "evidence": "game_catalog.py:168 [[2,1],[1,1]]"
+  },
+  {
+   "mid": "BEH058",
+   "class_name": "DictatorEvo",
+   "fidelity": "prototype",
+   "basis": "独裁者单方决定结构缺失，压成任意对称2×2。",
+   "simplifications": [
+    "无角色结构",
+    "dictator_split未用"
+   ],
+   "evidence": "game_catalog.py:171 [[2,3],[1,1]]；game_lib.py:65"
+  },
+  {
+   "mid": "BEH059",
+   "class_name": "TrustEvo",
+   "fidelity": "prototype",
+   "basis": "投资-受信两角色与乘数返还机制缺失，压成任意对称2×2，trust_game未用。",
+   "simplifications": [
+    "无投资×3与返还决策"
+   ],
+   "evidence": "game_catalog.py:174 [[2.5,0.5],[1,1]]；game_lib.py:70"
+  },
+  {
+   "mid": "BEH060",
+   "class_name": "MatchingPenniesEvo",
+   "fidelity": "lite",
+   "basis": "正典零和矩阵+复制-突变，但单种群动态锁向角点(实测0.995)，声称的混合均衡未复现。",
+   "simplifications": [
+    "单种群复制动态不适用于零和博弈",
+    "终态0.995/0.005"
+   ],
+   "evidence": "game_catalog.py:177 mu=0.02；game_lib.py:76-80"
+  },
+  {
+   "mid": "BEH061",
+   "class_name": "CoordinationConflictEvo",
+   "fidelity": "full",
+   "basis": "Battle of Sexes非对称偏好矩阵正典(A/B互换)，复制动态协调到纯均衡。",
+   "simplifications": [
+    "B矩阵存而不用，动态仅用A"
+   ],
+   "evidence": "game_catalog.py:159；game_lib.py:82-87"
+  },
+  {
+   "mid": "BEH062",
+   "class_name": "RPSEvo",
+   "fidelity": "full",
+   "basis": "正典循环优势矩阵+复制动态，闭合轨道复现。",
+   "simplifications": [],
+   "evidence": "game_catalog.py:161；game_lib.py:89-93"
+  },
+  {
+   "mid": "BEH063",
+   "class_name": "CentipedeEvo",
+   "fidelity": "prototype",
+   "basis": "蜈蚣序贯结构与递增收益未体现，2×2反协调收益与原博弈无关，centipede_depth未用。",
+   "simplifications": [
+    "无序贯节点",
+    "无后向归纳结构"
+   ],
+   "evidence": "game_catalog.py:180 [[1,0.5],[2,0.1]]；game_lib.py:95"
+  },
+  {
+   "mid": "BEH064",
+   "class_name": "ShapleyModel",
+   "fidelity": "method_demo",
+   "basis": "置换枚举边际贡献精确计算Shapley值，固定可加例题验证。",
+   "simplifications": [
+    "固定可加特征函数",
+    "game_lib首循环为死代码"
+   ],
+   "evidence": "game_catalog.py:464；game_lib.py:103-129"
+  },
+  {
+   "mid": "BEH065",
+   "class_name": "NucleolusLiteModel",
+   "fidelity": "prototype",
+   "basis": "两步公式在正典破产例题(60,40,30;100)得(30,40,30)，偏离真核仁(50,25,25)。",
+   "simplifications": [
+    "非字典序最小超额计算",
+    "争议garment近似有误"
+   ],
+   "evidence": "game_catalog.py:541 551-559"
+  },
+  {
+   "mid": "BEH066",
+   "class_name": "AdditiveCoalitionModel",
+   "fidelity": "prototype",
+   "basis": "未执行任何分组或稳定性机制，仅对随机初始划分计算两种效用和。",
+   "simplifications": [
+    "无联盟形成算法",
+    "无核/NS稳定性判定"
+   ],
+   "evidence": "game_catalog.py:575 581-593"
+  },
+  {
+   "mid": "BEH067",
+   "class_name": "NashBargainingModel",
+   "fidelity": "method_demo",
+   "basis": "离散帕累托边界上最大化纳什积，对称例题(5,5)复现。",
+   "simplifications": [
+    "边界为离散点列",
+    "固定对称例题"
+   ],
+   "evidence": "game_catalog.py:488；game_lib.py:132-141"
+  },
+  {
+   "mid": "BEH068",
+   "class_name": "RubinsteinModel",
+   "fidelity": "method_demo",
+   "basis": "极限份额公式+有限期倒推迭代自洽，忠实演示Rubinstein议价。",
+   "simplifications": [
+    "固定δ=0.9例题"
+   ],
+   "evidence": "game_catalog.py:513 519-529"
+  },
+  {
+   "mid": "BEH069",
+   "class_name": "TitForTatModel",
+   "fidelity": "lite",
+   "basis": "TFT规则忠实(镜像对手)，但仅对阵硬编码ALLD，无对手种群/锦标赛。",
+   "simplifications": [
+    "对手固定永远背叛",
+    "无多策略环境"
+   ],
+   "evidence": "game_catalog.py:637；game_lib.py:148-150"
+  },
+  {
+   "mid": "BEH070",
+   "class_name": "TitForTatTatModel",
+   "fidelity": "lite",
+   "basis": "10%宽容规则忠实，环境为固定ALLD基线。",
+   "simplifications": [
+    "同BEH069"
+   ],
+   "evidence": "game_catalog.py:648 653-658"
+  },
+  {
+   "mid": "BEH071",
+   "class_name": "PavlovModel",
+   "fidelity": "lite",
+   "basis": "赢守输变(Pavlov)规则忠实，环境为固定ALLD基线。",
+   "simplifications": [
+    "同BEH069"
+   ],
+   "evidence": "game_catalog.py:661 666-671"
+  },
+  {
+   "mid": "BEH072",
+   "class_name": "GrimTriggerModel",
+   "fidelity": "lite",
+   "basis": "永久触发规则忠实，环境为固定ALLD基线。",
+   "simplifications": [
+    "同BEH069"
+   ],
+   "evidence": "game_catalog.py:674 679-682"
+  },
+  {
+   "mid": "BEH073",
+   "class_name": "ZeroDeterminantModel",
+   "fidelity": "prototype",
+   "basis": "三分支规则非ZD线性族(缺myC/oppD分支)，Press-Dyson参数错位映射，勒索关系未实现。",
+   "simplifications": [
+    "p1-p4响应表未按原规则",
+    "无勒索比例约束"
+   ],
+   "evidence": "game_catalog.py:685；game_lib.py:174-178"
+  },
+  {
+   "mid": "BEH075",
+   "class_name": "SimpleNormModel",
+   "fidelity": "lite",
+   "basis": "简单立场规则忠实：依接受者声誉捐赠+捐赠后更新声誉，最小可用实现。",
+   "simplifications": [
+    "无捐赠成本/收益",
+    "无适应度演化",
+    "每步一对交互"
+   ],
+   "evidence": "game_catalog.py:745 决策+声誉更新(712-733)"
+  },
+  {
+   "mid": "BEH076",
+   "class_name": "StrictJudgingModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：收益矩阵/更新规则已修为正典形式（见 tests/test_dayan_mechfix.py）",
+   "simplifications": [
+    "stern_judging评估表未用",
+    "_update_reputation三分支相同"
+   ],
+   "evidence": "game_catalog.py:752 719-725；实测输出与BEH075完全相同",
+   "fixed": true
+  },
+  {
+   "mid": "BEH077",
+   "class_name": "ShunningModel",
+   "fidelity": "prototype",
+   "basis": "排斥仅体现为50%概率从正声誉池采样，无排斥后果与规范结构。",
+   "simplifications": [
+    "无被排斥者状态变化",
+    "无收益结构"
+   ],
+   "evidence": "game_catalog.py:759 765-777"
+  },
+  {
+   "mid": "BEH078",
+   "class_name": "AxelrodNormCatalogModel",
+   "fidelity": "prototype",
+   "basis": "无收益结构、惩罚代价与代际演化，vengeance随机游走，目击概率自设常数。",
+   "simplifications": [
+    "meta_cost参数未用",
+    "无回报与boldness耦合",
+    "rng传参失败回退自建rng"
+   ],
+   "evidence": "game_catalog.py:780；game_lib.py:235-256"
+  },
+  {
+   "mid": "BEH079",
+   "class_name": "MetaNormModel",
+   "fidelity": "prototype",
+   "basis": "与BEH078完全同类仅换种子，元规范（惩罚不惩罚者）机制不存在。",
+   "simplifications": [
+    "无元惩罚结构",
+    "meta_cost无效"
+   ],
+   "evidence": "game_catalog.py:808 814-824"
+  },
+  {
+   "mid": "BEH080",
+   "class_name": "ConformistPunishModel",
+   "fidelity": "prototype",
+   "basis": "代理的是BEH036从众传播类，逐对线性权重且无任何惩罚机制，名实不符。",
+   "simplifications": [
+    "无惩罚",
+    "非超线性多数采样",
+    "实现与声明跨模型错位"
+   ],
+   "evidence": "game_catalog.py:836 842-851；culture.py:85-91"
+  },
+  {
+   "mid": "BEH082",
+   "class_name": "ReplicatorCatalogModel",
+   "fidelity": "full",
+   "basis": "标准复制动态方程配鹰鸽收益，实测收敛x*=V/C误差0.001。",
+   "simplifications": [],
+   "evidence": "beh_abm.py:687 复制动态(699-704)"
+  },
+  {
+   "mid": "BEH083",
+   "class_name": "ReplicatorMutationModel",
+   "fidelity": "full",
+   "basis": "标准复制-突变方程x(f-x̄Ax)+μ(1/n-x)，μ=0.03维持混合分布。",
+   "simplifications": [],
+   "evidence": "game_catalog.py:185；更新式64-67"
+  },
+  {
+   "mid": "BEH084",
+   "class_name": "MoranModel",
+   "fidelity": "full",
+   "basis": "N=100适应度比例出生+均匀死亡，标准Moran过程。",
+   "simplifications": [
+    "种群规模固定100"
+   ],
+   "evidence": "game_catalog.py:191；moran分支86-107"
+  },
+  {
+   "mid": "BEH085",
+   "class_name": "FermiModel",
+   "fidelity": "lite",
+   "basis": "Fermi比较更新在，但出生候选先按适应度比例选择，混合Moran偏离成对比较。",
+   "simplifications": [
+    "非均匀随机配对",
+    "β固定3"
+   ],
+   "evidence": "game_catalog.py:193；fermi门控99-103"
+  },
+  {
+   "mid": "BEH086",
+   "class_name": "BestResponseModel",
+   "fidelity": "full",
+   "basis": "每步向当前最优反应迁移0.3概率质量，标准最优反应动态离散化。",
+   "simplifications": [
+    "带惯性的平滑切换"
+   ],
+   "evidence": "game_catalog.py:187；更新式68-71"
+  },
+  {
+   "mid": "BEH087",
+   "class_name": "LogitResponseModel",
+   "fidelity": "full",
+   "basis": "softmax(λ·Ax)目标+凸组合更新，logit响应标准离散化。",
+   "simplifications": [
+    "λ固定4",
+    "步率0.1"
+   ],
+   "evidence": "game_catalog.py:189；更新式72-76"
+  },
+  {
+   "mid": "BEH088",
+   "class_name": "FictitiousPlayModel",
+   "fidelity": "prototype",
+   "basis": "信念取当前群体状态而非对手历史经验频率，实测在正反硬币上锁向角点，库中真FP未用。",
+   "simplifications": [
+    "无历史频率累积",
+    "无Laplace平滑"
+   ],
+   "evidence": "game_catalog.py:195；fictitious分支108-113；game_lib.py:327"
+  },
+  {
+   "mid": "BEH089",
+   "class_name": "EWARuleModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：收益矩阵/更新规则已修为正典形式（见 tests/test_dayan_mechfix.py）",
+   "simplifications": [
+    "无差异化更新",
+    "2臂bandit"
+   ],
+   "evidence": "game_catalog.py:214-219；实测2000tick仍0.47",
+   "fixed": true
+  },
+  {
+   "mid": "BEH090",
+   "class_name": "RothErevModel",
+   "fidelity": "lite",
+   "basis": "倾向累加+比例选择在，缺Roth-Erev实验率ε与遗忘φ参数，收敛慢。",
+   "simplifications": [
+    "无forgetting/experimentation"
+   ],
+   "evidence": "game_catalog.py:232 237-241"
+  },
+  {
+   "mid": "BEH091",
+   "class_name": "BushMostellerModel",
+   "fidelity": "lite",
+   "basis": "所选动作概率线性修正近似BM成功分支，无失败项、收益未对aspiration二值化。",
+   "simplifications": [
+    "无失败(未得)分支",
+    "无二元刺激"
+   ],
+   "evidence": "game_catalog.py:244 249-255"
+  },
+  {
+   "mid": "BEH092",
+   "class_name": "BayesianOppModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：收益矩阵/更新规则已修为正典形式（见 tests/test_dayan_mechfix.py）",
+   "simplifications": [
+    "决策退化为常量",
+    "退化自博弈"
+   ],
+   "evidence": "game_catalog.py:273 br=argmax(pay@opp_post)；实测恒[1,0]",
+   "fixed": true
+  },
+  {
+   "mid": "BEH093",
+   "class_name": "RegretMatchingModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：收益矩阵/更新规则已修为正典形式（见 tests/test_dayan_mechfix.py）",
+   "simplifications": [
+    "反事实与实际无关",
+    "比例选择在但输入无效"
+   ],
+   "evidence": "game_catalog.py:277 287-296",
+   "fixed": true
+  },
+  {
+   "mid": "BEH102",
+   "class_name": "DDMModel",
+   "fidelity": "full",
+   "basis": "漂移+维纳噪声+吸收界模拟RT与正确率，标准DDM机制。",
+   "simplifications": [
+    "无非决策时间与试次间变异",
+    "界对称"
+   ],
+   "evidence": "game_catalog.py:428 437-451"
+  },
+  {
+   "mid": "BEH103",
+   "class_name": "TPBModel",
+   "fidelity": "method_demo",
+   "basis": "固定线性权重0.4/0.3/0.3打分演示TPB结构，无动态与参数估计。",
+   "simplifications": [
+    "权重非实证",
+    "主观规范不依赖他者",
+    "状态静态"
+   ],
+   "evidence": "beh_abm.py:716 731-733"
+  },
+  {
+   "mid": "BEH104",
+   "class_name": "ProspectTheoryModel",
+   "fidelity": "method_demo",
+   "basis": "K-T1992参数(α=β=0.88,λ=2.25)价值函数+权重函数固定点列演示。",
+   "simplifications": [
+    "静态例题",
+    "loss_aversion标签混入收益尺度"
+   ],
+   "evidence": "game_catalog.py:300；game_lib.py:375-385"
+  },
+  {
+   "mid": "BEH105",
+   "class_name": "CPTModel",
+   "fidelity": "method_demo",
+   "basis": "TK1992权重函数w(p)曲线忠实，小概率高估/大概率低估复现。",
+   "simplifications": [
+    "仅单结果权重，未做多结果秩依赖累积"
+   ],
+   "evidence": "game_catalog.py:329；game_lib.py:382-385"
+  },
+  {
+   "mid": "BEH106",
+   "class_name": "FehrSchmidtModel",
+   "fidelity": "method_demo",
+   "basis": "FS不平等厌恶效用公式忠实(α劣势/β优势)，固定三情景比较。",
+   "simplifications": [
+    "静态例题"
+   ],
+   "evidence": "game_catalog.py:352；game_lib.py:388-393"
+  },
+  {
+   "mid": "BEH107",
+   "class_name": "ERCModel",
+   "fidelity": "prototype",
+   "basis": "自设claim-actual剥夺再分配动态，与Bolton-Ockenfels相对份额效用理论不符。",
+   "simplifications": [
+    "无ERC效用函数",
+    "无博弈互动",
+    "冲突不反馈决策"
+   ],
+   "evidence": "beh_abm.py:743 757-764"
+  },
+  {
+   "mid": "BEH108",
+   "class_name": "RabinReciprocityModel",
+   "fidelity": "prototype",
+   "basis": "善良函数为行均值简化，互惠均衡仅符号比较，step为空，无均衡求解。",
+   "simplifications": [
+    "非Rabin定义的公平参考点",
+    "无信念与互惠最优反应"
+   ],
+   "evidence": "beh_abm.py:774 780-793"
+  },
+  {
+   "mid": "BEH109",
+   "class_name": "LevelKModel",
+   "fidelity": "method_demo",
+   "basis": "L0=50逐层2/3递推忠实level-k，固定猜数例题。",
+   "simplifications": [
+    "无层级人群分布",
+    "静态"
+   ],
+   "evidence": "game_catalog.py:376 382-391"
+  },
+  {
+   "mid": "BEH110",
+   "class_name": "CognitiveHierarchyModel",
+   "fidelity": "lite",
+   "basis": "Poisson(τ)层级+逐层最优反应在，但层k仅对k-1响应且低层未截断归一。",
+   "simplifications": [
+    "非CH低层聚合分布",
+    "无截断归一",
+    "静态一次计算"
+   ],
+   "evidence": "beh_abm.py:799 808-826"
+  },
+  {
+   "mid": "BEH111",
+   "class_name": "QREModel",
+   "fidelity": "prototype",
+   "basis": "对固定纯列softmax而非双方耦合响应，q_row为角点，mixed_tendency检验恒真。",
+   "simplifications": [
+    "非logit-QRE不动点",
+    "检验指标无信息量"
+   ],
+   "evidence": "game_catalog.py:403 409-416；game_lib.py:404-408"
+  },
+  {
+   "mid": "BEH136",
+   "class_name": "DownsHotellingSpatialModel",
+   "fidelity": "prototype",
+   "basis": "无选民分布与得票竞争，仅距中位较远者每步移0.02的几何逼近示意。",
+   "simplifications": [
+    "无选民",
+    "无效用最大化",
+    "中位数外生固定"
+   ],
+   "evidence": "beh_abm.py:836 848-852"
+  },
+  {
+   "mid": "BEH137",
+   "class_name": "SocialIdentityModel",
+   "fidelity": "lite",
+   "basis": "向群原型吸引的去个性化在，但群归属固定、无自我分类显著性机制。",
+   "simplifications": [
+    "无元对比/显著性动态",
+    "原型=组均值",
+    "无群际比较"
+   ],
+   "evidence": "beh_abm.py:863 876-882"
+  },
+  {
+   "mid": "BEH138",
+   "class_name": "BourdieuCapitalModel",
+   "fidelity": "method_demo",
+   "basis": "固定转换矩阵的资本流量合成例题，演示资本转换概念，无场域/惯习。",
+   "simplifications": [
+    "转换率固定",
+    "无场域结构",
+    "无个体策略"
+   ],
+   "evidence": "beh_abm.py:897 910-917"
+  }
+ ]
+}

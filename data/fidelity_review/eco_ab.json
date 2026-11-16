@@ -1,0 +1,507 @@
+{
+ "module": "eco_ab",
+ "reviews": [
+  {
+   "mid": "ECO001",
+   "class_name": "LeontiefQuantityModel",
+   "fidelity": "full",
+   "basis": "x=d+Ax前向迭代收敛于(I-A)^{-1}d，数量核心方程完整",
+   "simplifications": [
+    "未显式求逆，靠不动点迭代收敛",
+    "默认A为合成随机列归一阵"
+   ],
+   "evidence": "eco_models.py:45 step内x=d+A@x迭代求解"
+  },
+  {
+   "mid": "ECO002",
+   "class_name": "LeontiefPriceModel",
+   "fidelity": "full",
+   "basis": "p=w+A^T p迭代收敛于(I-A^T)^{-1}w，价格方程正确",
+   "simplifications": [
+    "未显式求逆，迭代求解",
+    "默认A为合成矩阵"
+   ],
+   "evidence": "eco_models.py:75"
+  },
+  {
+   "mid": "ECO004",
+   "class_name": "GhoshModel",
+   "fidelity": "full",
+   "basis": "x=v+x@B行方向迭代，Ghosh供给驱动核心方程正确",
+   "simplifications": [
+    "默认B为合成行归一阵",
+    "无行和约束诊断"
+   ],
+   "evidence": "eco_models.py:103"
+  },
+  {
+   "mid": "ECO005",
+   "class_name": "LeontiefDynamicModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：机制缺陷已修（tests/test_dayan_mechfix.py 有解析基准断言）",
+   "simplifications": [
+    "Bc未进入任何方程",
+    "无x=Ax+BΔx+d结构",
+    "T期后冻结无终结逻辑"
+   ],
+   "evidence": "eco_models.py:133-138 target+0.1*(target-x)启发式",
+   "fixed": true
+  },
+  {
+   "mid": "ECO016",
+   "class_name": "RamseyModel",
+   "fidelity": "full",
+   "basis": "Euler方程离散化+打靶二分求鞍点路径，k动态完整",
+   "simplifications": [
+    "c≤0.9f(k)保护帽",
+    "打靶用dt=0.2粗积分"
+   ],
+   "evidence": "eco_models.py:161-196"
+  },
+  {
+   "mid": "ECO017",
+   "class_name": "AKModel",
+   "fidelity": "full",
+   "basis": "k̇=(sA-δ)k，AK核心增长律与理论g一致",
+   "simplifications": [
+    "k0_default/tick_cache死代码(230-231)",
+    "无消费/效用端"
+   ],
+   "evidence": "eco_models.py:222"
+  },
+  {
+   "mid": "ECO018",
+   "class_name": "RomerModel",
+   "fidelity": "lite",
+   "basis": "仅保留Ȧ=δL_A^λA^φ思想积累方程",
+   "simplifications": [
+    "无最终产品/劳动配置部门",
+    "L_A外生常数",
+    "无家庭与研发部门优化"
+   ],
+   "evidence": "eco_models.py:251-253"
+  },
+  {
+   "mid": "ECO020",
+   "class_name": "KaldorModel",
+   "fidelity": "full",
+   "basis": "非线性S(Y)+含资本拖累的I，Y-K双动态出极限环",
+   "simplifications": [
+    "参数为网格搜索校准而非Kaldor原始取值",
+    "Y/K带下限截断"
+   ],
+   "evidence": "eco_models.py:283-291"
+  },
+  {
+   "mid": "ECO021",
+   "class_name": "KaleckiModel",
+   "fidelity": "full",
+   "basis": "Y_t=a+cY_{t-1}+bΔY_{t-τ}，Kalecki延迟投资离散形式",
+   "simplifications": [
+    "τ=5及参数为数值探测校准",
+    "加[0.05,10]产能截断"
+   ],
+   "evidence": "eco_models.py:318-323"
+  },
+  {
+   "mid": "ECO031",
+   "class_name": "DiamondOLGModel",
+   "fidelity": "full",
+   "basis": "对数效用Diamond OLG：s=βw/(1+r)，k_{t+1}=s/(1+n)",
+   "simplifications": [
+    "仅对数效用特例",
+    "355-357行存在被覆盖死代码",
+    "仅聚合律无个体世代仿真"
+   ],
+   "evidence": "eco_models.py:350-359"
+  },
+  {
+   "mid": "ECO032",
+   "class_name": "BlanchardYOUTHModel",
+   "fidelity": "full",
+   "basis": "c=(p+θ)(W+h)，h=1/(r+p)，Yaari-Blanchard消费规则正确",
+   "simplifications": [
+    "r外生固定",
+    "劳动收入恒为1",
+    "无世代分布与保险再分配"
+   ],
+   "evidence": "eco_models.py:386-391"
+  },
+  {
+   "mid": "ECO033",
+   "class_name": "LifeCycleModel",
+   "fidelity": "full",
+   "basis": "T期恒定消费c=40/T，r=0下生命周期平滑精确，驼峰正确",
+   "simplifications": [
+    "r=0无贴现/利率",
+    "确定性收入路径单个体"
+   ],
+   "evidence": "eco_models.py:421-427"
+  },
+  {
+   "mid": "ECO035",
+   "class_name": "GodleyLavoieSIMModel",
+   "fidelity": "full",
+   "basis": "SIM三部门流恒等：Y=(G+αH_h)/(1-α(1-θ))，ΔH_h+ΔH_g=0，Y*=G/θ",
+   "simplifications": [
+    "消费取当期联立均衡解而非财富滞后递推动态",
+    "仅货币单一资产"
+   ],
+   "evidence": "eco_models.py:459-466"
+  },
+  {
+   "mid": "ECO054",
+   "class_name": "GodeSunderZIModel",
+   "fidelity": "lite",
+   "basis": "ZI限价簿撮合机制在，但单轮成交+要价截断+中点价",
+   "simplifications": [
+    "每交易者限成交1笔（单期市场）",
+    "要价U[c+1,c+20]截断非GS的U[c,200]",
+    "成交价取买卖报价中点"
+   ],
+   "evidence": "eco_models.py:524-547"
+  },
+  {
+   "mid": "ECO078",
+   "class_name": "McCallModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：机制缺陷已修（tests/test_dayan_mechfix.py 有解析基准断言）",
+   "simplifications": [
+    "argmax作用于递增数组，w*恒为上界50",
+    "连续均匀offer≥50概率为0，几乎永不接受"
+   ],
+   "evidence": "eco_models.py:601-608",
+   "fixed": true
+  },
+  {
+   "mid": "ECO082",
+   "class_name": "BenPorathModel",
+   "fidelity": "lite",
+   "basis": "凹积累与早期投资密集机制在，但投资额为启发式非FOC最优",
+   "simplifications": [
+    "s=q^{1/(1-φ)}-0.4启发式规则",
+    "无放弃收益机会成本与利率贴现"
+   ],
+   "evidence": "eco_models.py:669-673"
+  },
+  {
+   "mid": "ECO083",
+   "class_name": "MincerModel",
+   "fidelity": "method_demo",
+   "basis": "按Mincer方程生成数据再OLS恢复ρ，方法例题",
+   "simplifications": [
+    "无动态机制",
+    "单一DGP无稳健性检验"
+   ],
+   "evidence": "eco_models.py:630-638"
+  },
+  {
+   "mid": "ECO087",
+   "class_name": "GibratModel",
+   "fidelity": "full",
+   "basis": "乘性对数正态iid增长冲击，Gibrat律机制完整",
+   "simplifications": [
+    "无企业进入退出",
+    "模拟限T=60期"
+   ],
+   "evidence": "eco_models.py:704-708"
+  },
+  {
+   "mid": "ECO088",
+   "class_name": "RaschModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：机制缺陷已修（tests/test_dayan_mechfix.py 有解析基准断言）",
+   "simplifications": [
+    "b_hat更新符号错误（b_hat+=Σ(r-P)·η为下降方向）",
+    "用|corr|替代参数恢复误差"
+   ],
+   "evidence": "eco_models.py:746-752",
+   "fixed": true
+  },
+  {
+   "mid": "ECO089",
+   "class_name": "TwoPLModel",
+   "fidelity": "method_demo",
+   "basis": "2PL仅做数据生成+分组单调性检查，未估计任何参数",
+   "simplifications": [
+    "报告的mean_a为真值非估计值",
+    "无拟合算法"
+   ],
+   "evidence": "eco_models.py:775-794"
+  },
+  {
+   "mid": "ECO090",
+   "class_name": "ThreePLModel",
+   "fidelity": "method_demo",
+   "basis": "3PL数据生成+低θ组猜测效应检查，未估计参数",
+   "simplifications": [
+    "c_mean为真值非估计值",
+    "无拟合/参数恢复"
+   ],
+   "evidence": "eco_models.py:805-819"
+  },
+  {
+   "mid": "ECO096",
+   "class_name": "StaticTaxBenefitModel",
+   "fidelity": "full",
+   "basis": "2026-11-12 机制修复：机制缺陷已修（tests/test_dayan_mechfix.py 有解析基准断言）",
+   "simplifications": [
+    "静态无行为响应（该类模型定义使然）",
+    "net_monotone校验含or True恒真(866-867)"
+   ],
+   "evidence": "eco_models.py:841-853",
+   "fixed": true
+  },
+  {
+   "mid": "ECO110",
+   "class_name": "RichardsonArmsModel",
+   "fidelity": "full",
+   "basis": "Richardson ODE含防务/疲劳/常数项，稳定性条件与闭式均衡正确",
+   "simplifications": [
+    "依赖核心RK4积分器",
+    "仅两方对称设定"
+   ],
+   "evidence": "eco_models.py:893-906"
+  },
+  {
+   "mid": "ECO111",
+   "class_name": "LanchesterSquareModel",
+   "fidelity": "full",
+   "basis": "平方律ODE与不变量x²-(a/b)y²精确",
+   "simplifications": [
+    "兵力截断非负（轻微）"
+   ],
+   "evidence": "eco_models.py:926-935"
+  },
+  {
+   "mid": "ECO112",
+   "class_name": "LanchesterLinearModel",
+   "fidelity": "full",
+   "basis": "2026-11-12 机制修复：古式/面射击线性律 dx/dt=-a·x·y 与线性不变量 a·N2-b·N1，区别于平方律",
+   "simplifications": [
+    "导数[-ay,-bx]为平方律形式",
+    "报告二次型不变量而非线性差值不变量"
+   ],
+   "evidence": "eco_models.py:956-965",
+   "fixed": true
+  },
+  {
+   "mid": "ECO113",
+   "class_name": "SchaeferFisheryModel",
+   "fidelity": "full",
+   "basis": "dB/dt=rB(1-B/K)-qEB，MSY=rK/4@K/2、B_eq闭式正确",
+   "simplifications": [
+    "捕捞努力E外生无进入退出动态"
+   ],
+   "evidence": "eco_models.py:989-998"
+  },
+  {
+   "mid": "ECO115",
+   "class_name": "HotellingModel",
+   "fidelity": "lite",
+   "basis": "价格按构造p=p0·e^{δt}增长，Hotelling规则硬编码非优化导出",
+   "simplifications": [
+    "p0=a·T/S粗略定标",
+    "无边际成本/回探价格",
+    "存量耗尽后价格仍按δ增长"
+   ],
+   "evidence": "eco_models.py:1056-1064"
+  },
+  {
+   "mid": "ECO104",
+   "class_name": "BeerGameModel",
+   "fidelity": "full",
+   "basis": "4级链+2期管线延迟+Sterman锚定启发式，阶跃后牛鞭效应完整",
+   "simplifications": [
+    "目标库存12/管线8硬编码",
+    "订单上限20截断"
+   ],
+   "evidence": "eco_models.py:1106-1126"
+  },
+  {
+   "mid": "ECO106",
+   "class_name": "DICELiteModel",
+   "fidelity": "lite",
+   "basis": "仅线性化碳循环-辐射强迫-温度链，DICE经济模块缺失",
+   "simplifications": [
+    "无生产/资本/减排/储蓄模块",
+    "E_hist在derivatives内追加致RK4下重复记录"
+   ],
+   "evidence": "eco_models.py:1159-1166"
+  },
+  {
+   "mid": "ECO058",
+   "class_name": "LefkovitchModel",
+   "fidelity": "full",
+   "basis": "n(t+1)=An(t)阶段矩阵投影，λ1取主特征值，Lefkovitch完整",
+   "simplifications": [
+    "默认A为文献式合成矩阵"
+   ],
+   "evidence": "eco_demog.py:38-45"
+  },
+  {
+   "mid": "ECO060",
+   "class_name": "RogersMultiregionalModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：机制缺陷已修（tests/test_dayan_mechfix.py 有解析基准断言）",
+   "simplifications": [
+    "每区移出与移入同为m·total/R，净迁移恒零",
+    "无多状态Leslie投影与主特征增长分析"
+   ],
+   "evidence": "eco_demog.py:67-74",
+   "fixed": true
+  },
+  {
+   "mid": "ECO061",
+   "class_name": "LeeCarterModel",
+   "fidelity": "method_demo",
+   "basis": "合成DGP+行均值/SVD一阶拟合，LC估计例题",
+   "simplifications": [
+    "无k_t随机游走外推预测",
+    "无参数不确定性分析"
+   ],
+   "evidence": "eco_demog.py:96-110"
+  },
+  {
+   "mid": "ECO063",
+   "class_name": "BrassLogitModel",
+   "fidelity": "method_demo",
+   "basis": "logit线性关系拟合R²成立，但标准表退化为自映射x",
+   "simplifications": [
+    "std=1/(1+e^{-logit x})≡x，非真实标准生命表"
+   ],
+   "evidence": "eco_demog.py:170-179"
+  },
+  {
+   "mid": "ECO064",
+   "class_name": "GompertzMakehamModel",
+   "fidelity": "method_demo",
+   "basis": "由G-M律生成μ(x)再对数线性回归恢复b，参数复现例题",
+   "simplifications": [
+    "无生存函数/预期寿命应用"
+   ],
+   "evidence": "eco_demog.py:134-140"
+  },
+  {
+   "mid": "ECO065",
+   "class_name": "CoaleMcNeilModel",
+   "fidelity": "full",
+   "basis": "Coale-McNeil标准密度0.7797系数据实现无误，矩计算正确",
+   "simplifications": [
+    "静态曲线求值无动态",
+    "密度离散归一"
+   ],
+   "evidence": "eco_demog.py:203-209"
+  },
+  {
+   "mid": "ECO066",
+   "class_name": "HadwigerModel",
+   "fidelity": "full",
+   "basis": "Hadwiger三参数生育曲线公式逐项实现，单峰峰值验证",
+   "simplifications": [
+    "静态求值仅峰值年龄检验"
+   ],
+   "evidence": "eco_demog.py:233-237"
+  },
+  {
+   "mid": "ECO069",
+   "class_name": "WilsonGravityModel",
+   "fidelity": "full",
+   "basis": "T_ij=A_iB_jO_iD_j·e^{-βc}，IPF行列缩放闭合，双约束完整",
+   "simplifications": [
+    "成本为线性距离×10",
+    "β外生无标定"
+   ],
+   "evidence": "eco_demog.py:274-277"
+  },
+  {
+   "mid": "ECO070",
+   "class_name": "RadiationModel",
+   "fidelity": "full",
+   "basis": "辐射模型T_ij=p_i p_j/((p_i+s)(p_i+s+p_j))，s为近邻人口和，公式正确",
+   "simplifications": [
+    "T_i以人口替代实际通勤数",
+    "单次静态计算"
+   ],
+   "evidence": "eco_demog.py:304-317"
+  },
+  {
+   "mid": "ECO071",
+   "class_name": "HarrisTodaroModel",
+   "fidelity": "lite",
+   "basis": "迁移响应期望工资差，HT均衡条件内嵌于就业更新规则",
+   "simplifications": [
+    "E_u按0.9/0.1收敛至N_u·w_r/w_u（硬编码均衡）",
+    "w_u、w_r固定",
+    "无正式部门生产函数"
+   ],
+   "evidence": "eco_demog.py:356-364"
+  },
+  {
+   "mid": "ECO073",
+   "class_name": "BeckerMarriageModel",
+   "fidelity": "lite",
+   "basis": "互补产出下正序vs逆序匹配比较，方向正确但覆盖极窄",
+   "simplifications": [
+    "仅比较两种极端匹配",
+    "无转移支付/一般均衡分配",
+    "单次抽样无重复"
+   ],
+   "evidence": "eco_demog.py:388-400"
+  },
+  {
+   "mid": "ECO074",
+   "class_name": "GaleShapleyModel",
+   "fidelity": "full",
+   "basis": "标准Gale-Shapley延迟接受+无阻塞对检验，算法完整",
+   "simplifications": [
+    "n=12小规模",
+    "偏好为均匀随机排列"
+   ],
+   "evidence": "eco_demog.py:431-463"
+  },
+  {
+   "mid": "ECO076",
+   "class_name": "BeckerTomesModel",
+   "fidelity": "prototype",
+   "basis": "仅y_{t+1}=0.8y^{αh}+0.4缩放AR，无Becker-Tomes投资机制",
+   "simplifications": [
+    "常数0.8/0.4无出处",
+    "无禀赋传递/人力资本投资方程"
+   ],
+   "evidence": "eco_demog.py:494-498"
+  },
+  {
+   "mid": "ECO077",
+   "class_name": "IntergenerationalMarkovModel",
+   "fidelity": "full",
+   "basis": "dist@P迭代+谱隙+πP=π平稳检验，Markov流动完整",
+   "simplifications": [
+    "默认3阶P为手工设定"
+   ],
+   "evidence": "eco_demog.py:531-542"
+  },
+  {
+   "mid": "ECO091",
+   "class_name": "BKTModel",
+   "fidelity": "full",
+   "basis": "含slip/guess贝叶斯后验+学习更新，BKT标准更新式完整",
+   "simplifications": [
+    "单知识点单序列",
+    "无EM参数拟合"
+   ],
+   "evidence": "eco_demog.py:605-616"
+  },
+  {
+   "mid": "ECO099",
+   "class_name": "HealthMarkovModel",
+   "fidelity": "full",
+   "basis": "队列Markov+状态成本/QALY累计，行和校验，标准奖励模型",
+   "simplifications": [
+    "无时间贴现",
+    "ICER仅标志位未算比值"
+   ],
+   "evidence": "eco_demog.py:570-582"
+  }
+ ]
+}

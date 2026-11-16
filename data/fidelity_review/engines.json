@@ -1,0 +1,251 @@
+{
+ "module": "engines",
+ "reviews": [
+  {
+   "entity_id": "engine/sd/stock_flow",
+   "fidelity": "full",
+   "basis": "声明式存量-流量引擎忠实：流入减流出语义、辅助变量先求、经编排器RK4积分，非负截断与干预/快照齐备",
+   "simplifications": [
+    "eval 受限命名空间 DSL，无表函数与延迟环节",
+    "net_stock 流若同时声明 from 会双重计入",
+    "流量表达式按名线性查找 O(F)",
+    "observe 仅输出存量",
+    "非负截断仅在 x 赋值时生效，RK4 中间级可为负"
+   ],
+   "evidence": "sd.py:47-89 流量语义；96-102 截断；121-134 干预/快照"
+  },
+  {
+   "entity_id": "engine/sd/causal_graph",
+   "fidelity": "prototype",
+   "basis": "因果图仅把 spec.links 元数据逐条翻译成 mermaid 行，无从流量关系自动推断或一致性校验",
+   "simplifications": [
+    "只回显 links 声明，极性写错不校验",
+    "不与 stocks/flows 结构交叉验证"
+   ],
+   "evidence": "sd.py:9 links 声明；137-143 渲染"
+  },
+  {
+   "entity_id": "engine/games/matrix_game",
+   "fidelity": "full",
+   "basis": "二人正则式博弈忠实：纯纳什全枚举、行/列最优反应计算均正确",
+   "simplifications": [
+    "仅二人正则式",
+    "纯纳什枚举 O(n²) 无占优预筛"
+   ],
+   "evidence": "games.py:26-34 枚举；73-77 argmax"
+  },
+  {
+   "entity_id": "engine/games/mixed_nash_2x2",
+   "fidelity": "prototype",
+   "basis": "混合纳什公式互换：行玩家概率误用A的无差异式、列玩家误用B，仅对称博弈碰巧正确，非对称博弈输出非均衡组合",
+   "simplifications": [
+    "p0/q0 张冠李戴",
+    "对称博弈掩盖缺陷",
+    "58-70 为 return 后死代码，内含正确推导",
+    "性别大战应得行2/3列1/3，代码返回行1/3列2/3"
+   ],
+   "evidence": "games.py:37-57 实现体；58-70 死代码"
+  },
+  {
+   "entity_id": "engine/games/replicator",
+   "fidelity": "full",
+   "basis": "单种群复制动态忠实：dx=x[(Ax)-x·Ax] 标准离散化，截断后重归一化回单纯形",
+   "simplifications": [
+    "定步长 Euler",
+    "仅单种群对称收益矩阵",
+    "clip+归一化为投影，长程轨迹略偏"
+   ],
+   "evidence": "games.py:80-90 实现"
+  },
+  {
+   "entity_id": "engine/games/llm_player",
+   "fidelity": "lite",
+   "basis": "LLM 玩家明确简化：遮蔽博弈名 prompt+JSON 解析可用，但回退随机脱离随机流合同，未遮蔽路径有潜伏错误",
+   "simplifications": [
+    "回退 rng 种子硬编码 0，不走 RngStreams",
+    "masked=False 时 game.name AttributeError",
+    "历史窗口固定 5 轮"
+   ],
+   "evidence": "games.py:107-140 实现；125 name；140 回退"
+  },
+  {
+   "entity_id": "engine/or/lp",
+   "fidelity": "full",
+   "basis": "线性规划直接封装 scipy linprog HiGHS，参数透传、结果结构化",
+   "simplifications": [
+    "仅 HiGHS",
+    "不含 MIP"
+   ],
+   "evidence": "or_lp.py:14-21"
+  },
+  {
+   "entity_id": "engine/or/transportation",
+   "fidelity": "full",
+   "basis": "平衡运输问题忠实：行列等式约束展开为 LP 经 HiGHS 求解，不平衡显式断言拒绝",
+   "simplifications": [
+    "仅支持供需平衡",
+    "约束矩阵稠密展开 m*n"
+   ],
+   "evidence": "or_lp.py:24-48"
+  },
+  {
+   "entity_id": "engine/or/propose_dispose",
+   "fidelity": "full",
+   "basis": "propose-dispose 协议 dispose 端忠实：可行性校验完整，最优差距计算正确",
+   "simplifications": [
+    "gap 不先校验提案可行性",
+    "gap 仅对运输问题口径"
+   ],
+   "evidence": "or_lp.py:51-70"
+  },
+  {
+   "entity_id": "coupled/goodwin_sd",
+   "fidelity": "full",
+   "basis": "Goodwin 1967 线性形式忠实：工资份额-就业率 Lotka-Volterra 方程与手写 RK4 系数正确",
+   "simplifications": [
+    "线性菲利普斯",
+    "clip 边界轻微破坏闭轨道",
+    "手写 RK4 与内核编排器并存"
+   ],
+   "evidence": "coupled.py:16-42"
+  },
+  {
+   "entity_id": "coupled/micro_abm",
+   "fidelity": "prototype",
+   "basis": "微观就业 ABM 为示意级：纯工资阈值 Bernoulli 进出，无劳动需求侧，就业率不受岗位数约束",
+   "simplifications": [
+    "无企业/岗位/空缺约束",
+    "保留工资静态均匀分布",
+    "p_join/p_leave 参数拍定",
+    "逐个体 Python 循环"
+   ],
+   "evidence": "coupled.py:45-74"
+  },
+  {
+   "entity_id": "coupled/coupled_simulation",
+   "fidelity": "lite",
+   "basis": "三模式耦合器明确简化：共享种子与标量语义接口属实，但单向模式量纲混用、cyclic 反馈为截断加性扰动",
+   "simplifications": [
+    "one-way 把工资份额 ω 当工资水平注入，量纲混用",
+    "cyclic 反馈为 clip ±0.01 加性扰动，非结构耦合",
+    "self.rng 死属性",
+    "len≤20 时 corr 返回 0.0"
+   ],
+   "evidence": "coupled.py:77-134"
+  },
+  {
+   "entity_id": "core/registry",
+   "fidelity": "full",
+   "basis": "模型登记表忠实：十字段组合、六级状态、contract_issues 分级校验、promote 只进不退",
+   "simplifications": [
+    "升级仅改字段不做实质审查",
+    "同 id 直接覆盖"
+   ],
+   "evidence": "core.py:28-159"
+  },
+  {
+   "entity_id": "core/clocks",
+   "fidelity": "full",
+   "basis": "四时钟独立记录的数据类，simulate 各分支均正确累加",
+   "simplifications": [
+    "纯计数容器，无墙钟自动埋点"
+   ],
+   "evidence": "core.py:171-177"
+  },
+  {
+   "entity_id": "core/rng_streams",
+   "fidelity": "full",
+   "basis": "派生随机流忠实：SHA256 派生独立 PCG64 流，缓存复用，可导出流状态",
+   "simplifications": [
+    "非字符串键经 default=str 有歧义",
+    "无流回放审计"
+   ],
+   "evidence": "core.py:192-208"
+  },
+  {
+   "entity_id": "core/event_queue",
+   "fidelity": "full",
+   "basis": "事件队列忠实：堆+稳定键、取消句柄、零时间循环防护；拼写bug已修复命名一致",
+   "simplifications": [
+    "payload_id 复用会误伤 cancel",
+    "未接入 simulate des 分支"
+   ],
+   "evidence": "core.py:245-274（bug已修复）"
+  },
+  {
+   "entity_id": "core/dayan_model",
+   "fidelity": "full",
+   "basis": "统一执行接口忠实：六合同方法+五推进族分型，参数注入含 int/float 适配",
+   "simplifications": [
+    "_apply_parameters 超出签名静默忽略",
+    "无运行时类型校验"
+   ],
+   "evidence": "core.py:321-403"
+  },
+  {
+   "entity_id": "core/rk4",
+   "fidelity": "full",
+   "basis": "经典 RK4 定步积分忠实：四级系数标准，末步收缩不越过 horizon",
+   "simplifications": [
+    "无自适应步长",
+    "ode 分支观测无 MAX_OBS 护栏",
+    "中间级不经 nonneg 截断"
+   ],
+   "evidence": "core.py:439-457"
+  },
+  {
+   "entity_id": "core/euler_maruyama",
+   "fidelity": "full",
+   "basis": "Euler-Maruyama 忠实：x+a·dt+b·dW，末步收缩一致",
+   "simplifications": [
+    "仅对角/标量扩散",
+    "强收敛阶 0.5",
+    "sde 分支无 MAX_OBS"
+   ],
+   "evidence": "core.py:458-474"
+  },
+  {
+   "entity_id": "core/des",
+   "fidelity": "full",
+   "basis": "DES 编排忠实：next_event_time 链式驱动、零时间防护与观测护栏",
+   "simplifications": [
+    "不使用 EventQueue",
+    "超 MAX_OBS 后仍追加空 dict 无界增长",
+    "DomainEvent 固定 etype"
+   ],
+   "evidence": "core.py:475-501"
+  },
+  {
+   "entity_id": "core/gillespie",
+   "fidelity": "full",
+   "basis": "Gillespie 直接法忠实：τ~Exp(1/总强度)，按强度比例抽样，越界即停",
+   "simplifications": [
+    "无 tau-leaping",
+    "每步构造概率向量",
+    "jump 分支无 MAX_OBS"
+   ],
+   "evidence": "core.py:502-521"
+  },
+  {
+   "entity_id": "core/ledger_transfer",
+   "fidelity": "full",
+   "basis": "平衡账本转移忠实：复式记录、负转移与余额不足事务性拒绝并留痕",
+   "simplifications": [
+    "资源名按前缀拆分约定隐式",
+    "单线程假设"
+   ],
+   "evidence": "core.py:282-305"
+  },
+  {
+   "entity_id": "core/ledger_conservation_residual",
+   "fidelity": "prototype",
+   "basis": "守恒残差为恒0桩：return 表达式带 if False else 0.0 占位，校验永远通过，net 计算语义错误",
+   "simplifications": [
+    "恒返回 0.0",
+    "committed 金额乘 -1 求和不构成残差定义",
+    "未对照外部总量快照"
+   ],
+   "evidence": "core.py:311-316"
+  }
+ ]
+}

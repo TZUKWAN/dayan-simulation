@@ -1,0 +1,18 @@
+{
+  "_说明": "定量校准靶 v0：来自公开发表口径的数字（非微观数据集）。CGSS微观数据接入留待阶段2。",
+  "labor_share_range": [
+    0.5,
+    0.7
+  ],
+  "labor_share_source": "国民账户口径劳动收入份额常见区间",
+  "gini_cn_official": 0.47,
+  "gini_cn_source": "国家统计局全国居民收入基尼系数近年公布值约0.46-0.47",
+  "gini_us": 0.41,
+  "gini_us_source": "美国普查局收入基尼系数",
+  "surplus_rate_range": [
+    1.0,
+    2.0
+  ],
+  "surplus_rate_source": "古典-马克思计量传统（Shaikh-Tonak 1994; Cogliano 2018 US 1990-2015）中 s' 的量级",
+  "wealth_two_class": "下层指数 + 上尾Pareto（Yakovenko RMP 2009）"
+}

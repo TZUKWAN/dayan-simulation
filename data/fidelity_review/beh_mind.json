@@ -1,0 +1,423 @@
+{
+ "module": "beh_mind",
+ "reviews": [
+  {
+   "model_id": "BEH094",
+   "module": "beh_mind",
+   "class_name": "BDIAgentFullModel",
+   "fidelity": "lite",
+   "basis": "BDI决策环真实但显著缩减:仅2信念2愿望硬编码,无计划库,类名Full名不符实",
+   "simplifications": [
+    "无计划库与手段-目的推理",
+    "意图即排序结果,无承诺过滤与持久化",
+    "信念/愿望内容硬编码各2项",
+    "信念更新为固定+0.1增量"
+   ],
+   "evidence": "beh_mind.py:35 deliberate()按效用x信念一致性排序意图,step内restock使supply+0.1"
+  },
+  {
+   "model_id": "BEH095",
+   "module": "beh_mind",
+   "class_name": "ACTRModel",
+   "fidelity": "lite",
+   "basis": "ACT-R陈述性激活方程B=ln(sum t^-d)+噪声真实实现,但仅此一个模块",
+   "simplifications": [
+    "无程序性产生式/目标/缓冲模块",
+    "块内容硬编码3项",
+    "检索为argmax,无延迟阈值与冲突解决"
+   ],
+   "evidence": "beh_mind.py:66 _activation实现基准学习+噪声,胜者块追加当前时刻"
+  },
+  {
+   "model_id": "BEH096",
+   "module": "beh_mind",
+   "class_name": "SoarLiteModel",
+   "fidelity": "prototype",
+   "basis": "仅'平局→僵局→偏好+0.05'示意,无产生式系统/子状态/组块化学习",
+   "simplifications": [
+    "无产生式记忆与逐环匹配",
+    "仅2算子硬编码问题空间",
+    "学习=偏好标量微调,非chunking"
+   ],
+   "evidence": "beh_mind.py:108 差值<0.05判僵局后偏好+0.05,无子状态"
+  },
+  {
+   "model_id": "BEH097",
+   "module": "beh_mind",
+   "class_name": "CLARIONModel",
+   "fidelity": "prototype",
+   "basis": "隐层Q更新真实,显层规则抽取仅追加占位串'best',双层交互名存实亡",
+   "simplifications": [
+    "规则抽取无state→action形式,仅布尔占位符",
+    "无显隐层混合选择机制",
+    "2动作1状态玩具"
+   ],
+   "evidence": "beh_mind.py:144 rules.append('best')"
+  },
+  {
+   "model_id": "BEH098",
+   "module": "beh_mind",
+   "class_name": "SigmaFactorGraphModel",
+   "fidelity": "method_demo",
+   "basis": "3节点链和积消息传递为真实算法,但CPT先验硬编码单次推断,属方法例题",
+   "simplifications": [
+    "仅X-Y-Z三变量链图",
+    "先验/条件概率表硬编码",
+    "initialize一次算完,step空转"
+   ],
+   "evidence": "beh_mind.py:168-176 手工和积矩阵运算求belief_X/belief_Y"
+  },
+  {
+   "model_id": "BEH099",
+   "module": "beh_mind",
+   "class_name": "OCCModel",
+   "fidelity": "lite",
+   "basis": "评价变量→情绪映射规则真实,但仅6情绪子集且两事件硬编码无环境输入",
+   "simplifications": [
+    "OCC 22情绪仅实现6种",
+    "无情绪强度衰减与复合规则",
+    "step内两条固定事件评价"
+   ],
+   "evidence": "beh_mind.py:214 appraise按目标一致性/期望分支joy/distress/hope/fear等"
+  },
+  {
+   "model_id": "BEH100",
+   "module": "beh_mind",
+   "class_name": "PECSModel",
+   "fidelity": "prototype",
+   "basis": "仅需求阈值if-elif阶梯,无PECS生理/情绪/认知/社会四层参考架构",
+   "simplifications": [
+    "无情绪与认知层内部动力学",
+    "行为仅eat/shelter/socialize三种",
+    "需求增减为固定常数"
+   ],
+   "evidence": "beh_mind.py:260 energy<0.4→eat优先级阶梯"
+  },
+  {
+   "model_id": "BEH101",
+   "module": "beh_mind",
+   "class_name": "ConsumatModel",
+   "fidelity": "lite",
+   "basis": "需要x能力→策略矩阵核心在,7策略缩为4且确定性阈值,无概率选择",
+   "simplifications": [
+    "7策略仅实现4种(缺优化/兴趣组等)",
+    "无不确定性维度",
+    "need动态与行为解耦为常数增减"
+   ],
+   "evidence": "beh_mind.py:289 need/ability阈值分支选repetition/deliberation等"
+  },
+  {
+   "model_id": "BEH129",
+   "module": "generative",
+   "class_name": "GenerativeAgentModel",
+   "fidelity": "prototype",
+   "basis": "真实有界LLM决策、记忆/反思/计划、环境行动与反馈已接通；为简化架构适配，未复现原论文环境与评估",
+   "simplifications": [
+    "抽象社区环境与受限动作",
+    "非原论文全量实现，未做经验人类行为校准",
+    "LLM调用有预算；耗尽后明确复用最后计划"
+   ],
+   "evidence": "models/generative.py CognitiveSimulation; real BEH129 call audit in .claude/repair_all_20261112/generative_validation/result.json; test_repair_generative.py"
+  },
+  {
+   "model_id": "BEH130",
+   "module": "generative",
+   "class_name": "ReActModel",
+   "fidelity": "prototype",
+   "basis": "真实有界LLM决策、记忆/反思/计划、环境行动与反馈已接通；为简化架构适配，未复现原论文环境与评估",
+   "simplifications": [
+    "抽象社区环境与受限动作",
+    "非原论文全量实现，未做经验人类行为校准",
+    "LLM调用有预算；耗尽后明确复用最后计划"
+   ],
+   "evidence": "models/generative.py CognitiveSimulation; real BEH129 call audit in .claude/repair_all_20261112/generative_validation/result.json; test_repair_generative.py"
+  },
+  {
+   "model_id": "BEH131",
+   "module": "generative",
+   "class_name": "ReflexionModel",
+   "fidelity": "prototype",
+   "basis": "真实有界LLM决策、记忆/反思/计划、环境行动与反馈已接通；为简化架构适配，未复现原论文环境与评估",
+   "simplifications": [
+    "抽象社区环境与受限动作",
+    "非原论文全量实现，未做经验人类行为校准",
+    "LLM调用有预算；耗尽后明确复用最后计划"
+   ],
+   "evidence": "models/generative.py CognitiveSimulation; real BEH129 call audit in .claude/repair_all_20261112/generative_validation/result.json; test_repair_generative.py"
+  },
+  {
+   "model_id": "BEH132",
+   "module": "generative",
+   "class_name": "VoyagerSkillLibraryModel",
+   "fidelity": "prototype",
+   "basis": "真实有界LLM决策、记忆/反思/计划、环境行动与反馈已接通；为简化架构适配，未复现原论文环境与评估",
+   "simplifications": [
+    "抽象社区环境与受限动作",
+    "非原论文全量实现，未做经验人类行为校准",
+    "LLM调用有预算；耗尽后明确复用最后计划"
+   ],
+   "evidence": "models/generative.py CognitiveSimulation; real BEH129 call audit in .claude/repair_all_20261112/generative_validation/result.json; test_repair_generative.py"
+  },
+  {
+   "model_id": "BEH133",
+   "module": "generative",
+   "class_name": "ConcordiaModel",
+   "fidelity": "prototype",
+   "basis": "真实有界LLM决策、记忆/反思/计划、环境行动与反馈已接通；为简化架构适配，未复现原论文环境与评估",
+   "simplifications": [
+    "抽象社区环境与受限动作",
+    "非原论文全量实现，未做经验人类行为校准",
+    "LLM调用有预算；耗尽后明确复用最后计划"
+   ],
+   "evidence": "models/generative.py CognitiveSimulation; real BEH129 call audit in .claude/repair_all_20261112/generative_validation/result.json; test_repair_generative.py"
+  },
+  {
+   "model_id": "BEH134",
+   "module": "beh_mind",
+   "class_name": "GraphRAGModel",
+   "fidelity": "prototype",
+   "basis": "3实体硬编码图谱2跳遍历真实,但无LLM抽取/嵌入/生成,本地规则模拟未接真实LLM",
+   "simplifications": [
+    "图谱3实体与查询硬编码",
+    "无向量检索与社区汇总",
+    "step为空,单次检索"
+   ],
+   "evidence": "beh_mind.py:492 一跳+二跳循环收集evidence字符串"
+  },
+  {
+   "model_id": "BEH135",
+   "module": "beh_mind",
+   "class_name": "NeurosymbolicModel",
+   "fidelity": "prototype",
+   "basis": "文档称MLP打分实为rng.uniform随机数,符号约束硬编码,单次过滤示意",
+   "simplifications": [
+    "无神经网络,scores为随机均匀采样",
+    "约束字典硬编码fly/teleport=False",
+    "step为空,一次推断"
+   ],
+   "evidence": "beh_mind.py:521 scores=rng.uniform(0,1,4)后按约束过滤"
+  },
+  {
+   "model_id": "BEH112",
+   "module": "beh_rl",
+   "class_name": "TabularQModel",
+   "fidelity": "lite",
+   "basis": "标准表格Q-learning更新公式真实,120回合多episode训练,环境仅4格走廊玩具",
+   "simplifications": [
+    "4格走廊玩具环境,非原始基准",
+    "initialize内一次性自训练,无step循环(rl_demo协议)",
+    "输出仅为贪心策略诊断"
+   ],
+   "evidence": "beh_rl.py:104 Q[s,a]+=alpha*(r+gamma*maxQ(s2)*(not done)-Q[s,a])"
+  },
+  {
+   "model_id": "BEH113",
+   "module": "beh_rl",
+   "class_name": "SarsaModel",
+   "fidelity": "lite",
+   "basis": "on-policy SARSA以实际下一动作a2更新,公式真实,同4格走廊玩具",
+   "simplifications": [
+    "玩具走廊环境",
+    "initialize内一次性自训练(rl_demo协议)",
+    "120回合小规模"
+   ],
+   "evidence": "beh_rl.py:125 Q[s,a]+=alpha*(r+gamma*Q[s2,a2]-Q[s,a])"
+  },
+  {
+   "model_id": "BEH114",
+   "module": "beh_rl",
+   "class_name": "DQNModel",
+   "fidelity": "lite",
+   "basis": "numpy双层MLP手工反传+经验回放+epsilon衰减真实,但无目标网络单网自举",
+   "simplifications": [
+    "无目标网络,_replay同网取maxQ",
+    "4格走廊玩具",
+    "60回合小规模"
+   ],
+   "evidence": "beh_rl.py:163 target=r+gamma*同网_q(s2).max()"
+  },
+  {
+   "model_id": "BEH115",
+   "module": "beh_rl",
+   "class_name": "DoubleDQNModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：BEH115 目标网训练前同步+周期同步；BEH116 真 V/A 决斗分解头",
+   "simplifications": [
+    "net_target训练期间未同步(bug)",
+    "Double更新基于随机目标网",
+    "玩具走廊"
+   ],
+   "evidence": "beh_rl.py:206-210 super().initialize(内含train)后才copy权重",
+   "fixed": true
+  },
+  {
+   "model_id": "BEH116",
+   "module": "beh_rl",
+   "class_name": "DuelingDQNModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：BEH115 目标网训练前同步+周期同步；BEH116 真 V/A 决斗分解头",
+   "simplifications": [
+    "无V(s)+A(s,a)-mean(A)网络头",
+    "训练代码与DQNModel完全一致"
+   ],
+   "evidence": "beh_rl.py:248-263 train仅调用_replay,与DQNModel同一实现",
+   "fixed": true
+  },
+  {
+   "model_id": "BEH117",
+   "module": "beh_rl",
+   "class_name": "REINFORCEModel",
+   "fidelity": "lite",
+   "basis": "真实轨迹采集+MC折扣回报+softmax策略梯度(手工近似梯度式),玩具走廊",
+   "simplifications": [
+    "策略梯度为手工近似式,非解析dlogpi",
+    "仅4状态线性logit",
+    "line322存在未使用死代码d_log"
+   ],
+   "evidence": "beh_rl.py:323 theta[s]+=0.1*G*(1-p[1]或-p[1])"
+  },
+  {
+   "model_id": "BEH118",
+   "module": "beh_rl",
+   "class_name": "A3CModel",
+   "fidelity": "lite",
+   "basis": "优势=G-V基线的actor-critic更新真实,但无异步worker,同步单线程变体",
+   "simplifications": [
+    "无异步多worker(A3C核心)",
+    "V为4维查表非网络",
+    "MC优势非n-step自举"
+   ],
+   "evidence": "beh_rl.py:384-387 adv=G-V[s],theta与V分别更新"
+  },
+  {
+   "model_id": "BEH119",
+   "module": "beh_rl",
+   "class_name": "TRPOLiteModel",
+   "fidelity": "lite",
+   "basis": "重要性比值+log比超0.2缩步长的KL信赖域近似,无二阶优化,玩具走廊",
+   "simplifications": [
+    "无FIM/共轭梯度",
+    "KL约束为阈值惩罚缩放",
+    "单参数theta线性策略"
+   ],
+   "evidence": "beh_rl.py:415-416 ratio超界时step*=0.1"
+  },
+  {
+   "model_id": "BEH120",
+   "module": "beh_rl",
+   "class_name": "PPOLiteModel",
+   "fidelity": "lite",
+   "basis": "比值裁剪min(ratio*A,clip*A)目标真实,但文档宣称的多epoch重放未实现(单遍)",
+   "simplifications": [
+    "无多epoch轨迹复用",
+    "adv=Rt,无GAE与基线",
+    "步长含obj正负号hack"
+   ],
+   "evidence": "beh_rl.py:349-355 单遍遍历traj计算裁剪目标"
+  },
+  {
+   "model_id": "BEH121",
+   "module": "beh_rl",
+   "class_name": "DDPGModel",
+   "fidelity": "prototype",
+   "basis": "无演员/评论家网络,mu与V为标量符号式近似更新,bandit收敛演示",
+   "simplifications": [
+    "确定性策略梯度仅mu+=f(td)标量",
+    "无replay与目标网",
+    "无状态bandit(奖励=-|a-0.7|)"
+   ],
+   "evidence": "beh_rl.py:471 mu+=0.2*td/max(|td|,0.5)*0.5"
+  },
+  {
+   "model_id": "BEH122",
+   "module": "beh_rl",
+   "class_name": "TD3Model",
+   "fidelity": "prototype",
+   "basis": "双评论家取min与延迟更新以标量计数器模仿,无网络实现,bandit演示",
+   "simplifications": [
+    "V/V2为标量",
+    "延迟更新为%2计数器",
+    "无目标策略平滑噪声"
+   ],
+   "evidence": "beh_rl.py:491 td=r-min(V,V2),495计数%2延迟更新mu"
+  },
+  {
+   "model_id": "BEH123",
+   "module": "beh_rl",
+   "class_name": "SACModel",
+   "fidelity": "prototype",
+   "basis": "熵项-0.5log(sigma^2)加入目标以标量近似,无随机策略网络/温度自适应,bandit演示",
+   "simplifications": [
+    "标量mu/sigma/V",
+    "sigma固定*0.99衰减,无温度自调",
+    "无重参数化策略梯度"
+   ],
+   "evidence": "beh_rl.py:512-513 target=r+0.2*ent"
+  },
+  {
+   "model_id": "BEH124",
+   "module": "beh_rl",
+   "class_name": "MADDPGModel",
+   "fidelity": "prototype",
+   "basis": "中心化评论家仅为联合奖励标量TD,无网络与真实确定性策略梯度,矩阵博弈",
+   "simplifications": [
+    "评论家无联合观测输入结构",
+    "mu为标量动作倾向",
+    "合作率由50次后验采样统计"
+   ],
+   "evidence": "beh_rl.py:570-575 mu[i]+=0.1*(joint-V[i])"
+  },
+  {
+   "model_id": "BEH125",
+   "module": "beh_rl",
+   "class_name": "COMAModel",
+   "fidelity": "prototype",
+   "basis": "反事实基线硬编码常数0.5,未实现其余动作边缘化,COMA机制名不符实",
+   "simplifications": [
+    "baseline=0.5,非真实反事实边缘化",
+    "无中心化评论家",
+    "Q为2维查表"
+   ],
+   "evidence": "beh_rl.py:595-596 baseline=0.5,adv=r[i]-0.5"
+  },
+  {
+   "model_id": "BEH126",
+   "module": "beh_rl",
+   "class_name": "VDNModel",
+   "fidelity": "lite",
+   "basis": "加性值分解Qtot=sum Qi与联合TD误差分摊真实,但矩阵博弈无状态演化",
+   "simplifications": [
+    "无状态重复博弈(环境无转移)",
+    "两智能体均分同一td",
+    "2智能体2动作小规模"
+   ],
+   "evidence": "beh_rl.py:614-617 Qtot=Q0+Q1,td同额更新两Q"
+  },
+  {
+   "model_id": "BEH127",
+   "module": "beh_rl",
+   "class_name": "QMIXModel",
+   "fidelity": "prototype",
+   "basis": "混合权重为固定常数数组,无状态条件超网络,单调混合退化,机制示意",
+   "simplifications": [
+    "权重非状态函数(硬编码[1,1]/[1.2,0.8])",
+    "无单调性约束网络",
+    "矩阵博弈无状态"
+   ],
+   "evidence": "beh_rl.py:630 weights固定,Qtot=w1*Q1+w2*Q2"
+  },
+  {
+   "model_id": "BEH128",
+   "module": "beh_rl",
+   "class_name": "MAPPOModel",
+   "fidelity": "prototype",
+   "basis": "文档称共享策略,实现为每智能体独立logit,中心价值为标量,无GAE/裁剪",
+   "simplifications": [
+    "策略未共享,theta[2]独立更新",
+    "V为标量,adv=平均奖励-V",
+    "无clip与多epoch"
+   ],
+   "evidence": "beh_rl.py:653 theta=np.zeros(2),theta[i]独立升降"
+  }
+ ]
+}

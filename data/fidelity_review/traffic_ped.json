@@ -1,0 +1,31 @@
+{
+  "module": "traffic_met",
+  "reviews": [
+    {"mid": "NET095", "class_name": "LWRModel", "fidelity": "full", "basis": "LWR守恒律+Greenshields基本图+Godunov式有限体积，界面通量取上下流最小值", "simplifications": ["Godunov通量简化为min(f上,f下)，跨临界密度界面低估容量流", "CFL条件仅注释未强制执行", "周期边界通量直接取f[-1]"], "evidence": "traffic.py:42-48 flux[1:-1]=np.minimum(f[:-1],f[1:])"},
+    {"mid": "NET096", "class_name": "CTMModel", "fidelity": "full", "basis": "Daganzo CTM发送/接收双约束元胞传输，车辆守恒、排队形成与消散机制完整", "simplifications": ["接收函数隐含反波速w=vf/2不可参数化", "下游为完全吸收汇无流出约束"], "evidence": "traffic.py:76-84 send=min(k*vf,qmax), recv=min((kj-k)*vf/2,qmax)"},
+    {"mid": "NET097", "class_name": "ARZModel", "fidelity": "prototype", "basis": "仅剩(V(k)-v)/tau松弛ODE，空间平流与胞间耦合全缺，密度场恒不演化", "simplifications": ["偏导项∂(kv)/∂x与(v-λk)∂v/∂x完全省略", "k恒定则串不稳定无从产生，与docstring宣称不符"], "evidence": "traffic.py:112-117 derivatives对k返回全零向量"},
+    {"mid": "NET098", "class_name": "IDMModel", "fidelity": "full", "basis": "标准Treiber IDM：s*=s0+max(0,vT+vΔv/2√ab)，a=a_max[1-(v/v0)^δ-(s*/s)²]", "simplifications": ["加速度未按[-b,a]截断，仅速度clip≥0"], "evidence": "traffic.py:190-195 _accel完整IDM公式"},
+    {"mid": "NET099", "class_name": "GippsModel", "fidelity": "lite", "basis": "保留min(自由,安全)框架，但自由项乘dt0/tau、安全式改有理近似非原式平方根", "simplifications": ["安全速度用有理式替代Gipps原式sqrt判别式", "自由加速项含dt0/tau缩放偏离原式", "最小间距固定2.0充当s0"], "evidence": "traffic.py:209-214 v_safe=b*tau+(gap_eff-b*tau^2/2)/(tau+dt0/2+v_l/b_max)"},
+    {"mid": "NET100", "class_name": "NewellModel", "fidelity": "lite", "basis": "放弃轨迹时空平移法，改为期望速度追踪启发式，docstring自认简化", "simplifications": ["无leader轨迹平移这一Newell核心机制", "gap阈值硬切换自由/跟驰无滞回", "自由加速3.0*dt0上限为启发式"], "evidence": "traffic.py:227-234"},
+    {"mid": "NET101", "class_name": "OVMModel", "fidelity": "full", "basis": "Bando OVM原式：tanh最优速度函数V(s)，dv/dt=a(V(s)-v)", "simplifications": [], "evidence": "traffic.py:246-250"},
+    {"mid": "NET102", "class_name": "FVDModel", "fidelity": "full", "basis": "Jiang全速度差FVD原式：OVM项+lambda*(v_leader-v_self)前瞻项", "simplifications": [], "evidence": "traffic.py:263-268"},
+    {"mid": "NET103", "class_name": "KraussModel", "fidelity": "full", "basis": "Krauss三要素齐全：v_safe、min(vf,v_safe)、均匀噪声随机慢化", "simplifications": ["v_safe闭式(g-s0)/tau+v_l/(1+tau*b)为文献常见有理近似"], "evidence": "traffic.py:280-286"},
+    {"mid": "NET104", "class_name": "Wiedemann74Model", "fidelity": "prototype", "basis": "仅3态阈值状态机+单SDx阈值，无W74心理阈值族与分态加速度公式", "simplifications": ["缺SDV/SDLLV/OPDV/CLDV阈值体系", "自由/跟随/接近加速度均为线性启发式"], "evidence": "traffic.py:301-316"},
+    {"mid": "NET105", "class_name": "Wiedemann99Model", "fidelity": "prototype", "basis": "与W74共用基类仅改vf/ax/bx三参数，无W99专属分态公式与参数集", "simplifications": ["无99系SDV等阈值与per-regime公式", "类体仅为参数赋值"], "evidence": "traffic.py:328-334"},
+    {"mid": "NET106", "class_name": "NSModel", "fidelity": "full", "basis": "NaSch四步(加速/限速/随机慢化/前进)标准实现，并行更新，车队数守恒", "simplifications": ["_ns_gap为Python逐格循环(性能问题非机制问题)"], "evidence": "traffic.py:363-376, 388-400"},
+    {"mid": "NET107", "class_name": "BMLModel", "fidelity": "full", "basis": "BML规则忠实：东西/南北相位交替、目标格空则进、车数守恒", "simplifications": ["两方向车强制等量投放"], "evidence": "traffic.py:430-447"},
+    {"mid": "NET108", "class_name": "VDRModel", "fidelity": "full", "basis": "Barlovic慢启动VDR：停车态用p0、运动态用p随机慢化，规则完整", "simplifications": [], "evidence": "traffic.py:486-503"},
+    {"mid": "NET109", "class_name": "VickreyBottleneckModel", "fidelity": "prototype", "basis": "仅确定性容量瓶颈排队模拟，无个体出发时刻选择与alpha/beta/gamma调度均衡", "simplifications": ["到达率为硬编码三角波而非均衡解", "无调度效用与边际成本均等条件"], "evidence": "traffic.py:535-545 rate为capacity*2*(1-|tick-peak|/peak)"},
+    {"mid": "NET110", "class_name": "WardropUEModel", "fidelity": "lite", "basis": "双路径玩具网络固定步长流量交换迭代，收敛于成本均等的UE不动点", "simplifications": ["仅2条路径非通用网络", "启发式步长(0.5切换+0.3平滑)非MSA/Frank-Wolfe"], "evidence": "traffic.py:577-586"},
+    {"mid": "NET111", "class_name": "WardropSOModel", "fidelity": "lite", "basis": "边际成本mc=c+f·c'(f)公式正确并梯度下降，机制真实但网络极简", "simplifications": ["与UE共用双路径玩具网络", "固定步长0.2非正规凸优化求解"], "evidence": "traffic.py:610-622"},
+    {"mid": "NET112", "class_name": "MOBILModel", "fidelity": "prototype", "basis": "换道增益判定在，但politeness未用、无新后车安全判据、新车道加速度按自由流", "simplifications": ["politeness参数存储但从不参与判定", "缺b_safe新后车减速度安全约束", "期望加速度忽略新前车(仅前间隙≥3m硬门槛)"], "evidence": "traffic.py:655-668, 632"},
+    {"mid": "NET113", "class_name": "SocialForceModel", "fidelity": "full", "basis": "Helbing三项齐备：驱动力(v_des·e-v)/0.5+指数行人排斥+指数墙排斥", "simplifications": ["无各向异性权重cos(phi)与私有圈半径", "身体挤压/摩擦接触项拆至NET114实现"], "evidence": "pedestrian.py:132-146, 87-91"},
+    {"mid": "NET114", "class_name": "ContactEvacModel", "fidelity": "lite", "basis": "仅法向接触推挤12·重叠深度，docstring宣称摩擦但无切向摩擦项", "simplifications": ["缺kappa·g·Δv·t̂切向滑动摩擦项", "法向推挤为线性非Helbing弹性形式"], "evidence": "pedestrian.py:156-171"},
+    {"mid": "NET115", "class_name": "CentrifugalModel", "fidelity": "prototype", "basis": "仅1/(d-2r)标量排斥，无v²与相对速度方向依赖，离心机制名不副实", "simplifications": ["缺广义离心力(Yu et al.)的速度平方与相对速度项"], "evidence": "pedestrian.py:188-192"},
+    {"mid": "NET116", "class_name": "VOModel", "fidelity": "prototype", "basis": "无Minkowski速度障碍锥判别，仅2.5m内接近即垂直偏转的避让启发式", "simplifications": ["未在速度空间构造VO碰撞锥", "无相对速度几何，偏转系数0.8硬编码"], "evidence": "pedestrian.py:274-278"},
+    {"mid": "NET117", "class_name": "RVOModel", "fidelity": "prototype", "basis": "以0.5(vi+vj)中点体现互惠让担，但无RVO平均公式与锥构造", "simplifications": ["无v_new=(v_pref+v_safe)/2原式", "无碰撞锥判别，仅近距垂直偏转"], "evidence": "pedestrian.py:299-303"},
+    {"mid": "NET118", "class_name": "ORCAModel", "fidelity": "prototype", "basis": "无ORCA半平面约束与LP投影，仅v_pref-0.7·Σu向量偏移", "simplifications": ["未构造线性化碰撞约束超平面", "无截断时距锥与投影回优选速度"], "evidence": "pedestrian.py:330-336"},
+    {"mid": "NET119", "class_name": "FloorFieldModel", "fidelity": "lite", "basis": "S静态BFS距离场+D动态轨迹场+冲突消解均在，但转移零温确定化", "simplifications": ["无exp(-kS·S-kD·D)概率转移(取零温极限)", "D无扩散与衰减机制", "冲突时全员不动而非随机择一"], "evidence": "pedestrian.py:393-414"},
+    {"mid": "NET120", "class_name": "OptimalStepsModel", "fidelity": "full", "basis": "OSM效用最大化忠实：前进收益-邻近排斥-速度变化代价，离散步集逐tick选优", "simplifications": ["墙仅硬边界拒绝无排斥势", "候选步限定8方向×2速度档", "出口退化为角点目标"], "evidence": "pedestrian.py:449-484"}
+  ]
+}

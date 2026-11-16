@@ -1,0 +1,407 @@
+{
+ "module": "eco_flagship",
+ "reviews": [
+  {
+   "model_id": "ECO003",
+   "class_name": "MiyazawaModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "x=(I-A-C)^{-1} 迭代收敛并对照直接求逆，消费内生乘数在，但为 V=I 特例",
+   "simplifications": [
+    "收入形成矩阵 V 未实现，C 直接作用于产出（等价 Miyazawa 的 V=I 特例）",
+    "文档公式 (I-A-C·V)^{-1} 与实际实现不符",
+    "合成随机矩阵，3 部门小规模"
+   ],
+   "evidence": "eco_flagship_lite.py:55 step 为 x=inv+A@x+C@x，observe 对照 solve(I-A-C,inv)"
+  },
+  {
+   "model_id": "ECO006",
+   "class_name": "MRIModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "仅名义 R×S 维度，无区域分块与区域内-区域间结构，退化为一般列昂惕夫迭代",
+   "simplifications": [
+    "A 为随机满矩阵，无分块 MRIO 结构",
+    "无区域间贸易流与溢出解释",
+    "与 ECO008 同构，仅维度 4"
+   ],
+   "evidence": "eco_flagship_lite.py:87 k=n_regions*sectors，A=rng 矩阵，step 为 x=d+A@x"
+  },
+  {
+   "model_id": "ECO007",
+   "class_name": "EnvIOModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "列昂惕夫产出+排放卫星账户 p=e·x 与排放强度均实现并校验，环境扩展真实在",
+   "simplifications": [
+    "3 部门合成随机 A，无真实 IO 表",
+    "无减排/政策/环境反馈环节"
+   ],
+   "evidence": "eco_flagship_lite.py:117 observe 计算 e@x_direct 与 poll_intensity"
+  },
+  {
+   "model_id": "ECO008",
+   "class_name": "SAMMultiplierModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "固定价格乘数 y=(I-A_sam)^{-1} 迭代精确实现并对照直接求逆，机制核心在",
+   "simplifications": [
+    "A_sam 为随机列归一矩阵，无真实 SAM 账户结构（家户/政府/要素行）",
+    "对角清零不符合 SAM 惯例",
+    "4 账户小规模"
+   ],
+   "evidence": "eco_flagship_lite.py:26 step 迭代 y=exog+A@y，observe err 对照 np.linalg.solve"
+  },
+  {
+   "model_id": "ECO009",
+   "class_name": "GTAPLiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "2 区域 Armington(p^-3) 需求+试探调价出清在，无生产与要素市场",
+   "simplifications": [
+    "每区域单商品，无部门/生产函数/要素价格",
+    "需求按总禀赋归一使 walras 检验恒为 0（平凡恒真）",
+    "替代弹性 3 与系数 180 无来源"
+   ],
+   "evidence": "eco_flagship_lite.py:924 dem=180*p**-3 归一化后 tatonnement 调价"
+  },
+  {
+   "model_id": "ECO011",
+   "class_name": "PEP11CGEModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "文档称 CES 生产+Leontief 消费，实际 Cobb-Douglas 供需+试探调价，无政府/贸易",
+   "simplifications": [
+    "供给与需求均为 CD，非声明的 CES 与 Leontief",
+    "两部门供给完全相同，相对价格仅由需求端决定",
+    "无机构主体/税收/SAM 结构"
+   ],
+   "evidence": "eco_flagship_lite.py:860 y=a*L^α*50^(1-α)，dem=0.5*y.sum()/p"
+  },
+  {
+   "model_id": "ECO012",
+   "class_name": "RecursiveCGEModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "实为单部门 Solow 资本积累，无价格/出清/多部门等 CGE 结构",
+   "simplifications": [
+    "Y=30K^0.35、K+=sY-δK，即 Solow 律，无递归动态均衡",
+    "无消费优化或跨期决策",
+    "无部门、价格与要素市场"
+   ],
+   "evidence": "eco_flagship_lite.py:897 step 即 Solow 增量，observe 对照 K_star"
+  },
+  {
+   "model_id": "ECO023",
+   "class_name": "NK3Model",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "三方程名义齐全但预期完全后向化，NKPC 退化为加速主义曲线，前向确定性缺失",
+   "simplifications": [
+    "π=βπ+κx+u 后向迭代，无理性预期与前向 IS",
+    "参数非微观推导校准",
+    "泰勒原则仅以 phi_pi>1 布尔标注，无确定性检验"
+   ],
+   "evidence": "eco_flagship_lite.py:344 pi_new=beta*pi+kappa*x+u（后向）"
+  },
+  {
+   "model_id": "ECO027",
+   "class_name": "BewleyModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：VFI 收敛判据真实（last_delta 报告）",
+   "simplifications": [
+    "vf_converged 检查为 abs(V-V) 恒真（无效校验）",
+    "预防性储蓄未与完全信息对比，monotone_consumption 硬编码 True",
+    "对数效用、40×3 小网格"
+   ],
+   "evidence": "eco_flagship_lite.py:387 三重循环 VFI；434 行恒真检查",
+   "fixed": true
+  },
+  {
+   "model_id": "ECO028",
+   "class_name": "HuggettModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "继承 Bewley VFI，r 二分内生化在，但市场出清用储蓄率阈值启发式替代净供给=0",
+   "simplifications": [
+    "零净供给条件以 mean_saving_rate>0.12 阈值近似",
+    "仅 8 次二分，无真实市场出清统计",
+    "无借贷上限与违约结构"
+   ],
+   "evidence": "eco_flagship_lite.py:447 二分调 r 后重复调 super().initialize"
+  },
+  {
+   "model_id": "ECO029",
+   "class_name": "AiyagariModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "r=αK^{α-1}-δ 与储蓄定点迭代在，但资本聚合用 K=s/0.06 粗近似",
+   "simplifications": [
+    "K=s/0.06 非生产函数反解或总量守恒",
+    "仅 6 次定点迭代",
+    "无资本分布聚合，复用 Bewley 网格"
+   ],
+   "evidence": "eco_flagship_lite.py:468 r=0.3*K**(-0.7)-0.06，K=max(0.5,min(20,s/0.06))"
+  },
+  {
+   "model_id": "ECO034",
+   "class_name": "DeatonBufferModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "收入无风险（σ 参数未用），缓冲目标由机械消费规则产生，非预防性储蓄机制",
+   "simplifications": [
+    "sigma=0.1 声明后从未使用，收入路径 y=1.0*G 确定",
+    "消费规则 c=min(cash,max(0.9cash,0.8)) 为启发式",
+    "无流动性约束下的风险冲击测试"
+   ],
+   "evidence": "eco_flagship_lite.py:485 y=1.0*self.G 恒定，c 由 cash 比例决定"
+  },
+  {
+   "model_id": "ECO036",
+   "class_name": "GodleySIMEXModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "SIM 稳态乘数+政府/家户存量记账且货币守恒经校验，政策规则系数硬编码",
+   "simplifications": [
+    "Y 用稳态式 (G+αH)/(1-α(1-θ)) 而非 SIM 滞后动态",
+    "赤字反馈 G+=0.1*(-deficit)*0.1 系数拼凑",
+    "无利率与央行、无多资产"
+   ],
+   "evidence": "eco_flagship_lite.py:1125 H_h+H_g 守恒由 validate_state 校验"
+  },
+  {
+   "model_id": "ECO037",
+   "class_name": "GodleyPCModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "利率恒定致票据配置份额静态，无央行规则与政府负债对应方，SFC 不闭合",
+   "simplifications": [
+    "r=0.03 从不更新，share_bills=0.3+5r 恒 0.45",
+    "票据无政府供给端（缺 H_g 对应科目）",
+    "G=20 常数，T 计算后未进入政府存量"
+   ],
+   "evidence": "eco_flagship_lite.py:1160 share_bills=min(0.9,0.3+5*self.r) 恒定"
+  },
+  {
+   "model_id": "ECO039",
+   "class_name": "SVARModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "method_demo",
+   "basis": "Cholesky 短期识别 IRF 在合成 2 变量数据上演示，无真实数据与识别约束检验",
+   "simplifications": [
+    "irf_err 将缩减式 A_hat 与结构 A_true 直接对比（口径不当）",
+    "仅 2 变量 1 阶滞后",
+    "无置信区间/滞后阶选择/稳健性"
+   ],
+   "evidence": "eco_flagship_lite.py:149 lstsq 恢复 A_hat，cholesky(Sigma) 作 irf_first"
+  },
+  {
+   "model_id": "ECO040",
+   "class_name": "VECMModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "method_demo",
+   "basis": "Engle-Granger 两步法+简化 ADF t 统计量在，协整判定阈值 -2.0 硬编码",
+   "simplifications": [
+    "ADF 无标准临界值表，阈值 -2.0 拍定",
+    "仅两步静态回归，无误差修正项估计",
+    "对照序列用 y1 差分而非无关非平稳过程"
+   ],
+   "evidence": "eco_flagship_lite.py:191 _adf_stat 与 cointegration_detected"
+  },
+  {
+   "model_id": "ECO041",
+   "class_name": "HamiltonSwitchModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "method_demo",
+   "basis": "两状态 Markov 模拟+离散 Hamilton 前向滤波在，参数已知未估计（无 EM/MLE）",
+   "simplifications": [
+    "转移矩阵与状态均值给定，无最大似然估计",
+    "滤波似然用固定方差 0.01 的正态",
+    "准确率仅 argmax 与真实状态对比"
+   ],
+   "evidence": "eco_flagship_lite.py:300 f=A.T@f 后 like 加权更新"
+  },
+  {
+   "model_id": "ECO043",
+   "class_name": "DynamicFactorModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "method_demo",
+   "basis": "PCA 第一主成分恢复共同因子，静态近似 DFM，无动态滞后与载荷估计",
+   "simplifications": [
+    "无因子 VAR 动态、无载荷回归估计",
+    "单因子静态 SVD",
+    "仅相关系数与方差解释比两指标"
+   ],
+   "evidence": "eco_flagship_lite.py:269 SVD 取 f_hat=U[:,0]*S[0]"
+  },
+  {
+   "model_id": "ECO044",
+   "class_name": "ARCHModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "method_demo",
+   "basis": "ARCH(1) 生成+滤波+高低波动聚集比演示，无 MLE 参数估计",
+   "simplifications": [
+    "ω/α 已知未估计",
+    "聚集比仅中位数分组方差比",
+    "docstring 提及 GARCH 但无实现"
+   ],
+   "evidence": "eco_flagship_lite.py:232 sig2=omega+alpha*e^2 递推与 ratio 检验"
+  },
+  {
+   "model_id": "ECO046",
+   "class_name": "SantaFeLiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "三类交易者固定线性需求规则调价，无信念进化/GA、无市场出清与股息，非 SFI 机制",
+   "simplifications": [
+    "需求系数 0.02/0.05 固定，无规则库与适应度进化",
+    "无市场出清，价格按需求加权和微调",
+    "无股息/风险资产定价结构"
+   ],
+   "evidence": "eco_flagship_lite.py:603 p+=0.02*(dem_f+dem_t+dem_n) 线性组合"
+  },
+  {
+   "model_id": "ECO047",
+   "class_name": "BrockHommesModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "适应度 Logit 信念切换+加权需求调价机制在，2 类信念与简化利润代理",
+   "simplifications": [
+    "仅基本面/趋势 2 类，原版含偏差型共 4 类",
+    "适应度为 (p-f)(g·p-p) 近似利润",
+    "无供给与噪声需求项"
+   ],
+   "evidence": "eco_flagship_lite.py:518 w_t=exp(βfit)/Σ，p+=0.3*demand"
+  },
+  {
+   "model_id": "ECO048",
+   "class_name": "LuxMarchesiLiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "动量+羊群跳变+基本面套利三成分在并产出肥尾，但切换为随机而非适应度",
+   "simplifications": [
+    "羊群翻转 6%/tick 随机，非多数意见/价格偏离驱动",
+    "无市场出清定价（ret=0.01*超额需求+噪声）",
+    "类型数 60/40 缩水"
+   ],
+   "evidence": "eco_flagship_lite.py:646 momentum 递推+跳变，observe 超额峰度"
+  },
+  {
+   "model_id": "ECO049",
+   "class_name": "KirmanModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "full",
+   "basis": "招募+自转换逐步实现，份额均值与理论 p_conv/(p_conv+p_self) 对照",
+   "simplifications": [
+    "每 tick 全体并行作用（原版为逐对接触），n=50 小规模",
+    "仅观点动态未接金融市场"
+   ],
+   "evidence": "eco_flagship_lite.py:562 双概率招募/翻转，594 行 theory_mean 对照"
+  },
+  {
+   "model_id": "ECO051",
+   "class_name": "Mark0LiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "Mark-0 核心的价格/产量自适应决策缺失，定价外生成本加成，仅剩破产/信贷骨架",
+   "simplifications": [
+    "price=unit_cost*1.12，无企业价格决策规则",
+    "无产量/库存目标机制（Mark-0 定义特征）",
+    "份额按 (1/p)^2、清算回收上限 2.0 拼凑"
+   ],
+   "evidence": "eco_flagship_lite.py:804 price 固定加成，profit 与破产重生逻辑"
+  },
+  {
+   "model_id": "ECO055",
+   "class_name": "CliffZIModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "自称 Cliff 增强（报价带学习）但无任何跨轮学习，实为一次性 ZI 集中撮合",
+   "simplifications": [
+    "买卖报价每步独立随机生成，无向成交方向调整",
+    "无价格时间序列与市场动态",
+    "效率按剩余价值静态计算"
+   ],
+   "evidence": "eco_flagship_lite.py:692 bids 随机生成排序撮合，observe 静态效率"
+  },
+  {
+   "model_id": "ECO056",
+   "class_name": "SmithFarmerLOBLiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "持久限价簿+市价吃单+价差统计在，无撤单/报价更新与均衡价格发现",
+   "simplifications": [
+    "每侧交易者一次性进场（bi/si 计数）",
+    "无限价修改与取消，无成交价跟踪（trade 变量死赋值）",
+    "订单到达固定 0.5 交替"
+   ],
+   "evidence": "eco_flagship_lite.py:748 bids/asks 持久列表，spread_hist 记录"
+  },
+  {
+   "model_id": "ECO102",
+   "class_name": "World3LiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "人口/资本/污染/资源 4 存量耦合 ODE 与 overshoot 机制在，结构大幅缩水",
+   "simplifications": [
+    "4 存量 vs World3 十余存量，无技术/农业/教育部门",
+    "参数与耦合系数 ad hoc",
+    "dPol=max(dPol,-1) 非常规钳制"
+   ],
+   "evidence": "eco_flagship_lite.py:957 derivatives 四方程耦合，overshoot=Res<400"
+  },
+  {
+   "model_id": "ECO103",
+   "class_name": "ForresterCityLiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "人口/企业/住房 3 存量负反馈增长机制在，无企业老化/衰退与迁移滞后结构",
+   "simplifications": [
+    "无住房老化与企业迁移延迟（Forrester 特征）",
+    "attractiveness=min(吸引力,2) 截断 ad hoc",
+    "无政策情景（原版核心）"
+   ],
+   "evidence": "eco_flagship_lite.py:990 dPop/dFirm/dHouse 三反馈方程"
+  },
+  {
+   "model_id": "ECO107",
+   "class_name": "RICELiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "lite",
+   "basis": "两区域资本-排放-共享碳库-温度耦合 ODE 在，无减排政策与福利优化（RICE 核心）",
+   "simplifications": [
+    "无 abatement 控制变量与目标函数",
+    "损害项 K/max(K,1) 化简为常数，两区域动态仅排放系数不同",
+    "碳循环 0.02*(M-590) 与 forcing log2 简化"
+   ],
+   "evidence": "eco_flagship_lite.py:1021 dM=(E1+E2)-0.02*(M-590)，dT=0.05*(forcing/1.2-T)"
+  },
+  {
+   "model_id": "ECO108",
+   "class_name": "FUNDLiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "无经济/排放动态，仅 4 条二次损害函数随 T 线性抬升的查表计算器",
+   "simplifications": [
+    "T=tick*0.02 外生，无气候模块",
+    "无区域/人口/技术动态（FUND 特征）",
+    "农业非单调受益以常数值布尔标注"
+   ],
+   "evidence": "eco_flagship_lite.py:1054 observe 内 ag/en/sea/health 二次式求和"
+  },
+  {
+   "model_id": "ECO109",
+   "class_name": "PAGE09LiteModel",
+   "file": "eco_flagship_lite.py",
+   "fidelity": "prototype",
+   "basis": "仅气候敏感度三角分布 MC 抽样温度/损害分位数，无政策路径/临界点/适应性",
+   "simplifications": [
+    "无 PAGE 的失效/瓦解临界模块",
+    "M=590+U(80,200)*8 碳存量拼凑",
+    "损害=0.01*T^2*U(0.7,1.5) 单式"
+   ],
+   "evidence": "eco_flagship_lite.py:1088 n_mc 循环 triangular 抽样与分位数"
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+scenario: 教学·Schelling分异涌现
+pack: 社会学包
+population:
+  n: 200
+  阈值: 0.5
+institutions: {}
+measurement_plan: [segregation]
+validity_plan:
+  基线: 规则组
+  种子: [7, 43]
+claims_level:
+  机制主张: 仅探索
+  趋势主张: 允许
+教学要点: |
+  微观容忍（只要50%同组邻居）→ 宏观分异（分异指数0.5→0.97）。
+  个体无恶意，结构涌现恶性结果——社会学" unintended consequences"经典。
+  课堂演示：改阈值 0.3（容忍）vs 0.6（不容忍），看分异速度。
+ticks: 60
+seed: 7

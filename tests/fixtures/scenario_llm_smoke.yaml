@@ -1,0 +1,17 @@
+scenario: R0冒烟_LLM混合
+pack: 政治经济学包
+population:
+  n: 16
+  LLM比例: 0.25
+institutions:
+  制度: private
+measurement_plan: [wealth_gini, positions, p_ref]
+validity_plan:
+  基线: 规则组
+  消融: [人设]
+  种子: [7]
+claims_level:
+  机制主张: 仅探索
+  趋势主张: 允许
+ticks: 8
+seed: 7

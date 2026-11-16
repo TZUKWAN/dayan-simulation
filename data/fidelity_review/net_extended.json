@@ -1,0 +1,374 @@
+{
+ "module": "net_extended",
+ "reviews": [
+  {
+   "mid": "NET039",
+   "class_name": "ERGMModel",
+   "fidelity": "prototype",
+   "basis": "MH图空间采样器真实(边+三角形统计量)，但θ硬编码、n=20、400步，无任何估计。",
+   "simplifications": [
+    "θ=(-2.0,0.5)硬编码，未从数据估计",
+    "固定n=20、初始p=0.12随机图、400次MH迭代",
+    "无伪极大似然/MCMC-MLE估计环节",
+    "三角形计数用trace(g^3)整除近似"
+   ],
+   "evidence": "net_extended.py:20 类定义；41-51 MH采样循环；29 θ硬编码"
+  },
+  {
+   "mid": "NET040",
+   "class_name": "TERGMModel",
+   "fidelity": "prototype",
+   "basis": "仅按0.3+0.4互惠+0.3滞后边的逐对独立伯努利生成两期网络，无指数族统计量、无MCMC估计。",
+   "simplifications": [
+    "无TERGM指数族/全图滞后统计量(如edgewise shared partners)",
+    "逐对独立转移，非全图依赖",
+    "无估计(MCMC-MLE/伪似然)，系数硬编码",
+    "仅两期一次性静态结果"
+   ],
+   "evidence": "net_extended.py:67 类定义；78-85 逐对转移采样"
+  },
+  {
+   "mid": "NET041",
+   "class_name": "STERGMModel",
+   "fidelity": "prototype",
+   "basis": "形成率0.15/消融率0.05的逐对常数危险过程，无网络统计量条件化，form/dissolve分离仅名义存在。",
+   "simplifications": [
+    "形成/消融概率为常数，不依赖网络统计量",
+    "无形成/消融两个ERGM子模型的MCMC模拟",
+    "无估计",
+    "一次性在initialize内完成"
+   ],
+   "evidence": "net_extended.py:101 类定义；113-120 常数率形成/消融"
+  },
+  {
+   "mid": "NET042",
+   "class_name": "SAOMModel",
+   "fidelity": "lite",
+   "basis": "序贯微步+目标函数(互惠/传递性/密度)的SAOM骨架真实，但贪心确定性选择，无速率函数与估计。",
+   "simplifications": [
+    "微步为贪心最优，无多项logit随机效用",
+    "无速率函数(每步恰一行动者一改动)",
+    "效应权重硬编码，无MoM/MCMC参数估计",
+    "n=12小规模"
+   ],
+   "evidence": "net_extended.py:134 类定义；149-153 目标函数；155-169 贪心微步"
+  },
+  {
+   "mid": "NET043",
+   "class_name": "NetBehaviorSAOMModel",
+   "fidelity": "prototype",
+   "basis": "仅实现网络→行为影响(邻居多数)，行为未进入目标函数，同质选择缺失，共演化单向。",
+   "simplifications": [
+    "docstring称行为进入目标函数，实际_objective未变",
+    "无行为→网络的选择机制",
+    "无行为目标函数",
+    "继承SAOM全部简化"
+   ],
+   "evidence": "net_extended.py:180 类定义；189-195 行为仅受邻居多数更新"
+  },
+  {
+   "mid": "NET044",
+   "class_name": "REMModel",
+   "fidelity": "prototype",
+   "basis": "事件流由exp(β·发送者历史强度)模拟，注释称MLE网格搜索但代码只有互惠率阈值判断，无估计。",
+   "simplifications": [
+    "β=1.2硬编码，无MLE/网格搜索(228行注释虚标)",
+    "率函数统计量为发送者历史事件数，非REM经典AB-XY统计",
+    "n=8、T=200一次性模拟",
+    "互惠率仅作检测标志"
+   ],
+   "evidence": "net_extended.py:203 类定义；216-227 事件模拟；228-235 伪估计"
+  },
+  {
+   "mid": "NET045",
+   "class_name": "HawkesModel",
+   "fidelity": "prototype",
+   "basis": "强度递推λ←λe^{-δΔt}+α近似指数核自激，但事件由外部jump时钟注入、无互激矩阵、基线被衰减+下限扭曲。",
+   "simplifications": [
+    "无互激(α仅加本维，多元互激名实不符)",
+    "事件非按强度thinning采样，由框架jump调度",
+    "基线μ参与衰减并设0.2μ下限，非标准常数项",
+    "无分支结构表示"
+   ],
+   "evidence": "net_extended.py:247 类定义；266-272 apply_jump递推"
+  },
+  {
+   "mid": "NET046",
+   "class_name": "ActivityDrivenModel",
+   "fidelity": "full",
+   "basis": "a_i~幂律、按a_i激活、每激活生成m条随机连边并聚合，Perra活动驱动核心机制完整。",
+   "simplifications": [
+    "m每次激活从均匀整数重抽(原模型为固定m)",
+    "pareto(2.0)截断缩放近似幂律",
+    "无聚合度分布解析对照"
+   ],
+   "evidence": "net_extended.py:283 类定义；294 活动率幂律；298-306 激活连边"
+  },
+  {
+   "mid": "NET047",
+   "class_name": "SimplexActivityModel",
+   "fidelity": "prototype",
+   "basis": "把AD边事件换成每次激活随机抽3节点记为单纯形，组员不持久且激活节点自身不在组内，高阶机制仅示意。",
+   "simplifications": [
+    "3-simplex成员每次随机重抽，无持久群组",
+    "激活节点不在单纯形中(循环变量i被忽略)",
+    "无高阶传染耦合",
+    "无组级激活概率"
+   ],
+   "evidence": "net_extended.py:316 类定义；321-327 随机三元组事件"
+  },
+  {
+   "mid": "NET049",
+   "class_name": "RandomIntersectionModel",
+   "fidelity": "full",
+   "basis": "成员资格集合→共享组投影连边，均匀随机交集图经典构造如实实现。",
+   "simplifications": [
+    "组规模均匀2-5(经典为二项采样或固定m)",
+    "一次性静态生成(该模型本为静态)"
+   ],
+   "evidence": "net_extended.py:337 类定义；342-355 构造与投影"
+  },
+  {
+   "mid": "NET050",
+   "class_name": "BipartiteConfigModel",
+   "fidelity": "lite",
+   "basis": "两组度序列stub配对机制在，但截断到较短侧、重边折叠，度序列不严格匹配。",
+   "simplifications": [
+    "stub总数截断min(len_t,len_b)，被截侧度数失配",
+    "pairs集合去重折叠多重边",
+    "一次性静态生成"
+   ],
+   "evidence": "net_extended.py:367 类定义；376-382 stub配对"
+  },
+  {
+   "mid": "NET075",
+   "class_name": "GeneralizedBassModel",
+   "fidelity": "lite",
+   "basis": "(p+qF)(1-F)·f(t)的GBM方程形式忠实，营销因子硬编码指数衰减，状态x与解析F(t)冗余。",
+   "simplifications": [
+    "f(t)=1+c·e^{-2t}固定形式，无外生营销数据",
+    "导数中F由t解析重算而非取自状态x",
+    "×100缩放混入状态",
+    "无参数估计"
+   ],
+   "evidence": "net_extended.py:397 类定义；409-414 derivatives"
+  },
+  {
+   "mid": "NET078",
+   "class_name": "WattsCascadeModel",
+   "fidelity": "full",
+   "basis": "邻居激活比例>阈值即采纳的Watts阈值级联核心机制忠实；全局级联条件仅以占比>0.2粗略替代。",
+   "simplifications": [
+    "文档所称级联条件(种子×簇系数)未计算",
+    "图构造每点随机加k/2邻居，可有重复边",
+    "同步更新为原地顺序更新(异步效应)",
+    "阈值判据用严格大于"
+   ],
+   "evidence": "net_extended.py:426 类定义；450-460 阈值采纳规则"
+  },
+  {
+   "mid": "NET079",
+   "class_name": "DoddsWattsModel",
+   "fidelity": "lite",
+   "basis": "剂量累积+衰减记忆+概率达阈感染机制在，但无网络(全局随机接触)、无异质阈值、无康复。",
+   "simplifications": [
+    "无接触网络，感染者向随机节点播撒剂量",
+    "阈值统一1.0(原为个体异质分布)",
+    "感染后不康复，无再感染循环",
+    "剂量与衰减参数均质"
+   ],
+   "evidence": "net_extended.py:471 类定义；489-501 剂量播撒与衰减"
+  },
+  {
+   "mid": "NET080",
+   "class_name": "DKRumorModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：DK/MT 单本记账+S-S 规则；Buldyrev 巨分量存活+一一依赖，级联真实传播",
+   "simplifications": [
+    "S-R接触应S-1/R+1，代码S-2/R+2双倍计账(538行)",
+    "S-S接触无事(DK应双抑制者)",
+    "binomial钳位均值场近似",
+    "n=400均值场，无接触网络"
+   ],
+   "evidence": "net_extended.py:511 类定义；527-540 步进(538行2*conv_sr)",
+   "fixed": true
+  },
+  {
+   "mid": "NET081",
+   "class_name": "MakiThompsonModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：DK/MT 单本记账+S-S 规则；Buldyrev 巨分量存活+一一依赖，级联真实传播",
+   "simplifications": [
+    "S递推含双倍扣减(563行)",
+    "额外Poisson(rate_sr*dt*0.3)无模型依据",
+    "Poisson均值场(原为逐接触过程)",
+    "无网络结构"
+   ],
+   "evidence": "net_extended.py:550 类定义；555-566 步进",
+   "fixed": true
+  },
+  {
+   "mid": "NET082",
+   "class_name": "SimplicialContagionModel",
+   "fidelity": "lite",
+   "basis": "成对(0.1)+三角强化(0.3)双通道传染机制忠实，但无恢复动态(原为SIS)、三角列表截断200。",
+   "simplifications": [
+    "无SIS恢复，状态只增不减",
+    "仅前200个三角参与",
+    "三角枚举用邻接双跳，n=60小图",
+    "2/3感染触发为简化规则"
+   ],
+   "evidence": "net_extended.py:569 类定义；600-613 双通道步进"
+  },
+  {
+   "mid": "NET083",
+   "class_name": "ICEModel",
+   "fidelity": "prototype",
+   "basis": "社区分层概率(0.5/0.05)+种子社区扩散骨架在，但每步对全部边重复掷概率，违反IC单次尝试语义，实为离散SI。",
+   "simplifications": [
+    "活动节点每步重掷所有出边(IC应每边一次机会)",
+    "无已尝试标记",
+    "无影响力异质性",
+    "n=100一次性参数"
+   ],
+   "evidence": "net_extended.py:624 类定义；650-657 step重复尝试"
+  },
+  {
+   "mid": "NET084",
+   "class_name": "ICPModel",
+   "fidelity": "prototype",
+   "basis": "仅把跨社区概率升至0.12并统计跨社区暴露计数，其余继承ICE的SI式重复尝试，非真ICP级联。",
+   "simplifications": [
+    "同ICE：每步重复掷边，无IC单次语义",
+    "参数硬编码",
+    "跨社区暴露仅为计数诊断"
+   ],
+   "evidence": "net_extended.py:673 类定义；678-685 step"
+  },
+  {
+   "mid": "NET085",
+   "class_name": "BondPercolationModel",
+   "fidelity": "full",
+   "basis": "随机正则图按p占边测巨分量，键渗流经典实验如实；唯p_c=1/k标注有误(应为1/(k-1))。",
+   "simplifications": [
+    "p仅3个值，无相变扫描",
+    "p_critical标注1/k=0.25，k=4正则图应为1/3",
+    "一次性静态实验"
+   ],
+   "evidence": "net_extended.py:695 类定义；700-711 占边与巨分量；711 p_c标注"
+  },
+  {
+   "mid": "NET086",
+   "class_name": "SitePercolationModel",
+   "fidelity": "full",
+   "basis": "按p占点取子图测巨分量，点渗流机制忠实；p_c≈0.5硬编码标注与k=6正则图实际阈值不符。",
+   "simplifications": [
+    "p_c硬编码0.5(k=6正则图点阈值远低于此)",
+    "p仅3值无扫描",
+    "一次性静态实验"
+   ],
+   "evidence": "net_extended.py:723 类定义；728-741 占点实验；741 p_c标注"
+  },
+  {
+   "mid": "NET087",
+   "class_name": "KCoreModel",
+   "fidelity": "full",
+   "basis": "k-core核数委托networkx标准剥离算法，分布与最大核如实；一次性静态诊断。",
+   "simplifications": [
+    "无自实现剥离(委托库实现)",
+    "仅BA图单一实例",
+    "无动力学"
+   ],
+   "evidence": "net_extended.py:753 类定义；758-766 core_number"
+  },
+  {
+   "mid": "NET088",
+   "class_name": "BootstrapPercolationModel",
+   "fidelity": "full",
+   "basis": "≥m个激活邻居则激活的bootstrap渗流规则忠实，随机正则图+种子同步演化。",
+   "simplifications": [
+    "m=3、k=6单一参数组，无临界m_c扫描",
+    "固定seed=3图"
+   ],
+   "evidence": "net_extended.py:778 类定义；795-804 阈值激活步进"
+  },
+  {
+   "mid": "NET089",
+   "class_name": "MotterLaiModel",
+   "fidelity": "lite",
+   "basis": "介数负载+容量α·L0+全局重分配级联核心在，但对象为边(原模型为节点介数超载)。",
+   "simplifications": [
+    "负载用边介数，Motter-Lai原文为节点介数",
+    "每步移除一条最高负载边+超载边(跨步级联)",
+    "容量下限0.02地板",
+    "α=1.05单参数"
+   ],
+   "evidence": "net_extended.py:814 类定义；823-829 容量；831-845 超载级联"
+  },
+  {
+   "mid": "NET090",
+   "class_name": "BuldyrevModel",
+   "fidelity": "lite",
+   "basis": "2026-11-12 机制修复：DK/MT 单本记账+S-S 规则；Buldyrev 巨分量存活+一一依赖，级联真实传播",
+   "simplifications": [
+    "keep=全部分量并集(应仅巨分量)，连通失效分支永假(886-893行)",
+    "依赖映射随机非一一对应(原文one-to-one,873行)",
+    "初始攻击后B网零失效传播",
+    "while循环一步退出"
+   ],
+   "evidence": "net_extended.py:860 类定义；886-893 keep并集缺陷",
+   "fixed": true
+  },
+  {
+   "mid": "NET091",
+   "class_name": "EisenbergNoeModel",
+   "fidelity": "full",
+   "basis": "行归一相对负债矩阵+不动点p=min(总负债,外部资产+Πᵀp)迭代清算，Eisenberg-Noe核心机制忠实。",
+   "simplifications": [
+    "n=4硬编码例题数据",
+    "不动点用简单迭代(原文为FPP线性规划)",
+    "未报告违约银行集合"
+   ],
+   "evidence": "net_extended.py:923 类定义；934-943 清算不动点迭代"
+  },
+  {
+   "mid": "NET092",
+   "class_name": "RogersVeraartModel",
+   "fidelity": "lite",
+   "basis": "违约折损清算不动点迭代在，但折损以单一λ施于全部资产，未区分RV原文外部/同业回收率γ、β。",
+   "simplifications": [
+    "统一loss_given_default=0.6施于总资产",
+    "recovered表达式含assets*0死代码",
+    "n=3例题数据",
+    "无救助/rescue分析"
+   ],
+   "evidence": "net_extended.py:960 类定义；972-980 折损不动点"
+  },
+  {
+   "mid": "NET093",
+   "class_name": "DebtRankModel",
+   "fidelity": "lite",
+   "basis": "影响递推h_j←h_i·W_ij/V_j与DebtRank百分比公式忠实，但缺论文R状态单次传播(防重复计数)规则。",
+   "simplifications": [
+    "V节点可重复入队再传播(论文为一次性R状态)",
+    "状态集缺U/V/R完整语义",
+    "n=5例题数据",
+    "防重复计数仅docstring声称"
+   ],
+   "evidence": "net_extended.py:996 类定义；1018-1028 传播与公式"
+  },
+  {
+   "mid": "NET094",
+   "class_name": "AssetFireSaleModel",
+   "fidelity": "prototype",
+   "basis": "违约→压价→再违约螺旋意象在，但无价格冲击函数、无抛售量、无网络敞口，仅固定比例压价的均值场。",
+   "simplifications": [
+    "无CFS价格冲击律p=e^{-αx}，改为每违约固定×(1-0.06)",
+    "无银行间网络与交叉持仓",
+    "无现金/抛售分解与市场深度",
+    "价格下限0.2截断"
+   ],
+   "evidence": "net_extended.py:1043 类定义；1061-1071 违约压价循环"
+  }
+ ]
+}

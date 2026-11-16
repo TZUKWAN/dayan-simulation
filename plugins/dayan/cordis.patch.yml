@@ -1,0 +1,5 @@
+# 大衍 DAYAN：单 bundle 注册。
+- insert:
+    - id: dayan
+      name: dayan
+      config: {}

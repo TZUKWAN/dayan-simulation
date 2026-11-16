@@ -1,0 +1,9 @@
+scenario: YAML冒烟实验
+pack: 政治经济学包
+population: {n: 20, LLM比例: 0}
+institutions: {制度: private}
+measurement_plan: [基尼, 剥削记账]
+validity_plan: {基线: 规则组, 种子: [7]}
+claims_level: {机制主张: 仅探索, 趋势主张: 允许}
+ticks: 5
+seed: 7

@@ -1,0 +1,38 @@
+{
+  "name": "dayan",
+  "display_name": "大衍 DAYAN 社会仿真平台",
+  "version": "1.1.0",
+  "description": "DSH原生AI直接调用共享工具：精确建模、真实资源采集、显式数据绑定、校准留出、同源图表报告及复现。完整工作台按原生会话同步。来源目录状态、研究误差与科学适用性分别记录。",
+  "author": "刘总",
+  "license": "MIT",
+  "min_platform": "DSH原生工作台；工作台界面依赖本机Python 3.10+与dayan依赖（fastapi/uvicorn/numpy/pandas/matplotlib/scipy/python-docx）。",
+  "skills": [
+    {
+      "name": "dayan",
+      "path": "skills/dayan/SKILL.md",
+      "role": "平台总控路由：数据采集、仿真运行、校准与报告工作流"
+    }
+  ],
+  "commands": [
+    {
+      "name": "dayan",
+      "path": "commands/dayan.md",
+      "role": "打开工作台（检测并拉起后端）"
+    },
+    {
+      "name": "dayan-collect",
+      "path": "commands/dayan-collect.md",
+      "role": "按主题采集真实数据"
+    },
+    {
+      "name": "dayan-policy",
+      "path": "commands/dayan-policy.md",
+      "role": "政策对比模拟与报告生成"
+    }
+  ],
+  "runtime": {
+    "backend": "pythonw -m dayan.background_server（Windows后台独立运行，显式日志；默认127.0.0.1:8899）",
+    "project_root": "源码链接自动定位工程根；打包安装通过DAYAN_PROJECT_ROOT指定已有msim工程",
+    "log": "data/server_dsh.log"
+  }
+}

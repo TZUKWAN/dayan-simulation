@@ -1,0 +1,20 @@
+scenario: 教学·Downs中位选民收敛
+pack: 政治学包
+population:
+  n: 200
+  党派数: 2
+institutions:
+  选举规则: plurality
+measurement_plan: [convergence]
+validity_plan:
+  基线: 规则组
+  种子: [7]
+claims_level:
+  机制主张: 仅探索
+  趋势主张: 允许
+教学要点: |
+  两党空间竞争：败方逐期向胜方选民均值移动 → 平台收敛到中位选民。
+  收敛度（胜方-中位距）0.018 ≈ 精确命中。
+  课堂演示：改比例制，看有效政党数从1.0跳到2.84（Duverger）。
+ticks: 40
+seed: 7
