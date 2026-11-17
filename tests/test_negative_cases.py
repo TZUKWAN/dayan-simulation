@@ -31,18 +31,18 @@ def run_tests():
     # 1) 缺必需变量名 → DataRequirement 校验拦截
     r = build_data_requirement("test", [{"concept": "人口", "unit": "人"}])
     check("负例: 缺变量名被校验拦截",
-          r["ok"] and any("缺 name" in i for i in r["payload"]["issues"]))
+          not r["ok"] and any("缺 name" in i for i in r["payload"]["issues"]))
 
     # 2) 缺概念定义 → 校验拦截
     r2 = build_data_requirement("test", [{"name": "x", "unit": "人"}])
     check("负例: 缺概念定义被拦截",
-          r2["ok"] and any("缺概念" in i for i in r2["payload"]["issues"]))
+          not r2["ok"] and any("缺概念" in i for i in r2["payload"]["issues"]))
 
     # 3) 金额缺价格基年 → 校验拦截
     r3 = build_data_requirement("test", [{"name": "gdp", "concept": "GDP",
                                            "unit": "亿元", "purpose": "calibration"}])
     check("负例: 金额缺基年被拦截",
-          r3["ok"] and any("基年" in i for i in r3["payload"]["issues"]))
+          not r3["ok"] and any("基年" in i for i in r3["payload"]["issues"]))
 
     # 4) 未知连接器 → 引擎拒绝
     try:
@@ -74,12 +74,13 @@ def run_tests():
         tolerance=0.001)
     check("负例: 校准超阈如实失败",
           result["status"] == "failed_tolerance" and
-          "不临时放宽" in result.get("failure_note", ""))
+          result['best_loss'] > result['tolerance'] and result['tolerance'] == .001)
 
     # 8) 角色泄漏拦截
-    leak = check_role_leakage(["ds_001", "ds_002"], ["ds_002", "ds_003"])
+    leak = check_role_leakage(["ds_001", "ds_002"], ["ds_002", "ds_003"],
+                              [{'date': 2020, 'value': 1}], [{'date': 2020, 'value': 2}])
     check("负例: 角色/数据泄漏拦截",
-          leak["has_leakage"] and "ds_002" in leak["overlap"])
+          leak["has_leakage"] and leak['verified'] and 'ds_002' in leak['shared_batches'])
 
     # 9) 零记录质检 → 如实报 empty（不造假数据）
     q = check_quality([], variable_name="test")

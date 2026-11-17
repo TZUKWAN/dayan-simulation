@@ -119,6 +119,10 @@ def _lmstudio_up(url="http://127.0.0.1:1234/v1") -> bool:
 def test_game_llm_player_live():
     """LLM 玩家（真实 LM Studio）：遮蔽博弈名，动作合法即通过。
     LM Studio 未运行时自动 SKIP（回归测试不依赖服务在线）。"""
+    import os
+    if os.environ.get('DAYAN_TEST_LLM') != '1':
+        print('[SKIP] 真实LLM测试未显式启用；未调用外部服务')
+        return
     if not _lmstudio_up():
         print("[SKIP] LM Studio 未运行——该测试仅在服务在线时执行")
         return

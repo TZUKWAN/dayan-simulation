@@ -154,23 +154,15 @@ def test_action_handler_boundary():
 
 # ============ 7) YAML 文件加载 ============
 def test_yaml_loader(tmp_scenario_path=None):
-    p = ROOT / "tests" / "fixtures" / "scenario_smoke.yaml"
-    p.parent.mkdir(exist_ok=True)
-    p.write_text("""scenario: YAML冒烟实验
-pack: 政治经济学包
-population: {n: 20, LLM比例: 0}
-institutions: {制度: private}
-measurement_plan: [基尼, 剥削记账]
-validity_plan: {基线: 规则组, 种子: [7]}
-claims_level: {机制主张: 仅探索, 趋势主张: 允许}
-ticks: 5
-seed: 7
-""", encoding="utf-8")
-    from src.kernel.spec import load_scenario
-    s = load_scenario(p)
-    assert s.name == "YAML冒烟实验" and s.ticks == 5 and s.seed == 7
-    assert not s.check_gates()
-    print("[PASS] YAML 规约加载 + 闸门")
+    import tempfile
+    with tempfile.TemporaryDirectory() as temp_dir:
+        p = Path(temp_dir) / "scenario_smoke.yaml"
+        p.write_text("scenario: YAML冒烟实验\npack: 政治经济学包\npopulation: {n: 20, LLM比例: 0}\ninstitutions: {制度: private}\nmeasurement_plan: [基尼, 剥削记账]\nvalidity_plan: {基线: 规则组, 种子: [7]}\nclaims_level: {机制主张: 仅探索, 趋势主张: 允许}\nticks: 5\nseed: 7\n", encoding="utf-8")
+        from src.kernel.spec import load_scenario
+        s = load_scenario(p)
+        assert s.name == "YAML冒烟实验" and s.ticks == 5 and s.seed == 7
+        assert not s.check_gates()
+        print("[PASS] YAML 规约加载 + 闸门（临时fixture，无跟踪文件改写）")
 
 
 if __name__ == "__main__":

@@ -1,102 +1,62 @@
-"""采集底座核心离线单元测试：注册表状态机、预设解析、引擎任务账本、
-已完成真实采集的盘上证据一致性。真实网络采集证据见 data/collection/。"""
-from __future__ import annotations
-
+"""Offline collection state machine; synthetic transport pages are labelled fixtures.
+Real public-source availability is checked separately by test_online_sources.
+"""
+import hashlib
+import importlib
 import json
+import os
 import sys
+import tempfile
+import unittest
 from pathlib import Path
+from unittest.mock import patch
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+class CollectionCore(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory();self.env=patch.dict(os.environ,{'DAYAN_DATA_DIR':self.temp.name});self.env.start()
+        from dayan.collection import engine,registry,connectors
+        self.engine,self.registry,self.connectors=engine,registry,connectors
+        importlib.reload(engine);importlib.reload(registry)
+        self.old=dict(connectors.CONNECTORS);self.old_source=dict(connectors.CONNECTOR_SOURCE)
+    def tearDown(self):
+        self.connectors.CONNECTORS.clear();self.connectors.CONNECTORS.update(self.old)
+        self.connectors.CONNECTOR_SOURCE.clear();self.connectors.CONNECTOR_SOURCE.update(self.old_source)
+        self.env.stop();importlib.reload(self.engine);importlib.reload(self.registry);self.temp.cleanup()
+    def test_fresh_matrix_presets_and_no_phantom_live_evidence(self):
+        from dayan.collection import presets
+        from dayan.agent.data_tools import search_sources
+        rows=self.registry.matrix()
+        self.assertGreaterEqual(len(rows),30)
+        self.assertEqual({r['cat'] for r in rows},set(self.registry.CATS))
+        self.assertTrue(all(r['state']=='candidate' for r in rows))
+        self.assertEqual(self.engine.list_tasks(),[])
+        with self.assertRaises(ValueError):self.registry.set_state('__test__','super_live')
+        self.assertGreaterEqual(len(presets.list_presets()),6)
+        pr=presets.get_preset('pop_employment_wb')
+        with self.assertRaises(ValueError):presets.resolve_params(pr,{})
+        params=presets.resolve_params(pr,{'indicator':'SP.POP.TOTL','country':'中国','year_from':2019,'year_to':2024})
+        self.assertEqual(params['country'],'CHN')
+        self.assertGreaterEqual(search_sources('就业')['payload']['n_sources'],3)
+    def test_partial_resume_hashes_idempotency_and_no_recollection_claim(self):
+        calls=[]
+        def fixture(params,budget):
+            start=(params.get('_cursor') or {}).get('page',0)
+            for i in range(start,min(start+budget,2)):
+                calls.append(i);raw=json.dumps({'fixture':True,'page':i}).encode()
+                yield self.connectors.Page('fixture://unit/'+str(i),raw,[{'value':i,'fixture':True}],
+                     {'has_more':i<1,'cursor':{'page':i+1},'fixture':True})
+        self.connectors.CONNECTORS['unit_fixture']=fixture
+        self.connectors.CONNECTOR_SOURCE['unit_fixture']='wb_indicators'
+        first=self.engine.run_collection('unit_fixture',{},page_budget=1,purpose='unit-fixture')
+        self.assertEqual(first['status'],'partial');self.assertEqual(first['n_records'],1)
+        final=self.engine.run_collection('unit_fixture',{},page_budget=1,collection_id=first['collection_id'])
+        self.assertEqual(final['status'],'done');self.assertEqual(calls,[0,1])
+        same=self.engine.run_collection('unit_fixture',{},collection_id=first['collection_id'])
+        self.assertTrue(same['reused']);self.assertEqual(calls,[0,1])
+        for page in final['pages']:
+            self.assertEqual(hashlib.sha256((self.engine.BASE/page['raw']).read_bytes()).hexdigest(),page['sha256'])
+        self.assertEqual(len(self.engine.records_preview(final['collection_id'],10)),2)
+        with self.assertRaises(ValueError):self.engine.run_collection('unit_fixture',{'changed':1},collection_id=first['collection_id'])
 
-from dayan.collection import registry, presets, engine  # noqa: E402
-from dayan.agent.data_tools import search_sources, run_preset  # noqa: E402
-
-
-def run_tests():
-    passed, failed = 0, 0
-
-    def check(name, cond, detail=""):
-        nonlocal passed, failed
-        if cond:
-            passed += 1
-            print(f"[PASS] {name}")
-        else:
-            failed += 1
-            print(f"[FAIL] {name} {detail}")
-
-    # ---- 注册表 ----
-    m = registry.matrix()
-    check("矩阵≥30源", len(m) >= 30, f"n={len(m)}")
-    cats = {r["cat"] for r in m}
-    check("8类全覆盖", cats == set(registry.CATS), f"cats={cats}")
-    check("状态值合法", all(r["state"] in registry.STATES for r in m))
-    live = [r["source_id"] for r in m if r["state"] == "live"]
-    check("live≥12源", len(live) >= 12, f"live={live}")
-    cn_live = [s for s in live if s.startswith("cn_")]
-    check("中国官方live≥2", len(cn_live) >= 2, f"{cn_live}")
-    # 非法状态拒绝
-    try:
-        registry.set_state("__test__", "super_live")
-        check("非法状态被拒", False)
-    except ValueError:
-        check("非法状态被拒", True)
-
-    # ---- 预设 ----
-    p = presets.list_presets()
-    check("预设≥6", len(p) >= 6, f"n={len(p)}")
-    # 占位符缺失报错（不静默）
-    pr = presets.get_preset("pop_employment_wb")
-    try:
-        presets.resolve_params(pr, {})
-        check("缺占位符报错", False)
-    except ValueError:
-        check("缺占位符报错", True)
-    # 地区别名映射
-    resolved = presets.resolve_params(pr, {"indicator": "SP.POP.TOTL",
-                                           "country": "中国",
-                                           "year_from": 2019, "year_to": 2024})
-    check("地区别名自动映射 中国→CHN", resolved["country"] == "CHN",
-          f"country={resolved['country']}")
-
-    # ---- 引擎账本（盘上真实任务） ----
-    tasks = engine.list_tasks()
-    ok_tasks = [t for t in tasks if t["status"] in ("done", "partial")
-                and t.get("n_records", 0) > 0]
-    check("盘上成功任务≥12", len(ok_tasks) >= 12, f"n={len(ok_tasks)}")
-    themes = {t.get("theme") for t in ok_tasks}
-    check("主题≥6", len(themes) >= 6, f"themes={sorted(themes)[:8]}…")
-    # partial 如实标记（任务书：预算截断必须partial）
-    partials = [t for t in tasks if t.get("partial")]
-    check("partial 机制存在且被真实使用", len(partials) >= 1,
-          f"n_partial={len(partials)}")
-    # 原始快照哈希一致性（抽验1个任务）
-    if ok_tasks:
-        t0 = ok_tasks[0]
-        d = ROOT / "data" / "collections" / t0["collection_id"]
-        manifest_ok = (d / "records.jsonl").exists() and \
-                      any((d / "originals").glob("page_*.raw"))
-        check("原始快照+记录文件在盘", manifest_ok, str(d))
-        if manifest_ok:
-            first = t0["pages"][0]
-            import hashlib
-            real = hashlib.sha256((ROOT / "data" / "collections" /
-                                   first["raw"]).read_bytes()).hexdigest()
-            check("页哈希可复算", real == first["sha256"])
-
-    # ---- Agent 工具链 ----
-    r = search_sources("就业")
-    check("search_sources 主题检索", r["ok"] and r["payload"]["n_sources"] >= 3)
-    r2 = run_preset("pop_employment_wb",
-                    {"indicator": "SP.POP.TOTL", "country": "中国",
-                     "year_from": "2019", "year_to": "2024"})
-    # 已缓存任务幂等返回（同参数同collection_id不重复采集）
-    check("同参数幂等复用（不冒称重采）", r2["ok"] and
-          r2["payload"].get("status") in ("done", "partial"))
-
-    print(f"\n{passed} passed, {failed} failed")
-    return 1 if failed else 0
-
-
-if __name__ == "__main__":
-    sys.exit(run_tests())
+if __name__=='__main__':unittest.main(verbosity=2)

@@ -31,6 +31,9 @@ def _smoke_module(module, skip=("_Base", "_LandBase", "per_comm_rounded",
             continue
         if getattr(cls, "__module__", "") != module.__name__:
             continue
+        if getattr(cls, 'requires_external', False):
+            print(f'[SKIP] {name} 需要真实外部服务；离线探针不调用')
+            continue
         n += 1
         try:
             m = cls()
@@ -94,15 +97,20 @@ def test_mind_architectures():
     sigma.step(0, 0.1)
     assert "belief_X" in sigma.observe()
     react = d["BEH130"]
-    react.initialize({}, {}, None, None, rng)
-    # 2026-11-13 重写后思考-行动-观察环由 step 驱动（initialize 仅建骨架）
-    react.step(0, 0.1)
-    assert react.observe()["actions_executed"] >= 1,         f"ReAct 环未执行 {react.observe()}"
+    assert react.requires_external, 'ReAct必须声明真实LLM依赖'
+    from unittest.mock import patch
+    import os
+    with patch.dict(os.environ, {'DAYAN_API_KEY': ''}):
+        try:
+            react.initialize({}, {}, None, None, rng)
+            raise AssertionError('未配置真实LLM不应初始化成功')
+        except RuntimeError as exc:
+            assert '真实LLM' in str(exc)
     rag = d["BEH134"]
     rag.initialize({}, {}, None, None, rng)
     rag_o = rag.observe()
     assert any(k in rag_o for k in ("retrieval_2hop", "evidence", "hops")),         f"GraphRAG 检索观测缺失 {list(rag_o)}"
-    print(f"[PASS] 认知/生成式骨架：OCC/Sigma/ReAct/GraphRAG 机制验证")
+    print('[PASS] OCC/Sigma/GraphRAG离线机制；ReAct真实服务缺失时诚实拒绝（未验证在线生成）')
 
 
 def test_key_net_extended_benchmarks():
