@@ -45,16 +45,18 @@ def test_final_16_runnable():
 
 
 def test_platform_zero_remaining():
-    """目录终态：仅登记 = 0。"""
-    import json
-    cat = json.loads(Path(str(ROOT / "data" / "dayan_catalog.json"))
-                    .read_text(encoding="utf-8"))
-    remaining = [m["model_id"] for m in cat["models"]
-                 if m["status"] == "仅登记"]
-    assert len(remaining) == 0, f"仍有 {len(remaining)} 条仅登记: {remaining[:5]}"
-    from collections import Counter
-    dist = Counter(m["status"] for m in cat["models"])
-    print(f"[PASS] 目录终态：556 = {dict(dist)}（零仅登记）")
+    """An implementation entry is separate from a declaration and verification."""
+    from dayan.fidelity import get_catalog
+    from dayan.model_index import resolve
+    cat=get_catalog()
+    for row in cat['models']:
+        assert row['has_factory']==(resolve(row['model_id'])[0] is not None)
+        if not row['has_factory']:
+            assert row['fidelity']=='registered' and not row['runnable']
+        if row['probe']['status']=='not_run':
+            assert row['probe'].get('ok') is None
+    assert cat['counts']['registered_no_factory']==sum(not m['has_factory'] for m in cat['models'])
+    print('[PASS] 目录逐项核对真实运行工厂；仅登记项如实保留，不以旧状态声明零残留')
 
 
 if __name__ == "__main__":

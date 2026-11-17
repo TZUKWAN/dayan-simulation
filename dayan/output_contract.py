@@ -114,7 +114,7 @@ def _class_fields(cls):
     return fields, evidence
 
 
-def output_contract(mid):
+def output_contract(mid, *, reference_results=None):
     from .model_index import resolve
     protocol, factory = resolve(mid)
     if factory is None:
@@ -128,12 +128,25 @@ def output_contract(mid):
     else:
         fields, evidence = _class_fields(cls)
     fields = {k: dict(v) for k, v in fields.items()}
+    # Explicit, saved reference probes can supply dynamic fields. No discovery
+    # request initiates a simulation. Changed execution sources invalidate them.
+    from .fidelity import _existing_probes, models_source_fingerprint
+    if reference_results is None:
+        reference_results = _existing_probes(models_source_fingerprint())
+    reference = reference_results.get(mid, {})
+    if reference.get('ok'):
+        for name, kinds in reference.get('output_types', {}).items():
+            scalar = set(kinds)-{'null'}
+            fields[name] = {'type': next(iter(scalar)) if len(scalar)==1 else 'unknown',
+                            'nullable': 'null' in kinds, 'optional': True}
     primary = getattr(cls, "primary_metric", None) or PRIMARY_METRICS.get(str(mid).upper())
     if primary not in fields:
         primary = None
     return {"version": "source-output-1", "model_id": mid, "protocol": protocol,
             "fields": fields, "primary_metric": primary, "additional_fields": True,
             "evidence_kind": "source-contract", "evidence": evidence,
+            "reference_probe": {'status': 'passed' if reference.get('ok') else 'not_executed',
+                                'scope': '对应源码的参考运行，不是当前请求的测量'},
             "runtime_verified": False}
 
 

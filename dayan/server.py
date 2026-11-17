@@ -54,17 +54,9 @@ def configure_planner():
 
 
 def _load_catalog():
-    cat_path = ROOT / "data" / "dayan_catalog.json"
-    cat = json.loads(cat_path.read_text(encoding="utf-8")) if cat_path.exists() else {"models": []}
-    from .custom_models import capabilities
-    extra = [{"model_id": c["model_id"], "name": c.get("name", c["model_id"]),
-              "kind": "自定义可执行规约", "layer": "模型层",
-              "status": "未独立审查" if c["runnable"] else "规约未通过"} for c in capabilities()]
-    extra.append({"model_id": "CPL001", "name": "路网疏散 老年行动 信息 公交耦合", "kind": "复合机制模型", "layer": "模型层", "status": "情景原型 需真实数据输入"})
-    existing = {m["model_id"] for m in cat["models"]}
-    cat["models"] += [m for m in extra if m["model_id"] not in existing]
-    cat["count"] = len(cat["models"])
-    return cat
+    from .fidelity import get_catalog
+    catalog=get_catalog()
+    return {'count':catalog['counts']['total'],'counts':catalog['counts'],'models':catalog['models']}
 
 
 @app.on_event("startup")
@@ -357,7 +349,7 @@ async def api_models_search(theme: str = "", limit: int = 60):
     if matched:
         rx = re.compile("|".join(MECHANISMS[m] for m in matched), re.I)
         for m in models:
-            blob = " ".join([m.get("basis") or "", m.get("model_id") or "",
+            blob = " ".join([m.get("name") or "", m.get("description") or "", " ".join(m.get("mechanisms") or []), m.get("basis") or "", m.get("model_id") or "",
                              " ".join(m.get("simplifications") or []),
                              m.get("evidence") or "", m.get("fidelity_zh") or ""])
             if rx.search(blob):

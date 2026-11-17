@@ -152,6 +152,8 @@ def load_capabilities(refresh=False):
     from ..runtime import param_contract
     from ..custom_models import capabilities as custom_capabilities
     from ..output_contract import output_contract
+    from ..fidelity import _existing_probes, models_source_fingerprint
+    reference = _existing_probes(models_source_fingerprint())
     by_id = {}
     catalog_names=_catalog_names()
     for mid in sorted(ALL_INDEX):
@@ -159,7 +161,7 @@ def load_capabilities(refresh=False):
             continue
         protocol, factory = resolve(mid)
         cls = factory[1] if isinstance(factory, tuple) else factory
-        schema = output_contract(mid)
+        schema = output_contract(mid, reference_results=reference)
         cap = dict(by_id.get(mid, {}))
         cap.update(model_id=mid, protocol=protocol,
                    name=(inspect.getdoc(cls) or catalog_names.get(mid) or mid).splitlines()[0][:160],

@@ -27,7 +27,7 @@ def category(name):
     if 'performance' in name: return 'performance'
     if any(s in name for s in ('e2e','requirements','scenario_alignment','assistant_scene','workspace_reports','research_integrity')): return 'e2e'
     if any(s in name for s in ('report','datasets','artifacts','job_store','security','task_manager')): return 'api'
-    if any(s in name for s in ('civil_violence','game_contract','benchmarks','mechfix','families','models','engines','eco_','net_','coupled')): return 'mechanism'
+    if any(s in name for s in ('civil_violence','game_contract','benchmarks','model_probe','mechfix','families','models','engines','eco_','net_','coupled')): return 'mechanism'
     return 'unit'
 
 

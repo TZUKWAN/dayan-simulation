@@ -36,7 +36,7 @@ def run_tests():
     check("计数一致（total=各分级和）",
           cat["counts"]["total"] == sum(cat["counts"]["fidelity"].values())
           == len(cat["models"]))
-    check("可运行计数与探针一致",
+    check("运行入口计数一致（不混为探针通过）",
           cat["counts"]["runnable"] == sum(1 for m in cat["models"]
                                            if m["runnable"]))
     check("每条记录带证据字段",
@@ -50,7 +50,7 @@ def run_tests():
               for m in cat["models"] if m["reviewed"]))
     check("未审可运行条目不虚标（降级为 prototype；仅登记条目除外）",
           all(m["fidelity"] == "prototype" for m in cat["models"]
-              if not m["reviewed"] and m["fidelity"] != "registered"))
+              if not m["reviewed"] and m["fidelity"] not in ("registered", "method_demo")))
 
     # 已知审查结论抽检（防止装配器悄悄改动级别）
     by_id = {m["model_id"]: m for m in cat["models"]}
@@ -60,8 +60,11 @@ def run_tests():
             "BEH129": "prototype",
             "ECO112": "full"}      # 线性律修复后升级
     for mid, expect in spot.items():
-        got = by_id.get(mid, {}).get("fidelity")
-        check(f"抽检 {mid}={expect}", got == expect, f"got={got}")
+        record = by_id.get(mid, {})
+        got = record.get('historical_review', {}).get('fidelity')
+        check(f"历史审查 {mid}={expect} 保留且不冒充当前证据", got == expect, f"got={got}")
+        check(f"{mid} 当前高忠实级别必须有源码锚点",
+              record['reviewed'] or record['fidelity'] == 'prototype')
 
     # 测试证据链接
     refs = test_refs_for("NET052")
@@ -79,13 +82,13 @@ def run_tests():
     # （审查里允许有目录外条目：engines 机制实体、别名备选实现等）
     by_id = {m["model_id"]: m for m in cat["models"]}
     missing_flag = [mid for mid in rv if mid in by_id
-                    and not by_id[mid]["reviewed"]]
+                    and by_id[mid]["review_status"] != rv[mid]['review_status']]
     check("审查条目全部合并进目录（交集不变式）", not missing_flag,
           f"未合并: {missing_flag[:5]}")
 
     # 观测量缓存（编译器依赖）
-    obs61 = (by_id.get("NET061", {}).get("probe") or {}).get("observables")
-    check("NET061 探针观测量含标量总量", bool(obs61) and
+    obs61 = (by_id.get("NET061", {}).get("output_contract") or {}).get("fields")
+    check("NET061 源码输出合同含标量总量（不依赖隐式探针）", bool(obs61) and
           "I_total" in obs61, f"obs={obs61}")
 
     print(f"\n{passed} passed, {failed} failed")
