@@ -1,0 +1,126 @@
+{
+  "ok": true,
+  "session_id": "dayan-audit-cc7bdbcd113e",
+  "study_id": "ST-104262efaab049d5aca5e635",
+  "run_id": "R20261117T201800-fffeb83407084ad3ad4d701e8b465926",
+  "actual_tool_calls": 7,
+  "rejected_then_recovered": 1,
+  "initial_strict_verifier_passed": false,
+  "original_request_exact": true,
+  "country": "DEU",
+  "date": "2010:2015",
+  "grid": {
+    "slope": [
+      -1,
+      -0.75,
+      -0.5,
+      -0.25,
+      0
+    ]
+  },
+  "threshold": 1,
+  "training_rmse": 0.3197835205259959,
+  "holdout_rmse": 1.14364701722166,
+  "validation": "failed_holdout",
+  "collection_id": "C20261118T041545-ad43481b",
+  "source_pages": [
+    {
+      "url": "https://api.worldbank.org/v2/country/DEU/indicator/SL.UEM.TOTL.ZS?format=json&date=2010%3A2015&per_page=500&page=1",
+      "sha256": "096b528ec30ee9c74fd7db415740732a7bb0fae9abc63f9d7794c71e7b1f173e",
+      "records_sha256": "28f78e73f0ab3dc79e8aad90af70bbc78e536801003057b50274ac311eeee533",
+      "bytes": 1567,
+      "n_records": 6
+    }
+  ],
+  "training_dataset": {
+    "dataset_id": "DS-7b696bea968b6c0b5e33e620",
+    "sha256": "b06732905f9d8ad6e40e4007ceb2371b94a7bb789b6521e630c1ac8da407fbfe",
+    "data_sha256": "b06732905f9d8ad6e40e4007ceb2371b94a7bb789b6521e630c1ac8da407fbfe",
+    "role": "calibration",
+    "metadata": {
+      "unit": "%",
+      "scope": "DEU",
+      "frequency": "annual",
+      "collection_id": "C20261118T041545-ad43481b",
+      "raw_pages": [
+        "096b528ec30ee9c74fd7db415740732a7bb0fae9abc63f9d7794c71e7b1f173e"
+      ],
+      "transform": {
+        "sort_by": "date ASC",
+        "date": "integer year",
+        "value": "float",
+        "unit_mapping": "SL.UEM.TOTL.ZS"
+      },
+      "holdout_excluded": [
+        2014,
+        2015
+      ],
+      "input_records_sha256": "bc3d8484d353f071cc7da5710d5b8586f998752807b99d2a2a5c816423a970aa"
+    },
+    "n_records": 4
+  },
+  "training": {
+    "dates": [
+      2010,
+      2011,
+      2012,
+      2013
+    ],
+    "actual": [
+      7.043,
+      5.967,
+      5.372,
+      5.316
+    ],
+    "predicted": [
+      7.043,
+      6.293,
+      5.543,
+      4.793
+    ],
+    "residuals": [
+      0,
+      -0.3260000000000005,
+      -0.17100000000000026,
+      0.5229999999999997
+    ]
+  },
+  "holdout": {
+    "n": 2,
+    "dates": [
+      2014,
+      2015
+    ],
+    "actual": [
+      4.979,
+      4.612
+    ],
+    "predicted": [
+      4.043,
+      3.293
+    ],
+    "residuals": [
+      0.9359999999999999,
+      1.319
+    ],
+    "rmse": 1.14364701722166,
+    "tolerance": 1,
+    "tolerance_met": false,
+    "baseline_train_mean_rmse": 1.1438152167199036
+  },
+  "original_request": "实际验收任务。仅使用dayan工具执行，不用shell，不委托其他agent。\n采集德国2010到2015年的失业率数据，指标SL.UEM.TOTL.ZS，国家DEU，ILO模型估计占劳动力百分比，完整6年。\n建立线性趋势模型linear，参数网格slope=[-1,-0.75,-0.5,-0.25,0]，首年实测值初始化，末尾2年留出，预算最多5次。\n事前训练和留出RMSE阈值均为1.0个百分点，不放宽。实际运行校准并保存模型，然后以新的study_id生成本次学术DOCX和复现包。\n先读schema核对合同。目录检索不算实际数据。留出失败仍生成如实呈现失败的报告，不要更换国家、指标、时间、模型或阈值。\n最后给出实际collection_id、study_id、run_id、训练/留出RMSE、验证结论、报告下载路径。不能凭测试通过宣称科学有效。",
+  "data_binding": {
+    "dataset_id": "DS-7b696bea968b6c0b5e33e620",
+    "field": "value",
+    "aggregate": "first",
+    "parameter": "p0",
+    "scale": 1,
+    "source_unit": "%",
+    "target_unit": "%",
+    "source_scope": "DEU",
+    "target_scope": "DEU",
+    "order_by": "date"
+  },
+  "run_observations_sha256": "5d598953fdadc5802c625c50f4e1a80acd0b117c01b3b34fef076e28b5ae9b7c",
+  "code_archive_sha256": "c5c7a2b9d685428eedbcfd9e9658c24b203234b48f8d488ae7d4a6f99061b4ea"
+}

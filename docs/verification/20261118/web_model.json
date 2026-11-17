@@ -1,0 +1,409 @@
+{
+  "ok": true,
+  "job_id": "6d3c92dfd15a4e21bc64d25785647370",
+  "run_id": "R20261117T211045-5e2284fb9535474788db8538aa1fb01f",
+  "model_id": "USRA6C075EBC922",
+  "planner": "rule",
+  "original_request": "创建一个二维主体模型：37名行人在宽40米、高30米的矩形大厅里，从左侧区域（x为1至8米，y为1至29米）以每秒1米的固定速度直线走向右侧出口（x=40米，y=15米），到达出口后停止。忽略人与人之间的避让，这是机制演示，不用真实数据。把人数作为n参数，出口位置作为有效参数，画面要显示大厅、出口和真实的行人位置。运行200步，步长0.2，种子7。",
+  "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+  "actual_llm_calls": [
+    {
+      "call_id": "LLM-177d7f40fd1444efbbf312247fcabaa0",
+      "purpose": "build-model",
+      "model": "deepseek-v4.1-flash-1017",
+      "created_at": "2026-11-17T21:10:04.313688+00:00",
+      "request_sha256": "7dbebb80546034f84d5dbffbaded8045fc570182678aa2b9e224586f86b91fb3",
+      "max_tokens": 393216,
+      "input_token_upper_bound": 9062,
+      "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+      "context_window": 1000000,
+      "provider_max_output_tokens": 393216,
+      "limit_source": "provider-metadata-and-official-documentation",
+      "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+      "ok": true,
+      "enable_thinking": false,
+      "usage": {
+        "prompt_tokens": 1907,
+        "total_tokens": 3317,
+        "completion_tokens": 1410,
+        "prompt_tokens_details": {
+          "cached_tokens": 1792,
+          "image_tokens": 0,
+          "text_tokens": 1907
+        },
+        "completion_tokens_details": {
+          "text_tokens": 1410
+        }
+      },
+      "finish_reason": "stop",
+      "response_sha256": "a8972b42ffc79c8bfc2effae6e28cf0c1bd79f9ebe6b329bc1661b2dfba3b6f1",
+      "duration_s": 6.742
+    },
+    {
+      "call_id": "LLM-4c6e81eed157483c8aa502eb873e61d3",
+      "purpose": "scene-semantic-review",
+      "model": "deepseek-v4.1-flash-1017",
+      "created_at": "2026-11-17T21:10:11.061642+00:00",
+      "request_sha256": "fd86a0d1f9248040fae331ac6bb580759224e5dbebb7938a34cf8a5bc815d967",
+      "max_tokens": 393216,
+      "input_token_upper_bound": 10321,
+      "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+      "context_window": 1000000,
+      "provider_max_output_tokens": 393216,
+      "limit_source": "provider-metadata-and-official-documentation",
+      "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+      "ok": true,
+      "enable_thinking": true,
+      "usage": {
+        "prompt_tokens": 2463,
+        "total_tokens": 7511,
+        "completion_tokens": 5048,
+        "prompt_tokens_details": {
+          "cached_tokens": 256,
+          "image_tokens": 0,
+          "text_tokens": 2463
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4498,
+          "text_tokens": 549
+        }
+      },
+      "finish_reason": "stop",
+      "response_sha256": "623167e49e36094350327277db42dffe9359f66cb267e8017fcd486af613398b",
+      "duration_s": 33.949
+    }
+  ],
+  "scenario_review": {
+    "matched": true,
+    "missing": [],
+    "checks": [
+      {
+        "quote": "创建一个二维主体模型",
+        "refs": [
+          "kind",
+          "space.width",
+          "space.height",
+          "agents.update.x",
+          "agents.update.y"
+        ]
+      },
+      {
+        "quote": "37名行人",
+        "refs": [
+          "parameters.n.default",
+          "agents.count",
+          "execution.parameters.n"
+        ]
+      },
+      {
+        "quote": "宽40米、高30米的矩形大厅",
+        "refs": [
+          "space.width",
+          "space.height",
+          "space.unit",
+          "scenario.facilities.hall.width",
+          "scenario.facilities.hall.depth"
+        ]
+      },
+      {
+        "quote": "从左侧区域（x为1至8米，y为1至29米）",
+        "refs": [
+          "agents.initial.x",
+          "agents.initial.y"
+        ]
+      },
+      {
+        "quote": "以每秒1米的固定速度直线走向右侧出口（x=40米，y=15米）",
+        "refs": [
+          "parameters.speed.default",
+          "parameters.speed.unit",
+          "parameters.exit_x.default",
+          "parameters.exit_y.default",
+          "agents.update.x",
+          "agents.update.y"
+        ]
+      },
+      {
+        "quote": "到达出口后停止",
+        "refs": [
+          "agents.update.arrived",
+          "agents.update.x",
+          "agents.update.y",
+          "visualization.color_by"
+        ]
+      },
+      {
+        "quote": "忽略人与人之间的避让",
+        "refs": [
+          "agents.update.x",
+          "agents.update.y",
+          "agents.update.arrived"
+        ]
+      },
+      {
+        "quote": "把人数作为n参数",
+        "refs": [
+          "parameters.n.default",
+          "parameters.n.type",
+          "agents.count",
+          "execution.parameters.n"
+        ]
+      },
+      {
+        "quote": "出口位置作为有效参数",
+        "refs": [
+          "parameters.exit_x",
+          "parameters.exit_y",
+          "scenario.facilities.exit.x",
+          "scenario.facilities.exit.y"
+        ]
+      },
+      {
+        "quote": "画面要显示大厅、出口和真实的行人位置",
+        "refs": [
+          "scenario.facilities.hall",
+          "scenario.facilities.exit",
+          "visualization.glyph",
+          "agents.update.x",
+          "agents.update.y"
+        ]
+      },
+      {
+        "quote": "运行200步，步长0.2，种子7",
+        "refs": [
+          "execution.ticks",
+          "execution.dt",
+          "execution.seed"
+        ]
+      },
+      {
+        "quote": "种子7",
+        "refs": [
+          "execution.seed",
+          "agents.initial.x",
+          "agents.initial.y"
+        ]
+      }
+    ],
+    "limitations": [
+      "出口以参数点(exit_x,exit_y)及1×1显示尺寸表示，未建模有限宽度门；用户仅要求出口位置作为有效参数。",
+      "初始位置采用左侧区域内的均匀随机分布；用户未指定具体分布，采用该简化以配合种子7。",
+      "行人无身体尺寸、无避让、无排队、无墙体碰撞与通行能力建模，符合机制演示且不用于现实校准。",
+      "execution.prior为空，未进行原模型沿用对比。"
+    ],
+    "method": "真实LLM语义复核 + 本地引用/数据流校验",
+    "scientific_validation": false
+  },
+  "actual_parameters": {
+    "n": 37,
+    "exit_x": 40,
+    "exit_y": 15,
+    "speed": 1
+  },
+  "model_definition": {
+    "name": "hall_exit_pedestrians",
+    "description": "37名行人从大厅左侧区域以1 m/s固定速度直线走向右侧出口，到达后停止；忽略避让。",
+    "kind": "agents",
+    "time_unit": "s",
+    "mechanisms": [
+      "固定速度直线目标移动",
+      "到达出口后停止",
+      "无避让的独立行人运动"
+    ],
+    "assumptions": [
+      "行人在二维平面内运动，不考虑身体尺寸与碰撞",
+      "行人之间无避让、无排队、无相互作用",
+      "出口为点目标，到达即停止",
+      "初始位置在左侧矩形区域内均匀随机分布"
+    ],
+    "limitations": [
+      "不模拟行人之间的避让与拥挤",
+      "不模拟墙体碰撞与出口通行能力",
+      "不模拟楼层、烟气或流体场",
+      "出口为点而非有限宽度门"
+    ],
+    "parameters": {
+      "n": {
+        "default": 37,
+        "type": "int",
+        "minimum": 1,
+        "maximum": 2000,
+        "unit": "人",
+        "mutable": false
+      },
+      "exit_x": {
+        "default": 40,
+        "type": "float",
+        "minimum": 0,
+        "maximum": 40,
+        "unit": "m",
+        "mutable": true
+      },
+      "exit_y": {
+        "default": 15,
+        "type": "float",
+        "minimum": 0,
+        "maximum": 30,
+        "unit": "m",
+        "mutable": true
+      },
+      "speed": {
+        "default": 1,
+        "type": "float",
+        "minimum": 0.01,
+        "maximum": 10,
+        "unit": "m/s",
+        "mutable": true
+      }
+    },
+    "initial_state": {},
+    "rates": {},
+    "observables": {
+      "arrived_count": "sum_arrived",
+      "population": "n_agents",
+      "x_mean": "mean_x",
+      "y_mean": "mean_y"
+    },
+    "agents": {
+      "count": "n",
+      "initial": {
+        "x": "uniform(1, 8)",
+        "y": "uniform(1, 29)",
+        "arrived": "0"
+      },
+      "update": {
+        "x": "x + min(speed * dt, sqrt((exit_x - x)**2 + (exit_y - y)**2)) * ((exit_x - x) / sqrt((exit_x - x)**2 + (exit_y - y)**2)) if arrived == 0 and sqrt((exit_x - x)**2 + (exit_y - y)**2) > 0 else x",
+        "y": "y + min(speed * dt, sqrt((exit_x - x)**2 + (exit_y - y)**2)) * ((exit_y - y) / sqrt((exit_x - x)**2 + (exit_y - y)**2)) if arrived == 0 and sqrt((exit_x - x)**2 + (exit_y - y)**2) > 0 else y",
+        "arrived": "1 if arrived == 0 and sqrt((exit_x - x)**2 + (exit_y - y)**2) <= speed * dt else arrived"
+      },
+      "type": "agent",
+      "color_by": "arrived"
+    },
+    "space": {
+      "width": 40,
+      "height": 30,
+      "unit": "m"
+    },
+    "visualization": {
+      "glyph": "person",
+      "color_by": "arrived",
+      "label": "到达状态"
+    },
+    "scenario": {
+      "title": "大厅行人走向出口",
+      "setting": "40m×30m矩形大厅，37名行人从左侧x∈[1,8]、y∈[1,29]区域出发，以1 m/s直线走向右侧出口(40,15)，到达后停止；忽略避让。",
+      "agent_label": "行人",
+      "facilities": [
+        {
+          "id": "hall",
+          "kind": "room",
+          "label": "大厅",
+          "x": "20",
+          "y": "15",
+          "width": "40",
+          "depth": "30",
+          "role": "context",
+          "behavior_parameters": []
+        },
+        {
+          "id": "exit",
+          "kind": "exit",
+          "label": "出口",
+          "x": "exit_x",
+          "y": "exit_y",
+          "width": "1",
+          "depth": "1",
+          "role": "modeled",
+          "behavior_parameters": [
+            "exit_x",
+            "exit_y"
+          ]
+        }
+      ],
+      "requirements": [
+        {
+          "quote": "37名行人",
+          "model_refs": [
+            "agents.count",
+            "parameters.n"
+          ],
+          "visual_refs": [
+            "agents.initial",
+            "visualization.color_by"
+          ]
+        },
+        {
+          "quote": "宽40米、高30米的矩形大厅",
+          "model_refs": [
+            "space.width",
+            "space.height"
+          ],
+          "visual_refs": [
+            "scenario.facilities.hall"
+          ]
+        },
+        {
+          "quote": "从左侧区域（x为1至8米，y为1至29米）",
+          "model_refs": [
+            "agents.initial.x",
+            "agents.initial.y"
+          ],
+          "visual_refs": [
+            "agents.initial"
+          ]
+        },
+        {
+          "quote": "以每秒1米的固定速度直线走向右侧出口（x=40米，y=15米）",
+          "model_refs": [
+            "parameters.speed",
+            "agents.update.x",
+            "agents.update.y",
+            "parameters.exit_x",
+            "parameters.exit_y"
+          ],
+          "visual_refs": [
+            "scenario.facilities.exit"
+          ]
+        },
+        {
+          "quote": "到达出口后停止",
+          "model_refs": [
+            "agents.update.arrived",
+            "agents.update.x",
+            "agents.update.y"
+          ],
+          "visual_refs": [
+            "visualization.color_by"
+          ]
+        },
+        {
+          "quote": "画面要显示大厅、出口和真实的行人位置",
+          "model_refs": [
+            "agents.initial.x",
+            "agents.initial.y",
+            "agents.update.x",
+            "agents.update.y"
+          ],
+          "visual_refs": [
+            "scenario.facilities.hall",
+            "scenario.facilities.exit",
+            "visualization.glyph"
+          ]
+        }
+      ],
+      "source_request": "创建一个二维主体模型：37名行人在宽40米、高30米的矩形大厅里，从左侧区域（x为1至8米，y为1至29米）以每秒1米的固定速度直线走向右侧出口（x=40米，y=15米），到达出口后停止。忽略人与人之间的避让，这是机制演示，不用真实数据。把人数作为n参数，出口位置作为有效参数，画面要显示大厅、出口和真实的行人位置。运行200步，步长0.2，种子7。"
+    }
+  },
+  "entity_count": 37,
+  "n_frames": 201,
+  "final_t": 40,
+  "checks": [
+    "actual configured LLM planner in supervised HTTP worker",
+    "actual DSL generation and independent scene review",
+    "37 persistent agents",
+    "exact original request retained",
+    "actual hall and exit facility",
+    "fixed-speed motion numerically checked",
+    "saved stream has true final time"
+  ]
+}

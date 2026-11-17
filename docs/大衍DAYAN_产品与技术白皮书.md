@@ -1,7 +1,7 @@
 # 大衍 DAYAN 社会仿真平台 · 产品与技术白皮书
 
 > 版本 v1.0 · 2026-11-10
-> 代码库位置：`D:\社会模拟仿真\msim\`
+> 代码库位置：`本仓库根目录`
 > 运行方式：`python -m dayan.server` → http://127.0.0.1:8899/
 
 ---
@@ -625,7 +625,7 @@ curl http://127.0.0.1:8899/api/agent/planner_status
 
 ```bash
 # 1. 启动
-cd D:\社会模拟仿真\msim
+cd dayan-simulation
 python -m dayan.server
 # 看到 [DAYAN] LLM planner 已接入：aliyun-maas 即完整启动
 

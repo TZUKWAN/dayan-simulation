@@ -30,7 +30,7 @@
 4. **避免范围蔓延**：设计文档 §8 风险表首条——"范围蔓延（什么学科都想做）"
 
 ## 5. 若用户要求立即对接（推翻本评估）
-路径：clone 到 `D:\社会模拟仿真\msim\external\god` → 读其 `server/` API 契约 →
+路径：clone 到 `external/god` → 读其 `server/` API 契约 →
 写 `src/kernel/god_bridge.py` 把 msim Kernel 包装成其期望的 agent provider →
 前端不动。预估 1-2 天，需用户确认投入。
 

@@ -87,6 +87,7 @@ def run(base,output,engine='firefox'):
             check('large run retains final frame and discloses render sampling',page.evaluate('_vizStateStream.frames.at(-1).sim_t===DAYAN_RESULTS.end') and '采样3000' in page.locator('#vizStateHud').inner_text())
             check('large-scene GPU instances retain actual entity IDs and coordinates',page.evaluate('''()=>{const g=_scene.children.find(c=>c.userData.isStateGroup),b=g.userData.carBatch,f=_vizStateStream.frames.at(-1),road=f.facilities.find(f=>f.type==='road');if(!b||b.count!==3000)return false;const saved=new Map(f.entities.map(e=>[String(e.id),e])),m=new THREE.Matrix4(),v=new THREE.Vector3();return b.userData.instanceIds.every((id,i)=>{const e=saved.get(String(id));b.getMatrixAt(i,m);v.setFromMatrixPosition(m);return !!e&&Math.abs(v.x-30*Math.cos(e.x/road.length*Math.PI*2))<1e-4&&Math.abs(v.z-30*Math.sin(e.x/road.length*Math.PI*2))<1e-4;});}'''))
             performance=page.evaluate('''()=>{const times=[];for(let i=0;i<5;i++){const start=performance.now();DAYAN3D.renderAt(DAYAN_RESULTS.end);_vizRenderer.getContext().finish();times.push(performance.now()-start);}return {timing:'completed GPU render (WebGL finish)',render_ms:times,geometries:_vizRenderer.info.memory.geometries,draw_calls:_vizRenderer.info.render.calls,triangles:_vizRenderer.info.render.triangles,archived_entities:_vizStateStream.n_entities_max,frames:_vizStateStream.frames.length};}''')
+            print('Measured browser render: '+json.dumps(performance),flush=True)
             check('large-scene render remains bounded',max(performance['render_ms'])<5000 and performance['frames']<=201)
             # Keep the actual visible WebGL viewport; expanding a large canvas
             # for a full-page capture can stall Chromium's software compositor.
@@ -101,7 +102,7 @@ def run(base,output,engine='firefox'):
             page.reload(wait_until='domcontentloaded');page.wait_for_function('DAYAN_RESULTS.runs[0]?.run_id',timeout=30000)
             check('reload restores the saved run without creating a new one',page.evaluate('DAYAN_RESULTS.runs[0].run_id')==rid)
             check('no uncaught application JavaScript errors',not errors)
-            result={'ok':True,'checks':checks,'errors':errors,'performance':performance,'run_ids':[rid,iv['run_id'],queue['run_id'],large['run_id']]}
+            result={'ok':True,'browser':engine,'checks':checks,'errors':errors,'performance':performance,'run_ids':[rid,iv['run_id'],queue['run_id'],large['run_id']]}
             (output/'verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
             return result
         except Exception as error:

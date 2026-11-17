@@ -1,0 +1,1201 @@
+{
+  "scope": "Real GitHub Actions offline results; external validation is recorded separately.",
+  "commit": "179053ee79d46d3f3dde7325f268d736a8b6948b",
+  "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+  "platforms": [
+    {
+      "platform": "ubuntu",
+      "job_id": 134368732973,
+      "url": "https://github.com/TZUKWAN/dayan-simulation/actions/runs/44176386367/job/134368732973",
+      "passed": 508,
+      "skipped": 3,
+      "failed_suites": 0,
+      "suites": [
+        {
+          "suite": "test_agent_job_store",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 3.164
+        },
+        {
+          "suite": "test_api_security",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.451
+        },
+        {
+          "suite": "test_assistant_scene_routing",
+          "verdict": "PASS",
+          "passed": 8,
+          "skipped": 0,
+          "duration_s": 5.653
+        },
+        {
+          "suite": "test_benchmarks",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 21.748
+        },
+        {
+          "suite": "test_catalog_performance",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.06
+        },
+        {
+          "suite": "test_civil_violence",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.773
+        },
+        {
+          "suite": "test_collection_core",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 0.141
+        },
+        {
+          "suite": "test_collection_transport",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 0.164
+        },
+        {
+          "suite": "test_coupling_contracts",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.767
+        },
+        {
+          "suite": "test_cross_pack",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 0.981
+        },
+        {
+          "suite": "test_dayan_agent",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 2.615
+        },
+        {
+          "suite": "test_dayan_catalog_map",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.607
+        },
+        {
+          "suite": "test_dayan_core",
+          "verdict": "PASS",
+          "passed": 10,
+          "skipped": 0,
+          "duration_s": 0.112
+        },
+        {
+          "suite": "test_dayan_coupled",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.562
+        },
+        {
+          "suite": "test_dayan_eco_batch",
+          "verdict": "PASS",
+          "passed": 21,
+          "skipped": 0,
+          "duration_s": 0.182
+        },
+        {
+          "suite": "test_dayan_eco_flagship",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 8.543
+        },
+        {
+          "suite": "test_dayan_engines",
+          "verdict": "PASS",
+          "passed": 8,
+          "skipped": 1,
+          "duration_s": 0.729
+        },
+        {
+          "suite": "test_dayan_experiment",
+          "verdict": "PASS",
+          "passed": 15,
+          "skipped": 0,
+          "duration_s": 0.756
+        },
+        {
+          "suite": "test_dayan_families",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 2.484
+        },
+        {
+          "suite": "test_dayan_fidelity",
+          "verdict": "PASS",
+          "passed": 27,
+          "skipped": 0,
+          "duration_s": 1.049
+        },
+        {
+          "suite": "test_dayan_final_batch",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.789
+        },
+        {
+          "suite": "test_dayan_manifest",
+          "verdict": "PASS",
+          "passed": 14,
+          "skipped": 0,
+          "duration_s": 1.38
+        },
+        {
+          "suite": "test_dayan_mechfix",
+          "verdict": "PASS",
+          "passed": 21,
+          "skipped": 0,
+          "duration_s": 2.813
+        },
+        {
+          "suite": "test_dayan_met",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 2.239
+        },
+        {
+          "suite": "test_dayan_met_registry",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 9.005
+        },
+        {
+          "suite": "test_dayan_migration",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 0.081
+        },
+        {
+          "suite": "test_dayan_models",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 1.78
+        },
+        {
+          "suite": "test_dayan_net_final16",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 1.288
+        },
+        {
+          "suite": "test_dayan_runtime",
+          "verdict": "PASS",
+          "passed": 22,
+          "skipped": 0,
+          "duration_s": 1.013
+        },
+        {
+          "suite": "test_dayan_scene_state",
+          "verdict": "PASS",
+          "passed": 16,
+          "skipped": 0,
+          "duration_s": 1.088
+        },
+        {
+          "suite": "test_dayan_sys",
+          "verdict": "PASS",
+          "passed": 19,
+          "skipped": 0,
+          "duration_s": 1.28
+        },
+        {
+          "suite": "test_dayan_sys_extras",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.628
+        },
+        {
+          "suite": "test_dayan_traffic_ped",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 1.602
+        },
+        {
+          "suite": "test_dayan_wave2",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.168
+        },
+        {
+          "suite": "test_defined_statistics",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.062
+        },
+        {
+          "suite": "test_e2e_pipeline",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 1.716
+        },
+        {
+          "suite": "test_game_contract",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.117
+        },
+        {
+          "suite": "test_god_bridge",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.659
+        },
+        {
+          "suite": "test_kernel_facilities",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.654
+        },
+        {
+          "suite": "test_ledger",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 0.244
+        },
+        {
+          "suite": "test_live_llm",
+          "verdict": "SKIP",
+          "passed": 0,
+          "skipped": 1,
+          "duration_s": 0
+        },
+        {
+          "suite": "test_llm_limits",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.208
+        },
+        {
+          "suite": "test_media",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.163
+        },
+        {
+          "suite": "test_model_probe_all",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 60.76
+        },
+        {
+          "suite": "test_negative_cases",
+          "verdict": "PASS",
+          "passed": 14,
+          "skipped": 0,
+          "duration_s": 0.132
+        },
+        {
+          "suite": "test_online_sources",
+          "verdict": "SKIP",
+          "passed": 0,
+          "skipped": 1,
+          "duration_s": 0
+        },
+        {
+          "suite": "test_orglabor",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.758
+        },
+        {
+          "suite": "test_output_contracts",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.118
+        },
+        {
+          "suite": "test_pipeline",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.621
+        },
+        {
+          "suite": "test_platform",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 0.669
+        },
+        {
+          "suite": "test_politics",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.948
+        },
+        {
+          "suite": "test_registry",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 0.102
+        },
+        {
+          "suite": "test_repair_artifacts",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 7.977
+        },
+        {
+          "suite": "test_repair_composer",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 2.303
+        },
+        {
+          "suite": "test_repair_coupled_evacuation",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 1.381
+        },
+        {
+          "suite": "test_repair_custom_models",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.763
+        },
+        {
+          "suite": "test_repair_datasets",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 5.927
+        },
+        {
+          "suite": "test_repair_execution_inputs",
+          "verdict": "PASS",
+          "passed": 16,
+          "skipped": 0,
+          "duration_s": 1.243
+        },
+        {
+          "suite": "test_repair_generative",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 0.728
+        },
+        {
+          "suite": "test_repair_parameters",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 3.554
+        },
+        {
+          "suite": "test_repair_policy_contract",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 0.722
+        },
+        {
+          "suite": "test_repair_report",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 6.149
+        },
+        {
+          "suite": "test_repair_requirements",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 2.657
+        },
+        {
+          "suite": "test_repair_resume",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 7.197
+        },
+        {
+          "suite": "test_repair_same_run",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 0.785
+        },
+        {
+          "suite": "test_report_fonts",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 0.457
+        },
+        {
+          "suite": "test_reproducible_bundle",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 4.556
+        },
+        {
+          "suite": "test_research_constraints",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.173
+        },
+        {
+          "suite": "test_research_integrity",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 0.209
+        },
+        {
+          "suite": "test_scenario_alignment",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.842
+        },
+        {
+          "suite": "test_scene_contract",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 2.134
+        },
+        {
+          "suite": "test_scene_review_protocol",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.147
+        },
+        {
+          "suite": "test_site",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.752
+        },
+        {
+          "suite": "test_sociology",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 11.446
+        },
+        {
+          "suite": "test_state_identity",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.918
+        },
+        {
+          "suite": "test_static_delivery",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.564
+        },
+        {
+          "suite": "test_task_manager",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 2.755
+        },
+        {
+          "suite": "test_test_runner",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.268
+        },
+        {
+          "suite": "test_workspace_reports",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 7.176
+        },
+        {
+          "suite": "dayan_backend_start.test",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 0.493
+        },
+        {
+          "suite": "dayan_bridge.test",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 3.588
+        },
+        {
+          "suite": "dayan_scene_data.test",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.099
+        },
+        {
+          "suite": "dayan_session_binding.test",
+          "verdict": "PASS",
+          "passed": 9,
+          "skipped": 0,
+          "duration_s": 0.086
+        }
+      ],
+      "syntax": {
+        "python_files": 225,
+        "javascript_files": 13
+      },
+      "pip_check": "passed",
+      "tracked_diff": "clean"
+    },
+    {
+      "platform": "windows",
+      "job_id": 134368733713,
+      "url": "https://github.com/TZUKWAN/dayan-simulation/actions/runs/44176386367/job/134368733713",
+      "passed": 508,
+      "skipped": 3,
+      "failed_suites": 0,
+      "suites": [
+        {
+          "suite": "test_agent_job_store",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 4.307
+        },
+        {
+          "suite": "test_api_security",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.722
+        },
+        {
+          "suite": "test_assistant_scene_routing",
+          "verdict": "PASS",
+          "passed": 8,
+          "skipped": 0,
+          "duration_s": 10.632
+        },
+        {
+          "suite": "test_benchmarks",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 27.989
+        },
+        {
+          "suite": "test_catalog_performance",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.5
+        },
+        {
+          "suite": "test_civil_violence",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.127
+        },
+        {
+          "suite": "test_collection_core",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 0.257
+        },
+        {
+          "suite": "test_collection_transport",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 0.331
+        },
+        {
+          "suite": "test_coupling_contracts",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.153
+        },
+        {
+          "suite": "test_cross_pack",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 1.407
+        },
+        {
+          "suite": "test_dayan_agent",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 3.831
+        },
+        {
+          "suite": "test_dayan_catalog_map",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.831
+        },
+        {
+          "suite": "test_dayan_core",
+          "verdict": "PASS",
+          "passed": 10,
+          "skipped": 0,
+          "duration_s": 0.169
+        },
+        {
+          "suite": "test_dayan_coupled",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.795
+        },
+        {
+          "suite": "test_dayan_eco_batch",
+          "verdict": "PASS",
+          "passed": 21,
+          "skipped": 0,
+          "duration_s": 0.272
+        },
+        {
+          "suite": "test_dayan_eco_flagship",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 12.121
+        },
+        {
+          "suite": "test_dayan_engines",
+          "verdict": "PASS",
+          "passed": 8,
+          "skipped": 1,
+          "duration_s": 0.982
+        },
+        {
+          "suite": "test_dayan_experiment",
+          "verdict": "PASS",
+          "passed": 15,
+          "skipped": 0,
+          "duration_s": 1.155
+        },
+        {
+          "suite": "test_dayan_families",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 2.865
+        },
+        {
+          "suite": "test_dayan_fidelity",
+          "verdict": "PASS",
+          "passed": 27,
+          "skipped": 0,
+          "duration_s": 1.479
+        },
+        {
+          "suite": "test_dayan_final_batch",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 2.552
+        },
+        {
+          "suite": "test_dayan_manifest",
+          "verdict": "PASS",
+          "passed": 14,
+          "skipped": 0,
+          "duration_s": 1.822
+        },
+        {
+          "suite": "test_dayan_mechfix",
+          "verdict": "PASS",
+          "passed": 21,
+          "skipped": 0,
+          "duration_s": 4.159
+        },
+        {
+          "suite": "test_dayan_met",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 3
+        },
+        {
+          "suite": "test_dayan_met_registry",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 11.755
+        },
+        {
+          "suite": "test_dayan_migration",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 0.137
+        },
+        {
+          "suite": "test_dayan_models",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 2.301
+        },
+        {
+          "suite": "test_dayan_net_final16",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 1.89
+        },
+        {
+          "suite": "test_dayan_runtime",
+          "verdict": "PASS",
+          "passed": 22,
+          "skipped": 0,
+          "duration_s": 1.663
+        },
+        {
+          "suite": "test_dayan_scene_state",
+          "verdict": "PASS",
+          "passed": 16,
+          "skipped": 0,
+          "duration_s": 1.651
+        },
+        {
+          "suite": "test_dayan_sys",
+          "verdict": "PASS",
+          "passed": 19,
+          "skipped": 0,
+          "duration_s": 1.684
+        },
+        {
+          "suite": "test_dayan_sys_extras",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.978
+        },
+        {
+          "suite": "test_dayan_traffic_ped",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 2.201
+        },
+        {
+          "suite": "test_dayan_wave2",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.528
+        },
+        {
+          "suite": "test_defined_statistics",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.745
+        },
+        {
+          "suite": "test_e2e_pipeline",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 2.611
+        },
+        {
+          "suite": "test_game_contract",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.218
+        },
+        {
+          "suite": "test_god_bridge",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.998
+        },
+        {
+          "suite": "test_kernel_facilities",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.954
+        },
+        {
+          "suite": "test_ledger",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 0.347
+        },
+        {
+          "suite": "test_live_llm",
+          "verdict": "SKIP",
+          "passed": 0,
+          "skipped": 1,
+          "duration_s": 0
+        },
+        {
+          "suite": "test_llm_limits",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.323
+        },
+        {
+          "suite": "test_media",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.531
+        },
+        {
+          "suite": "test_model_probe_all",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 96.736
+        },
+        {
+          "suite": "test_negative_cases",
+          "verdict": "PASS",
+          "passed": 14,
+          "skipped": 0,
+          "duration_s": 0.223
+        },
+        {
+          "suite": "test_online_sources",
+          "verdict": "SKIP",
+          "passed": 0,
+          "skipped": 1,
+          "duration_s": 0
+        },
+        {
+          "suite": "test_orglabor",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.132
+        },
+        {
+          "suite": "test_output_contracts",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.673
+        },
+        {
+          "suite": "test_pipeline",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 0.942
+        },
+        {
+          "suite": "test_platform",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 1.012
+        },
+        {
+          "suite": "test_politics",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.361
+        },
+        {
+          "suite": "test_registry",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 0.172
+        },
+        {
+          "suite": "test_repair_artifacts",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 12.472
+        },
+        {
+          "suite": "test_repair_composer",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 4.595
+        },
+        {
+          "suite": "test_repair_coupled_evacuation",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 1.948
+        },
+        {
+          "suite": "test_repair_custom_models",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.123
+        },
+        {
+          "suite": "test_repair_datasets",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 8.697
+        },
+        {
+          "suite": "test_repair_execution_inputs",
+          "verdict": "PASS",
+          "passed": 16,
+          "skipped": 0,
+          "duration_s": 1.811
+        },
+        {
+          "suite": "test_repair_generative",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 7.141
+        },
+        {
+          "suite": "test_repair_parameters",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 5.505
+        },
+        {
+          "suite": "test_repair_policy_contract",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 1.104
+        },
+        {
+          "suite": "test_repair_report",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 10.302
+        },
+        {
+          "suite": "test_repair_requirements",
+          "verdict": "PASS",
+          "passed": 7,
+          "skipped": 0,
+          "duration_s": 4.517
+        },
+        {
+          "suite": "test_repair_resume",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 10.713
+        },
+        {
+          "suite": "test_repair_same_run",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 1.172
+        },
+        {
+          "suite": "test_report_fonts",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 0.59
+        },
+        {
+          "suite": "test_reproducible_bundle",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 7.137
+        },
+        {
+          "suite": "test_research_constraints",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.983
+        },
+        {
+          "suite": "test_research_integrity",
+          "verdict": "PASS",
+          "passed": 13,
+          "skipped": 0,
+          "duration_s": 0.416
+        },
+        {
+          "suite": "test_scenario_alignment",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.282
+        },
+        {
+          "suite": "test_scene_contract",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 3.482
+        },
+        {
+          "suite": "test_scene_review_protocol",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.245
+        },
+        {
+          "suite": "test_site",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 1.169
+        },
+        {
+          "suite": "test_sociology",
+          "verdict": "PASS",
+          "passed": 4,
+          "skipped": 0,
+          "duration_s": 15.342
+        },
+        {
+          "suite": "test_state_identity",
+          "verdict": "PASS",
+          "passed": 5,
+          "skipped": 0,
+          "duration_s": 1.427
+        },
+        {
+          "suite": "test_static_delivery",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 2.362
+        },
+        {
+          "suite": "test_task_manager",
+          "verdict": "PASS",
+          "passed": 6,
+          "skipped": 0,
+          "duration_s": 3.88
+        },
+        {
+          "suite": "test_test_runner",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.421
+        },
+        {
+          "suite": "test_workspace_reports",
+          "verdict": "PASS",
+          "passed": 2,
+          "skipped": 0,
+          "duration_s": 11.562
+        },
+        {
+          "suite": "dayan_backend_start.test",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 1.128
+        },
+        {
+          "suite": "dayan_bridge.test",
+          "verdict": "PASS",
+          "passed": 1,
+          "skipped": 0,
+          "duration_s": 4.968
+        },
+        {
+          "suite": "dayan_scene_data.test",
+          "verdict": "PASS",
+          "passed": 3,
+          "skipped": 0,
+          "duration_s": 0.291
+        },
+        {
+          "suite": "dayan_session_binding.test",
+          "verdict": "PASS",
+          "passed": 9,
+          "skipped": 0,
+          "duration_s": 0.18
+        }
+      ],
+      "syntax": {
+        "python_files": 225,
+        "javascript_files": 13
+      },
+      "pip_check": "passed",
+      "tracked_diff": "clean"
+    }
+  ]
+}
