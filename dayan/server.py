@@ -102,6 +102,14 @@ async def root_js():
     raise HTTPException(404)
 
 
+@app.get('/vendor/three.min.js')
+async def local_three():
+    from fastapi.responses import FileResponse
+    path=ROOT/'site/console/vendor/three.min.js'
+    if not path.is_file():raise HTTPException(404,'缺少本地3D运行库')
+    return FileResponse(path,media_type='application/javascript',headers={'Cache-Control':'no-cache'})
+
+
 @app.get("/pages.js")
 async def pages_js():
     fp = ROOT / "site" / "console" / "pages.js"

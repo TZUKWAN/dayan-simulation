@@ -17,7 +17,7 @@ def source_inventory():
         paths.update(p for p in (ROOT/name).rglob('*.py') if '__pycache__' not in p.parts and 'data' not in p.relative_to(ROOT/name).parts)
     for name in ('site/console','plugins/dayan'):
         for path in (ROOT/name).rglob('*'):
-            if path.is_file() and not {'node_modules','data','__pycache__'} & set(path.relative_to(ROOT/name).parts) and path.suffix.lower() in ('.js','.mjs','.cjs','.json','.html','.css','.webp','.svg','.woff2','.ttf','.otf','.txt','.md'):
+            if path.is_file() and not {'node_modules','data','__pycache__'} & set(path.relative_to(ROOT/name).parts) and (path.name=='LICENSE' or path.suffix.lower() in ('.js','.mjs','.cjs','.json','.html','.css','.webp','.svg','.woff2','.ttf','.otf','.txt','.md')):
                 if path.name not in ('config.json','package-lock.json'):paths.add(path)
     for name in ('requirements.txt','requirements-dev.txt','requirements-ui.txt','README.md','dayan/config.example.json',
                  'data/model_semantics.json','data/dayan_catalog.json','data/targets.json','data/calibration_targets.md'):

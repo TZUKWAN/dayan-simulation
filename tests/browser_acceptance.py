@@ -27,6 +27,7 @@ def run(base,output,engine='firefox'):
         else:options['args']=['--use-angle=swiftshader','--enable-unsafe-swiftshader']
         browser=getattr(p,engine).launch(**options)
         page=browser.new_page(viewport={'width':1680,'height':1100},accept_downloads=True)
+        page.route('https://**/*',lambda route:route.abort())
         page.on('pageerror',lambda e:errors.append(str(e)))
         page.on('request',lambda r:posts.append(r.url) if r.method=='POST' else None)
         def api(path,payload=None):

@@ -13,6 +13,17 @@ from dayan import server
 
 
 class StaticDelivery(unittest.TestCase):
+    def test_workbench_uses_the_bundled_3d_runtime(self):
+        c=TestClient(server.app,base_url='http://127.0.0.1',client=('127.0.0.1',50000))
+        html=c.get('/').text
+        self.assertIn('vendor/three.min.js',html)
+        self.assertNotIn('cdnjs.cloudflare.com',html)
+        library=c.get('/vendor/three.min.js')
+        self.assertEqual(library.status_code,200)
+        self.assertTrue(library.headers['content-type'].startswith('application/javascript'))
+        import hashlib
+        self.assertEqual(hashlib.sha256(library.content).hexdigest(),'170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa')
+
     def test_webp_and_windows_traversal(self):
         c=TestClient(server.app,base_url='http://127.0.0.1',client=('127.0.0.1',50000))
         response=c.get('/console/assets/city-simulation.webp')
