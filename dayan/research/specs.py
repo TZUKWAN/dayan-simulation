@@ -134,6 +134,15 @@ class ExperimentSpec:
             issues.append("缺 model_id")
         if not self.primary_metric:
             issues.append("缺 primary_metric（主要结局指标必须显式声明）")
+        import math
+        if isinstance(self.warmup_ticks,bool) or not isinstance(self.warmup_ticks,int) or not 0<=self.warmup_ticks<=self.ticks:
+            issues.append('warmup_ticks须为0..ticks整数')
+        if self.analysis_window:
+            window=self.analysis_window
+            if not isinstance(window,list) or len(window)!=2 or any(isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) for v in window):
+                issues.append('analysis_window须为有限数值[t0,t1]')
+            elif not 0<=window[0]<=window[1]<=self.ticks*self.dt:
+                issues.append('analysis_window须处于实际运行时间范围内')
         from ..limits import validate_compute
         try:
             validate_compute(self.ticks, runs=max(1,len(self.seeds))*(len(self.arms)+1),

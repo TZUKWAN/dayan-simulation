@@ -1,138 +1,141 @@
-"""DAYAN 旗舰耦合器（设计 v3 R7-e）：范式间 CoupledSimulation。
+"""Explicit synchronous SD/ABM coupling with reproducible clock and ports.
 
-三模式：
-- one-way : SD 核（Goodwin 工资份额-就业周期）单向驱动微观 ABM（初始工资）
-- cyclic  : ABM 就业率反馈 SD 需求项（双向闭环）
-- reference : 共享种子/时钟的对照组（验证耦合本身不破坏各自动态）
-
-核心思想（三主权）：引擎管状态（SD 求解与 ABM 状态各自守恒），
-耦合只经"语义接口"传标量（工资水平、就业率），LLM/理论不进内核。
+The wage proxy and feedback law are declared mechanism assumptions. No currency,
+empirical calibration or classical bounds are inferred from this experiment.
 """
 from __future__ import annotations
-
+import copy
+import math
 import numpy as np
 
 
 class GoodwinSDCore:
-    """Goodwin 增长周期（Goodwin 1967 线性形式，RK4）：
-    ẇ/ω = −a + b·λ（就业→工资增长的线性菲利普斯关系）
-    λ̇ = λ((1−ω)/ν − δ)（利润份额→就业，资本系数 ν、折旧 δ）。
-    Lotka–Volterra 型闭轨道：ω 与 λ 反相摆动；
-    ω 上界=利润挤压（工资份额→1），λ 下界=投资崩溃——经典有界机制。"""
+    """RK4: dw=w*(-a+b*l); dl=l*((1-w)/nu-delta).
 
-    def __init__(self, nu=2.5, delta=0.03, a=0.045, b=0.06,
-                 x0=(0.68, 0.9)):
-        self.nu, self.delta, self.a, self.b = nu, delta, a, b
-        self.x = np.array(x0, float)
+    Positive Lotka-Volterra orbits conserve
+    H=w/nu-(1/nu-delta)*log(w)+b*l-a*log(l).
+    Classical equations do not guarantee fractions <=1 for arbitrary initial
+    states. Values are never clipped to manufacture economic validity.
+    """
+    def __init__(self,nu=2.5,delta=.03,a=.045,b=.06,x0=None):
+        if any(not math.isfinite(v) or v<=0 for v in (nu,delta,a,b)) or nu*delta>=1:
+            raise ValueError('Goodwin需要正有限参数及nu*delta<1')
+        self.nu,self.delta,self.a,self.b=nu,delta,a,b
+        self.x=np.array(x0 if x0 is not None else [(1-nu*delta)*.95,(a/b)*1.05],float)
+        if self.x.shape!=(2,) or not np.isfinite(self.x).all() or (self.x<=0).any():
+            raise ValueError('Goodwin初态须为两个正有限数')
 
-    def derivatives(self, x):
-        w, lmb = np.maximum(x, 1e-9)
-        profit_share = 1 - w
-        dw = w * (-self.a + self.b * lmb)
-        dl = lmb * ((profit_share / self.nu) - self.delta)
-        return np.array([dw, dl])
+    def derivatives(self,x):
+        w,lmb=x
+        return np.array([w*(-self.a+self.b*lmb),lmb*((1-w)/self.nu-self.delta)])
 
-    def step(self, dt):
-        x = self.x
-        k1 = self.derivatives(x)
-        k2 = self.derivatives(x + dt / 2 * k1)
-        k3 = self.derivatives(x + dt / 2 * k2)
-        k4 = self.derivatives(x + dt * k3)
-        self.x = x + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
-        self.x = np.clip(self.x, 0.02, 0.999)
+    def invariant(self):
+        w,lmb=self.x
+        return float(w/self.nu-(1/self.nu-self.delta)*np.log(w)+self.b*lmb-self.a*np.log(lmb))
+
+    def step(self,dt):
+        if not math.isfinite(dt) or dt<=0:raise ValueError('dt须为正有限数')
+        x=self.x;k1=self.derivatives(x);k2=self.derivatives(x+dt*k1/2)
+        k3=self.derivatives(x+dt*k2/2);k4=self.derivatives(x+dt*k3)
+        result=x+dt/6*(k1+2*k2+2*k3+k4)
+        if not np.isfinite(result).all() or (result<=0).any():
+            raise ValueError('Goodwin数值状态失效，请缩小步长；未裁剪结果')
+        self.x=result
 
 
 class MicroABMSector:
-    """微观就业 ABM：N 个异质个体，工资吸引力 → 采纳就业的概率；
-    state: 就业人数、平均保留工资。耦合接口：set_wage_level(w)、
-    get_employment_rate()。"""
+    """Heterogeneous reservation-wage mechanism; wages are normalized proxies."""
+    BASE_DT=.1
+    def __init__(self,n=200,seed=0):
+        if isinstance(n,bool) or not isinstance(n,int) or not 1<=n<=5000:raise ValueError('主体数须为1..5000整数')
+        self.rng=np.random.default_rng(seed);self.n=n
+        self.employed=np.zeros(n,bool);self.reservation=self.rng.uniform(.4,.95,n);self.wage=.7
 
-    def __init__(self, n=200, seed=0):
-        self.rng = np.random.default_rng(seed)
-        self.n = n
-        self.employed = np.zeros(n, bool)
-        self.reservation = self.rng.uniform(0.4, 0.95, n)
-        self.wage = 0.7
+    def set_wage_level(self,w):
+        if not math.isfinite(w) or w<0:raise ValueError('工资代理须非负有限')
+        self.wage=float(w)
 
-    def set_wage_level(self, w):
-        self.wage = float(np.clip(w, 0.1, 1.5))
+    def step(self,dt=.1):
+        if not math.isfinite(dt) or dt<=0:raise ValueError('dt须为正有限数')
+        base_join=np.clip((self.wage-self.reservation)/.3,0,.6)
+        base_leave=np.clip((self.reservation-self.wage)/.5,0,.3)
+        # Convert the explicitly defined .1-time transition to equal hazards.
+        p_join=-np.expm1(np.log1p(-base_join)*dt/self.BASE_DT)
+        p_leave=-np.expm1(np.log1p(-base_leave)*dt/self.BASE_DT)
+        draws=self.rng.random(self.n)
+        self.employed=np.where(self.employed,draws>=p_leave,draws<p_join)
 
-    def step(self):
-        p_join = np.clip((self.wage - self.reservation) / 0.3, 0, 0.6)
-        p_leave = np.clip((self.reservation - self.wage) / 0.5, 0, 0.3)
-        for i in range(self.n):
-            if not self.employed[i] and self.rng.random() < p_join[i]:
-                self.employed[i] = True
-            elif self.employed[i] and self.rng.random() < p_leave[i]:
-                self.employed[i] = False
-
-    def get_employment_rate(self):
-        return float(self.employed.mean())
+    def get_employment_rate(self):return float(self.employed.mean())
 
     def money(self):
-        """总量守恒检验口径：就业者获得工资计数（虚拟账户）。"""
-        return float(self.employed.sum() * self.wage)
+        """Virtual wage bill, not a conservation law or a monetary ledger."""
+        return float(self.employed.sum()*self.wage)
 
 
 class CoupledSimulation:
-    """范式耦合器：Goodwin SD 核 × 微观 ABM，三模式。"""
+    """Jacobi-style sample at start, operator-split SD feedback then RK4 and ABM."""
+    def __init__(self,mode='one-way',n_micro=200,seed=0,T=200.,dt=.1):
+        if mode not in ('one-way','cyclic','reference'):raise ValueError('未知耦合模式')
+        if not math.isfinite(T) or not math.isfinite(dt) or T<=0 or dt<=0:raise ValueError('T/dt须为正有限数')
+        from .runtime import validate_run_arguments
+        validate_run_arguments(math.ceil(T/dt),dt,seed)
+        self.mode,self.T,self.dt,self.seed=mode,float(T),float(dt),seed
+        self.sd=GoodwinSDCore();self.abm=MicroABMSector(n_micro,seed)
+        self.t=0.;self.history=[];self.port_trace=[]
 
-    def __init__(self, mode="one-way", n_micro=200, seed=0, T=200.0, dt=0.1):
-        assert mode in ("one-way", "cyclic", "reference")
-        self.mode = mode
-        self.sd = GoodwinSDCore()
-        self.abm = MicroABMSector(n=n_micro, seed=seed)
-        self.T, self.dt = T, dt
-        self.history = []
-        self.rng = np.random.default_rng(seed)
+    def _record(self):
+        self.history.append({'t':self.t,'wage_share':float(self.sd.x[0]),'employment_sd':float(self.sd.x[1]),
+                             'employment_abm':self.abm.get_employment_rate(),'wage_proxy_abm':self.abm.wage})
+
+    def step(self,dt=None):
+        h=min(self.dt if dt is None else dt,self.T-self.t)
+        if h<=0:return
+        start=self.t;macro=float(self.sd.x[1]);micro=self.abm.get_employment_rate()
+        feedback=0.
+        if self.mode!='reference':self.abm.set_wage_level(.7*macro)
+        if self.mode=='cyclic':
+            feedback=float(np.clip(.05*(micro-macro),-.01,.01))
+            self.sd.x[1]+=h*feedback
+        self.sd.step(h);self.abm.step(h);self.t=min(self.T,round(start+h,12))
+        self.port_trace.append({'source_t':start,'target_t':self.t,'mode':self.mode,
+            'employment_sd_source':macro,'employment_abm_source':micro,
+            'wage_proxy_applied':self.abm.wage,'feedback_rate_applied':feedback,
+            'units':{'employment':'fraction','wage':'normalized_proxy','feedback':'fraction/model_time'},
+            'order':'sample_start -> SD_feedback -> SD_RK4 + ABM_hazard -> record_common_end'})
+        self._record()
 
     def run(self):
-        n_steps = int(self.T / self.dt)
-        for k in range(n_steps):
-            w_sd = float(self.sd.x[0])
-            lmb_sd = float(self.sd.x[1])
-            # 映射修正（审计 2026-11-14）：工资份额 ω∈[0,1] ≠ 工资水平。
-            # 就业率 λ 才是劳动力市场紧张的度量——高λ→企业加薪竞争→ABM工资感知高。
-            # wage_level = baseline * λ（基准=0.7，λ归一到[0,1]→level≈[0,0.7]范围）
-            # 旧实现直接传 ω=0.9→ABM 认为工资很高→200人全就业，异质性失效。
-            wage_level = 0.7 * lmb_sd    # λ∈[0.6,0.95] → level∈[0.42,0.67]
-            if self.mode == "one-way":
-                self.abm.set_wage_level(wage_level)
-            elif self.mode == "cyclic":
-                self.abm.set_wage_level(wage_level)
-                # ABM 就业率反馈 SD（双向）：就业率差→投资扰动
-                lmb_abm = self.abm.get_employment_rate()
-                self._feedback = float(np.clip(0.05 * (lmb_abm - lmb_sd), -0.01, 0.01))
-            else:  # reference：无耦合，各自演化（同种子）
-                pass
-            self.sd.x[1] = float(np.clip(
-                self.sd.x[1] + self.dt * getattr(self, '_feedback', 0.0),
-                0.05, 0.95))
-            self.sd.step(self.dt)
-            self.abm.step()
-            if k % max(1, n_steps // 500) == 0 or k == n_steps - 1:
-                self.history.append({
-                    "t": k * self.dt,
-                    "wage_share": w_sd,
-                    "employment_sd": lmb_sd,
-                    "employment_abm": self.abm.get_employment_rate(),
-                })
+        if not self.history:self._record()
+        while self.t<self.T-1e-12:self.step()
         return self.summary()
 
+    def snapshot(self):
+        return copy.deepcopy({'version':1,'mode':self.mode,'T':self.T,'dt':self.dt,'seed':self.seed,'t':self.t,
+            'sd':{'params':{k:getattr(self.sd,k) for k in ('nu','delta','a','b')},'x':self.sd.x.tolist()},
+            'abm':{'n':self.abm.n,'employed':self.abm.employed.tolist(),'reservation':self.abm.reservation.tolist(),
+                   'wage':self.abm.wage,'rng_state':self.abm.rng.bit_generator.state},
+            'history':self.history,'port_trace':self.port_trace})
+
+    def restore(self,state):
+        state=copy.deepcopy(state)
+        if state.get('version')!=1:raise ValueError('不支持的耦合检查点')
+        self.__init__(state['mode'],state['abm']['n'],state['seed'],state['T'],state['dt'])
+        self.t=state['t'];self.sd=GoodwinSDCore(**state['sd']['params'],x0=state['sd']['x'])
+        self.abm.employed=np.array(state['abm']['employed'],bool)
+        self.abm.reservation=np.array(state['abm']['reservation'],float);self.abm.wage=state['abm']['wage']
+        self.abm.rng.bit_generator.state=state['abm']['rng_state']
+        self.history=state['history'];self.port_trace=state['port_trace']
+
     def summary(self):
-        arr = np.array([h["wage_share"] for h in self.history])
-        emp_sd = np.array([h["employment_sd"] for h in self.history])
-        emp_abm = np.array([h["employment_abm"] for h in self.history])
-        # Goodwin 闭轨道检验：工资份额范围应有界振荡（非发散）
-        w_range = float(arr.max() - arr.min())
-        return {
-            "mode": self.mode,
-            "wage_share_range": w_range,
-            "wage_share_final": float(arr[-1]),
-            "emp_sd_final": float(emp_sd[-1]),
-            "emp_abm_final": float(emp_abm[-1]),
-            "sd_bounded": bool(w_range < 0.6 and 0.02 < arr[-1] < 0.98),
-            "abm_active": bool(emp_abm.max() > 0 and emp_abm.min() < 1),
-            "corr_sd_abm": float(np.corrcoef(emp_sd[10:], emp_abm[10:])[0, 1])
-            if len(emp_sd) > 20 else 0.0,
-        }
+        if not self.history:self._record()
+        arr=np.array([h['wage_share'] for h in self.history]);sd=np.array([h['employment_sd'] for h in self.history])
+        abm=np.array([h['employment_abm'] for h in self.history])
+        correlation=float(np.corrcoef(sd,abm)[0,1]) if len(sd)>2 and sd.std()>1e-12 and abm.std()>1e-12 else None
+        return {'mode':self.mode,'wage_share_range':float(np.ptp(arr)),'wage_share_final':float(arr[-1]),
+                'emp_sd_final':float(sd[-1]),'emp_abm_final':float(abm[-1]),
+                'sd_bounded':bool((arr>0).all() and (arr<1).all() and (sd>0).all() and (sd<1).all()),
+                'abm_active':bool(abm.max()>0 and abm.min()<1),'corr_sd_abm':correlation,
+                'final_t':self.t,'n_steps':len(self.port_trace),
+                'assumptions':['工资代理=.7*宏观就业率，无实证货币单位',
+                    '反馈率=clip(.05*(微观就业率-宏观就业率),-.01,.01)，单位fraction/model_time',
+                    'Goodwin方程不裁剪；sd_bounded只报告本次轨迹是否位于经济比例域，不是任意参数的定理']}

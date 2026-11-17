@@ -10,6 +10,7 @@ from __future__ import annotations
 import numpy as np
 
 from ..runtime import run_model_full, param_contract
+from ..limits import validate_compute
 
 
 def _numeric(observation):
@@ -37,6 +38,9 @@ def sweep(mid, param, values, ticks=100, seed=None, parameters=None, dt=None,
         raise ValueError("参数扫描至少需要一个值")
     if param not in param_contract(mid)["params"]:
         raise ValueError(f"{mid} 无模型参数 {param}")
+    validate_compute(ticks,runs=len(values),arms=len(values)-1,parameters=parameters)
+    from ..research.compiler import _pick_metric
+    selected=_pick_metric(mid,field)
     runs = []
     for v in values:
         run = _execute(mid, {**(parameters or {}), param: v}, ticks, seed, dt, persist, "sweep")
@@ -46,10 +50,10 @@ def sweep(mid, param, values, ticks=100, seed=None, parameters=None, dt=None,
     table = [{f: [r["final"].get(f) for r in runs] for f in fields}][0]
     if field and field not in fields:
         raise ValueError(f"请求观测量 {field} 不在模型输出中")
-    preferred = next((f for f in ("flux", "I", "gini", "mean_opinion", "k") if f in fields), None)
     return {"model_id": mid, "param": param, "values": values,
             "baseline_parameters": dict(parameters or {}), "seed": runs[0]["manifest"]["rng"]["seed"],
-            "primary_metric": field or preferred or (fields[0] if fields else None),
+            "primary_metric": selected or None,
+            "metric_choice_required":not bool(selected),
             "runs": runs, "table": table}
 
 
@@ -59,6 +63,7 @@ def ensemble(mid, seeds=(0, 1, 2, 3, 4), ticks=100, parameters=None, dt=None, pe
     seeds = list(seeds)
     if not seeds or len(set(seeds)) != len(seeds):
         raise ValueError("种子列表必须非空且不重复")
+    validate_compute(ticks,runs=len(seeds),seeds=len(seeds),parameters=parameters)
     finals, runs = [], []
     for s in seeds:
         run = _execute(mid, parameters, ticks, s, dt, persist, "ensemble")
@@ -72,9 +77,9 @@ def ensemble(mid, seeds=(0, 1, 2, 3, 4), ticks=100, parameters=None, dt=None, pe
         if len(vals) == 0:
             continue
         mean = float(vals.mean())
-        std = float(vals.std(ddof=1)) if len(vals) > 1 else 0.0
+        std = float(vals.std(ddof=1)) if len(vals) > 1 else None
         stats[f] = {"mean": mean, "std": std,
-                    "cv": float(std / abs(mean)) if abs(mean) > 1e-12 else None,
+                    "cv": float(std / abs(mean)) if std is not None and abs(mean) > 1e-12 else None,
                     "n_valid": int(len(vals))}
     return {"model_id": mid, "n_seeds": len(seeds), "seeds": seeds,
             "parameters": parameters, "stats": stats, "runs": runs}
@@ -83,6 +88,8 @@ def ensemble(mid, seeds=(0, 1, 2, 3, 4), ticks=100, parameters=None, dt=None, pe
 def compare(mid_a, mid_b, field=None, ticks=100, seed=None, parameters_a=None,
             parameters_b=None, dt=None, persist=False):
     """跨模型对照：共同数值字段的并排终值与方向一致性。"""
+    validate_compute(ticks,runs=2,arms=1,parameters=parameters_a)
+    validate_compute(ticks,parameters=parameters_b)
     ra = _execute(mid_a, parameters_a, ticks, seed, dt, persist, "compare")
     rb = _execute(mid_b, parameters_b, ticks, seed, dt, persist, "compare")
     fa, fb = ra["final"], rb["final"]
@@ -128,18 +135,45 @@ def compose(steps, handoff=None, ticks=100, seed=None, record_obs=False, dt=None
     record_obs=True 时每级附带截断的观测序列（供前端 3D 可视化）。"""
     steps = _norm_steps(steps)
     handoff = handoff or {}
+    if not steps:raise ValueError('流水线至少需要一个模型')
+    from ..runtime import validate_run_arguments
+    from ..research.semantics import port
+    total=0
+    for mid,params in steps:
+        count=params.get('ticks',ticks)
+        validate_run_arguments(count,.1 if dt is None else dt,0 if seed is None else seed)
+        validate_compute(count,arms=len(steps)-1,parameters=params)
+        total+=count
+    from ..limits import limits,BudgetExceeded
+    if total>limits().total_steps:raise BudgetExceeded('流水线总运行步数超过预算')
     outputs = []
     carry = {}
     for i, step in enumerate(steps):
         mid, params = step
         params = dict(params or {})
-        step_ticks = int(params.pop("ticks", ticks) or ticks)
+        step_ticks = params.pop("ticks", ticks)
         if i > 0 and handoff:
-            for src, dst in handoff.items():
+            mapping_trace=[]
+            for src, mapping in handoff.items():
+                dst=mapping.get('target') if isinstance(mapping,dict) else mapping
                 if src in carry and dst:
                     if dst not in param_contract(mid)["params"]:
                         raise ValueError(f"映射目标 {mid}.{dst} 不是模型参数")
+                    source_port=port(steps[i-1][0],src,'outputs')
+                    target_port=port(mid,dst,'inputs')
+                    if isinstance(mapping,dict):
+                        declared={key:mapping.get(key) for key in ('unit','scope')}
+                        if not all(declared.values()):raise ValueError('显式映射须声明unit与scope，不能从字段名猜测')
+                        if any(p and p!=declared for p in (source_port,target_port)):
+                            raise ValueError('显式单位/主体范围与模型端口合同不一致')
+                        source_port=target_port=declared
+                    if not source_port or source_port!=target_port:
+                        raise ValueError(f'{src}→{mid}.{dst}缺少兼容单位及主体范围的显式端口合同')
                     params[dst] = carry[src]
+                    mapping_trace.append({'source_model':steps[i-1][0],'source_field':src,'target_model':mid,
+                        'target_parameter':dst,'value':carry[src],**source_port,
+                        'source_t':outputs[-1]['manifest']['actual'].get('final_t'),
+                        'target_phase':'initialization (independent stage clock)'})
                 else:
                     raise ValueError(f"前级没有映射所需观测量 {src}")
         run = _execute(mid, params, step_ticks, seed, dt, persist, "compose")
@@ -147,10 +181,11 @@ def compose(steps, handoff=None, ticks=100, seed=None, record_obs=False, dt=None
         entry = {"step": i, "model_id": mid,
                  "params": params, "final": numeric, "run_id": run["run_id"],
                  "manifest": run["manifest"], "state_url": run["state_url"]}
+        entry['mapping_trace']=mapping_trace if i>0 and handoff else []
         if record_obs:
             entry["observations"] = obs
         outputs.append(entry)
         carry = numeric
     return {"n_stages": len(steps), "handoff": handoff, "stages": outputs,
             "coupling_kind": "sequential_handoff",
-            "coupling_note": "按显式字段映射顺序传值；不自动证明单位兼容，不等同于共享时钟反馈耦合"}
+            "coupling_note": "显式单位/主体范围合同下的顺序终值→初值传递；各级时钟独立，不等同于共享时钟反馈耦合"}

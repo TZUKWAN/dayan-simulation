@@ -30,7 +30,9 @@ class AssistantSceneRoutingTests(unittest.TestCase):
         p=plan_rule_based('运行NET106，运行2步，种子7')
         self.assertEqual(p['plan'][0]['args']['model_id'],'NET106')
         natural=plan_rule_based('模拟SIR疫情传播，运行3步')
-        self.assertEqual(natural['plan'],[])  # Full-language planner must select; no family-first execution.
+        # The explicit SIR compartment contract selects SIR, never the first SIS family entry.
+        self.assertEqual(natural['plan'][0]['args']['model_id'],'NET053')
+        self.assertEqual(plan_rule_based('模拟疫情传播，运行3步')['plan'],[])
 
     def test_question_does_not_run_and_capabilities_use_true_context(self):
         p=plan_rule_based('为什么刚才的车流会停下来？',last_run={'model_id':'NET106'})

@@ -13,8 +13,9 @@ from dayan.coupled import CoupledSimulation, GoodwinSDCore  # noqa: E402
 
 
 def test_goodwin_bounded_cycle():
-    """Goodwin SD 核：利润挤压-充分就业有界循环（ω∈[0.75,1)、λ 同步摆动）。"""
+    """Unclipped RK4 conserves the mathematical first integral on the default orbit."""
     core = GoodwinSDCore()
+    invariant=core.invariant()
     hist_w, hist_l = [], []
     for _ in range(4000):
         core.step(0.1)
@@ -24,9 +25,8 @@ def test_goodwin_bounded_cycle():
     lam = np.array(hist_l[1000:])
     assert 0.8 <= arr.min() < arr.max() <= 1.0, \
         f"Goodwin 轨道异常 [{arr.min():.2f},{arr.max():.2f}]"
-    assert arr.max() - arr.min() > 0.1, "振幅不足（未成循环）"
-    assert lam.max() - lam.min() > 0.25, "就业率未同步摆动"
-    # 有周期性：自相关峰值
+    assert abs(core.invariant()-invariant)<1e-9, 'Goodwin第一积分漂移'
+    assert arr.std()>0 and lam.std()>0, '非均衡初态未运动'
     print(f"[PASS] Goodwin 核：ω∈[{arr.min():.2f},{arr.max():.2f}] "
           f"λ∈[{lam.min():.2f},{lam.max():.2f}] 利润挤压循环")
 

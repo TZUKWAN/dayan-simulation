@@ -17,8 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 # Reviewed defaults refer to a specific model, never to the first numeric column.
 PRIMARY_METRICS = {"NET052": "I", "NET053": "I", "NET055": "I",
                    "NET106": "flux", "NET113": "evacuated",
-                   "BEH001": "segregation", "BEH018": "mean_opinion",
-                   "ECO019": "v", "SYS002": "queue_length",
+                   "BEH001": "segregation", "BEH018": "mean",
+                   "ECO019": "employment", "SYS002": "Wq_sim",
                    "CPL001": "evacuated"}
 
 

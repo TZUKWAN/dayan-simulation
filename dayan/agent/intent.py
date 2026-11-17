@@ -29,9 +29,17 @@ def plan_rule_based(text, last_run=None):
         ids = [next((mid for name, mid in (("ReAct", "BEH130"), ("Reflexion", "BEH131"), ("Voyager", "BEH132"), ("Concordia", "BEH133")) if name.lower() in text.lower()), "BEH129")]
     if any(word in text for word in ("能力卡", "参数清单", "说明书")) and ids:
         kind = "get_capabilities"
+    compiled=None
+    if not ids and kind=='run' and r['mechanisms']:
+        from ..research.compiler import compile_research
+        compiled=compile_research(text,last_run=last_run,seeds=[r['options'].get('seed',0)])
+        if compiled.experiment_spec:
+            spec=compiled.experiment_spec;ids=[spec.model_id]
+            r['parameters']=spec.baseline_params;r['options'].update(ticks=spec.ticks,dt=spec.dt)
     # Natural-language requests without an explicit model must be planned from the full request.
     # Keyword tables may supply search candidates, never permission to execute their first entry.
     errors = coverage_issues(r, ids[0] if ids and kind not in ("search_models", "get_capabilities") else None)
+    if compiled and not compiled.experiment_spec:errors.extend(compiled.warnings)
     args = {"parameters": r["parameters"], **{k: v for k, v in r["options"].items() if k in ("ticks", "dt", "seed")}}
     actions = []
     if kind == "build_model":

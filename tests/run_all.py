@@ -78,9 +78,9 @@ def _snapshot(target):
     (target/'data').mkdir()
     for path in (ROOT/'data').glob('*'):
         if path.name=='fidelity_review' and path.is_dir(): shutil.copytree(path,target/'data'/path.name)
-        elif path.name in {'dayan_catalog.json','calibration_targets.md','targets.json','output_contract_evidence.json'}:
+        elif path.name in {'dayan_catalog.json','calibration_targets.md','targets.json','output_contract_evidence.json','model_semantics.json'}:
             shutil.copy2(path,target/'data'/path.name)
-    for name in ('README.md','requirements.txt','.gitignore'):
+    for name in ('README.md','requirements.txt','requirements-dev.txt','.gitignore'):
         if (ROOT/name).exists(): shutil.copy2(ROOT/name,target/name)
 
 
