@@ -15,7 +15,7 @@ def _path(job_id):
     return get_store().directory.parent/'agent_jobs'/(str(job_id)+'.json')
 
 
-def save_job(job_id,job,request_text):
+def bounded_job(job_id,job,request_text):
     record=copy.deepcopy(job);record.update(job_id=job_id,request_text=request_text)
     data=_bytes(record)
     if len(data)>LIMIT:
@@ -31,7 +31,12 @@ def save_job(job_id,job,request_text):
         record['result']=result;record['artifact_note']='完整模型数据保存在引用的研究归档；任务信封省略重复数据。'
         data=_bytes(record)
     if len(data)>LIMIT:raise ValueError('任务日志超过2MiB，未写入不完整JSON')
-    _atomic_write(_path(job_id),data)
+    return record
+
+
+def save_job(job_id,job,request_text):
+    record=bounded_job(job_id,job,request_text)
+    _atomic_write(_path(job_id),_bytes(record))
 
 
 def load_job(job_id):

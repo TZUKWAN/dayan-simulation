@@ -134,6 +134,14 @@ class ExperimentSpec:
             issues.append("缺 model_id")
         if not self.primary_metric:
             issues.append("缺 primary_metric（主要结局指标必须显式声明）")
+        from ..limits import validate_compute
+        try:
+            validate_compute(self.ticks, runs=max(1,len(self.seeds))*(len(self.arms)+1),
+                             seeds=len(self.seeds), arms=len(self.arms), parameters=self.baseline_params)
+            for arm in self.arms:
+                validate_compute(self.ticks, parameters=arm.get('params'))
+        except ValueError as exc:
+            issues.append(str(exc))
         if not self.seeds:
             issues.append("缺 seeds（单次运行不构成实验）")
         if self.purpose not in ("teaching", "mechanism", "explanatory", "policy", "prediction"):

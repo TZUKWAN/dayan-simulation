@@ -11,7 +11,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 OUT=ROOT/'.claude/ui_implementation_20261113/report_tests'
 os.environ['DAYAN_REPORTS_DIR']=str(OUT)
-from fastapi.testclient import TestClient
+from api_client import local_client as TestClient
 from docx import Document
 from dayan.server import app
 

@@ -73,6 +73,10 @@ class RunStore:
         return self.directory / str(record_id)
 
     def _write_record(self, record_id, pieces, metadata):
+        from .limits import limits
+        total_bytes=sum(len(_bytes(value)) for value in pieces.values())
+        if total_bytes>limits().run_bytes:
+            raise ValueError('运行归档超过单次大小预算；未写入不完整记录，请减少帧数/主体数')
         target = self._path(record_id)
         with _LOCK:
             if target.exists():

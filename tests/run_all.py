@@ -99,6 +99,7 @@ def run_suite(suite, root, output, timeout=SUITE_TIMEOUT_S, online=False, llm=Fa
     work = output/suite['name']; work.mkdir(parents=True,exist_ok=True)
     env = {**os.environ,'PYTHONIOENCODING':'utf-8','PYTHONPATH':str(root),
            'DAYAN_DATA_DIR':str(work/'data'),'DAYAN_REPORTS_DIR':str(work/'reports'),
+           'DAYAN_PYTHON':sys.executable,
            'DAYAN_TEST_ONLINE':'1' if online else '0','DAYAN_TEST_LLM':'1' if llm else '0'}
     if not llm:
         env.update(DAYAN_API_KEY='',DAYAN_BASE_URL='',DAYAN_MODEL='')

@@ -461,7 +461,12 @@ def run_model_full(mid: str, parameters: dict | None = None,
             normalized[name] = options[name]
     ticks, dt, seed = options["ticks"], options["dt"], options["seed"]
     validate_run_arguments(ticks, dt, seed)
+    from .limits import validate_compute, frame_stride
+    validate_compute(int(ticks), parameters=params_in)
     clean, issues = validate_params(mid, normalized, strict=strict)
+    if capture_state:
+        defaults = {name: meta.get('default') for name, meta in sig.items()}
+        state_every = frame_stride(int(ticks), state_every, {**defaults, **clean})
     issues = placement + issues
 
     # 构造期注入：__init__ 形参真实传参（结构参数在构造时生效）

@@ -1,6 +1,6 @@
 /** Shared DSH-native tool bridge. All execution uses the platform's explicit tool contract. */
 import { spawn } from 'node:child_process';
-import { closeSync, existsSync, mkdirSync, openSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -55,9 +55,12 @@ export async function ensureBackend() {
 
 export async function api(path, init = {}, signal) {
   await ensureBackend();
+  const token = process.env.DAYAN_ACCESS_TOKEN || readFileSync(
+    join(process.env.DAYAN_DATA_DIR || join(PROJECT_ROOT, 'data'), '.workbench-token'), 'utf8').trim();
+  if (token.length < 32) throw new Error('Backend access capability is missing or invalid');
   const r = await fetch(BACKEND_URL + path, { ...init,
     signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(285000)]) : AbortSignal.timeout(285000),
-    headers: { 'content-type': 'application/json', ...(init.headers || {}) } });
+    headers: { 'content-type': 'application/json', ...(init.headers || {}), authorization: 'Bearer ' + token } });
   const raw = await r.text();
   let value; try { value = JSON.parse(raw); } catch { throw new Error('Backend returned invalid JSON (' + r.status + ')'); }
   if (!r.ok) throw new Error(typeof value.detail === 'string' ? value.detail : JSON.stringify(value));

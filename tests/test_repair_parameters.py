@@ -7,7 +7,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dayan.runtime import run_model_full
 from dayan.agent.tools import tool_run
-from fastapi.testclient import TestClient
+from api_client import local_client as TestClient
 from dayan.server import app
 
 

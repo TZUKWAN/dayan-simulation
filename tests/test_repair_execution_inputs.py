@@ -20,7 +20,7 @@ def run_tests():
     assert len(result.observations) == 4
     assert result.manifest['actual']['n_steps'] == 3
     print('[PASS] valid execution still computes three steps')
-    from fastapi.testclient import TestClient
+    from api_client import local_client as TestClient
     from dayan.server import app
     # No lifespan/startup: no cloud calls, cache rewrites, or valid-run history writes.
     client = TestClient(app)

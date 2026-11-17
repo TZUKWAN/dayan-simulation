@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from fastapi.testclient import TestClient
+from api_client import local_client as TestClient
 from dayan import server
 from dayan.run_store import get_store, RunStore
 from dayan.research.specs import ExperimentSpec
