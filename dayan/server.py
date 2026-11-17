@@ -721,15 +721,21 @@ async def api_saved_csv(run_id: str):
 
 @app.get("/api/runs/{run_id}/bundle.zip")
 async def api_saved_bundle(run_id: str):
-    from .run_store import get_store
+    from fastapi.responses import FileResponse
+    from .task_manager import get_manager
     try:
-        data = await asyncio.to_thread(get_store().bundle, run_id)
-        return Response(data, media_type="application/zip",
-                        headers={"Content-Disposition": f'attachment; filename="{run_id}.zip"'})
+        result=await get_manager().execute('api_prepare_bundle',{'run_id':run_id})
+        return FileResponse(result['path'],media_type='application/zip',filename=run_id+'.zip')
     except KeyError as e:
         raise HTTPException(404, str(e))
     except ValueError as e:
         raise HTTPException(400, str(e))
+
+
+async def api_prepare_bundle(run_id: str):
+    from .run_store import get_store
+    try:return {'path':str(get_store().prepare_bundle(run_id))}
+    except KeyError as exc:raise HTTPException(404,str(exc))
 
 
 def _log_history(entry: dict):

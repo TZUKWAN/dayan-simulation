@@ -29,6 +29,14 @@ import uuid
 import numpy as np
 
 from .core import RngStreams
+from .source_version import source_fingerprint
+_PROCESS_SOURCE_FINGERPRINT=source_fingerprint()
+
+
+def assert_loaded_source():
+    if source_fingerprint()!=_PROCESS_SOURCE_FINGERPRINT:
+        raise ValueError('执行进程加载后源码已变化，请使用新工作进程；禁止将新磁盘源码冒充本次执行版本')
+    return _PROCESS_SOURCE_FINGERPRINT
 
 # 已知参数别名（仅映射到目标模型真实形参名才生效；宁缺勿猜）
 PARAM_ALIASES: dict[str, tuple[str, ...]] = {
@@ -295,6 +303,7 @@ def save_checkpoint(model: Any, t: float, rng: np.random.Generator,
 
 def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=False):
     """Continue a supported full fixed-step snapshot; never rerun its earlier history."""
+    executing_source=assert_loaded_source()
     validate_run_arguments(steps, dt, 0)
     if not chk.get("resumable") or chk.get("protocol") != "fixed_step":
         raise ValueError("该检查点不可续算：缺少完整模型状态/恢复协议。可回放已保存观测。")
@@ -348,7 +357,7 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
     checkpoint["pending_interventions"] = pending
     events = [_jsonable(e) for e in getattr(model, "events", []) if isinstance(e, dict) and e.get("sim_t", start) >= start]
     events += [{"etype": "intervention", "sim_t": iv["actual_t"], **iv} for iv in applied]
-    manifest = {"run_id": run_id, "model_id": mid, "protocol": protocol,
+    manifest = {"run_id": run_id, "model_id": mid, "protocol": protocol,"source_fingerprint":executing_source,
                 "requested": {"resume_from_t": start, "ticks": steps, "dt": dt},
                 "actual": {"parameters": chk.get("parameters") or {}, "effective_parameters": initial_parameters,
                            "n_steps": iterations, "n_obs": len(rows), "final_t": round(t, 9)},
@@ -427,12 +436,13 @@ def run_model_full(mid: str, parameters: dict | None = None,
                    state_every: int = 1,
                    data_bindings: list | None = None) -> RunResult:
     """权威运行入口。返回 RunResult（observations + manifest + issues）。"""
+    executing_source=assert_loaded_source()
     from .model_index import resolve
     t_start = time.perf_counter()
     started_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     params_in = dict(parameters or {})
     from .datasets import bind_parameters
-    bound, data_evidence = bind_parameters(data_bindings)
+    bound, data_evidence = bind_parameters(data_bindings,mid)
     for name, value in bound.items():
         if name in params_in and params_in[name] != value:
             raise ValueError(f"参数 {name} 与数据映射值冲突，不能静默覆盖")
@@ -666,6 +676,7 @@ def run_model_full(mid: str, parameters: dict | None = None,
         "-" + uuid.uuid4().hex
 
     manifest = {
+        "source_fingerprint": executing_source,
         "run_id": run_id,
         "model_id": mid,
         "protocol": protocol,
@@ -675,7 +686,8 @@ def run_model_full(mid: str, parameters: dict | None = None,
         "implementation_note": getattr(model, "implementation_note", None),
         "llm_calls": getattr(model, "llm_audit", []),
         "requested": {"parameters": params_in, "ticks": ticks,
-                      "dt": dt, "seed": seed, "experiment": experiment},
+                      "dt": dt, "seed": seed, "experiment": experiment,
+                      "interventions":copy.deepcopy(interventions or [])},
         "actual": {
             "parameters": {k: _jsonable(v) for k, v in clean.items()},
             "effective_parameters": initial_effective,
@@ -709,6 +721,9 @@ def run_model_full(mid: str, parameters: dict | None = None,
     }
     from .output_contract import output_contract
     manifest["output_contract"] = output_contract(mid)
+    for binding in data_evidence:
+        if binding.get('compatibility_status')!='units_verified' or binding.get('scope_status')!='verified':
+            manifest['warnings'].append('数据已数值接入，但单位或地区/主体范围尚未完整声明；不据此认定现实政策适用性：'+binding['parameter'])
     manifest["observed_output_types"] = {
         key: sorted({_type_of(row[key]) for row in obs_out if key in row})
         for key in {k for row in obs_out for k in row}}
@@ -733,6 +748,7 @@ def run_model_full(mid: str, parameters: dict | None = None,
                           **iv} for iv in applied_ivs)
     for fr in state_frames:
         fr["run_id"] = run_id
+    assert_loaded_source()
     return RunResult(model_id=mid, observations=obs_out,
                      manifest=manifest, issues=issues, state_frames=state_frames,
                      events=domain_events, checkpoint=checkpoint)

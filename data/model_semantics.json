@@ -1,7 +1,7 @@
 {
   "scope": "Manually mapped source mechanisms and units, not calibration or validity evidence. Other models remain searchable through source output contracts.",
   "models": {
-    "NET052": {"mechanisms": ["疾病传播"], "match": "SIS|重复感染|可再感染", "description": "SIS易感-感染，无免疫退出", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "fraction", "scope": "population"}}},
+    "NET052": {"mechanisms": ["疾病传播"], "match": "SIS|重复感染|可再感染", "description": "SIS易感-感染，无免疫退出", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "fraction", "scope": "population"}}, "inputs": {"I0": {"unit":"fraction","scope":"population"}}},
     "NET053": {"mechanisms": ["疾病传播"], "match": "(?<![A-Za-z])SIR(?![A-Za-z])|永久免疫|康复免疫", "description": "SIR易感-感染-康复", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "person", "scope": "population"}}},
     "NET055": {"mechanisms": ["疾病传播"], "match": "SEIR|潜伏期|潜伏仓", "description": "SEIR增加潜伏仓", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "person", "scope": "population"}}},
     "NET061": {"mechanisms": ["疾病传播", "年龄接触差异"], "match": "年龄接触|年龄分层", "description": "分年龄接触矩阵SEIR", "clock": "user_defined"},
@@ -15,7 +15,7 @@
     "BEH001": {"mechanisms": ["居住分异"], "match": "Schelling|居住分异|居住隔离|社区分选", "description": "格点Schelling阈值迁移", "primary_metric": "segregation", "clock": "model_step"},
     "BEH005": {"mechanisms": ["公民暴力"], "match": "Epstein|公民暴力|警民|合法性", "description": "空间公民不满、警察逮捕和监禁", "primary_metric": "active_frac", "clock": "model_step"},
     "BEH082": {"mechanisms": ["演化博弈"], "match": "复制子|replicator|演化博弈", "description": "复制子频率动力学", "clock": "model_time"},
-    "NET106": {"mechanisms": ["交通流"], "match": "NaSch|Nagel|环形|单车道|元胞", "description": "NaSch环形单车道元胞交通", "primary_metric": "flux", "clock": "model_step", "outputs": {"flux": {"unit": "vehicle/cell/step", "scope": "ring_lane"}}},
+    "NET106": {"mechanisms": ["交通流"], "match": "NaSch|Nagel|环形|单车道|元胞", "description": "NaSch环形单车道元胞交通", "primary_metric": "flux", "clock": "model_step", "outputs": {"flux": {"unit": "vehicle/cell/step", "scope": "ring_lane"}}, "inputs": {"density": {"unit":"fraction","scope":"ring_lane"}}},
     "NET110": {"mechanisms": ["交通分配"], "match": "Wardrop|用户均衡|UE", "description": "Wardrop用户均衡路径分配", "clock": "iteration", "outputs": {"total_cost": {"unit": "model_cost", "scope": "same_traffic_network"}}},
     "NET111": {"mechanisms": ["交通分配"], "match": "系统最优|SO", "description": "系统最优路径分配", "clock": "iteration", "outputs": {"total_cost": {"unit": "model_cost", "scope": "same_traffic_network"}}},
     "NET113": {"mechanisms": ["人群疏散"], "match": "社会力|Social.Force|行人|疏散", "description": "二维房间出口社会力行人", "primary_metric": "evacuated", "clock": "second"},

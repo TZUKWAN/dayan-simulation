@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import io
+import http.client
 import ipaddress
 import json
 import math
@@ -19,16 +20,58 @@ ROOT = Path(__file__).resolve().parents[1]
 LIMIT = 10 * 1024 * 1024
 
 
+def _public_addresses(host):
+    addresses=socket.getaddrinfo(host,443,type=socket.SOCK_STREAM)
+    ips=list(dict.fromkeys(addr[4][0] for addr in addresses))
+    if not ips or any(not ipaddress.ip_address(value).is_global for value in ips):
+        raise ValueError('不能采集本机、内网或保留地址')
+    return ips
+
+
 def _public_url(url):
     parsed = urllib.parse.urlsplit(url)
     if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
         raise ValueError("采集地址必须为不含凭据的公开HTTPS URL")
     if parsed.port not in (None, 443):
         raise ValueError("采集仅支持HTTPS默认端口")
-    addresses = socket.getaddrinfo(parsed.hostname, 443, type=socket.SOCK_STREAM)
-    if not addresses or any(not ipaddress.ip_address(addr[4][0]).is_global for addr in addresses):
-        raise ValueError("不能采集本机、内网或保留地址")
+    _public_addresses(parsed.hostname)
     return url
+
+
+class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+    """Connect only to validated literal addresses; preserve TLS hostname checks.
+
+    An already configured system proxy remains trusted transport. CONNECT uses
+    the validated literal target IP so the proxy cannot resolve a rebinding name.
+    No URL/request can configure the proxy or disable certificate verification.
+    """
+    def connect(self):
+        original=self._tunnel_host or self.host
+        ips=_public_addresses(original)
+        if self._tunnel_host:
+            self._tunnel_host=ips[0]
+            try:http.client.HTTPConnection.connect(self)
+            finally:self._tunnel_host=original
+        else:
+            error=None
+            for address in ips:
+                try:
+                    self.sock=socket.create_connection((address,self.port),self.timeout,self.source_address)
+                    if self.sock.getpeername()[0] not in ips:
+                        self.sock.close();raise ValueError('实际连接地址与核验地址不一致')
+                    break
+                except OSError as exc:error=exc
+            else:raise error or OSError('没有可连接的公开地址')
+        self.sock=self._context.wrap_socket(self.sock,server_hostname=original)
+
+
+class _PinnedHTTPSHandler(urllib.request.HTTPSHandler):
+    def https_open(self,req):
+        return self.do_open(_PinnedHTTPSConnection,req,context=self._context)
+
+
+def public_opener():
+    return urllib.request.build_opener(_Redirect(),_PinnedHTTPSHandler())
 
 
 class _Redirect(urllib.request.HTTPRedirectHandler):
@@ -130,7 +173,7 @@ def summary(record):
 def fetch(url, *, name="远程数据", format="json", license="unknown", role="input"):
     _public_url(url)
     request = urllib.request.Request(url, headers={"User-Agent": "DAYAN-Research-Workbench/2.1", "Accept": "application/json,text/csv,*/*"})
-    with urllib.request.build_opener(_Redirect()).open(request, timeout=45) as response:
+    with public_opener().open(request, timeout=45) as response:
         raw = response.read(LIMIT + 1)
         return ingest(raw, name=name, format=format, source=response.geturl(), license=license,
                       role=role, metadata={"requested_url": url, "content_type": response.headers.get("Content-Type"),
@@ -147,9 +190,14 @@ def import_file(path, *, name=None, format="csv", license="unknown", role="input
                   source=str(actual), license=license, role=role)
 
 
-def analyze(dataset_id, path=""):
+def analyze(dataset_id, path="",filters=None,order_by=None):
     record = load(dataset_id)
     rows = _rows(record["data"], path)
+    if filters:
+        rows=[r for r in rows if all(r.get(k)==v for k,v in filters.items())]
+    if order_by:
+        if any(order_by not in r for r in rows):raise ValueError('排序字段缺失')
+        rows=sorted(rows,key=lambda r:r[order_by])
     fields = sorted(set().union(*(row.keys() for row in rows))) if rows else []
     numeric = {}
     for field in fields:
@@ -173,16 +221,17 @@ def analyze(dataset_id, path=""):
             "n_rows": len(rows), "fields": fields, "numeric": numeric}
 
 
-def bind_parameters(bindings):
+def bind_parameters(bindings,model_id=None):
     params, evidence = {}, []
     for binding in bindings or []:
         record = load(binding["dataset_id"])
         if record.get("role") not in ("input", "initialization", "calibration", "exogenous_input", "mechanism_estimation"):
             raise ValueError("留出验证/背景/文本证据等数据角色不能直接绑定为模型输入参数")
-        allowed = {"dataset_id", "path", "field", "aggregate", "parameter", "scale"}
+        allowed = {"dataset_id", "path", "field", "aggregate", "parameter", "scale",
+                   "source_unit","target_unit","source_scope","target_scope","filters","order_by"}
         if set(binding) - allowed:
             raise ValueError("未知数据映射字段")
-        stats = analyze(binding["dataset_id"], binding.get("path", ""))
+        stats = analyze(binding["dataset_id"], binding.get("path", ""),binding.get('filters'),binding.get('order_by'))
         aggregate = binding.get("aggregate", "last")
         if aggregate not in ("first", "last", "sum", "mean", "min", "max", "n"):
             raise ValueError("未知数据聚合方法")
@@ -194,11 +243,42 @@ def bind_parameters(bindings):
         if not math.isfinite(value):
             raise ValueError("映射值必须有限")
         parameter = binding["parameter"]
+        from .research.semantics import port
+        target=port(model_id,parameter,'inputs') or {}
+        if str(model_id).startswith('USR'):
+            from .custom_models import factory
+            target={**target,**factory(model_id).parameter_schema.get(parameter,{})}
+        meta=record.get('metadata',{})
+        source_unit=binding.get('source_unit') or meta.get('units',{}).get(binding['field']) or meta.get('unit')
+        target_unit=target.get('unit') or binding.get('target_unit')
+        if target.get('unit') and binding.get('target_unit') not in (None,target['unit']):
+            raise ValueError('映射目标单位与模型参数合同不一致')
+        if meta.get('unit') and binding.get('source_unit') not in (None,meta['unit']):
+            raise ValueError('源单位声明与已记录数据单位不一致')
+        field_unit=meta.get('units',{}).get(binding['field'])
+        if field_unit and binding.get('source_unit') not in (None,field_unit):
+            raise ValueError('字段单位与已记录元数据不一致')
+        status='unverified_units'
+        if source_unit and target_unit:
+            conversions={('%','fraction'):.01,('fraction','%'):100.,('second','minute'):1/60,('minute','second'):60.}
+            required=1. if source_unit==target_unit else conversions.get((source_unit,target_unit))
+            if required is None or not math.isclose(scale,required,rel_tol=1e-12,abs_tol=1e-12):
+                raise ValueError('数据单位与模型参数单位/显式scale不兼容')
+            status='units_verified'
+        source_scope=binding.get('source_scope') or meta.get('scope')
+        target_scope=binding.get('target_scope')
+        if meta.get('scope') and source_scope!=meta['scope']:
+            raise ValueError('源地区/主体范围声明与数据元数据不一致')
+        if source_scope and target_scope and source_scope!=target_scope:
+            raise ValueError('源数据与模型的地区/主体范围不一致')
         if parameter in params:
             raise ValueError("一个参数不能由多个数据映射覆盖")
         params[parameter] = value
         evidence.append({**binding, "resolved_value": value, "sha256": stats["sha256"],
-                         "source": load(binding["dataset_id"])["source"]})
+                         "source": record['source'],'source_unit':source_unit,'target_unit':target_unit,
+                         'compatibility_status':status,'source_scope':source_scope,'target_scope':target_scope,
+                         'role':record['role'],'frequency':meta.get('frequency'),
+                         'scope_status':'verified' if source_scope and target_scope else 'not_declared'})
     return params, evidence
 
 

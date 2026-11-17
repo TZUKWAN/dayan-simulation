@@ -14,7 +14,7 @@ def source_files():
     if (ROOT/'requirements.txt').is_file():paths.append(ROOT/'requirements.txt')
     for name in ('dayan_catalog.json','targets.json','calibration_targets.md','model_semantics.json'):
         if (ROOT/'data'/name).is_file():paths.append(ROOT/'data'/name)
-    return sorted(paths)
+    return sorted(paths,key=lambda p:p.relative_to(ROOT).as_posix())
 
 
 @lru_cache(maxsize=8)

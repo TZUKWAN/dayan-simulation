@@ -104,7 +104,10 @@ class RunStore:
     def save_run(self, rr: RunResult, source="run", intent="", request_text=""):
         run_id = rr.manifest["run_id"]
         manifest = dict(rr.manifest)
-        manifest["code_version"] = self.archive_code()
+        manifest["code_version"] = self.archive_code(manifest.get('source_fingerprint'))
+        manifest['code_archive_sha256']=hashlib.sha256((self.directory/'code_versions'/(manifest['code_version']+'.zip')).read_bytes()).hexdigest()
+        from .reproducibility import environment
+        manifest['environment']=environment()
         manifest["software"] = {"python": platform.python_version()}
         from importlib.metadata import version, PackageNotFoundError
         for package in ("numpy", "scipy", "pandas", "fastapi", "pydantic"):
@@ -233,44 +236,71 @@ class RunStore:
         return stream.getvalue().encode("utf-8-sig")
 
     def bundle(self, record_id):
+        """Compatibility bytes helper; HTTP delivery uses the prepared file."""
+        return self.prepare_bundle(record_id).read_bytes()
+
+    def prepare_bundle(self, record_id):
         record = self.load(record_id)  # Verify integrity before export.
-        output = io.BytesIO()
-        with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
+        from .limits import limits
+        target=self.directory/'exports'/(record_id+'.zip')
+        target.parent.mkdir(parents=True,exist_ok=True)
+        temporary=target.with_name(target.name+'.'+uuid.uuid4().hex+'.tmp')
+        total=0
+        try:
+          with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
             ids = list(dict.fromkeys([record_id] + ([r["run_id"] for r in record["runs"]]
                                                    if record["kind"] != "run" else [])))
             codes = set()
             datasets = set()
             for rid in ids:
                 r = self.load(rid)
-                codes.add(r.get("manifest", {}).get("code_version"))
+                version=r.get('manifest',{}).get('code_version')
+                codes.add(version)
+                if version:
+                    code_path=self.directory/'code_versions'/(version+'.zip')
+                    expected=r.get('manifest',{}).get('code_archive_sha256')
+                    if expected and hashlib.sha256(code_path.read_bytes()).hexdigest()!=expected:
+                        raise ValueError('归档代码ZIP哈希不一致')
                 datasets.update(b["dataset_id"] for b in r.get("manifest", {}).get("data_bindings", []))
                 for p in self._path(rid).iterdir():
                     if p.is_file():
+                        total+=p.stat().st_size
+                        if total>limits().job_bytes:raise ValueError('研究包超过导出大小预算')
                         archive.write(p, f"{rid}/{p.name}")
             for code in codes - {None}:
                 p = self.directory / "code_versions" / (code + ".zip")
+                total+=p.stat().st_size
+                if total>limits().job_bytes:raise ValueError('研究包超过导出大小预算')
                 archive.write(p, "code_versions/" + p.name)
             from .datasets import load as load_dataset, dataset_dir
             for dataset in datasets:
                 load_dataset(dataset)
                 for path in (dataset_dir() / dataset).iterdir():
+                    total+=path.stat().st_size
+                    if total>limits().job_bytes:raise ValueError('研究包超过导出大小预算')
                     archive.write(path, "datasets/" + dataset + "/" + path.name)
-        return output.getvalue()
+          os.replace(temporary,target)
+        finally:
+            temporary.unlink(missing_ok=True)
+        return target
 
-    def archive_code(self):
-        paths = sorted((ROOT / "dayan").rglob("*.py"))
-        source = [(str(p.relative_to(ROOT)).replace("\\", "/"), p.read_bytes()) for p in paths
-                  if "__pycache__" not in p.parts]
-        h = hashlib.sha256()
-        for name, content in source:
-            h.update(name.encode("utf-8")); h.update(hashlib.sha256(content).digest())
-        code = h.hexdigest()
+    def archive_code(self,expected_source=None):
+        from .runtime import assert_loaded_source
+        from .reproducibility import source_inventory
+        current=assert_loaded_source()
+        if not expected_source or expected_source!=current:
+            raise ValueError('执行版本与归档源码不一致；未伪造本次源码证据')
+        code,source,digests=source_inventory()
+        if assert_loaded_source()!=expected_source:raise ValueError('归档期间源码变化')
         target = self.directory / "code_versions" / (code + ".zip")
         if not target.exists():
             output = io.BytesIO()
             with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as archive:
                 for name, content in source:
                     archive.writestr(name, content)
+                archive.writestr('SOURCE_MANIFEST.json',_bytes({'schema':1,'code_version':code,
+                    'source_fingerprint':expected_source,'files':digests,
+                    'exclusions':['private config and secrets','historical research and collected data','virtual environments']}))
             _atomic_write(target, output.getvalue())
         return code
 
@@ -283,6 +313,9 @@ def resume_saved_run(run_id,ticks,dt=None):
     """Shared API/assistant continuation; state restoration never means reinitialization."""
     from .runtime import resume_from_checkpoint
     store=get_store();parent=store.load(run_id);checkpoint=parent.get('checkpoint')
+    from .runtime import assert_loaded_source
+    if parent.get('manifest',{}).get('source_fingerprint')!=assert_loaded_source():
+        raise ValueError('原运行源码与当前进程不一致；须在归档源码中恢复，不能用修改后的模型冒充连续状态')
     if parent['kind']!='run' or not checkpoint:raise ValueError('该记录没有可用于真实续算的检查点')
     step=dt if dt is not None else parent['manifest'].get('requested',{}).get('dt',.1)
     result=resume_from_checkpoint(checkpoint,ticks,step,capture_state=True,with_initial=True)

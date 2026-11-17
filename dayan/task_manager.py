@@ -23,7 +23,7 @@ from .collection.storage import atomic_json, file_lock
 ROOT=Path(__file__).resolve().parents[1]
 TARGETS={'api_run','api_experiment','api_agent','api_ai_chat','api_report',
          'api_state_stream','api_resume','api_custom_model','api_dataset_collect','api_dataset_import',
-         'api_run_preset','api_render_collection_reports','api_platform_tool'}
+         'api_run_preset','api_render_collection_reports','api_platform_tool','api_prepare_bundle'}
 _managers={}
 
 
@@ -87,7 +87,11 @@ class TaskManager:
 
     def _disk(self,force=False):
         if force or time.monotonic()-self._disk_at>1:
-            self._disk_bytes=sum(p.stat().st_size for p in self.base.rglob('*') if p.is_file())
+            self._disk_bytes=0
+            for p in self.base.rglob('*'):
+                try:
+                    if p.is_file():self._disk_bytes+=p.stat().st_size
+                except FileNotFoundError:pass  # An atomic staging rename is not a failed task.
             self._disk_at=time.monotonic()
         return self._disk_bytes
 
@@ -104,7 +108,8 @@ class TaskManager:
             if psutil.disk_usage(str(self.base)).free<self.cap.job_bytes:raise QueueFull('可用磁盘不足，未启动任务')
             self._ensure_owner()
             jid=uuid.uuid4().hex;path=self._path(jid);path.mkdir()
-            atomic_json(path/'request.json',{'target':target,'arguments':arguments})
+            from .source_version import source_fingerprint
+            atomic_json(path/'request.json',{'target':target,'arguments':arguments,'source_fingerprint':source_fingerprint()})
             atomic_json(path/'status.json',{'job_id':jid,'status':'queued','stages':['已入队，等待有界工作进程'],
                 'result':None,'ts':time.time(),'target':target,'limits':vars(self.cap)})
             self.queue.append(jid)

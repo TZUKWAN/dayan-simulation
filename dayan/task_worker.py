@@ -19,9 +19,12 @@ def progress(message):
 
 async def execute(folder):
     from .task_manager import TARGETS
+    request=json.loads((folder/'request.json').read_text(encoding='utf-8'))
+    from .source_version import source_fingerprint
+    if request.get('source_fingerprint')!=source_fingerprint():
+        raise ValueError('排队期间源码已变化；未用另一个版本执行已提交任务')
     from . import server
     server.configure_planner()
-    request=json.loads((folder/'request.json').read_text(encoding='utf-8'))
     target=request['target']
     if target not in TARGETS:raise ValueError('未知工作进程操作')
     fn=getattr(server,target)

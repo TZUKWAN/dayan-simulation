@@ -240,10 +240,12 @@ def create_study(question, collection_id, model_family, param_grid, tolerance,
     registered = custom_models.register(definition, original_request=question)
     dataset = datasets.ingest(json.dumps(training, ensure_ascii=False, allow_nan=False).encode(),
         name=question, format="json", source=f"collection:{collection_id}", license="World Bank CC BY 4.0 (indicator terms apply)",
-        role="calibration", metadata={"collection_id": collection_id, "raw_pages": [p["sha256"] for p in task["pages"]],
+        role="calibration", metadata={"unit":unit,"scope":contract['country'],"frequency":"annual",
+            "collection_id": collection_id, "raw_pages": [p["sha256"] for p in task["pages"]],
             "transform": {"sort_by": "date ASC", "date": "integer year", "value": "float", "unit_mapping": contract["indicator"]},
             "holdout_excluded": [r["date"] for r in holdout], "input_records_sha256": digest(raw_rows)})
-    binding = {"dataset_id": dataset["dataset_id"], "field": "value", "aggregate": "first", "parameter": "p0", "scale": 1}
+    binding = {"dataset_id": dataset["dataset_id"], "field": "value", "aggregate": "first", "parameter": "p0", "scale": 1,
+               "source_unit":unit,"target_unit":unit,"source_scope":contract['country'],"target_scope":contract['country'],"order_by":"date"}
     return save({"schema_version": 1, "phase": "prepared", "question": question, "contract": contract,
         "collection_id": collection_id, "source_pages": task["pages"], "records": records,
         "training": training, "holdout": holdout, "quality": quality, "role_check": role_check,

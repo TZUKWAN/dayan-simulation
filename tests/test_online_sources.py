@@ -18,14 +18,17 @@ class OnlineResearch(unittest.TestCase):
         from dayan.research import studies
         from dayan.research.study_reports import generate_report
         from dayan.run_store import get_store
-        question='德国2010:2015失业率线性趋势，留出2年，阈值1，参数initial=7.043，slope=-0.75'
+        question='德国2010:2015失业率线性趋势，末尾2年留出，事前RMSE阈值1，slope=[-0.75,-0.5,0]，初值取首年真实观测'
         task=engine.run_collection('worldbank',{'country':'DEU','indicator':'SL.UEM.TOTL.ZS',
             'date':'2010:2015','per_page':100},page_budget=1,name='Actual public source acceptance')
         if task['status']!='done' or not task.get('n_records'):
-            self.skipTest('真实World Bank不可用：'+str(task.get('error') or task['status']))
+            error=str(task.get('error') or task['status'])
+            if error.startswith(('URLError:','TimeoutError:','ConnectionError:')):
+                self.skipTest('真实World Bank网络不可用：'+error)
+            self.fail('真实采集失败（程序/协议错误不能当作未执行）：'+error)
         for page in task['pages']:
             self.assertEqual(hashlib.sha256((engine.BASE/page['raw']).read_bytes()).hexdigest(),page['sha256'])
-        prepared=studies.create_study(question,task['collection_id'],'linear',{'initial':[7.043],'slope':[-.75]},1,2,5)
+        prepared=studies.create_study(question,task['collection_id'],'linear',{'slope':[-.75,-.5,0]},1,2,5)
         fitted=studies.calibrate_study(prepared['study_id'])
         self.assertTrue(fitted['run_id'])
         saved=get_store().load(fitted['run_id'])
