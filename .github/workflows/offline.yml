@@ -46,8 +46,8 @@ jobs:
       DAYAN_BASE_URL: ''
       DAYAN_MODEL: ''
       DAYAN_PORT: '8918'
-      DAYAN_DATA_DIR: ${{ runner.temp }}/dayan-browser-data
-      DAYAN_REPORTS_DIR: ${{ runner.temp }}/dayan-browser-reports
+      DAYAN_DATA_DIR: ${{ github.workspace }}/.claude/browser-ci-data
+      DAYAN_REPORTS_DIR: ${{ github.workspace }}/.claude/browser-ci-reports
     steps:
       - uses: actions/checkout@v4
         with:

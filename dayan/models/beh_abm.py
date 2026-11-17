@@ -32,6 +32,8 @@ class SchellingModel(_ABMBase):
         n = self.size
         cells = rng.random((n, n)) < self.density
         self.grid = np.where(cells, rng.integers(1, 3, (n, n)), 0)
+        self.resident_ids = np.full((n, n), -1, dtype=int)
+        self.resident_ids[cells] = np.arange(int(cells.sum()))
         self.tick = 0
 
     def _similarity(self, g):
@@ -61,6 +63,7 @@ class SchellingModel(_ABMBase):
             pick_u = idx[self.rng.choice(len(idx), moves, replace=False)]
             for (ui, uj), (ei, ej) in zip(pick_u, pick_e):
                 g[ei, ej], g[ui, uj] = g[ui, uj], 0
+                self.resident_ids[ei, ej], self.resident_ids[ui, uj] = self.resident_ids[ui, uj], -1
         self.tick += 1
 
     def observe(self):
@@ -72,10 +75,10 @@ class SchellingModel(_ABMBase):
         """WP7 状态帧：真实居民类型与格点位置。"""
         n = self.grid.shape[0]
         coords = np.argwhere(self.grid > 0)
-        entities = [{"id": f"res_{int(x)}_{int(y)}", "type": "resident",
+        entities = [{"id": f"res_{int(self.resident_ids[x, y])}", "type": "resident",
                      "x": float(y), "y": float(x),
                      "state": f"type_{int(self.grid[x, y])}"}
-                    for x, y in coords[:4000]]
+                    for x, y in coords]
         return {"entities": entities,
                 "facilities": [{"id": "grid", "type": "lattice",
                                 "size": int(n)}],

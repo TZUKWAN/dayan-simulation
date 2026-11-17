@@ -10,6 +10,21 @@ from dayan.stateframe import state_frame_of
 
 
 class StateIdentity(unittest.TestCase):
+    def test_resident_identity_follows_moves_and_preserves_population(self):
+        result=run_model_full('BEH001',parameters={'size':12,'density':.8,'threshold':.7},
+                              ticks=8,dt=1.,seed=7,capture_state=True)
+        frames=result.state_frames
+        first={e['id']:e for e in frames[0]['entities']}
+        moved=set()
+        for frame in frames[1:]:
+            current={e['id']:e for e in frame['entities']}
+            self.assertEqual(set(current),set(first))
+            self.assertEqual(len(current),len(frame['entities']))
+            for key,entity in current.items():
+                self.assertEqual(entity['state'],first[key]['state'])
+                if (entity['x'],entity['y'])!=(first[key]['x'],first[key]['y']):moved.add(key)
+        self.assertTrue(moved,'Resident identities must travel with actual relocations')
+
     def test_customer_ids_and_server_assignments_remain_actual(self):
         model=MMCQueueModel(c=2,lam=3.,mu=2.)
         model.initialize(None,{},None,None,np.random.default_rng(7))
