@@ -22,6 +22,25 @@ def wait(manager,jid,predicate,timeout=15):
 
 
 class Tasks(unittest.TestCase):
+    def test_transient_windows_sharing_errors_retry_but_corrupt_json_does_not(self):
+        from unittest.mock import patch
+        from dayan.collection.storage import read_json,atomic_json
+        from dayan import task_manager
+        with patch.object(Path,'read_text',side_effect=[PermissionError('explicit sharing fixture'),'{"status":"running"}']):
+            self.assertEqual(task_manager._read(Path('unit-status.json')),{'status':'running'})
+        with patch.object(Path,'read_text',return_value='{invalid'):
+            with self.assertRaises(json.JSONDecodeError):read_json(Path('unit-corrupt.json'))
+        with tempfile.TemporaryDirectory() as td:
+            path=Path(td)/'status.json'
+            original=os.replace;calls=[]
+            def sharing_once(src,dst):
+                calls.append(1)
+                if len(calls)==1:raise PermissionError('explicit sharing fixture')
+                return original(src,dst)
+            with patch('os.replace',side_effect=sharing_once):atomic_json(path,{'status':'done'})
+            self.assertEqual(read_json(path),{'status':'done'})
+            self.assertEqual(list(Path(td).glob('*.tmp')),[])
+
     def test_real_model_process_and_durable_result(self):
         with tempfile.TemporaryDirectory() as td:
             m=TaskManager(td)

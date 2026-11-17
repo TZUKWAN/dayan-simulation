@@ -34,3 +34,50 @@ jobs:
       - run: python tests/check_sources.py
       - run: python tests/run_all.py --output .claude/ci
       - run: git diff --exit-code
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MPLBACKEND: Agg
+      PYTHONIOENCODING: utf-8
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      DAYAN_API_KEY: ''
+      DAYAN_BASE_URL: ''
+      DAYAN_MODEL: ''
+      DAYAN_PORT: '8918'
+      DAYAN_DATA_DIR: ${{ runner.temp }}/dayan-browser-data
+      DAYAN_REPORTS_DIR: ${{ runner.temp }}/dayan-browser-reports
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-ui.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r requirements-ui.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Verify actual offline workbench in a headless browser
+        shell: bash
+        run: |
+          python -m dayan.server > "$RUNNER_TEMP/dayan-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          python - <<'PY'
+          import time,urllib.request
+          for attempt in range(120):
+              try:
+                  urllib.request.urlopen('http://127.0.0.1:8918/api/health',timeout=2).read()
+                  break
+              except OSError:
+                  time.sleep(.25)
+          else:
+              raise RuntimeError('Local workbench did not become ready')
+          PY
+          python tests/browser_acceptance.py --base-url http://127.0.0.1:8918 --browser chromium --output .claude/browser-ci
+      - run: git diff --exit-code

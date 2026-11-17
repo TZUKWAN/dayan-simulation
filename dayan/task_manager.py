@@ -18,7 +18,7 @@ import psutil
 
 from .access import data_root
 from .limits import limits, validate_envelope
-from .collection.storage import atomic_json, file_lock
+from .collection.storage import atomic_json, file_lock, read_json
 
 ROOT=Path(__file__).resolve().parents[1]
 TARGETS={'api_run','api_experiment','api_agent','api_ai_chat','api_report',
@@ -28,7 +28,7 @@ _managers={}
 
 
 def _read(path):
-    return json.loads(path.read_text(encoding='utf-8'))
+    return read_json(path)
 
 
 def _kill(proc):
@@ -40,6 +40,7 @@ def _kill(proc):
             try:child.kill()
             except psutil.NoSuchProcess:pass
         parent.kill();proc.wait(timeout=10)
+        psutil.wait_procs(children,timeout=3)
     except (psutil.NoSuchProcess,ProcessLookupError):pass
 
 
@@ -124,15 +125,15 @@ class TaskManager:
         if row['status']=='done' and (path/'result.json').exists():row['result']=_read(path/'result.json')['value']
         return row
 
-    def cancel(self,jid):
+    def cancel(self,jid,reason='cancelled'):
         with self.lock:
-            row=self.get(jid)
+            current=self.active.pop(jid,None)
+            row=dict(current['row']) if current else self.get(jid)
             if row['status'] not in ('queued','running'):return row
             if jid in self.queue:self.queue.remove(jid)
-            current=self.active.pop(jid,None)
             if current:_kill(current['process'])
             if not self.active and not self.queue:self._release_owner()
-            row.update(status='error',terminal_reason='cancelled',error='用户已取消，工作进程已停止；已生成归档保留',result=None)
+            row.update(status='error',terminal_reason=reason,error=('用户已取消' if reason=='cancelled' else '任务状态读取异常')+'，工作进程已停止；已生成归档保留',result=None)
             atomic_json(self._path(jid)/'status.json',row)
         return row
 
@@ -148,6 +149,10 @@ class TaskManager:
                 await asyncio.sleep(.04)
         except asyncio.CancelledError:
             self.cancel(jid);raise
+        except Exception:
+            try:self.cancel(jid,reason='result_read_error')
+            except Exception:pass  # Original storage failure remains the returned error; owned worker is already stopped.
+            raise
 
     def _start(self,jid):
         path=self._path(jid)

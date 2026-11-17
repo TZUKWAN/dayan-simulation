@@ -47,4 +47,22 @@ def atomic_json(path, value):
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + "." + uuid.uuid4().hex + ".tmp")
     tmp.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
-    os.replace(tmp, path)
+    try:
+        deadline=time.monotonic()+1.5
+        while True:
+            try:os.replace(tmp,path);break
+            except PermissionError:
+                # Windows readers/antivirus can briefly hold a sharing handle.
+                if time.monotonic()>=deadline:raise
+                time.sleep(.015)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def read_json(path):
+    deadline=time.monotonic()+1.5
+    while True:
+        try:return json.loads(Path(path).read_text(encoding='utf-8'))
+        except PermissionError:
+            if time.monotonic()>=deadline:raise
+            time.sleep(.015)
