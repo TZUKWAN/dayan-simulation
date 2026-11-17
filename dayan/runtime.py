@@ -702,6 +702,11 @@ def run_model_full(mid: str, parameters: dict | None = None,
                      ("unknown", "alias", "coerced", "type_error", "runtime_key")],
         "runtime_version": "2.1",
     }
+    from .output_contract import output_contract
+    manifest["output_contract"] = output_contract(mid)
+    manifest["observed_output_types"] = {
+        key: sorted({_type_of(row[key]) for row in obs_out if key in row})
+        for key in {k for row in obs_out for k in row}}
     if getattr(model, "implementation_note", None):
         manifest["warnings"].append(model.implementation_note)
     from .fidelity import load_reviews

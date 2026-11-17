@@ -16,11 +16,18 @@ import numpy as np
 class MatrixGame:
     """2 人正则式博弈。A[row, col] 为行玩家收益，B[row, col] 为列玩家收益。"""
 
-    def __init__(self, A: np.ndarray, B: np.ndarray, actions: list[str] | None = None):
+    def __init__(self, A: np.ndarray, B: np.ndarray, actions: list[str] | None = None,
+                 name: str = "Unnamed matrix game", column_actions: list[str] | None = None):
         self.A = np.asarray(A, dtype=float)
         self.B = np.asarray(B, dtype=float)
-        assert self.A.shape == self.B.shape
+        if self.A.ndim != 2 or not self.A.size or self.A.shape != self.B.shape or not np.isfinite(self.A).all() or not np.isfinite(self.B).all():
+            raise ValueError("收益矩阵须为同形状、非空、有限的二维数组")
         self.actions = actions or [str(i) for i in range(self.A.shape[0])]
+        self.column_actions = column_actions or (list(self.actions) if self.A.shape[0] == self.A.shape[1] else [str(i) for i in range(self.A.shape[1])])
+        if len(self.actions) != self.A.shape[0] or len(self.column_actions) != self.A.shape[1]:
+            raise ValueError("行/列行动名称数量须与收益矩阵对应")
+        self.name = str(name)
+        self.last_decision = None
 
     # ---- 纯策略纳什均衡（枚举）----
     def pure_nash(self) -> list[tuple[int, int]]:
@@ -83,36 +90,47 @@ def replicator_dynamics(A: np.ndarray, x0: np.ndarray, steps: int = 500,
 def hawk_dove_matrix(V: float = 4.0, C: float = 6.0) -> MatrixGame:
     """鹰鸽博弈（对称，B=A 转置）：混合均衡 x_H=V/C。"""
     A = np.array([[(V - C) / 2.0, V], [0.0, V / 2.0]])
-    return MatrixGame(A, A.T.copy(), actions=["Hawk", "Dove"])
+    return MatrixGame(A, A.T.copy(), actions=["Hawk", "Dove"], name="Hawk–Dove")
 
 
 def prisoners_dilemma_matrix() -> MatrixGame:
     """囚徒困境：B = A 的转置（零和错位语义下各取各的收益）。
     T=3 > R=2 > P=1 > S=0：背叛严格占优，唯一纯纳什 (D,D)。"""
     A = np.array([[2.0, 0.0], [3.0, 1.0]])
-    return MatrixGame(A, A.T.copy(), actions=["Coop", "Defect"])
+    return MatrixGame(A, A.T.copy(), actions=["Coop", "Defect"], name="Prisoner's dilemma")
 
 
 # ---- LLM 玩家（遮蔽变体：prompt 不含博弈名，测自发识别）----
 def llm_game_action(client, game: MatrixGame, my_index: int,
                     history: list[tuple[int, int]] | None = None,
-                    masked: bool = True) -> int:
-    """LLM 玩家：描述策略情境（遮蔽博弈名）→ 动作编号。解析失败回退随机。"""
-    acts = "；".join(f"{i}={a}" for i, a in enumerate(game.actions))
+                    masked: bool = True, *, rng: np.random.Generator | None = None,
+                    audit: list | None = None) -> int:
+    """Choose an action. A fallback consumes the caller's persistent RNG stream.
+
+    last_decision/audit distinguish real LLM decisions from random fallbacks.
+    No implicit seed is created when a caller has omitted their random stream.
+    """
+    if my_index not in (0, 1) or isinstance(my_index, bool):
+        raise ValueError("my_index 必须为行玩家0或列玩家1")
+    labels = (game.actions, game.column_actions)
+    mine, other = labels[my_index], labels[1-my_index]
+    if masked:
+        mine, other = [f"A{i}" for i in range(len(mine))], [f"A{i}" for i in range(len(other))]
+    payoff = game.A if my_index == 0 else game.B.T
+    acts = "；".join(f"{i}={a}" for i, a in enumerate(mine))
     hist = ""
     if history:
-        hist = "历史（你=行玩家）：\n" + "\n".join(
-            f"  第{k+1}轮：你={game.actions[i]}，对方={game.actions[j]}"
-            for k, (i, j) in enumerate(history[-5:]))
+        hist = "历史（你="+("行玩家" if my_index == 0 else "列玩家")+"）：\n" + "\n".join(
+            f"  第{k+1}轮：你={mine[pair[my_index]]}，对方={other[pair[1-my_index]]}"
+            for k, pair in enumerate(history[-5:]))
     gains = []
-    for i in range(game.A.shape[0]):
-        row = "；".join(f"对方选{game.actions[j]}→你得{game.A[i, j]:.0f}"
-                        for j in range(game.A.shape[1]))
-        gains.append(f"  你选 {game.actions[i]}：{row}")
-    body = f"可选行动：{acts}\n" + "\n".join(gains)
+    for i in range(len(mine)):
+        row = "；".join(f"对方选{other[j]}→你得{payoff[i, j]:g}"
+                        for j in range(len(other)))
+        gains.append(f"  你选 {mine[i]}：{row}")
+    body = ("" if masked else f"博弈名称：{game.name}\n")+f"可选行动：{acts}\n"+"\n".join(gains)
     if hist:
         body += "\n" + hist
-    name_hint = "" if masked else f"（{game.name}）"
     msgs = [
         {"role": "system",
          "content": "你是策略情境中的参与人。只输出JSON：{\"action\": 编号}。"},
@@ -122,9 +140,17 @@ def llm_game_action(client, game: MatrixGame, my_index: int,
     try:
         raw = client.chat(msgs, temperature=0.2, max_tokens=120)
         d = _json.loads(raw[raw.index("{"): raw.rindex("}") + 1])
-        act = int(d.get("action"))
-        if 0 <= act < game.A.shape[0]:
-            return act
-    except Exception:  # noqa: BLE001
-        pass
-    return int(np.random.default_rng(0).integers(game.A.shape[0]))
+        act = d.get("action")
+        if isinstance(act, bool) or not isinstance(act, int) or not 0 <= act < len(mine):
+            raise ValueError("LLM行动编号必须为合法整数")
+        record = {"source": "llm", "action": act, "player": my_index, "masked": masked}
+    except Exception as exc:
+        if not isinstance(rng, np.random.Generator):
+            raise ValueError("LLM失败后的随机回退必须提供平台派生rng；未创建固定种子替代") from exc
+        act = int(rng.integers(len(mine)))
+        record = {"source": "rng-fallback", "action": act, "player": my_index,
+                  "masked": masked, "error_type": type(exc).__name__}
+    game.last_decision = record
+    if audit is not None:
+        audit.append(record)
+    return act

@@ -183,58 +183,146 @@ class SugarscapeTradeModel(SugarscapeModel):
 
 
 class EpsteinViolenceModel(_ABMBase):
-    """BEH005 Epstein 公民暴力：grievance=hardship×legitimacy 缺口+风险。"""
+    """Epstein (2002) Model I: G=H(1-L), N=R[1-exp(-k C/A)].
+
+    Toroidal square-vision lattice; movement, citizen decisions, then arrests.
+    This phase schedule is explicit, rather than a claim to reproduce every
+    activation-order variant. Jail terms are measured in agent steps.
+    Reference: https://doi.org/10.1073/pnas.092080199
+    """
 
     model_id = "BEH005"
     clock_type = "fixed_step"
+    primary_metric = "active_frac"
 
-    def __init__(self, n_agents=60, n_cops=6, size=30):
+    def __init__(self, n_agents=60, n_cops=6, size=30, legitimacy=0.85,
+                 vision=2, threshold=0.1, arrest_constant=2.3, max_jail_term=30):
+        if n_agents < 1 or n_cops < 0 or size < 2 or n_agents+n_cops >= size*size:
+            raise ValueError("人口/警察必须非负，且格点必须留有空位")
+        if not 0 <= legitimacy <= 1 or not 0 <= threshold <= 1 or arrest_constant <= 0:
+            raise ValueError("合法性/阈值须在0–1，逮捕系数须为正")
+        if not 0 <= vision < size or max_jail_term < 0:
+            raise ValueError("视野须小于边长，监禁期不能为负")
         self.n, self.n_cops, self.size = n_agents, n_cops, size
+        self.legitimacy, self.vision, self.threshold = legitimacy, vision, threshold
+        self.arrest_constant, self.max_jail_term = arrest_constant, max_jail_term
 
     def initialize(self, context, parameters, population, topology, rng):
         self.rng_ = rng
-        n = self.size
-        self.pos_a = rng.integers(0, n, (self.n, 2))
-        self.grievance = rng.uniform(0, 1, self.n)
+        sites = rng.choice(self.size*self.size, self.n+self.n_cops, replace=False)
+        positions = np.column_stack((sites // self.size, sites % self.size))
+        self.pos_a = positions[:self.n].copy()
+        self.hardship = rng.uniform(0, 1, self.n)
+        self.grievance = self.hardship * (1-self.legitimacy)
         self.risk_av = rng.uniform(0, 1, self.n)
         self.active = np.zeros(self.n, bool)
-        self.pos_c = rng.integers(0, n, (self.n_cops, 2))
-        self.jailed = np.zeros(self.n_cops * 6, int)
+        self.pos_c = positions[self.n:].copy()
+        self.jailed = np.zeros(self.n, int)
+        self.arrests = 0
         self.violence_hist = []
 
+    def _near(self, positions, point):
+        delta = np.abs(positions-point)
+        delta = np.minimum(delta, self.size-delta)
+        return delta.max(axis=1) <= self.vision
+
+    def _move(self, position, occupied, releasing=False):
+        candidates = sorted({((int(position[0])+dx) % self.size,
+                              (int(position[1])+dy) % self.size)
+                             for dx in range(-self.vision, self.vision+1)
+                             for dy in range(-self.vision, self.vision+1)} - occupied)
+        if not candidates and releasing:
+            candidates = sorted({(x, y) for x in range(self.size) for y in range(self.size)}-occupied)
+        return np.array(candidates[int(self.rng_.integers(len(candidates)))]) if candidates else position.copy()
+
+    def arrest_probability(self, citizen):
+        cops = int(self._near(self.pos_c, self.pos_a[citizen]).sum()) if self.n_cops else 0
+        near = self._near(self.pos_a, self.pos_a[citizen]) & (self.jailed == 0) & self.active
+        near[citizen] = False
+        # The deciding citizen counts themself as active, so A is never zero.
+        actives = int(near.sum())+1
+        return float(-np.expm1(-self.arrest_constant*cops/actives))
+
     def step(self, t, dt):
-        n = self.size
-        for i in range(self.n):
-            if self.active[i]:
-                self.pos_a[i] = self.rng_.integers(0, n, 2)
+        imprisoned = self.jailed > 0
+        self.jailed[imprisoned] -= 1
+        occupied = {tuple(p) for p in self.pos_a[~imprisoned]} | {tuple(p) for p in self.pos_c}
+        # Release to a vacant site, without overlapping an officer or citizen.
+        for i in np.flatnonzero(imprisoned & (self.jailed == 0)):
+            self.pos_a[i] = self._move(self.pos_a[i], occupied, releasing=True)
+            occupied.add(tuple(self.pos_a[i]))
+        actors = self.rng_.permutation(self.n+self.n_cops)
+        for actor in actors:
+            if actor < self.n:
+                if self.jailed[actor] > 0:
+                    continue
+                positions, index = self.pos_a, actor
             else:
-                self.pos_a[i] = (self.pos_a[i] + self.rng_.integers(-1, 2, 2)) % n
-        # 警察就近镇压
-        for ci, cp in enumerate(self.pos_c):
-            cp = (cp + self.rng_.integers(-1, 2, 2)) % n
-            d = np.abs(self.pos_a - cp).sum(axis=1)
-            near = np.where(d <= 2)[0]
-            act_near = [i for i in near if self.active[i]]
-            if act_near:
-                caught = act_near[int(self.rng_.integers(len(act_near)))]
+                positions, index = self.pos_c, actor-self.n
+            occupied.discard(tuple(positions[index]))
+            positions[index] = self._move(positions[index], occupied)
+            occupied.add(tuple(positions[index]))
+        self.grievance = self.hardship * (1-self.legitimacy)
+        for i in self.rng_.permutation(self.n):
+            self.active[i] = self.jailed[i] == 0 and self.grievance[i]-self.risk_av[i]*self.arrest_probability(i) > self.threshold
+        for ci in self.rng_.permutation(self.n_cops):
+            targets = np.flatnonzero(self._near(self.pos_a, self.pos_c[ci]) & self.active & (self.jailed == 0))
+            if len(targets):
+                caught = int(self.rng_.choice(targets))
                 self.active[caught] = False
-        # 新暴发
-        legit = 0.85
-        for i in range(self.n):
-            d = np.min(np.abs(self.pos_a[i] - self.pos_c).sum(axis=1))                 if self.n_cops else 99
-            risk = 1 - np.exp(-d)
-            if (not self.active[i]) and \
-                    self.grievance[i] - legit * (1 - risk) > self.risk_av[i] * risk:
-                self.active[i] = True
+                occupied.discard(tuple(self.pos_c[ci]))
+                self.pos_c[ci] = self.pos_a[caught].copy()
+                self.jailed[caught] = int(self.rng_.integers(self.max_jail_term+1))
+                if self.jailed[caught] == 0:
+                    self.pos_a[caught] = self._move(self.pos_a[caught], occupied, releasing=True)
+                    occupied.add(tuple(self.pos_a[caught]))
+                self.arrests += 1
         self.violence_hist.append(float(self.active.mean()))
 
     def observe(self):
         tail = self.violence_hist[-50:]
         return {"violence_frac": float(np.mean(tail)) if tail else 0,
+                "active_frac": float(self.active.mean()), "jailed_count": int((self.jailed > 0).sum()),
+                "arrests": int(self.arrests), "mean_grievance": float(self.grievance.mean()),
                 "episodic": bool(np.std(tail) > 0.01) if len(tail) > 5 else False}
 
+    def state_frame(self):
+        citizens = [{"id": f"citizen_{i}", "type": "pedestrian", "x": float(p[0]), "y": float(p[1]),
+                     "state": "active" if self.active[i] else "quiet"}
+                    for i, p in enumerate(self.pos_a) if self.jailed[i] == 0]
+        cops = [{"id": f"cop_{i}", "type": "pedestrian", "x": float(p[0]), "y": float(p[1]), "state": "cop"}
+                for i, p in enumerate(self.pos_c)]
+        return {"entities": citizens+cops, "space": {"bounds": [0, 0, self.size, self.size], "unit": "cell", "topology": "torus"},
+                "aggregates": self.observe(), "note": "监禁者不在格点中，不为其绘制虚构坐标"}
+
+    def snapshot(self):
+        return {"parameters": {"n_agents": self.n, "n_cops": self.n_cops, "size": self.size,
+                               "legitimacy": self.legitimacy, "vision": self.vision,
+                               "threshold": self.threshold, "arrest_constant": self.arrest_constant,
+                               "max_jail_term": self.max_jail_term},
+                "arrays": {name: getattr(self, name).tolist() for name in
+                           ("pos_a", "pos_c", "hardship", "grievance", "risk_av", "active", "jailed")},
+                "violence_hist": list(self.violence_hist), "arrests": self.arrests,
+                "rng_state": self.rng_.bit_generator.state}
+
+    def restore(self, snapshot):
+        self.__init__(**snapshot["parameters"])
+        for name, values in snapshot["arrays"].items():
+            kind = bool if name == "active" else int if name in ("pos_a", "pos_c", "jailed") else float
+            setattr(self, name, np.array(values, dtype=kind))
+        self.violence_hist = list(snapshot["violence_hist"])
+        self.arrests = snapshot["arrests"]
+        self.rng_ = self.rng = np.random.default_rng()
+        self.rng_.bit_generator.state = snapshot["rng_state"]
+
     def validate_state(self):
-        return []
+        errs = []
+        positions = [tuple(p) for p in self.pos_a[self.jailed == 0]]+[tuple(p) for p in self.pos_c]
+        if len(positions) != len(set(positions)):
+            errs.append("格点占用冲突")
+        if np.any(self.active & (self.jailed > 0)) or np.any(self.jailed < 0):
+            errs.append("监禁者仍活跃或监禁期限非法")
+        return errs
 
 
 class AgentZeroModel(_ABMBase):

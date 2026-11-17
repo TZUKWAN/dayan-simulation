@@ -27,14 +27,15 @@ class CompileResult:
 
 
 def _pick_metric(mid, requested=None):
-    from ..agent.metadata import load_capabilities
-    obs = next((c.get("observables", []) for c in load_capabilities() if c["model_id"] == mid), [])
+    from ..output_contract import output_contract, validate_metric
+    schema = output_contract(mid)
     if requested:
-        return requested
-    for name in ("flux", "I", "I_total", "evacuated", "n_evacuated", "segregation", "mean_opinion", "employment", "v", "queue_length"):
-        if name in obs:
-            return name
-    return next((f for f in obs if f not in ("sim_t", "t", "tick", "step")), "")
+        return validate_metric(mid, requested)
+    if schema["primary_metric"]:
+        return schema["primary_metric"]
+    numeric = [name for name, field in schema["fields"].items()
+               if field["type"] == "number" and name not in ("sim_t", "t", "tick", "step")]
+    return numeric[0] if len(numeric) == 1 else ""
 
 
 def compile_research(text: str, purpose=None, ticks=None, dt=None, seeds=None,
@@ -89,10 +90,19 @@ def compile_research(text: str, purpose=None, ticks=None, dt=None, seeds=None,
         research.unsupported_requirements.append(issue)
         return CompileResult(research, candidates, None, [issue], [])
     arms = [{"label": "用户指定干预", "params": {}, "interventions": ivs}] if ivs else []
+    try:
+        primary = _pick_metric(mid, metric or request["metric"])
+    except ValueError as exc:
+        return CompileResult(research, candidates, None, [str(exc)], [])
+    if not primary:
+        from ..output_contract import output_contract
+        fields = output_contract(mid)["fields"]
+        return CompileResult(research, candidates, None,
+                             ["请选择主要结局指标 primary_metric；不能擅自选择第一个字段。可选："+", ".join(fields)], [])
     exp = ExperimentSpec(research_id=research.research_id, model_id=mid,
                          title=text[:100], baseline_params=baseline, arms=arms,
                          ticks=ticks, dt=dt, seeds=seeds,
-                         primary_metric=_pick_metric(mid, metric or request["metric"]),
+                         primary_metric=primary,
                          purpose=purpose,
                          hypothesis="用户指定干预相对同种子基线的模型内差异" if arms else "基线重复运行").finalize()
     validation = exp.validate()
