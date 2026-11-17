@@ -82,6 +82,7 @@ def run(base,output,engine='firefox'):
             large=api('/api/run',{'model_id':'NET106','parameters':{'cells':5000,'density':.8},'ticks':250,'dt':1,'seed':7})
             restore(large['run_id']);page.evaluate('DAYAN_RESULTS.seek(DAYAN_RESULTS.end)')
             check('large run retains final frame and discloses render sampling',page.evaluate('_vizStateStream.frames.at(-1).sim_t===DAYAN_RESULTS.end') and '采样3000' in page.locator('#vizStateHud').inner_text())
+            check('large-scene GPU instances retain actual entity IDs and coordinates',page.evaluate('''()=>{const g=_scene.children.find(c=>c.userData.isStateGroup),b=g.userData.carBatch,f=_vizStateStream.frames.at(-1),road=f.facilities.find(f=>f.type==='road');if(!b||b.count!==3000)return false;const saved=new Map(f.entities.map(e=>[String(e.id),e])),m=new THREE.Matrix4(),v=new THREE.Vector3();return b.userData.instanceIds.every((id,i)=>{const e=saved.get(String(id));b.getMatrixAt(i,m);v.setFromMatrixPosition(m);return !!e&&Math.abs(v.x-30*Math.cos(e.x/road.length*Math.PI*2))<1e-4&&Math.abs(v.z-30*Math.sin(e.x/road.length*Math.PI*2))<1e-4;});}'''))
             performance=page.evaluate('''()=>{const times=[];for(let i=0;i<5;i++){const start=performance.now();DAYAN3D.renderAt(DAYAN_RESULTS.end);times.push(performance.now()-start);}return {render_ms:times,geometries:_vizRenderer.info.memory.geometries,draw_calls:_vizRenderer.info.render.calls,archived_entities:_vizStateStream.n_entities_max,frames:_vizStateStream.frames.length};}''')
             check('large-scene render remains bounded',max(performance['render_ms'])<5000 and performance['frames']<=201)
             page.screenshot(path=str(output/'large.png'),full_page=True)
@@ -98,9 +99,11 @@ def run(base,output,engine='firefox'):
             result={'ok':True,'checks':checks,'errors':errors,'performance':performance,'run_ids':[rid,iv['run_id'],queue['run_id'],large['run_id']]}
             (output/'verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
             return result
-        except Exception:
-            page.screenshot(path=str(output/'failure.png'),full_page=True)
-            (output/'failure.json').write_text(json.dumps({'checks':checks,'errors':errors,'performance':performance},ensure_ascii=False,indent=2),encoding='utf-8')
+        except Exception as error:
+            print('Browser acceptance error: '+repr(error),flush=True)
+            (output/'failure.json').write_text(json.dumps({'checks':checks,'errors':errors,'performance':performance,'exception':repr(error)},ensure_ascii=False,indent=2),encoding='utf-8')
+            try:page.screenshot(path=str(output/'failure.png'),full_page=True,timeout=3000)
+            except Exception as capture_error:print('Diagnostic screenshot unavailable: '+repr(capture_error),flush=True)
             raise
         finally:browser.close()
 
