@@ -164,9 +164,13 @@ async def console_css():
 
 @app.get("/console/assets/{filename}")
 async def console_assets(filename: str):
+    # Validate before touching the filesystem: POSIX realpath rejects NUL,
+    # whereas a bad asset name must consistently return 404 on every OS.
+    if not re.fullmatch(r'[A-Za-z0-9_.-]+',filename):
+        raise HTTPException(404,'资源路径不在允许目录')
     base=(ROOT/'site'/'console'/'assets').resolve()
     fp=(base/filename).resolve()
-    if fp.parent!=base or not re.fullmatch(r'[A-Za-z0-9_.-]+',filename):
+    if fp.parent!=base:
         raise HTTPException(404,'资源路径不在允许目录')
     if fp.is_file():
         suffix = fp.suffix.lower()

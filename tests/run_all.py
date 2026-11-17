@@ -177,6 +177,9 @@ def main(argv=None):
             stats['passed']+=res['passed'];stats['skipped']+=res.get('skipped',0)
             stats['failed_suites']+=int(res['verdict']=='FAIL')
             print(res['verdict']+' '+suite['name']+': '+str(res['passed'])+' passed, '+str(res.get('skipped',0))+' skipped; '+str(res['duration_s'])+'s',flush=True)
+            if res['verdict']=='FAIL':
+                print('Reasons: '+'; '.join(res.get('reasons',[])),flush=True)
+                print(res.get('excerpt',''),flush=True)
             (output/'test_stats.json').write_text(json.dumps(stats,ensure_ascii=False,indent=2),encoding='utf-8')
     stats['total']=stats['passed'];stats['generated_at']=time.strftime('%Y-%m-%dT%H:%M:%S')
     for cat in CATEGORIES:

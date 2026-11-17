@@ -15,6 +15,15 @@ from dayan.research.compiler import compile_research
 
 
 class RequirementsTests(unittest.TestCase):
+    def test_facility_coordinates_do_not_overwrite_agent_state_parameters(self):
+        text='创建37名行人的模型，右侧出口（x=40米，y=15米），目标(x=20,y=10)，起点（x=2，y=3）。运行20步，步长0.2。'
+        request=extract_request(text)
+        self.assertEqual(request['explicit_parameters'],{'exit_x':40,'exit_y':15,
+                         'target_x':20,'target_y':10,'start_x':2,'start_y':3,'n':37})
+        self.assertEqual(request['options'],{'ticks':20,'dt':.2})
+        self.assertEqual(request['original_text'],text)
+        self.assertEqual(extract_request('新建方程模型，x=40，y=15')['explicit_parameters'],{'x':40,'y':15})
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.env = patch.dict(os.environ, {"DAYAN_DATA_DIR": self.temp.name})

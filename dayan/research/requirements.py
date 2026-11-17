@@ -38,6 +38,12 @@ PARAM_ALIASES = {"传播率": "beta", "传播率beta": "beta", "恢复率": "gam
 
 def _pairs(text):
     result = {}
+    # Coordinates belong to the named facility, not each agent's x/y state.
+    # Preserve ordinary equation parameters named x/y outside these blocks.
+    coordinate_blocks=[]
+    labels={'出口':'exit','目的地':'target','目标':'target','起点':'start','初始位置':'start'}
+    for block in re.finditer(r'(出口|目的地|目标|起点|初始位置)\s*[（(]([^）)\n。]{1,160})[）)]',text):
+        coordinate_blocks.append((block.start(2),block.end(2),labels[block.group(1)]))
     for match in re.finditer(r"(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)\s*(?:[=:＝]|改成|改为|设为)\s*", text):
         tail = text[match.end():match.end()+4096]
         try:
@@ -46,7 +52,13 @@ def _pairs(text):
                 value = float(token) if any(c in token for c in ".eE") else int(token)
             else:
                 value, _ = json.JSONDecoder().raw_decode(tail)
-            result[match.group(1)] = value
+            name=match.group(1)
+            if name.lower() in ('x','y'):
+                for start,end,prefix in coordinate_blocks:
+                    if start<=match.start()<end:
+                        name=prefix+'_'+name.lower()
+                        break
+            result[name] = value
         except (ValueError, TypeError):
             continue
     return result

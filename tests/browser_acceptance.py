@@ -60,7 +60,10 @@ def run(base,output,engine='firefox'):
             check('rendered persistent IDs equal archived entity IDs',set(by_id)=={str(e['id']) for e in frame['entities']})
             check('rendered ring positions transform actual saved cells',all(abs(by_id[str(e['id'])]['position'][0]-30*math.cos(e['x']/length*2*math.pi))<1e-8 and abs(by_id[str(e['id'])]['position'][2]-30*math.sin(e['x']/length*2*math.pi))<1e-8 for e in frame['entities']))
             page.screenshot(path=str(output/'traffic.png'),full_page=True)
-            before=len(posts);page.evaluate('DAYAN_RESULTS.seek(DAYAN_RESULTS.start);DAYAN_RESULTS.setPlaying(true)');page.wait_for_timeout(300)
+            before=len(posts);page.evaluate('DAYAN_RESULTS.seek(DAYAN_RESULTS.start);DAYAN_RESULTS.setPlaying(true)')
+            # Two real animation frames are required after the clock resets.
+            # Software WebGL in CI may take longer than a fixed 300 ms delay.
+            page.wait_for_function('DAYAN_RESULTS.time>DAYAN_RESULTS.start',timeout=15000)
             check('playback advances the actual shared clock',page.evaluate('DAYAN_RESULTS.time>DAYAN_RESULTS.start'))
             page.evaluate('DAYAN_RESULTS.setPlaying(false)');paused=page.evaluate('DAYAN_RESULTS.time');page.wait_for_timeout(120)
             check('pause and seek never rerun a model',page.evaluate('DAYAN_RESULTS.time')==paused and len(posts)==before)
