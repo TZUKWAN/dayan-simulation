@@ -11,6 +11,24 @@ from dayan.models.eco_flagship_lite import KirmanModel,SantaFeLiteModel
 
 
 class DefinedStatistics(unittest.TestCase):
+    def test_sis_disease_free_equilibrium_is_finite_and_nonnegative(self):
+        for beta in (.1,0.):
+            result=run_model_full('NET052',parameters={'beta':beta,'gamma':.2},ticks=10,dt=.1,seed=7)
+            self.assertTrue(all(row['I_star']==0. for row in result.observations))
+            self.assertGreater(result.observations[0]['I'],result.observations[-1]['I'])
+            json.dumps(result.observations,allow_nan=False)
+
+    def test_traffic_density_does_not_change_random_braking_probability(self):
+        from dayan.models.traffic import NSModel
+        for density in (.1,.7):
+            model=NSModel(cells=100,density=density)
+            model.initialize(None,{},None,None,np.random.default_rng(7))
+            self.assertEqual(model.observe()['n_cars'],int(100*density))
+            self.assertEqual(model.p,.2)
+            result=run_model_full('NET106',parameters={'cells':100,'density':density},ticks=5,seed=7)
+            self.assertEqual(result.manifest['actual']['effective_parameters']['p'],.2)
+            self.assertEqual(result.observations[0]['n_cars'],int(100*density))
+
     def test_initial_samples_do_not_produce_nonfinite_statistics(self):
         cases={'BEH007':'mean_attendance','BEH008':'mean_ones_share',
             **{mid:'coop_rate' for mid in ('BEH069','BEH070','BEH071','BEH072','BEH073')},

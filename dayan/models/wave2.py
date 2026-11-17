@@ -69,7 +69,8 @@ class SISModel(DayanModel):
     def observe(self):
         return {"I": float(self.x[0]),
                 "I_frac": float(self.x[0] / self.N),
-                "I_star": float(1 - self.gamma / self.beta)}
+                # The physical equilibrium is disease-free when R0 <= 1.
+                "I_star": float(max(0.,1-self.gamma/self.beta)) if self.beta>0 else 0.}
 
     def validate_state(self):
         return [] if self.x[0] >= 0 else ["I<0"]

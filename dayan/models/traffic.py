@@ -343,9 +343,9 @@ class NSModel(DayanModel):
     clock_type = "fixed_step"
 
     def __init__(self, cells=100, vmax=5, density=0.2, p=None):
-        # density=初始车辆密度（与 initialize 参数同名；p 为兼容别名）
+        # Initial occupancy and per-step random braking are independent inputs.
         self.cells, self.vmax = cells, vmax
-        self.p = p if p is not None else density
+        self.density, self.p = density, .2 if p is None else p
         self.road = np.full(cells, -1, int)
         self.car_ids = np.full(cells, -1, int)
         self.step_count = 0
@@ -354,7 +354,7 @@ class NSModel(DayanModel):
         self.cells = parameters.get("cells", self.cells)
         self.vmax = parameters.get("vmax", self.vmax)
         self.p = parameters.get("p", self.p)
-        dens = parameters.get("density", 0.2)
+        dens = parameters.get("density", self.density)
         self.rng = rng
         self.road = np.full(self.cells, -1, int)
         self.car_ids = np.full(self.cells, -1, int)

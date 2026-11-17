@@ -25,9 +25,9 @@ def run_tests():
     else:
         raise AssertionError('conflicting seeds accepted')
     defaulted = run_model_full('NET106', parameters={'density': .3, 'p': None}, ticks=20, seed=7)
-    explicit = run_model_full('NET106', parameters={'density': .3, 'p': .3}, ticks=20, seed=7)
+    explicit = run_model_full('NET106', parameters={'density': .3, 'p': .2}, ticks=20, seed=7)
     assert defaulted.observations == explicit.observations
-    print('[PASS] constructor-derived nullable defaults are preserved')
+    print('[PASS] nullable braking defaults stay independent of initial density')
     peds = run_model_full('NET113', parameters={'n_agents': 37}, ticks=2, seed=7, capture_state=True)
     assert len(peds.state_frames[0]['entities']) == 37
     road = run_model_full('NET106', parameters={'cells': 120, 'density': .3}, ticks=2, capture_state=True)
