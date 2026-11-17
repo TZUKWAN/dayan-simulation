@@ -19,7 +19,7 @@ def source_inventory():
         for path in (ROOT/name).rglob('*'):
             if path.is_file() and not {'node_modules','data','__pycache__'} & set(path.relative_to(ROOT/name).parts) and path.suffix.lower() in ('.js','.mjs','.cjs','.json','.html','.css','.webp','.svg','.woff2','.ttf','.otf','.txt','.md'):
                 if path.name not in ('config.json','package-lock.json'):paths.add(path)
-    for name in ('requirements.txt','requirements-dev.txt','README.md','dayan/config.example.json',
+    for name in ('requirements.txt','requirements-dev.txt','requirements-ui.txt','README.md','dayan/config.example.json',
                  'data/model_semantics.json','data/dayan_catalog.json','data/targets.json','data/calibration_targets.md'):
         if (ROOT/name).is_file():paths.add(ROOT/name)
     # Packaged report fonts and licenses are part of rendering reproducibility.

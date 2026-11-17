@@ -54,6 +54,9 @@ class StateIdentity(unittest.TestCase):
         self.assertEqual(len(rr.observations),401)
         self.assertLessEqual(len(rr.state_frames),201)
         self.assertEqual(rr.state_frames[-1]['sim_t'],rr.observations[-1]['sim_t'])
+        sampled=run_model_full('NET106',parameters={'cells':100},ticks=250,seed=7,state_every=3,capture_state=True)
+        self.assertEqual(sampled.state_frames[-1]['sim_t'],sampled.observations[-1]['sim_t'])
+        self.assertEqual(sampled.state_frames[-1]['aggregates']['flux'],sampled.observations[-1]['flux'])
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

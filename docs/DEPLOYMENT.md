@@ -82,3 +82,17 @@ GitHub Actions verifies the complete offline entry, Python/JavaScript syntax,
 the Python dependency graph, actual local HTTP/model integration, Chinese
 rendering and tracked-file cleanliness on Windows and Linux. Online credentials
 and private research artifacts are excluded from CI and from Git.
+
+For repeatable headless UI verification, install `requirements-ui.txt` and run
+`python -m playwright install firefox`. Start a separate local server with a new
+`DAYAN_DATA_DIR`, then run:
+
+```powershell
+python tests/browser_acceptance.py --base-url http://127.0.0.1:8918 --output .claude/browser-verification
+```
+
+This performs real professional-mode runs, rendered entity/coordinate checks,
+playback/pause/seek, aggregate labels, persistent queue identities, a large run,
+viewport changes and a labelled HTML escaping fixture. Screenshots and measured
+render times remain in the output directory. It uses a separate headless browser
+and does not operate the user's desktop or ordinary browser tabs.

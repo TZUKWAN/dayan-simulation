@@ -1,7 +1,7 @@
 {
   "scope": "Manually mapped source mechanisms and units, not calibration or validity evidence. Other models remain searchable through source output contracts.",
   "models": {
-    "NET052": {"mechanisms": ["疾病传播"], "match": "SIS|重复感染|可再感染", "description": "SIS易感-感染，无免疫退出", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "fraction", "scope": "population"}}, "inputs": {"I0": {"unit":"fraction","scope":"population"}}},
+    "NET052": {"mechanisms": ["疾病传播"], "match": "SIS|重复感染|可再感染", "description": "SIS易感-感染，无免疫退出", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "fraction", "scope": "population"}}, "inputs": {"i0": {"unit":"fraction","scope":"population"}}},
     "NET053": {"mechanisms": ["疾病传播"], "match": "(?<![A-Za-z])SIR(?![A-Za-z])|永久免疫|康复免疫", "description": "SIR易感-感染-康复", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "person", "scope": "population"}}},
     "NET055": {"mechanisms": ["疾病传播"], "match": "SEIR|潜伏期|潜伏仓", "description": "SEIR增加潜伏仓", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "person", "scope": "population"}}},
     "NET061": {"mechanisms": ["疾病传播", "年龄接触差异"], "match": "年龄接触|年龄分层", "description": "分年龄接触矩阵SEIR", "clock": "user_defined"},

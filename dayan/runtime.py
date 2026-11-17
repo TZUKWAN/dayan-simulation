@@ -555,13 +555,13 @@ def run_model_full(mid: str, parameters: dict | None = None,
                                 "actual_t": round(float(t_now), 9),
                                 "params": chg, "applied": bool(chg)})
 
-    def _capture(t_now: float):
+    def _capture(t_now: float,force=False):
         nonlocal checkpoint
         if checkpoint_at == observation_index:
             checkpoint = copy.deepcopy(save_checkpoint(model, t_now, rng, clean, protocol))
             checkpoint["model_id"] = mid
             checkpoint["pending_interventions"] = copy.deepcopy(iv_pending)
-        if capture_state and (observation_index % state_every == 0):
+        if capture_state and (force or observation_index % state_every == 0):
             from .stateframe import state_frame_of, _aggregate_frame
             fr = state_frame_of(model, t_now) or _aggregate_frame(model, t_now)
             state_frames.append(_jsonable(copy.deepcopy(fr)))
@@ -669,6 +669,8 @@ def run_model_full(mid: str, parameters: dict | None = None,
     else:
         obs_out = obs
 
+    if capture_state and (not state_frames or not math.isclose(state_frames[-1]['sim_t'],final_t,rel_tol=0,abs_tol=1e-8)):
+        _capture(final_t,True)
     if checkpoint_at is None:
         checkpoint = copy.deepcopy(save_checkpoint(model, final_t, rng, clean, protocol))
         checkpoint["model_id"] = mid
