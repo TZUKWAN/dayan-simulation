@@ -81,15 +81,8 @@ def _chart_png(model_id: str, observations: list, run_tag: str) -> Path | None:
     stats = _stats(observations)
     if not stats:
         return None
-    from matplotlib import font_manager
-    for family in ("Microsoft YaHei", "SimHei", "Noto Sans CJK SC"):
-        try:
-            font_manager.findfont(family, fallback_to_default=False)
-            plt.rcParams["font.sans-serif"] = [family]
-            break
-        except ValueError:
-            continue
-    plt.rcParams["axes.unicode_minus"] = False
+    from .fonts import configure_matplotlib
+    configure_matplotlib()
     fields = list(stats)[:6]
     rows = (len(fields) + 1) // 2
     fig, axes = plt.subplots(rows, 2, figsize=(7.2, 2.0 * rows), dpi=130, squeeze=False)
@@ -261,11 +254,11 @@ def _build_docx(path: Path, model_id: str, meta: dict, cat: dict, cap: dict,
     style.font.size = Pt(11)
     style.element.rPr.rFonts.set(
         "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}eastAsia",
-        "微软雅黑")
+        "Noto Sans CJK SC")
     for style_name in ("Title", "Heading 1", "Heading 2"):
         doc.styles[style_name].font.color.rgb = RGBColor(0, 0, 0)
         doc.styles[style_name].element.get_or_add_rPr().rFonts.set(
-            "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}eastAsia", "微软雅黑")
+            "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}eastAsia", "Noto Sans CJK SC")
     for doc_style in doc.styles:
         for border in list(doc_style.element.iter(qn("w:pBdr"))):
             border.getparent().remove(border)
@@ -385,7 +378,7 @@ def _build_research_docx(path, model_id, meta, stats, content):
         style = doc.styles[name]
         style.font.name = "Calibri"
         style.font.color.rgb = RGBColor(0, 0, 0)
-        style.element.get_or_add_rPr().rFonts.set(qn("w:eastAsia"), "微软雅黑")
+        style.element.get_or_add_rPr().rFonts.set(qn("w:eastAsia"), "Noto Sans CJK SC")
     normal = doc.styles["Normal"]
     normal.font.size = Pt(11)
     normal.paragraph_format.line_spacing = 1.25

@@ -84,7 +84,7 @@ async def index():
         digest=hashlib.sha256()
         for file in sorted((ROOT/'site'/'console').glob('*')):
             if file.suffix in ('.js','.css','.html'):digest.update(file.read_bytes())
-        html=re.sub(r'v=\d+', 'v='+digest.hexdigest()[:12], html_path.read_text(encoding='utf-8'))
+        html=re.sub(r'([?&]v=)[^"&\s<>]+',lambda m:m.group(1)+digest.hexdigest()[:12],html_path.read_text(encoding='utf-8'))
         return HTMLResponse(html,
                             headers={"Cache-Control": "no-cache"})
     html_path2 = ROOT / "site" / "dayan_ui.html"

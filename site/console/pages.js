@@ -72,256 +72,7 @@ function aiQuick(text) {
   aiSend();
 }
 
-/* 供恢复快照使用：从快照 obs 直接重建侧栏 */
-function updateObsPanelFromData(d) {
-  const modelEl = document.getElementById("obsModel");
-  if (modelEl) modelEl.textContent = "快照恢复 · " + (d.names || []).join("/") ;
-  const legend = document.getElementById("obsLegend");
-  if (legend) legend.innerHTML = (d.names || []).slice(0, 6).map((nm, i) =>
-    `<span><i style="background:${OBS_COLORS[i % 6]}"></i>${nm}</span>`).join("");
-  window._obsData = d;
-}
-
-/* 记录最近一次模型运行（供干预对照/回放/追踪使用） */
-function rememberRun(mid, obs, params, ticks, intent, planner, tools, text) {
-  window._lastRun = { model_id: mid, observations: obs, params: params || {},
-                      ticks: ticks || (obs ? obs.length - 1 : 120) };
-  window._branchSeries = null; window._branchNote = null; state_branch_clear();
-  // 新模型运行后，旧干预对照已失效 → 如实重置分支披露
-  const tag = document.getElementById("branchTag");
-  if (tag) tag.textContent = "基准 A · " + mid;
-  const pn = document.getElementById("policyNote");
-  if (pn) pn.textContent = "新模型基线 · 调整滑杆后可创建干预对照";
-  window.DAYAN_AGENT_TRACE = { model: mid, text: text || "", intent: intent || "",
-    planner: planner || "rule",
-    tools: tools || ("run " + mid + "（" + (obs ? obs.length : 0) + " obs）"),
-    result: obs && obs.length ? "运行成功，终值 " + Object.entries(obs[obs.length - 1])
-      .filter(([k, v]) => typeof v === "number").slice(0, 3)
-      .map(([k, v]) => k + "=" + (+v).toFixed(3)).join(" ") : "无观测" };
-}
-function state_branch_clear(){ if(window.appStateResetBranch){ window.appStateResetBranch(); } else { window._branchSeries = null; } }
-
-/* 干预对照（模型模式，WP8 时点干预）：在 30% 进度处对首个数值参数 ×1.2，
-   与基准共用同种子（配对随机流）——干预前轨迹一致、干预后按机制分化。 */
-window.DAYAN_APPLY_INTERVENTION = async function () {
-  const lr = window._lastRun;
-  const btn = document.getElementById("applyPolicy");
-  if (!lr || !btn) { if (window.DAYAN_EVENT) DAYAN_EVENT("warn", "干预对照不可用", "请先运行一个模型仿真"); return; }
-  btn.innerHTML = "<span>⏳</span>对照运行中…";
-  try {
-    const params = { ...(lr.params || {}) };
-    const keys = Object.keys(params).filter(k => typeof params[k] === "number" && isFinite(params[k]));
-    let note;
-    const atT = Math.max(0.1, (lr.ticks || 100) * 0.3 * 0.1);   // 30% 进度处（tick→sim_t）
-    let interventions;
-    if (keys.length) {
-      const k0 = keys[0];
-      interventions = [{ at_t: +atT.toFixed(4), label: `对照：${k0}×1.2`,
-                         params: { [k0]: "*1.2" } }];
-      note = `时点干预 t=${atT.toFixed(2)}：${k0} ${lr.params[k0]}→×1.2（同种子配对）`;
-    } else {
-      note = "对照运行：同配置复跑（模型无显式数值参数）";
-      interventions = [];
-    }
-    const r = await fetch("/api/run", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model_id: lr.model_id, ticks: lr.ticks,
-                             parameters: params, seed: 0,
-                             interventions })
-    });
-    const d = await r.json();
-    if (!d.ok) throw new Error(d.detail || "运行失败");
-    const ivRec = (d.manifest && d.manifest.interventions || [])[0] || {};
-    if (interventions.length && !ivRec.applied) {
-      throw new Error("干预未生效：" + (ivRec.error || "参数不可改写").slice(0, 40));
-    }
-    window._branchSeries = (d.observations || []).map(o => {
-      for (const [k, v] of Object.entries(o)) {
-        if (k !== "sim_t" && typeof v === "number" && isFinite(v)) return v;
-      }
-      return 0;
-    });
-    window._branchNote = note + " · " + lr.model_id;
-    if (window.DAYAN_EVENT) DAYAN_EVENT("policy-event", "时点干预对照完成", note);
-    if (typeof drawDashComparison === "function") drawDashComparison();
-    const tag = document.getElementById("branchTag");
-    if (tag) tag.textContent = "干预对照 · 已生成";
-    const pn = document.getElementById("policyNote");
-    if (pn) pn.textContent = note;
-    const toast = document.getElementById("toast");
-    if (toast) { toast.textContent = "对照分支已生成：" + note; toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3200); }
-  } catch (e) {
-    if (window.DAYAN_EVENT) DAYAN_EVENT("warn", "干预对照失败", String(e.message || e).slice(0, 60));
-  } finally {
-    btn.innerHTML = "<span>↻</span>更新干预分支<span>→</span>";
-  }
-};
-
-/* ===== 数据观测侧栏（独立一栏，与 3D 动画同步的实时曲线） ===== */
-const OBS_COLORS = ["#00e5ff", "#c084fc", "#ffb74d", "#ff4d6d", "#00ffa3", "#68bbef"];
-
-function updateObsPanel(mid, obs, note) {
-  const skip = /_min$|_max$|_std$|_mean$|^sim_t$/;
-  const last = (obs && obs.length) ? obs[obs.length - 1] : {};
-  const keys = Object.keys(last).filter(k => !skip.test(k) &&
-    typeof last[k] === "number" && isFinite(last[k]));
-  const names = [], series = [];
-  keys.forEach(k => {
-    const vals = obs.map(o => o[k]).filter(v => typeof v === "number" && isFinite(v));
-    if (vals.length > 1 && Math.max(...vals) - Math.min(...vals) > 1e-12) {
-      names.push(k); series.push(vals);
-    }
-  });
-  const modelEl = document.getElementById("obsModel");
-  if (modelEl) modelEl.textContent = mid + (note ? " · " + String(note).slice(0, 26) : "");
-  const legend = document.getElementById("obsLegend");
-  if (legend) legend.innerHTML = names.slice(0, 6).map((nm, i) =>
-    `<span><i style="background:${OBS_COLORS[i % 6]}"></i>${nm}</span>`).join("");
-  window._obsData = names.length
-    ? { names, series, n: series[0].length, DUR: 22 } : null;
-  drawObsChart();
-}
-
-function drawObsChart() {
-  if(window.DAYAN_RESULTS?.active)return;
-  const cv = document.getElementById("obsChart");
-  if (!cv) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const W = cv.clientWidth, H = cv.clientHeight;
-  if (!W || !H) return;
-  if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
-  const ctx = cv.getContext("2d");
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, W, H);
-  const padL = 8, padR = 8, padT = 11, padB = 16;
-  const pw = W - padL - padR, ph = H - padT - padB;
-  ctx.strokeStyle = "#1a3040"; ctx.lineWidth = 1;
-  for (let i = 0; i <= 3; i++) {
-    const gy = padT + ph * i / 3;
-    ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke();
-  }
-  const d = window._obsData;
-  if (!d) {
-    ctx.fillStyle = "#4a6a7a"; ctx.font = "10px monospace"; ctx.textAlign = "center";
-    ctx.fillText("运行仿真后此处显示实时曲线", W / 2, H / 2);
-    const tickEl0 = document.getElementById("obsTick");
-    if (tickEl0) tickEl0.textContent = "";
-    return;
-  }
-  const { names, series, n, DUR } = d;
-  const all = series.flatMap(s => s);
-  const lo = Math.min(...all), hi = Math.max(...all);
-  const y = v => padT + ph - (v - lo) / Math.max(hi - lo, 1e-12) * ph;
-  const x = i => padL + i / (n - 1) * pw;
-  // 播放头：与 3D 共用 clock（window._vizNow）
-  const t = window._vizNow || 0;
-  const idx = Math.min(n - 1, Math.floor((t % DUR) / DUR * n));
-  series.slice(0, 6).forEach((vals, si) => {
-    const c = OBS_COLORS[si % 6];
-    ctx.strokeStyle = c; ctx.lineWidth = 1.4;
-    ctx.beginPath();
-    vals.forEach((v, i) => i ? ctx.lineTo(x(i), y(v)) : ctx.moveTo(x(i), y(v)));
-    ctx.stroke();
-    ctx.beginPath(); ctx.arc(x(idx), y(vals[idx]), 2.6, 0, 7);
-    ctx.fillStyle = "#fff"; ctx.fill();
-    ctx.beginPath(); ctx.arc(x(idx), y(vals[idx]), 1.4, 0, 7);
-    ctx.fillStyle = c; ctx.fill();
-  });
-  ctx.strokeStyle = "rgba(255,255,255,0.45)"; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(x(idx), padT); ctx.lineTo(x(idx), padT + ph); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = "#5a7a8b"; ctx.font = "8px monospace"; ctx.textAlign = "left";
-  ctx.fillText(hi.toPrecision(3), padL + 2, padT - 2);
-  ctx.fillText(lo.toPrecision(3), padL + 2, padT + ph + 10);
-  const tickEl = document.getElementById("obsTick");
-  if (tickEl) tickEl.textContent =
-    `tick ${idx + 1}/${n} · 当前 ${names[0]}=${series[0][idx].toPrecision(3)}`;
-}
-setInterval(drawObsChart, 250);   // 含后台标签页兜底
-
-/* ===== Word 实验报告 ===== */
-function aiReportButton(data) {
-  const chat = document.getElementById("aiChatBody");
-  const div = document.createElement("div");
-  div.className = "ai-msg ai-bot";
-  const btn = document.createElement("button");
-  btn.textContent = "📄 一键生成 Word 实验报告";
-  btn.style.cssText = "padding:6px 14px;background:rgba(255,183,77,.14);border:1px solid rgba(255,183,77,.5);border-radius:5px;color:#ffb74d;cursor:pointer;font-size:11px;font-weight:700";
-  btn.onclick = () => generateReport(data, btn);
-  div.appendChild(btn);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-async function generateReport(data, btn) {
-  btn.disabled = true;
-  btn.textContent = "⏳ AI 撰写报告中（约 30-120 秒）…";
-  const chat = document.getElementById("aiChatBody");
-  const pushMsg = (text, color) => {
-    const m = document.createElement("div");
-    m.className = "ai-msg ai-bot";
-    m.style.color = color || "#d0e9ec";
-    m.textContent = text;
-    chat.appendChild(m);
-    chat.scrollTop = chat.scrollHeight;
-  };
-  try {
-    const r = await fetch("/api/report", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const d = await r.json();
-    if (d.ok) {
-      const m = document.createElement("div");
-      m.className = "ai-msg ai-bot";
-      const a = document.createElement("a");
-      a.href = d.url;
-      a.textContent = "✓ " + d.title + " — 点击下载 .docx";
-      a.style.cssText = "color:#00ffa3;font-weight:700";
-      m.appendChild(a);
-      chat.appendChild(m);
-      chat.scrollTop = chat.scrollHeight;
-      setTimeout(() => {
-        const x = document.createElement("a");
-        x.href = d.url; x.download = "";
-        document.body.appendChild(x); x.click(); x.remove();
-      }, 400);
-      if (window.DAYAN_EVENT) DAYAN_EVENT("", "实验报告已生成", d.title);
-      btn.textContent = "📄 已生成 ✓";
-    } else {
-      pushMsg("✗ 报告生成失败：" + (d.detail || d.error || "未知错误"), "#ff4d6d");
-      btn.disabled = false;
-      btn.textContent = "📄 重试生成报告";
-    }
-  } catch (e) {
-    pushMsg("✗ 报告请求失败：" + e.message, "#ff4d6d");
-    btn.disabled = false;
-    btn.textContent = "📄 重试生成报告";
-  }
-}
-
-/* 把观测序列转成驾驶舱 KPI + 对照图序列 */
-function dashFromObs(mid, obs, note) {  if (!window.DAYAN_DASH || !obs || obs.length < 2) return;
-  const skip = /_min$|_max$|_std$|_mean$|^sim_t$/;
-  const last = obs[obs.length - 1];
-  const keys = Object.keys(last).filter(k => !skip.test(k) &&
-    typeof last[k] === "number" && isFinite(last[k]));
-  const kpis = keys.slice(0, 6).map(k => ({
-    label: k,
-    value: Math.abs(last[k]) >= 1000 ? Math.round(last[k]).toLocaleString()
-                                      : Number(last[k].toFixed(4)),
-    unit: "", foot: mid + " · 终值"
-  }));
-  const series = keys.slice(0, 3).map(k => ({
-    name: k, vals: obs.map(o => o[k]).filter(v => typeof v === "number" && isFinite(v))
-  })).filter(s => s.vals.length > 1);
-  window.DAYAN_DASH({ title: mid + " · " + (note || "模型仿真"),
-                      kpis, series, modelId: mid, note });
-}
-
-/* 对话记忆：近期用户消息 + 上次运行（发给 LLM 做指代消解） */
+/* Results, reports, playback and interventions share DAYAN_RESULTS. */
 window._aiMsgs = [];
 
 async function aiSend() {
@@ -413,7 +164,7 @@ function fidBadge(m) {
   const f = window._fidelityMap && window._fidelityMap[m.model_id];
   if (!f) return '<span style="font:9px monospace;color:#5a6a7a">未审</span>';
   const [color, zh] = FID_STYLE[f.fidelity] || ["#5a6a7a", "?"];
-  return `<span title="${(f.basis || "").replace(/"/g, "&quot;")}"
+  return `<span title="${escapeCatalogText(f.basis)}"
     style="font:9px monospace;padding:1px 6px;border-radius:3px;color:${color};border:1px solid ${color}55;background:${color}14">${zh}</span>`;
 }
 
@@ -448,7 +199,7 @@ function renderModelsTable(query) {
   el.innerHTML = `
     <div style="padding:8px 14px 4px;display:flex;gap:8px;align-items:center">
       <input id="modelsSearch" placeholder="搜索 ID / 名称 / 状态，如 ECO01、Schelling、基准通过…"
-        value="${(query || "").replace(/"/g, "&quot;")}"
+        value="${escapeCatalogText(query)}"
         style="flex:1;padding:6px 9px;background:#04070f;border:1px solid #1b2a4a;border-radius:4px;color:#d8e2f2;font-size:11px;outline:none" />
       <span style="font:9px monospace;color:#657f91;white-space:nowrap">匹配 ${filtered.length} / ${models.length}</span>
     </div>
@@ -463,7 +214,7 @@ function renderModelsTable(query) {
       <tr><th></th><th>ID</th><th>名称</th><th>状态 / 忠实度</th><th>运行</th></tr>
     </thead><tbody>${rows}</tbody></table>
     <div class="modal-note">${q || fam ? `筛选命中 ${filtered.length} 条` : "显示前 200 条"} / 目录共 ${models.length} 条 ·
-    可运行 ${runnable.size} 个 · 忠实度分级经源码逐模型审查（未审条目按原型降级处理，不虚标）</div>`;
+    有运行入口 ${runnable.size} 个 · 探针、当前机制审查、校准和独立留出分别核验；历史审查失效时按原型显示</div>`;
   const inp = document.getElementById("modelsSearch");
   if (inp) {
     inp.addEventListener("input", () => {
@@ -505,7 +256,7 @@ async function loadModelsPage() {
     window._modelsData = { models, runnable };
     renderModelsTable(window._modelsQuery || "");
   } catch (e) {
-    el.innerHTML = `<p>加载失败：${e.message}</p>`;
+    el.innerHTML = `<p>加载失败：${escapeCatalogText(e.message)}</p>`;
   }
 }
 
@@ -529,37 +280,8 @@ async function visualizeWithState(mid, obs, params, ticks, meta) {
 }
 
 async function runFromCatalog(mid) {
-  try {
-    if (window.DAYAN_EVENT) DAYAN_EVENT("", `手动运行 ${mid}`, "仿真执行中…");
-    toastMsg(`⏳ ${mid} 运行中…`);
-    const r = await fetch("/api/run", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model_id: mid, ticks: 100 })
-    });
-    const d = await r.json();
-    if (d.ok) {
-      toastMsg(`✓ ${mid} 运行成功（${d.n} obs）`);
-      // WP3/WP5：参数警告如实披露（未知参数/别名/类型改写）
-      const warns = (d.manifest && d.manifest.warnings) || [];
-      if (warns.length) {
-        if (window.DAYAN_EVENT) DAYAN_EVENT("warn", `${mid} 参数提示`,
-          warns.slice(0, 3).join("；").slice(0, 120));
-      }
-      await visualizeWithState(mid, d.observations || [], {}, 100, {});
-      dashFromObs(mid, d.observations || [], "手动运行");
-      updateObsPanel(mid, d.observations || [], "手动运行");
-      rememberRun(mid, d.observations || [], {}, 100, "手动运行", "manual", "run " + mid, "手动运行 " + mid);
-      aiReportButton({ model_id: mid, observations: d.observations || [],
-                       intent: "手动运行", planner: "manual",
-                       manifest: d.manifest || {}, analysis: {} });
-      if (window.DAYAN_EVENT) DAYAN_EVENT("", `模型运行完成 ${mid}`, `${d.n} 个观测 · 3D 场景已更新`);
-    } else {
-      toastMsg(`✗ ${mid} 运行失败`, true);
-      if (window.DAYAN_EVENT) DAYAN_EVENT("warn", `运行失败 ${mid}`, d.error || "");
-    }
-  } catch (e) {
-    toastMsg("✗ 运行失败: " + e.message, true);
-  }
+  if(window.DAYAN_COMMAND)return DAYAN_COMMAND.chooseModel(mid);
+  window.DAYAN_NOTICE?.('参数工作台尚未就绪，请稍后重试。');
 }
 
 function loadScenariosPage() {
@@ -587,31 +309,6 @@ function loadScenariosPage() {
 }
 
 function loadReplayPage() {
-  const el = document.getElementById("replayList");
-  if (!el) return;
-  const snaps = (typeof window.DAYAN_SNAPSHOTS === "function") ? window.DAYAN_SNAPSHOTS() : [];
-  // 磁盘历史（跨会话持久化）
-  fetch("/api/history?limit=20").then(r2 => r2.json()).then(hist => {
-    const hh = t => { const m2 = String(Math.floor(t / 60) % 60).padStart(2, "0"); const s2 = String(Math.floor(t % 60)).padStart(2, "0"); return `T+${m2}:${s2}`; };
-    el.innerHTML = `
-      ${snaps.length ? `<div class="modal-note" style="margin:0">本会话快照（${snaps.length}）</div>
-      <table class="modal-table"><thead><tr><th>回放节点</th><th>仿真时间</th><th>状态</th><th>操作</th></tr></thead><tbody>
-      ${snaps.map(s2 => `<tr><td>${s2.name}</td><td class="mono">T+${String(Math.floor(s2.time / 3600)).padStart(2, "0")}:${String(Math.floor(s2.time % 3600 / 60)).padStart(2, "0")}</td><td>${s2.dash ? "模型仿真" : s2.branch ? "干预 B" : "基准 A"}</td><td><button class="run-btn" onclick="window.DAYAN_RESTORE(${s2.i});loadReplayPage()" title="恢复">↺</button></td></tr>`).join("")}
-      </tbody></table>` : `<p style="color:#8ba6b8;font-size:12px;padding:12px 14px 4px">本会话还没有快照。运行仿真后点「◇ 快照」保存。</p>`}
-      <div class="modal-note" style="margin:0">历史运行（磁盘持久化 · ${hist.count} 条，刷新不丢失）</div>
-      <table class="modal-table"><thead><tr><th>模型</th><th>来源</th><th>时间</th><th>意图</th><th>操作</th></tr></thead><tbody>
-      ${(hist.entries || []).map((e, i) => `<tr><td class="mono">${e.model_id}</td><td>${e.source}</td><td class="mono">${e.ts.slice(11, 16)}</td><td>${String(e.intent || "").slice(0, 18)}</td><td><button class="run-btn" onclick="window.DAYAN_HIST_RESTORE(${i})" title="恢复到驾驶舱">↺</button></td></tr>`).join("") || `<tr><td colspan="5" style="color:#5a7a8b">暂无</td></tr>`}
-      </tbody></table>
-      <div class="modal-note">恢复会将该运行的观测序列载入驾驶舱与 3D 场景（不重新计算）</div>`;
-      window._histEntries = hist.entries || [];
-  }).catch(() => {
-    if (!el.innerHTML) el.innerHTML = `<p style="color:#8ba6b8;font-size:12px;padding:20px">历史加载失败。</p>`;
-  });
+  if(window.DAYAN_RESULTS)return DAYAN_RESULTS.loadReplay();
+  document.getElementById('replayList').textContent='归档工作台尚未就绪。';
 }
-
-/* 从磁盘历史恢复：直接载入观测序列，不重跑 */
-window.DAYAN_HIST_RESTORE = function (i) {
-  const entry=(window._histEntries||[])[i];if(!entry||!window.DAYAN_RESULTS)return;
-  if(entry.complete&&entry.run_id)return DAYAN_RESULTS.restore(entry.run_id);
-  return DAYAN_RESULTS.showResult('run',{...entry,run_id:null,observations:entry.observations||[]},{intent:'旧记录汇总回放'});
-};

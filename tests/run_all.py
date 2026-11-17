@@ -71,7 +71,7 @@ def judge_suite(name, returncode, stdout, stderr, duration_s, timed_out=False, m
 
 
 def _snapshot(target):
-    for directory in ('dayan','src','tests','experiments','plugins','site'):
+    for directory in ('dayan','src','tests','experiments','plugins','site','assets'):
         if (ROOT/directory).is_dir():
             shutil.copytree(ROOT/directory,target/directory,
                 ignore=shutil.ignore_patterns('__pycache__','node_modules','data','config.json','*.pyc'))

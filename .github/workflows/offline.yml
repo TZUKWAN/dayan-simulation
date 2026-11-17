@@ -1,0 +1,36 @@
+name: Offline verification
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    env:
+      MPLBACKEND: Agg
+      PYTHONIOENCODING: utf-8
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      DAYAN_API_KEY: ''
+      DAYAN_BASE_URL: ''
+      DAYAN_MODEL: ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pip check
+      - run: python tests/check_sources.py
+      - run: python tests/run_all.py --output .claude/ci
+      - run: git diff --exit-code

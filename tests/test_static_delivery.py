@@ -25,7 +25,7 @@ class StaticDelivery(unittest.TestCase):
     def test_startup_and_html_response_do_not_write_source(self):
         with tempfile.TemporaryDirectory() as td,patch.dict(os.environ,{'DAYAN_DATA_DIR':str(Path(td)/'runtime'),'DAYAN_API_KEY':''}):
             root=Path(td);target=root/'site/console/index.html';target.parent.mkdir(parents=True)
-            target.write_text('<html><script src="/app.js?v=123"></script></html>',encoding='utf-8')
+            target.write_text('<html><script src="/app.js?v=123"></script><script src="/results.js?v=command-20261113"></script></html>',encoding='utf-8')
             original=target.read_bytes()
             target.chmod(0o444)
             try:
@@ -34,6 +34,7 @@ class StaticDelivery(unittest.TestCase):
                     response=asyncio.run(server.index())
                 self.assertEqual(target.read_bytes(),original)
                 self.assertNotIn(b'v=123',response.body)
+                self.assertNotIn(b'command-20261113',response.body)
             finally:target.chmod(0o600)
 
 

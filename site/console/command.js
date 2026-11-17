@@ -188,7 +188,7 @@
       $('#proTicks').value=source?.manifest?.requested?.ticks??100;$('#proDt').value=source?.manifest?.requested?.dt??'';$('#proSeed').value=source?.manifest?.rng?.seed??'';
       $('#proCheckpoint').value='';
       $('#proInterventions').value=JSON.stringify((source?.manifest?.interventions||[]).filter(i=>i.applied).map(i=>({at_t:i.requested_t,params:i.params,label:i.label})),null,2);
-      $('#proBindings').value=JSON.stringify((source?.manifest?.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>['dataset_id','path','field','aggregate','parameter','scale'].includes(k)))),null,2);
+      $('#proBindings').value=JSON.stringify((source?.manifest?.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>['dataset_id','path','field','aggregate','parameter','scale','source_unit','target_unit','source_scope','target_scope','filters','order_by'].includes(k)))),null,2);
       text('#proStatus',source?'已载入当前归档的实际初始配置；编辑后创建独立新运行。':'已读取模型默认合同；更改尚未执行。');$('#proStatus').dataset.state='ready';$('#proRun').disabled=false;
     } catch(e) {if(revision===proRevision){pro={modelId:mid,contract:null,source:null};proError('参数合同未取得：'+e.message);}}
   }

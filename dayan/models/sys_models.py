@@ -27,7 +27,11 @@ from ..core import DayanModel
 
 # ============ 排队族 ============
 class MMCQueueModel(DayanModel):
-    """SYS002 M/M/c 多服务窗：解析 P_wait（Erlang-C）与模拟平均等待对照。"""
+    """SYS002 fixed-step approximation to M/M/c, compared with Erlang-C.
+
+    Arrivals and completion processing are rounded to step boundaries. Customer
+    IDs and individual server allocations are retained, not invented by the view.
+    """
 
     model_id = "SYS002"
     clock_type = "fixed_step"
@@ -47,6 +51,8 @@ class MMCQueueModel(DayanModel):
         self.busy = 0
         self.wait_sum = 0.0
         self.n_served = 0
+        self.n_started = self.n_arrived = 0
+        self.slots = [None for _ in range(int(self.c))]
         self.departs = []
         self.clock = 0.0
 
@@ -59,29 +65,37 @@ class MMCQueueModel(DayanModel):
     def step(self, t, dt):
         rng = self.rng_
         for _ in range(rng.poisson(self.lam * dt)):
-            self.q.append(self.clock)
+            self.q.append({'id':'customer_'+str(self.n_arrived),'arrival':self.clock})
+            self.n_arrived+=1
         # 本 tick 内完成的服务
-        done = [d for d in self.departs if d <= self.clock]
-        self.departs = [d for d in self.departs if d > self.clock]
-        self.busy -= len(done)
+        for index,customer in enumerate(self.slots):
+            if customer is not None and customer['departure']<=self.clock:
+                self.slots[index]=None;self.n_served+=1
+        self.busy=sum(c is not None for c in self.slots)
         while self.busy < self.c and self.q:
-            w = self.clock - self.q.popleft()
+            customer=self.q.popleft()
+            w = self.clock - customer['arrival']
             self.wait_sum += w
-            self.n_served += 1
+            self.n_started += 1
+            index=self.slots.index(None)
+            customer.update(server=index,departure=self.clock+rng.exponential(1/self.mu))
+            self.slots[index]=customer
             self.busy += 1
-            self.departs.append(self.clock + rng.exponential(1 / self.mu))
+        self.departs=[c['departure'] for c in self.slots if c is not None]
         self.clock += dt
 
     def observe(self):
-        w_sim = self.wait_sum / max(self.n_served, 1)
+        w_sim = self.wait_sum / max(self.n_started, 1)
         return {"Wq_sim": float(w_sim), "Wq_erlangc": float(self._erlang_c()
                                                              / (self.c * self.mu - self.lam)) if self.lam < self.c*self.mu else None,
-                "n_served": self.n_served}
+                "n_served": self.n_served,'n_service_starts':self.n_started,'n_arrived':self.n_arrived}
 
     def apply_intervention(self, changes, t):
         if "mu" in changes:
             # Conditional exponential residual life rescales when the hazard changes.
-            self.departs = [max(t, t+max(0., d-t)*self.mu/changes["mu"]) for d in self.departs]
+            for customer in self.slots:
+                if customer is not None:customer['departure']=max(t,t+max(0.,customer['departure']-t)*self.mu/changes['mu'])
+            self.departs=[c['departure'] for c in self.slots if c is not None]
         for name, value in changes.items():
             setattr(self, name, value)
 
@@ -89,16 +103,32 @@ class MMCQueueModel(DayanModel):
         """WP7 状态帧：真实服务台占用与队列长度。"""
         servers = [{"id": f"server_{k}", "type": "server",
                     "x": float(k), "y": 0.0,
-                    "state": "busy" if k < min(self.busy, self.c) else "idle"}
+                    "state": "busy" if self.slots[k] is not None else "idle"}
                    for k in range(self.c)]
-        waiting = [{"id": f"q_{i}", "type": "customer",
+        waiting = [{"id": customer['id'], "type": "customer",
                     "x": float(-1 - i * 0.35), "y": 0.0, "state": "waiting"}
-                   for i in range(min(len(self.q), 40))]
-        return {"entities": servers + waiting,
+                   for i,customer in enumerate(self.q)]
+        serving=[{'id':customer['id'],'type':'customer','x':float(i),'y':1.,'state':'in_service','server_id':'server_'+str(i)}
+                 for i,customer in enumerate(self.slots) if customer is not None]
+        return {"entities": servers + waiting + serving,
                 "facilities": [{"id": "counter", "type": "counter",
                                 "capacity": int(self.c)}],
                 "aggregates": {**self.observe(), "queue_len": len(self.q),
                                "busy": self.busy}}
+
+    def snapshot(self):
+        import copy
+        return copy.deepcopy({'params':{k:getattr(self,k) for k in ('c','lam','mu')},'q':list(self.q),'slots':self.slots,
+            'busy':self.busy,'wait_sum':self.wait_sum,'n_served':self.n_served,'n_started':self.n_started,
+            'n_arrived':self.n_arrived,'clock':self.clock,'rng_state':self.rng_.bit_generator.state})
+
+    def restore(self,state):
+        import copy
+        state=copy.deepcopy(state);self.__init__(**state['params'])
+        self.q=deque(state['q']);self.slots=state['slots']
+        for key in ('busy','wait_sum','n_served','n_started','n_arrived','clock'):setattr(self,key,state[key])
+        self.rng_=np.random.default_rng();self.rng_.bit_generator.state=state['rng_state']
+        self.departs=[c['departure'] for c in self.slots if c is not None]
 
     def validate_state(self):
         return [] if self.lam < self.c * self.mu else ["ρ≥1 不稳定"]

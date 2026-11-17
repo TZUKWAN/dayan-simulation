@@ -2970,6 +2970,7 @@
     const t0 = prevFr ? (prevFr.sim_t ?? -1e9) : -1e9;
     const t1 = fr.sim_t ?? 1e9;
     st.events.forEach(ev => {
+      if(ev.etype!=='intervention'||ev.applied===false)return;
       const et = ev.sim_t ?? ev.t;
       if (typeof et !== 'number' || et <= t0 || et > t1) return;
       if (FXREG.waves.length >= 2) return;

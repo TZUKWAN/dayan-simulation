@@ -305,6 +305,9 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
     """Continue a supported full fixed-step snapshot; never rerun its earlier history."""
     executing_source=assert_loaded_source()
     validate_run_arguments(steps, dt, 0)
+    from .limits import validate_compute,frame_stride
+    validate_compute(steps,parameters=chk.get('parameters'))
+    sample_stride=frame_stride(steps,1,chk.get('parameters'))
     if not chk.get("resumable") or chk.get("protocol") != "fixed_step":
         raise ValueError("该检查点不可续算：缺少完整模型状态/恢复协议。可回放已保存观测。")
     from .model_index import resolve
@@ -314,7 +317,7 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
         raise ValueError("该模型协议尚未实现检查点续算")
     model = cls(**(chk.get("parameters") or {}))
     model.restore(copy.deepcopy(chk["model_snapshot"]))
-    rng = getattr(model, "rng", None)
+    rng = getattr(model, "rng", None) or getattr(model,'rng_',None)
     if not isinstance(rng, np.random.Generator):
         rng = np.random.default_rng()
         rng.bit_generator.state = chk["rng_state"]
@@ -322,19 +325,19 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
     eff_dt = dt * getattr(model, "dt_scale", 1.0)
     horizon = start + steps*eff_dt
     rows, frames, applied = [], [], []
+    iterations=0
     pending = copy.deepcopy(chk.get("pending_interventions", []))
     run_id = "R" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex
     initial_parameters = {name: _jsonable(getattr(model, name, meta.get("default"))) for name, meta in _init_signature(mid).items()}
     def capture():
         row = {"sim_t": round(t, 9), **copy.deepcopy(model.observe())}
         rows.append(_jsonable(row))
-        if capture_state:
+        if capture_state and (iterations%sample_stride==0 or t>=horizon-1e-12):
             from .stateframe import state_frame_of, _aggregate_frame
             frame = state_frame_of(model, t) or _aggregate_frame(model, t)
             frames.append({**_jsonable(copy.deepcopy(frame)), "run_id": run_id})
     if with_initial:
         capture()
-    iterations = 0
     while t < horizon - 1e-12:
         while pending and float(pending[0]["at_t"]) <= t + 1e-12:
             iv = pending.pop(0)
@@ -342,8 +345,11 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
             changes = {}
             for name, spec in iv["params"].items():
                 value = validate_intervention_value(mid, name, _resolve_param_op(model, name, spec))
-                setattr(model, name, value)
                 changes[name] = value
+            apply=getattr(model,'apply_intervention',None)
+            if callable(apply):apply(changes,t)
+            else:
+                for name,value in changes.items():setattr(model,name,value)
             applied.append({"requested_t": iv["at_t"], "actual_t": round(t, 9), "params": changes, "applied": True})
         step_dt = min(eff_dt, horizon-t)
         if pending and t + 1e-12 < float(pending[0]["at_t"]) < t+step_dt-1e-12:
@@ -367,6 +373,7 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
                 "interventions": applied, "model_definition": getattr(model, "definition", None),
                 "scenario_review": getattr(model,"scenario_review",None),
                 "llm_calls": getattr(model, "llm_audit", []), "state_frame_count": len(frames),
+                'state_every':sample_stride,
                 "runtime_version": "2.1", "warnings": [],
                 "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
     return RunResult(model_id=mid, observations=rows, manifest=manifest, state_frames=frames,

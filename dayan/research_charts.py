@@ -21,17 +21,10 @@ def _build(records, view, directory, tag):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
-    from matplotlib import font_manager
     from matplotlib.colors import ListedColormap
     from matplotlib.patches import Patch
-    for family in ("Microsoft YaHei", "SimHei", "Noto Sans CJK SC"):
-        try:
-            font_manager.findfont(family, fallback_to_default=False)
-            plt.rcParams["font.sans-serif"] = [family]
-            break
-        except ValueError:
-            continue
-    plt.rcParams["axes.unicode_minus"] = False
+    from .fonts import configure_matplotlib
+    configure_matplotlib()
     figures = []
     def save(fig, caption, kind):
         fig.tight_layout(pad=1.1)

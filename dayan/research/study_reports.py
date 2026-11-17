@@ -17,6 +17,8 @@ def _plots(s, target, kind="academic"):
     import matplotlib
     matplotlib.use("Agg")
     from matplotlib import pyplot as plt
+    from ..fonts import configure_matplotlib
+    configure_matplotlib()
     fig, axes = plt.subplots(3, 2, figsize=(11.4, 10.2), layout="constrained")
     records, predictions, cal = s["records"], s["predictions"], s["calibration"]
     years, actual = [r["date"] for r in records], [r["value"] for r in records]
@@ -127,7 +129,7 @@ def _generate_locked(study_id, kind="academic"):
     doc = Document(); section = doc.sections[0]
     section.top_margin=Inches(.7); section.bottom_margin=Inches(.7)
     normal = doc.styles["Normal"]; normal.font.name="Calibri"; normal.font.size=Pt(10)
-    normal.element.get_or_add_rPr().rFonts.set(qn("w:eastAsia"), "Microsoft YaHei")
+    normal.element.get_or_add_rPr().rFonts.set(qn("w:eastAsia"), "Noto Sans CJK SC")
     doc.add_paragraph(title, style="Title")
     doc.add_paragraph(conclusion)
     doc.add_heading("研究问题与数据口径", level=1); doc.add_paragraph(s["question"])
