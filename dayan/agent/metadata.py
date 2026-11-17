@@ -151,15 +151,17 @@ def load_capabilities(refresh=False):
     from ..model_index import ALL_INDEX, resolve
     from ..runtime import param_contract
     from ..custom_models import capabilities as custom_capabilities
-    cached = json.loads(CAP_PATH.read_text(encoding="utf-8")) if CAP_PATH.exists() else []
-    by_id = {cap["model_id"]: cap for cap in cached}
+    from ..output_contract import output_contract
+    from ..fidelity import _existing_probes, models_source_fingerprint
+    reference = _existing_probes(models_source_fingerprint())
+    by_id = {}
     catalog_names=_catalog_names()
     for mid in sorted(ALL_INDEX):
         if mid.startswith("USR"):
             continue
         protocol, factory = resolve(mid)
         cls = factory[1] if isinstance(factory, tuple) else factory
-        declared = getattr(cls, "declared_observables", None)
+        schema = output_contract(mid, reference_results=reference)
         cap = dict(by_id.get(mid, {}))
         cap.update(model_id=mid, protocol=protocol,
                    name=(inspect.getdoc(cls) or catalog_names.get(mid) or mid).splitlines()[0][:160],
@@ -171,12 +173,10 @@ def load_capabilities(refresh=False):
                    parameters=[{"name": key, **meta} for key, meta in param_contract(mid)["params"].items()],
                    requires_external=bool(getattr(cls, "requires_external", False)),
                    runnable=True)
-        if declared is not None:
-            cap["observables"] = list(declared)
-            cap.pop("observable_samples", None)
-        else:cap['observables_note']='未静态声明的字段须以实际运行归档为准'
-        cap.pop('observable_samples',None)  # Old probe examples are not this request's measurements.
-        cap.setdefault("observables", [])
+        cap["observables"] = list(schema["fields"])
+        cap["output_contract"] = schema
+        cap["primary_metric"] = schema["primary_metric"]
+        cap["observables_note"] = '源码声明的输出字段；不是本次运行测量，实际输出见归档'
         by_id[mid] = cap
     return [cap for mid, cap in by_id.items() if not mid.startswith("USR")] + custom_capabilities()
 

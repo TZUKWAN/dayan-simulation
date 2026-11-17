@@ -11,14 +11,7 @@
     const mean=sum/xs.length;
     return {n:xs.length,min,max,mean,std:Math.sqrt(xs.reduce((s,x)=>s+(x-mean)**2,0)/xs.length)};
   }
-  function correlation(rows,a,b) {
-    const pairs=rows.filter(r=>finite(r[a])&&finite(r[b]));
-    if (pairs.length<3) return {value:null,n:pairs.length};
-    const ax=stats(pairs.map(r=>r[a])).mean,bx=stats(pairs.map(r=>r[b])).mean;
-    let xy=0,xx=0,yy=0;
-    for (const r of pairs) {const x=r[a]-ax,y=r[b]-bx;xy+=x*y;xx+=x*x;yy+=y*y;}
-    return {value:xx>0&&yy>0?Math.max(-1,Math.min(1,xy/Math.sqrt(xx*yy))):null,n:pairs.length};
-  }
+  const correlation=(rows,a,b)=>DAYAN_ANALYSIS.correlation(rows,a,b);
   function changes(rows,key) {
     return rows.map((r,i)=>({sim_t:r.sim_t,change:i>0&&finite(r[key])&&finite(rows[i-1][key])?r[key]-rows[i-1][key]:null}));
   }
@@ -159,7 +152,10 @@
     if(window.DAYAN_RESEARCH)return DAYAN_RESEARCH.paintSources(el);
     el.textContent='数据研究组件尚未加载，请刷新页面。';
   }
+  let defaultRestoreCancelled=false;
+  function manualIntent() {defaultRestoreCancelled=true;window.DAYAN_RESULTS?.cancelPendingView();}
   function setMode(value,remember=true) {
+    if(remember)manualIntent();
     mode=value==='professional'?'professional':'simple';document.body.dataset.operationMode=mode;
     document.body.classList.toggle('mode-simple',mode==='simple');document.body.classList.toggle('mode-professional',mode==='professional');
     for(const b of document.querySelectorAll('[data-operation-mode]'))b.setAttribute('aria-pressed',String(b.dataset.operationMode===mode));
@@ -188,7 +184,7 @@
       $('#proTicks').value=source?.manifest?.requested?.ticks??100;$('#proDt').value=source?.manifest?.requested?.dt??'';$('#proSeed').value=source?.manifest?.rng?.seed??'';
       $('#proCheckpoint').value='';
       $('#proInterventions').value=JSON.stringify((source?.manifest?.interventions||[]).filter(i=>i.applied).map(i=>({at_t:i.requested_t,params:i.params,label:i.label})),null,2);
-      $('#proBindings').value=JSON.stringify((source?.manifest?.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>['dataset_id','path','field','aggregate','parameter','scale'].includes(k)))),null,2);
+      $('#proBindings').value=JSON.stringify((source?.manifest?.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>['dataset_id','path','field','aggregate','parameter','scale','source_unit','target_unit','source_scope','target_scope','filters','order_by'].includes(k)))),null,2);
       text('#proStatus',source?'已载入当前归档的实际初始配置；编辑后创建独立新运行。':'已读取模型默认合同；更改尚未执行。');$('#proStatus').dataset.state='ready';$('#proRun').disabled=false;
     } catch(e) {if(revision===proRevision){pro={modelId:mid,contract:null,source:null};proError('参数合同未取得：'+e.message);}}
   }
@@ -227,7 +223,7 @@
   async function restoreDefault() {
     try {
       const h=await history(),saved=storage('dayan_last_record_v1'),complete=h.entries.filter(e=>e.complete&&e.run_id),chosen=complete.find(e=>e.run_id===saved)||complete[0];
-      if(chosen&&!DAYAN_RESULTS.runs.length&&!$('#aiSend').disabled){await DAYAN_RESULTS.restore(chosen.run_id);text('#workspaceStatus','已恢复最近保存的归档；当前为暂停回放，未启动新计算。');}
+      if(chosen&&!defaultRestoreCancelled&&!DAYAN_RESULTS.runs.length&&!$('#aiSend').disabled){const restored=await DAYAN_RESULTS.restore(chosen.run_id);if(restored!==false&&!defaultRestoreCancelled)text('#workspaceStatus','已恢复最近保存的归档；当前为暂停回放，未启动新计算。');}
     }catch(e){text('#workspaceStatus','未能恢复最近记录：'+e.message+'；可直接向AI描述新任务。');}
   }
   async function recentRecords() {
@@ -279,7 +275,8 @@
     for(const b of rail.querySelectorAll('[data-rail-tab]'))b.onclick=()=>selectRail(b.dataset.railTab);
     for(const b of tools.querySelectorAll('[data-draft]'))b.onclick=()=>prefill(b.dataset.draft);
     window.toggleAIDrawer=()=>{selectRail('ai');$('#aiInput').focus({preventScroll:true});if(innerWidth<1000)rail.scrollIntoView({behavior:'smooth',block:'start'});};
-    $('#proLoad').onclick=()=>loadParameters($('#proModel').value.trim().toUpperCase()).catch(e=>proError(e.message));
+    $('#proLoad').onclick=()=>{manualIntent();return loadParameters($('#proModel').value.trim().toUpperCase()).catch(e=>proError(e.message));};
+    $('#aiInput').addEventListener('input',manualIntent);
     $('#proReset').onclick=()=>pro.modelId&&loadParameters(pro.modelId);
     $('#proForm').onsubmit=e=>{e.preventDefault();executeProfessional();};
     $('#askAboutParameters').onclick=()=>prefill('解释当前模型的参数含义，并建议如何调整来研究不同方案');

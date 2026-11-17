@@ -18,7 +18,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Iterator
 
-from ..datasets import _public_url, _Redirect
+from ..datasets import _public_url, public_opener
 
 UA_DAYAN = "DAYAN-Research-Workbench/2.4 (research data collection; contact: local-workbench)"
 UA_BROWSER = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -46,7 +46,7 @@ def _get(url: str, *, accept="application/json,text/csv,*/*", timeout=75,
     if headers:
         h.update(headers)
     req = urllib.request.Request(url, headers=h)
-    with urllib.request.build_opener(_Redirect()).open(req, timeout=timeout) as resp:
+    with public_opener().open(req, timeout=timeout) as resp:
         data = resp.read(cap + 1)
         if len(data) > cap:
             raise ValueError(f"单页超过 {cap} 字节上限（可调小查询范围或分页）")

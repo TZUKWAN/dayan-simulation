@@ -54,6 +54,14 @@ class EvacuationTests(unittest.TestCase):
         fast = run_model_full("CPL001", {**params, "elderly_speed_factor": 1.}, ticks=10, dt=.1, seed=7, capture_state=True)
         self.assertNotEqual(slow.state_frames[-1]["entities"], fast.state_frames[-1]["entities"])
 
+    def test_no_bus_really_removes_buses_and_waiting(self):
+        run=run_model_full('CPL001',{**self.params,'bus_count':0,'initial_rumor_fraction':0.,'rumor_rate':0.},
+                           ticks=200,dt=.1,seed=7,capture_state=True)
+        self.assertTrue(all(e['type']=='pedestrian' for e in run.state_frames[-1]['entities']))
+        self.assertEqual(run.observations[-1]['bus_queue'],0)
+        self.assertEqual(run.observations[-1]['rumor_mean'],0.)
+        self.assertGreater(run.observations[-1]['evacuated'],0)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -23,6 +23,8 @@
 /data/*
 /dayan/data/
 !/data/dayan_catalog.json
+!/data/output_contract_evidence.json
+!/data/model_semantics.json
 !/data/fidelity_review/
 !/data/calibration_targets.md
 !/data/targets.json

@@ -100,7 +100,7 @@ def run_coupled_scenario(name: str, *, nu: float = 2.5, delta: float = 0.03,
         "empirical_binding": binding,
         "calibration_status": "not_calibrated",
         "evidence_scope": "仅初始化使用真实宏观观测；行为、政策幅度、工资份额和成本仍是假设，不能据此宣称现实政策效果" if binding else "纯机制假设情景，无真实数据绑定或校准",
-        "note": "异质个体保留工资服从 U(0.4,0.95)；就业概率取决于个体保留工资与SD工资份额",
+        "note": "异质个体保留工资服从 U(0.4,0.95)；工资代理=0.7×SD就业率，非工资份额或货币工资；行为与反馈系数为机制假设",
     }
 
 

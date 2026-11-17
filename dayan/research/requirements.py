@@ -21,6 +21,15 @@ MECHANISMS = {
     "老年行动差异": r"老人|老年|行动不便|弱势群体",
     "接驳运力": r"接驳|公交|运力",
     "积水影响": r"暴雨|洪水|积水|内涝",
+    "年龄接触差异": r"年龄接触|年龄分层",
+    "集体行动": r"集体行动|参与阈值|Granovetter",
+    "公民暴力": r"公民暴力|警民|Epstein|合法性",
+    "演化博弈": r"复制子|演化博弈|replicator",
+    "投入产出": r"投入产出|产业关联|Leontief",
+    "经济增长": r"经济增长|Solow|索洛|Ramsey|拉姆齐",
+    "城乡迁移": r"城乡迁移|Todaro",
+    "交通分配": r"Wardrop|用户均衡|系统最优|路径分配",
+    "半马尔可夫": r"半马尔可夫|semi.Markov",
 }
 PARAM_ALIASES = {"传播率": "beta", "传播率beta": "beta", "恢复率": "gamma",
                  "随机慢化概率": "p", "慢化概率": "p", "密度": "density",
@@ -29,6 +38,12 @@ PARAM_ALIASES = {"传播率": "beta", "传播率beta": "beta", "恢复率": "gam
 
 def _pairs(text):
     result = {}
+    # Coordinates belong to the named facility, not each agent's x/y state.
+    # Preserve ordinary equation parameters named x/y outside these blocks.
+    coordinate_blocks=[]
+    labels={'出口':'exit','目的地':'target','目标':'target','起点':'start','初始位置':'start'}
+    for block in re.finditer(r'(出口|目的地|目标|起点|初始位置)\s*[（(]([^）)\n。]{1,160})[）)]',text):
+        coordinate_blocks.append((block.start(2),block.end(2),labels[block.group(1)]))
     for match in re.finditer(r"(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)\s*(?:[=:＝]|改成|改为|设为)\s*", text):
         tail = text[match.end():match.end()+4096]
         try:
@@ -37,10 +52,38 @@ def _pairs(text):
                 value = float(token) if any(c in token for c in ".eE") else int(token)
             else:
                 value, _ = json.JSONDecoder().raw_decode(tail)
-            result[match.group(1)] = value
+            name=match.group(1)
+            if name.lower() in ('x','y'):
+                for start,end,prefix in coordinate_blocks:
+                    if start<=match.start()<end:
+                        name=prefix+'_'+name.lower()
+                        break
+            result[name] = value
         except (ValueError, TypeError):
             continue
     return result
+
+
+def mechanism_constraints(text):
+    """Scope a negation to the named mechanism, preserving contrast clauses."""
+    positive, excluded, spans = [], [], []
+    for name, pattern in MECHANISMS.items():
+        enabled = False
+        for match in re.finditer(pattern, text, re.I):
+            prefix = re.split(r"[，,。；;]|但是|但|而是|只考虑|只模拟", text[:match.start()])[-1]
+            # Adjacent synonyms and coordinated nouns share the same negation;
+            # a relational phrase such as “没有公交的老人” does not negate老人.
+            clean_prefix=prefix
+            for noun_pattern in MECHANISMS.values():clean_prefix=re.sub(noun_pattern,'',clean_prefix,flags=re.I)
+            clean_prefix=re.sub(r'(?:和|与|及|、|机制|影响|传播|\s)+$','',clean_prefix)
+            negated = bool(re.search(r"(?:不考虑|不包含|不需要|不使用|不模拟|不涉及|不要|无需|排除|关闭|没有|无)(?:任何|相关|额外)?\s*$", clean_prefix))
+            if negated:
+                excluded.append(name);spans.append(match.span())
+            else:enabled=True
+        if enabled:positive.append(name)
+    cleaned=text
+    for start,end in sorted(spans,reverse=True):cleaned=cleaned[:start]+' '* (end-start)+cleaned[end:]
+    return positive,sorted(set(excluded)),cleaned
 
 
 def extract_request(text, last_run=None):
@@ -55,7 +98,7 @@ def extract_request(text, last_run=None):
     if reuse and not ids and previous.get("model_id"):
         ids = [previous["model_id"]]
     options, explicit = {}, _pairs(text)
-    for name in ("ticks", "steps", "dt", "seed", "seeds"):
+    for name in ("ticks", "steps", "dt", "seed", "seeds", "analysis_window", "warmup_ticks"):
         if name in explicit:
             options["ticks" if name == "steps" else name] = explicit.pop(name)
     tick = re.search(r"(?:运行|跑|迭代)\s*("+NUMBER+r")\s*(?:步|tick)", text, re.I)
@@ -159,7 +202,7 @@ def extract_request(text, last_run=None):
                 value = ((manifest.get("rng") or {}) if name == "seed" else (manifest.get("requested") or {})).get(name)
             if value is not None:
                 options.setdefault(name, value)
-    mechanisms = [name for name, pattern in MECHANISMS.items() if re.search(pattern, text, re.I)]
+    mechanisms, excluded_mechanisms, positive_text = mechanism_constraints(text)
     data_text = re.sub(r"(?:不用|不需要|无需|不要|不使用|不是|未使用)(?:采集|导入|接入)?(?:真实|现实|实际)(?:校准)?(?:数据|道路|路网|人口|建筑|地区)", "", text)
     real_data = bool(re.search(r"真实(?:道路|路网|人口|数据|建筑|地区)|采集|现实数据|实际数据|导入|读取.*(?:CSV|csv|数据)", data_text))
     llm_agents = bool(re.search(r"生成式(?:主体|智能体|代理)|真实\s*LLM|LLM驱动|大模型.{0,12}(?:主体|行动)|ReAct|Reflexion|Voyager|Concordia", text, re.I))
@@ -187,7 +230,12 @@ def extract_request(text, last_run=None):
         kind="explain"
     elif continuing:kind="resume"
     purpose = "prediction" if "预测" in text else "policy" if kind == "experiment" else "mechanism"
-    metric = "flux" if re.search(r"flux|流量", text, re.I) else "I" if re.search(r"感染比例|感染率", text) else None
+    metric_match=re.search(r"(?:主要指标|主要结局|primary_metric|metric)\s*[=:：]\s*([A-Za-z_]\w*)",text)
+    metric = metric_match.group(1) if metric_match else "flux" if re.search(r"flux|流量", text, re.I) else "I" if re.search(r"感染比例|感染率|感染人数", text) else None
+    for key in ('metric','primary_metric'):explicit.pop(key,None)
+    populations=list(dict.fromkeys(re.findall(r"老人|老年人|老年|儿童|学生|居民|行人|患者|医生|服务员|司机|企业|劳动者|主体|智能体",positive_text)))
+    regions=list(dict.fromkeys(re.findall(r"(?:武汉|北京|上海|广州|深圳|德国|中国|美国|全球)|[\u4e00-\u9fff]{2,6}(?:省|市|县|区)(?=[，,。；;\s]|$)",text)))
+    periods=list(dict.fromkeys(re.findall(r"(?:19|20)\d{2}\s*(?:年)?\s*(?:至|到|—|-|:)\s*(?:19|20)\d{2}年?|(?:未来|持续|模拟|运行)\s*\d+(?:\.\d+)?\s*(?:秒|分钟|小时|天|年)",text)))
     values, sweep_param = [], None
     if kind == "sweep":
         for hit in re.finditer(r"\b([A-Za-z_]\w*)\s+([\d.+\-eE\s,，、]+)", text):
@@ -203,6 +251,8 @@ def extract_request(text, last_run=None):
     return {"original_text": text, "model_ids": ids, "kind": kind, "purpose": purpose,
             "explicit_parameters": explicit, "parameters": {**base, **explicit},
             "options": options, "mechanisms": mechanisms, "requires_real_data": real_data,
+            "excluded_mechanisms":excluded_mechanisms,"positive_text":positive_text,
+            "population":populations,"space_scope":regions,"time_scope":periods,
             "reuse": reuse, "missing_context": reuse and not previous,
             "interventions": ([{"label": "用户指定干预", "at_t": time_value, "params": event_changes}]
                               if event_changes else []),
@@ -213,8 +263,8 @@ def extract_request(text, last_run=None):
 
 
 def model_mechanisms(mid):
-    if mid == "CPL001":
-        return {"人群疏散", "信息传播", "老年行动差异", "接驳运力", "积水影响"}
+    from .semantics import registry
+    if mid in registry():return set(registry()[mid]['mechanisms'])
     if str(mid).startswith("USR"):
         from ..custom_models import factory
         try:
@@ -249,4 +299,14 @@ def coverage_issues(request, mid=None):
         missing = set(request["mechanisms"]) - supported
         if missing:
             issues.append(f"{mid} 不覆盖所需机制："+"、".join(sorted(missing)))
+    text=request.get('positive_text',request.get('original_text',''))
+    for variant,allowed in [('SEIR',{'NET055','NET061'}),('SIR',{'NET053','NET-SIR'}),('SIS',{'NET052'})]:
+        if mid and re.search(r'(?<![A-Za-z])'+variant+r'(?![A-Za-z])',text,re.I) and mid not in allowed:
+            issues.append(f'{mid} 不符合明确指定的{variant}仓室机制')
+    if mid and request.get('excluded_mechanisms'):
+        disable={'信息传播':('initial_rumor_fraction','rumor_rate'),'接驳运力':('bus_count',),'积水影响':('flood_severity',)}
+        for name in set(request['excluded_mechanisms']) & model_mechanisms(mid):
+            keys=disable.get(name,()) if mid=='CPL001' else ()
+            if not keys or any(request['parameters'].get(key)!=0 for key in keys):
+                issues.append(f'{mid}包含已排除机制{name}；必须明确禁用对应参数，不能忽略否定条件')
     return issues

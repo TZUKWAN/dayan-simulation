@@ -1,0 +1,4 @@
+# Third-party assets are verified against the original upstream bytes.
+# Do not let Windows checkout line-ending conversion change their hashes.
+site/console/vendor/* -text
+assets/fonts/*.otf -text

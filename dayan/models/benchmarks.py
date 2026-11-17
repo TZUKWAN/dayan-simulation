@@ -140,6 +140,7 @@ class SIRModel(DayanModel):
 
     model_id = "NET-SIR"
     clock_type = "ode"
+    primary_metric = "I"
 
     def __init__(self, beta=0.4, gamma=0.1, N=1000.0, I0=5.0):
         self.beta, self.gamma, self.N = beta, gamma, N
@@ -160,8 +161,8 @@ class SIRModel(DayanModel):
 
     def observe(self):
         S, I, R = self.x
-        return {"S": S, "I": I, "R": R, "total": S + I + R,
-                "infected_peak_passed": 0}
+        return {"S": float(S), "I": float(I), "R": float(R), "total": float(S + I + R),
+                "infected_peak_passed": bool(I > 0 and self.beta * S / self.N <= self.gamma)}
 
     def validate_state(self):
         S, I, R = self.x

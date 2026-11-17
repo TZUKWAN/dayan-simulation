@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "commit": "8b995c902ef02c702fa296181ac489f6d7a1a324",
+  "run_id": 44178755431,
+  "job_id": 134377096006,
+  "url": "https://github.com/TZUKWAN/dayan-simulation/actions/runs/44178755431/job/134377096006",
+  "browser": "chromium",
+  "platform": "ubuntu-latest",
+  "checks": [
+    "actual WebGL renderer initialized",
+    "professional mode exposes every real parameter",
+    "professional action creates actual saved requested configuration",
+    "rendered persistent IDs equal archived entity IDs",
+    "rendered ring positions transform actual saved cells",
+    "playback advances the actual shared clock",
+    "pause and seek never rerun a model",
+    "paused workbench stops repeated chart and clock repaint",
+    "entity selection and camera follow use the same persistent ID",
+    "intervention timeline displays one actual event",
+    "aggregate animation explicitly discloses no individual tracks",
+    "queue scene retains persistent server and customer types",
+    "large run retains final frame and discloses render sampling",
+    "large-scene GPU instances retain actual entity IDs and coordinates",
+    "large-scene render remains bounded",
+    "dataset names render as text without executable markup",
+    "viewport resize keeps one renderer canvas",
+    "simple mode retains AI interaction",
+    "reload restores the saved run without creating a new one",
+    "no uncaught application JavaScript errors"
+  ],
+  "scope": "Actual offline HTTP workbench and software WebGL; 4000 saved entities, 3000 rendered instances, actual coordinates and completed-GPU bound verified; no live external APIs."
+}

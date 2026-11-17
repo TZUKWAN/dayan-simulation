@@ -10,6 +10,7 @@ state_frame() 合同：模型可选实现，返回
 from __future__ import annotations
 
 from typing import Any
+from numbers import Integral,Real
 
 
 def state_frame_of(model: Any, t: float) -> dict | None:
@@ -23,7 +24,24 @@ def state_frame_of(model: Any, t: float) -> dict | None:
     if not isinstance(fr, dict) or "entities" not in fr:
         raise ValueError("模型state_frame()未满足实体帧合同")
     fr = dict(fr)
-    fr.setdefault("sim_t", round(float(t), 9))
+    import math
+    if 'sim_t' in fr and (not isinstance(fr['sim_t'],(int,float)) or not math.isclose(fr['sim_t'],t,rel_tol=0,abs_tol=1e-8)):
+        raise ValueError('模型状态帧时间与执行时钟不一致')
+    fr['sim_t']=round(float(t),9)
+    entities=fr['entities']
+    if not isinstance(entities,list):raise ValueError('状态帧entities须为列表')
+    from .limits import limits
+    if len(entities)>limits().entities:raise ValueError('实际状态帧主体数量超过预算')
+    ids=set()
+    for entity in entities:
+        if not isinstance(entity,dict) or not isinstance(entity.get('id'),(str,Integral)) or isinstance(entity['id'],bool):
+            raise ValueError('实体须有持久字符串/整数ID')
+        key=str(entity['id'])
+        if key in ids:raise ValueError('状态帧实体ID重复')
+        ids.add(key)
+        for coordinate in ('x','y','z'):
+            if coordinate in entity and (isinstance(entity[coordinate],bool) or not isinstance(entity[coordinate],Real) or not math.isfinite(entity[coordinate])):
+                raise ValueError('状态帧坐标须为有限数值')
     fr["provenance"] = "entity"
     return fr
 

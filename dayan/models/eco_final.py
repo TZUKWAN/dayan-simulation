@@ -959,18 +959,18 @@ class GoodwinCatalogModel(_Base):
     """ECO019 Goodwin 工资份额-就业周期（Goodwin 1967 经典形式）：
     ẇ/w = -a + b·λ（就业→工资增长，线性菲利普斯）
     λ̇/λ = (1-ω)/ν - δ（利润份额→就业，资本系数 ν、折旧 δ）
-    闭轨道：ω 与 λ 反相摆动；利润挤压（ω→1）与充分就业（λ→1）为上界。"""
+    正初态产生Lotka–Volterra轨道；任意初态不保证比例小于1，不裁剪来制造有界结论。"""
 
     model_id = "ECO019"
     clock_type = "fixed_step"
     dt_scale = 1.0
-    TIME_GAIN = 3.0    # 每 tick 推进的模型时间（≈0.3），400 tick ≈ 2.5 个周期
-    SUBSTEPS = 40      # tick 内部子步，中点法 h≈0.0075 保持能量不漂移
+    SUBSTEPS = 40      # 数值细分不改变记录时钟的物理时长
 
     def __init__(self, nu=2.5, delta=0.03, a=0.045, b=0.06,
-                 x0=(0.68, 0.9)):
+                 x0=None):
         self.nu, self.delta, self.a, self.b = nu, delta, a, b
-        self.x = np.array(x0, float)
+        from ..coupled import GoodwinSDCore
+        self.x = GoodwinSDCore(nu,delta,a,b,x0).x
         self.hist = []
 
     def initialize(self, context, parameters, population, topology, rng):
@@ -986,17 +986,20 @@ class GoodwinCatalogModel(_Base):
         self.hist = [self.x.copy()]
 
     def _f(self, x):
-        w, lmb = np.maximum(x, 1e-9)
+        w, lmb = x
         return np.array([w * (-self.a + self.b * lmb),
                          lmb * ((1 - w) / self.nu - self.delta)])
 
     def step(self, t, dt):
-        h = dt * self.TIME_GAIN / self.SUBSTEPS
+        h = dt / self.SUBSTEPS
         for _ in range(self.SUBSTEPS):
             k1 = self._f(self.x)
-            k2 = self._f(self.x + 0.5 * h * k1)   # 中点法：二阶精度，能量漂移小
-            self.x = self.x + h * k2
-            self.x = np.clip(self.x, 0.02, 0.999)
+            k2 = self._f(self.x + 0.5 * h * k1)
+            k3 = self._f(self.x + 0.5 * h * k2)
+            k4 = self._f(self.x + h * k3)
+            self.x = self.x + h/6*(k1+2*k2+2*k3+k4)
+            if not np.isfinite(self.x).all() or (self.x<=0).any():
+                raise ValueError('Goodwin状态无效，需缩小步长；未裁剪结果')
         self.hist.append(self.x.copy())
 
     def observe(self):
@@ -1012,4 +1015,4 @@ class GoodwinCatalogModel(_Base):
         }
 
     def validate_state(self):
-        return [] if (self.x >= 0.02).all() else ["状态越界"]
+        return [] if np.isfinite(self.x).all() and (self.x>0).all() else ["状态非正或非有限"]

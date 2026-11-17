@@ -9,6 +9,10 @@
 from __future__ import annotations
 
 import sys
+import os
+import tempfile
+TEST_TEMP = tempfile.TemporaryDirectory(prefix="dayan-site-test-")
+os.environ.setdefault("DAYAN_DATA_DIR", TEST_TEMP.name)
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,17 +37,18 @@ def test_teaching_specs_load():
 
 def test_site_built():
     import subprocess
-    subprocess.run([sys.executable, str(ROOT / "experiments" / "build_site.py")],
+    generated = Path(TEST_TEMP.name) / "site"
+    subprocess.run([sys.executable, str(ROOT / "experiments" / "build_site.py"), "--output", str(generated)],
                    check=True, capture_output=True)
     for f in ["index.html", "packs.html", "teachings/index.html", "roadmap.html"]:
-        p = SITE / f
+        p = generated / f
         assert p.exists() and p.stat().st_size > 500, f"{f} 缺失或过小"
-    idx = (SITE / "index.html").read_text(encoding="utf-8")
+    idx = (generated / "index.html").read_text(encoding="utf-8")
     assert "五层架构" in idx and "理论包" in idx
     assert "35/35" in idx or "测试通过" in idx
-    road = (SITE / "roadmap.html").read_text(encoding="utf-8")
+    road = (generated / "roadmap.html").read_text(encoding="utf-8")
     assert "R0" in road and "R6" in road
-    teach = (SITE / "teachings" / "index.html").read_text(encoding="utf-8")
+    teach = (generated / "teachings" / "index.html").read_text(encoding="utf-8")
     assert "Schelling" in teach and "Downs" in teach and "假新闻" in teach
     print("[PASS] 文档站：4 页生成（index/packs/teachings/roadmap），内容含架构+包+教学+路线图")
 

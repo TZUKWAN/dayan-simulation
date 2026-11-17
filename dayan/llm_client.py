@@ -20,11 +20,13 @@ def configuration():
     cfg = json.loads(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
     return {"api_key": os.environ.get("DAYAN_API_KEY", cfg.get("api_key", "")),
             "base_url": os.environ.get("DAYAN_BASE_URL", cfg.get("base_url", "")),
-            "model_id": os.environ.get("DAYAN_MODEL", cfg.get("model_id", ""))}
+            "model_id": os.environ.get("DAYAN_MODEL", cfg.get("model_id", "")),
+            **{key:cfg[key] for key in ('context_window','max_output_tokens') if key in cfg}}
 
 
 def configured():
-    return all(configuration().values())
+    cfg=configuration()
+    return all(cfg.get(k) for k in ('api_key','base_url','model_id'))
 
 
 def json_object(raw):
@@ -40,15 +42,18 @@ def json_object(raw):
     raise ValueError("LLM未返回可解析的JSON对象")
 
 
-def complete(messages, *, max_tokens=8192, temperature=.2, timeout=60,
+def complete(messages, *, max_tokens=None, temperature=.2, timeout=180,
              purpose="chat", audit=None, thinking=None):
     cfg = configuration()
-    if not all(cfg.values()):
+    if not all(cfg.get(k) for k in ('api_key','base_url','model_id')):
         raise RuntimeError("未配置真实LLM服务；不会使用固定脚本代替")
-    if not 1 <= max_tokens <= 32768 or not 0 < timeout <= 180:
+    if not 0 < timeout <= 3600:
         raise ValueError("LLM调用预算超出允许范围")
+    from .llm_limits import discover,allocation
+    budget=allocation(messages,discover(cfg),max_tokens)
     payload = {"model": cfg["model_id"], "messages": messages,
-               "temperature": temperature, "max_tokens": max_tokens}
+               "temperature": temperature}
+    if budget['max_tokens'] is not None:payload['max_tokens']=budget['max_tokens']
     host=urlsplit(cfg["base_url"]).hostname or ""
     structured=purpose in {"planner","build-model","explain-archived-result"}
     mode=thinking if thinking is not None else (False if structured else None)
@@ -60,7 +65,7 @@ def complete(messages, *, max_tokens=8192, temperature=.2, timeout=60,
     record = {"call_id": "LLM-" + uuid.uuid4().hex, "purpose": purpose,
               "model": cfg["model_id"], "created_at": datetime.now(timezone.utc).isoformat(),
               "request_sha256": hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest(),
-              "max_tokens": max_tokens, "ok": False}
+              **budget, "ok": False}
     if "enable_thinking" in payload:record["enable_thinking"]=payload["enable_thinking"]
     if "thinking" in payload:record["thinking"]=payload["thinking"]
     started = time.monotonic()
@@ -70,9 +75,9 @@ def complete(messages, *, max_tokens=8192, temperature=.2, timeout=60,
                                      headers={"Authorization": "Bearer " + cfg["api_key"], "Content-Type": "application/json"})
         try:
             with urllib.request.urlopen(req, timeout=timeout) as response:
-                body = response.read(8 * 1024 * 1024 + 1)
-                if len(body) > 8 * 1024 * 1024:
-                    raise RuntimeError("LLM响应超过8MiB")
+                cap=max(8*1024*1024,min(64*1024*1024,(budget['max_tokens'] or 262144)*24))
+                body = response.read(cap+1)
+                if len(body)>cap:raise RuntimeError('LLM响应超过与模型输出能力匹配的字节预算')
                 data = json.loads(body)
         except urllib.error.HTTPError as exc:
             # Do not expose credentials, request headers, or provider diagnostic URLs.

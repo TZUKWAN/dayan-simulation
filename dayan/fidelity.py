@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -25,8 +26,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REVIEW_DIR = ROOT / "data" / "fidelity_review"
-CATALOG_PATH = ROOT / "data" / "model_catalog_v2.json"
-PROBE_CACHE = ROOT / "data" / "probe_results.json"
+CACHE_ROOT = Path(os.environ.get('DAYAN_DATA_DIR', ROOT/'data'))
+CATALOG_PATH = CACHE_ROOT / "model_catalog_v2.json"
+PROBE_CACHE = CACHE_ROOT / "probe_results.json"
 
 FIDELITY_LEVELS = ("full", "lite", "prototype", "method_demo", "registered")
 FIDELITY_ZH = {
@@ -39,29 +41,32 @@ FIDELITY_ZH = {
 
 
 def models_source_fingerprint() -> str:
-    """dayan/models + model_index + core 源码指纹：任何变更使目录过期。"""
-    h = hashlib.sha256()
-    for p in sorted((ROOT / "dayan" / "models").glob("*.py")) + \
-            [ROOT / "dayan" / "model_index.py", ROOT / "dayan" / "core.py"]:
-        h.update(p.name.encode("utf-8"))
-        h.update(hashlib.sha256(p.read_bytes()).digest())
-    return h.hexdigest()[:16]
+    """Models, engines, runtime, compiler, legacy packages and dependencies."""
+    from .source_version import source_fingerprint
+    return source_fingerprint()
+
+
+from functools import lru_cache
+
+
+@lru_cache(maxsize=8)
+def _test_reference_index(signature):
+    index={}
+    for relative,_,_ in signature:
+        text=(ROOT/relative).read_text(encoding='utf-8')
+        for mid in set(re.findall(r'\b(?:BEH|NET|ECO|SYS|MET|APP|CPL)\d{3}\b|\bNET-SIR\b',text)):
+            index.setdefault(mid,[]).append(relative.removeprefix('tests/'))
+    return index
+
+
+def _all_test_refs():
+    paths=sorted(p for p in (ROOT/'tests').rglob('*') if p.suffix in ('.py','.mjs') and '__pycache__' not in p.parts)
+    signature=tuple((p.relative_to(ROOT).as_posix(),p.stat().st_mtime_ns,p.stat().st_size) for p in paths)
+    return _test_reference_index(signature)
 
 
 def test_refs_for(mid: str) -> list[str]:
-    """扫描 tests/*.py 找直接引用该 mid 的测试文件。"""
-    refs = []
-    tests_dir = ROOT / "tests"
-    if not tests_dir.exists():
-        return refs
-    for p in sorted(tests_dir.glob("test_*.py")):
-        try:
-            if re.search(rf"\b{re.escape(mid)}\b", p.read_text(encoding="utf-8",
-                                                              errors="ignore")):
-                refs.append(p.name)
-        except OSError:
-            continue
-    return refs
+    return _all_test_refs().get(mid,[])
 
 
 def _probe_worker(mid: str, ticks: int = 5) -> dict:
@@ -87,9 +92,27 @@ def _probe_worker(mid: str, ticks: int = 5) -> dict:
         last = obs[-1] if obs else {}
         outs = [k for k, v in (last.items() if isinstance(last, dict) else [])
                 if isinstance(v, (int, float)) and not isinstance(v, bool)]
-        out.update(ok=True, n_obs=len(obs),
+        if not obs:
+            raise ValueError('探针没有任何实际观测')
+        import math
+        def kind(value):
+            if isinstance(value,bool):return 'boolean'
+            if isinstance(value,(int,float)):
+                if not math.isfinite(value):raise ValueError('探针输出含非有限数值')
+                return 'number'
+            if isinstance(value,str):return 'string'
+            if isinstance(value,list):
+                for item in value:kind(item)
+                return 'array'
+            if isinstance(value,dict):
+                for item in value.values():kind(item)
+                return 'object'
+            return 'null'
+        fields={key: sorted({kind(row[key]) for row in obs if key in row})
+                for key in {key for row in obs for key in row}}
+        out.update(ok=True, n_obs=len(obs), output_types=fields,
                    duration_s=round(time.perf_counter() - t0, 3),
-                   observables=outs[:12])
+                   observables=outs)
     except Exception as e:                     # noqa: BLE001
         out.update(ok=False, error=f"{type(e).__name__}: {e}"[:200],
                    duration_s=round(time.perf_counter() - t0, 3))
@@ -146,29 +169,23 @@ def probe_batch(mids: list[str], ticks: int = 5) -> dict[str, dict]:
 
 
 def load_reviews() -> dict[str, dict]:
-    """读取全部源码审查 JSON → {mid: review}。"""
-    reviews: dict[str, dict] = {}
-    if not REVIEW_DIR.exists():
-        return reviews
-    for p in sorted(REVIEW_DIR.glob("*.json")):
-        try:
-            data = json.loads(p.read_text(encoding="utf-8"))
-        except Exception:                      # noqa: BLE001
-            continue
-        for item in data.get("reviews", []):
-            mid = str(item.get("model_id") or item.get("mid") or "").strip().upper()
-            if not mid:
-                continue
-            fid = item.get("fidelity")
-            if fid not in FIDELITY_LEVELS:
-                fid = "prototype"              # 未分级/级别非法一律降级为原型
-            reviews[mid] = {
-                "fidelity": fid,
-                "basis": str(item.get("basis", ""))[:120],
-                "simplifications": item.get("simplifications") or [],
-                "evidence": str(item.get("evidence", ""))[:160],
-                "review_source": p.name,
-            }
+    """Unanchored/changed historical reviews never assert current fidelity."""
+    reviews={};fp=models_source_fingerprint()
+    for p in sorted(REVIEW_DIR.glob('*.json')) if REVIEW_DIR.exists() else []:
+        data=json.loads(p.read_text(encoding='utf-8'))
+        for item in data.get('reviews',[]):
+            mid=str(item.get('model_id') or item.get('mid') or '').strip().upper()
+            if not mid:continue
+            current=item.get('source_fingerprint',data.get('source_fingerprint'))==fp
+            historical=item.get('fidelity','prototype')
+            if historical not in FIDELITY_LEVELS:historical='prototype'
+            reviews[mid]={'fidelity':historical if current else 'prototype',
+                'basis':item.get('basis','') if current else '历史审查未绑定当前执行源码，不能作为当前机制忠实度证明',
+                'simplifications':item.get('simplifications',[]) if current else [],
+                'evidence':item.get('evidence','') if current else '',
+                'review_source':p.name,'review_status':'current' if current else 'stale_or_unanchored',
+                'reviewed':current,'historical_review':{k:item.get(k) for k in ('fidelity','basis','simplifications','evidence')},
+                'references':item.get('references',[])}
     return reviews
 
 
@@ -203,98 +220,89 @@ def reviews_fingerprint() -> str:
     return h.hexdigest()[:16]
 
 
-def build_catalog(force: bool = False) -> dict:
-    """三路合并构建忠实度目录并落盘。"""
-    from .model_index import ALL_INDEX, resolve
+def _existing_probes(fp):
+    for path in (PROBE_CACHE,ROOT/'data'/'output_contract_evidence.json'):
+        if path.exists():
+            try:
+                record=json.loads(path.read_text(encoding='utf-8'))
+                if record.get('source_fingerprint')==fp:return record.get('results',{})
+            except (ValueError,OSError):pass
+    return {}
 
-    fp = models_source_fingerprint()
-    rfp = reviews_fingerprint()
+
+def build_catalog(force: bool = False) -> dict:
+    """Fast metadata assembly. Probes run only in an explicit test/CLI operation."""
+    from .model_index import ALL_INDEX,resolve
+    from .custom_models import capabilities as custom_capabilities
+    from .output_contract import output_contract
+    from .research.requirements import model_mechanisms
+    fp=models_source_fingerprint();rfp=reviews_fingerprint()
+    custom=custom_capabilities()
+    probes=_existing_probes(fp)
+    pfp=hashlib.sha256(json.dumps(probes,sort_keys=True).encode()).hexdigest()
+    cfp=hashlib.sha256(json.dumps(custom,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
     if not force and CATALOG_PATH.exists():
         try:
-            old = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
-            if old.get("source_fingerprint") == fp \
-                    and old.get("review_fingerprint") == rfp:
+            old=json.loads(CATALOG_PATH.read_text(encoding='utf-8'))
+            if old.get('source_fingerprint')==fp and old.get('review_fingerprint')==rfp and old.get('custom_fingerprint')==cfp and old.get('probe_fingerprint')==pfp and old.get('version')==3:
                 return old
-        except Exception:                      # noqa: BLE001
-            pass
-
-    reviews = load_reviews()
-    mids = sorted(ALL_INDEX.keys())
-    # registered：声明过但无运行工厂的（从 data/dayan_catalog.json 找差集）
-    declared = set()
-    cat_path = ROOT / "data" / "dayan_catalog.json"
-    if cat_path.exists():
-        try:
-            declared = {m.get("model_id", "").upper()
-                        for m in json.loads(cat_path.read_text(encoding="utf-8"))
-                        .get("models", [])}
-        except Exception:                      # noqa: BLE001
-            pass
-    probe_results = _cached_probe(mids, fp)
-
-    models = []
-    for mid in mids:
-        protocol, _ = resolve(mid)
-        pr = probe_results.get(mid, {"ok": False, "error": "未探针"})
-        rv = reviews.get(mid)
-        if rv is None:
-            # 无审查记录：不得虚标。降为 prototype 并标注未审查
-            rv = {"fidelity": "prototype",
-                  "basis": "无源码审查记录，按未审查降级处理",
-                  "simplifications": [], "evidence": "",
-                  "review_source": None}
-        models.append({
-            "model_id": mid,
-            "protocol": protocol,
-            "runnable": bool(pr.get("ok")),
-            "probe": {k: pr.get(k) for k in
-                      ("ok", "error", "n_obs", "duration_s", "observables")},
-            "fidelity": rv["fidelity"],
-            "fidelity_zh": FIDELITY_ZH[rv["fidelity"]],
-            "basis": rv["basis"],
-            "simplifications": rv["simplifications"],
-            "evidence": rv["evidence"],
-            "review_source": rv["review_source"],
-            "reviewed": rv["review_source"] is not None,
-            "test_refs": test_refs_for(mid),
-            "entry_status": ("可运行" if pr.get("ok")
-                             else ("方法例题" if protocol == "demo"
-                                   else "注册但探针失败")),
-        })
-
-    # 仅登记：声明于目录但无运行工厂
-    for mid in sorted(declared - set(mids)):
-        if not mid:
-            continue
-        models.append({
-            "model_id": mid, "protocol": None, "runnable": False,
-            "probe": {"ok": False, "error": "无运行工厂"},
-            "fidelity": "registered", "fidelity_zh": "仅登记",
-            "basis": "目录声明但无实现入口", "simplifications": [],
-            "evidence": "", "review_source": None, "reviewed": False,
-            "test_refs": test_refs_for(mid), "entry_status": "仅登记",
-        })
-
-    counts: dict[str, int] = {}
-    for m in models:
-        counts[m["fidelity"]] = counts.get(m["fidelity"], 0) + 1
-    catalog = {
-        "version": 2,
-        "generated_at": __import__("datetime").datetime.now()
-        .isoformat(timespec="seconds"),
-        "source_fingerprint": fp,
-        "review_fingerprint": rfp,
-        "counts": {
-            "total": len(models),
-            "runnable": sum(1 for m in models if m["runnable"]),
-            "fidelity": counts,
-            "reviewed": sum(1 for m in models if m["reviewed"]),
-        },
-        "models": models,
-    }
-    CATALOG_PATH.parent.mkdir(exist_ok=True)
-    CATALOG_PATH.write_text(json.dumps(catalog, ensure_ascii=False, indent=1),
-                            encoding="utf-8")
+        except (OSError,ValueError):pass
+    declared_data=json.loads((ROOT/'data/dayan_catalog.json').read_text(encoding='utf-8'))
+    declared={m['model_id'].upper():m for m in declared_data.get('models',[])}
+    reviews=load_reviews();mids=sorted(set(ALL_INDEX)|{c['model_id'] for c in custom})
+    probes=_existing_probes(fp);models=[]
+    refs=_all_test_refs()
+    for mid in sorted(set(mids)|set(declared)):
+        registered=declared.get(mid,{})
+        protocol,factory=resolve(mid)
+        cls=factory[1] if isinstance(factory,tuple) else factory
+        has_factory=factory is not None
+        external=bool(getattr(cls,'requires_external',False))
+        pr=probes.get(mid)
+        probe_status=('skipped_external' if external else 'not_run') if not pr else ('passed' if pr.get('ok') else 'skipped_external' if pr.get('skipped') else 'failed')
+        rv=reviews.get(mid,{})
+        method_demo=protocol=='demo' and isinstance(cls,str)
+        level='registered' if not has_factory else 'method_demo' if method_demo else rv.get('fidelity','prototype')
+        schema=output_contract(mid,reference_results=probes) if has_factory else None
+        description=__import__('inspect').getdoc(cls) if isinstance(cls,type) else ''
+        entry={'model_id':mid,'name':registered.get('name') or getattr(cls,'__name__',mid),
+            'kind':registered.get('kind','机制/方法实现'),'layer':registered.get('layer','模型层'),
+            'description':description or '', 'registered':mid in declared,
+            'protocol':protocol,'has_factory':has_factory,'runnable':has_factory,
+            'entry_kind':'software_reference' if registered.get('layer')=='软件层' else 'compatibility_or_benchmark' if mid not in declared else 'application' if registered.get('layer')=='应用层' else 'model',
+            'requires_external':external,'output_contract':schema,'mechanisms':sorted(model_mechanisms(mid)),
+            'probe':{'status':probe_status,**(pr or {'ok':None,'error':'没有当前源码对应的实际探针证据'})},
+            'fidelity':level,'fidelity_zh':FIDELITY_ZH[level],
+            'basis':'目录声明但无实现入口' if not has_factory else rv.get('basis','无当前源码审查；运行入口不代表科学有效'),
+            'simplifications':rv.get('simplifications',[]),'evidence':rv.get('evidence',''),
+            'review_source':rv.get('review_source'),'reviewed':bool(rv.get('reviewed')),
+            'review_status':rv.get('review_status','unreviewed'),'historical_review':rv.get('historical_review'),
+            'test_refs':refs.get(mid,[]),'numerical_benchmark':{'state':'see_test_receipts','scope':'测试引用本身不证明断言已经通过'},
+            'data_calibration':{'state':'per_study','scope':'不能把一个场景的校准升级为全模型有效'},
+            'independent_holdout':{'state':'per_study'},
+            'entry_status':'仅登记' if not has_factory else '需要真实外部服务' if external else '有运行入口；'+{'passed':'探针通过','failed':'探针失败','not_run':'未探针','skipped_external':'外部服务未探针'}[probe_status]}
+        entry['status']=entry['entry_status'];models.append(entry)
+    levels={level:sum(m['fidelity']==level for m in models) for level in FIDELITY_LEVELS}
+    counts={'total':len(models),'static_registered':len(declared),'factory_entries':sum(m['has_factory'] for m in models),
+            'registered_by_layer':{layer:sum(m.get('layer')==layer for m in declared.values()) for layer in ('模型层','应用层','软件层')},
+            'compatibility_or_benchmark_entries':sum(m['entry_kind']=='compatibility_or_benchmark' for m in models),
+            'registered_model_factories':sum(m['has_factory'] and m['registered'] for m in models),
+            'registered_models_without_factory':sum(m['registered'] and m['entry_kind']!='software_reference' and not m['has_factory'] for m in models),
+            'runnable':sum(m['runnable'] for m in models),'registered_no_factory':sum(m['registered'] and not m['has_factory'] for m in models),
+            'factory_outside_static':[m['model_id'] for m in models if m['has_factory'] and not m['registered']],
+            'probe_passed':sum(m['probe']['status']=='passed' for m in models),'probe_failed':sum(m['probe']['status']=='failed' for m in models),
+            'probe_skipped_external':sum(m['probe']['status']=='skipped_external' for m in models),
+            'probe_not_run':sum(m['has_factory'] and m['probe']['status']=='not_run' for m in models),
+            'fidelity':levels,'reviewed':sum(m['reviewed'] for m in models),
+            'historical_reviews_stale':sum(m['review_status']=='stale_or_unanchored' for m in models)}
+    catalog={'version':3,'generated_at':__import__('datetime').datetime.now().isoformat(timespec='seconds'),
+             'source_fingerprint':fp,'review_fingerprint':rfp,'custom_fingerprint':cfp,'probe_fingerprint':pfp,
+             'counts':counts,'models':models}
+    try:
+        from .collection.storage import atomic_json
+        atomic_json(CATALOG_PATH,catalog)
+    except OSError:
+        catalog['cache_note']='缓存不可写，本次使用内存目录；未修改只读源码'
     return catalog
 
 

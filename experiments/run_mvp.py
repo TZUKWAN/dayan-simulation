@@ -119,7 +119,7 @@ def main():
     ap.add_argument("--narr-every", type=int, default=10)
     ap.add_argument("--narr-sample", type=int, default=18)
     ap.add_argument("--workers", type=int, default=6, help="LLM 并发数")
-    ap.add_argument("--max-tokens", type=int, default=200)
+    ap.add_argument("--max-tokens", type=int, default=None, help='默认按实际服务能力自适应；仅显式指定时收紧输出')
     ap.add_argument("--url", default="http://127.0.0.1:1234/v1")
     ap.add_argument("--model", default="qwen3.5-4b")
     ap.add_argument("--tag", default=None)

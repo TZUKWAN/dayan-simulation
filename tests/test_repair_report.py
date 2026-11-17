@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 EVIDENCE = ROOT / ".claude/repair_all_20261112/report_validation"
 os.environ["DAYAN_REPORTS_DIR"] = str(EVIDENCE)
-from fastapi.testclient import TestClient
+from api_client import local_client as TestClient
 from docx import Document
 from dayan.server import app
 from dayan.report_gen import _stats

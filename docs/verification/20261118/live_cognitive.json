@@ -1,0 +1,792 @@
+{
+  "ok": true,
+  "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+  "scope": "Actual live LLM decisions and two-step environment feedback for each simplified architecture; not original-paper or human-behavior validation",
+  "models": [
+    {
+      "model_id": "BEH129",
+      "run_id": "R20261117T211055-32fcf1f4eb3e4d5aa87e082616194db5",
+      "parameters": {
+        "n": 1,
+        "scenario": "抽象社区居民通过工作和互助降低风险，维持能量与公共资源。",
+        "decision_interval": 1,
+        "max_llm_calls": 2,
+        "initial_energy": 0.7
+      },
+      "final_observation": {
+        "sim_t": 2,
+        "n_agents": 1,
+        "n_memories": 4,
+        "n_reflections": 2,
+        "llm_calls": 2,
+        "actions_executed": 2,
+        "mean_energy": 1,
+        "resources": 10,
+        "hazard": 1,
+        "objective": 1
+      },
+      "decisions": [
+        {
+          "sim_t": 0,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-480668dc5c7d4b969fc81e23053c03ea",
+          "decision": {
+            "action": "rest",
+            "reason": "当前能量仅0.7，极低，继续工作或互助会加剧能量风险，优先休息恢复。",
+            "reflection": "初始记忆显示能量低而公共资源尚可、风险为1.0；在能量安全前不应消耗性行动。",
+            "plan": [
+              "原地休息恢复能量",
+              "恢复后评估风险与公共资源",
+              "再选择工作或互助以维持社区"
+            ],
+            "target": [
+              7.872420863939191,
+              9.348555951095769
+            ],
+            "skill": [
+              "rest"
+            ]
+          }
+        },
+        {
+          "sim_t": 1,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-79cc4b295a8c42dab30e45c641d790c6",
+          "decision": {
+            "action": "rest",
+            "reason": "当前能量仅0.85，先恢复以避免风险。",
+            "reflection": "上次休息仅使能量从0.7升到0.85，仍处于低位；在能量安全前不宜进行消耗性工作或互助。",
+            "plan": [
+              "原地休息恢复能量",
+              "能量回升后评估公共资源与风险",
+              "若能量充足再考虑工作或互助"
+            ],
+            "target": [
+              7.872420863939191,
+              9.348555951095769
+            ],
+            "skill": [
+              "rest"
+            ],
+            "allowed": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "sim_t": 1,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        },
+        {
+          "sim_t": 2,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        }
+      ],
+      "llm_calls": [
+        {
+          "call_id": "LLM-480668dc5c7d4b969fc81e23053c03ea",
+          "purpose": "BEH129:memory-reflection-plan",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:10:48.334782+00:00",
+          "request_sha256": "eb10dcbca014617511f8b410179e9be91a471389ddda0c2c9c52fac884cb2ddc",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2249,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 345,
+            "total_tokens": 732,
+            "completion_tokens": 387,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 345
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 274,
+              "text_tokens": 112
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "017c3defe3e9bdf40f68b0ceb11caee129926c037764e2625383d3a69a5abbd9",
+          "duration_s": 3.712
+        },
+        {
+          "call_id": "LLM-79cc4b295a8c42dab30e45c641d790c6",
+          "purpose": "BEH129:memory-reflection-plan",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:10:52.049025+00:00",
+          "request_sha256": "2435cb8db9d2ef50f9fb7b012fc8179db67650146fba0adb94810fc1320042da",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2614,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 467,
+            "total_tokens": 855,
+            "completion_tokens": 388,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 467
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 276,
+              "text_tokens": 111
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "649c60988b44328870eac2e903cc9d459411217934b8767df7054b05cb3475c9",
+          "duration_s": 3.429
+        }
+      ]
+    },
+    {
+      "model_id": "BEH130",
+      "run_id": "R20261117T211109-3f6c2f29176a487093538b08b8a100ba",
+      "parameters": {
+        "n": 1,
+        "scenario": "抽象社区居民通过工作和互助降低风险，维持能量与公共资源。",
+        "decision_interval": 1,
+        "max_llm_calls": 2,
+        "initial_energy": 0.7
+      },
+      "final_observation": {
+        "sim_t": 2,
+        "n_agents": 1,
+        "n_memories": 4,
+        "n_reflections": 2,
+        "llm_calls": 2,
+        "actions_executed": 2,
+        "mean_energy": 0.75,
+        "resources": 11,
+        "hazard": 0.98,
+        "objective": 1.9499999999999993
+      },
+      "decisions": [
+        {
+          "sim_t": 0,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-f6dc4a71d1b14313ac739b2428a0f4f4",
+          "decision": {
+            "action": "rest",
+            "reason": "当前能量仅0.7，先恢复能量以保障后续工作与互助能力",
+            "reflection": "低能量时继续工作或互助会放大风险，应优先休息恢复",
+            "plan": [
+              "休息恢复能量",
+              "能量回升后评估公共资源与风险",
+              "若条件允许再参与工作或互助"
+            ],
+            "target": [
+              5.960415217066373,
+              0.08849732489826345
+            ],
+            "skill": [
+              "rest"
+            ]
+          }
+        },
+        {
+          "sim_t": 1,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-5e3ffbb31f00441dac860aeeff6163b7",
+          "decision": {
+            "action": "work",
+            "reason": "当前能量0.85较充足，公共资源为10，先工作补充公共资源；风险仍可管理。",
+            "reflection": "上次休息有效恢复了能量，说明低能量时应休息；现在能量已恢复，可适度工作，但需监测消耗。",
+            "plan": [
+              "在当前位置工作，增加公共资源",
+              "监测能量，若低于0.5则优先休息",
+              "若风险上升，则转向互助以降低风险"
+            ],
+            "target": [
+              5.960415217066373,
+              0.08849732489826345
+            ],
+            "skill": [
+              "work"
+            ]
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "sim_t": 1,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        },
+        {
+          "sim_t": 2,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "work",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 1.0999999999999992
+        }
+      ],
+      "llm_calls": [
+        {
+          "call_id": "LLM-f6dc4a71d1b14313ac739b2428a0f4f4",
+          "purpose": "BEH130:observe-decide-tool-feedback",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:10:57.053954+00:00",
+          "request_sha256": "7c9cb4c6a00883865c45dc8736b25c1265313cb1e4a94c7d0876cbefcaa29971",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2257,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 351,
+            "total_tokens": 672,
+            "completion_tokens": 321,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 351
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 224,
+              "text_tokens": 96
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "bbd3405a75c510b92f249fe4d23d261051e5bfb42f3e47dc93fb781d5b5c77ea",
+          "duration_s": 2.986
+        },
+        {
+          "call_id": "LLM-5e3ffbb31f00441dac860aeeff6163b7",
+          "purpose": "BEH130:observe-decide-tool-feedback",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:11:00.042164+00:00",
+          "request_sha256": "7f082a0d38a48f2b9e6d22a3aab36d7adbe7fd08b6d6df42052996755935f7bb",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2586,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 462,
+            "total_tokens": 1667,
+            "completion_tokens": 1205,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 462
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 1081,
+              "text_tokens": 123
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "5ea7d38b29dd50adb9e44db1837e47255420b5aa4d9514753ab291b45cd10915",
+          "duration_s": 9.406
+        }
+      ]
+    },
+    {
+      "model_id": "BEH131",
+      "run_id": "R20261117T211116-21cac0eb2f9e48aea3820b9f8b792627",
+      "parameters": {
+        "n": 1,
+        "scenario": "抽象社区居民通过工作和互助降低风险，维持能量与公共资源。",
+        "decision_interval": 1,
+        "max_llm_calls": 2,
+        "initial_energy": 0.7
+      },
+      "final_observation": {
+        "sim_t": 2,
+        "n_agents": 1,
+        "n_memories": 4,
+        "n_reflections": 2,
+        "llm_calls": 2,
+        "actions_executed": 2,
+        "mean_energy": 1,
+        "resources": 10,
+        "hazard": 1,
+        "objective": 1
+      },
+      "decisions": [
+        {
+          "sim_t": 0,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-1188bc8f6ba748748dafaa2914cb0785",
+          "decision": {
+            "action": "rest",
+            "reason": "能量仅0.7，工作或互助会进一步消耗，优先恢复能量以降低风险。",
+            "reflection": "尚无上次动作反馈；初始状态能量极低，应避免高消耗行动。",
+            "plan": [
+              "原地休息恢复能量",
+              "恢复后评估公共资源与风险",
+              "能量充足时再考虑工作或互助"
+            ],
+            "target": [
+              5.559004937064818,
+              2.0935653336628035
+            ],
+            "skill": [
+              "rest"
+            ]
+          }
+        },
+        {
+          "sim_t": 1,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-5e645e068e9c4e14bb25d0380ce0d1b4",
+          "decision": {
+            "action": "rest",
+            "reason": "能量极低，休息以恢复能量并避免高消耗行动。",
+            "reflection": "上次休息使目标值略有改善，说明低能量时应优先恢复；当前能量仍低，不宜工作或互助。",
+            "plan": [
+              "继续休息直到能量恢复到较安全水平",
+              "恢复后再评估公共资源与风险，选择低消耗互助或工作"
+            ],
+            "target": [
+              5.559,
+              2.094
+            ],
+            "skill": [
+              "rest"
+            ]
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "sim_t": 1,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        },
+        {
+          "sim_t": 2,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        }
+      ],
+      "llm_calls": [
+        {
+          "call_id": "LLM-1188bc8f6ba748748dafaa2914cb0785",
+          "purpose": "BEH131:outcome-feedback-reflection",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:11:09.677959+00:00",
+          "request_sha256": "cde7eaf7acf714711d29c5c48df3523b84bce5982879d946353dfedb97eff8d5",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2255,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 348,
+            "total_tokens": 776,
+            "completion_tokens": 428,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 348
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 326,
+              "text_tokens": 101
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "9d6e9c4cb7dcfe2286d391851b6512f0fc028e4953a6fbe9512467dab787b813",
+          "duration_s": 3.915
+        },
+        {
+          "call_id": "LLM-5e645e068e9c4e14bb25d0380ce0d1b4",
+          "purpose": "BEH131:outcome-feedback-reflection",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:11:13.599758+00:00",
+          "request_sha256": "e811d4e281c2a1419dd73cf817cc41ca862df6bce471457670a17d8ca2a85d34",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2593,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 461,
+            "total_tokens": 768,
+            "completion_tokens": 307,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 461
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 210,
+              "text_tokens": 96
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "e59e00890cb687d071fe64fbfa1915ff04bf269d7b9ebd405376c40b1420964c",
+          "duration_s": 3.072
+        }
+      ]
+    },
+    {
+      "model_id": "BEH132",
+      "run_id": "R20261117T211126-926cec5858474ccd8e3c876228d1859b",
+      "parameters": {
+        "n": 1,
+        "scenario": "抽象社区居民通过工作和互助降低风险，维持能量与公共资源。",
+        "decision_interval": 1,
+        "max_llm_calls": 2,
+        "initial_energy": 0.7
+      },
+      "final_observation": {
+        "sim_t": 2,
+        "n_agents": 1,
+        "n_memories": 4,
+        "n_reflections": 2,
+        "llm_calls": 2,
+        "actions_executed": 2,
+        "mean_energy": 1,
+        "resources": 10,
+        "hazard": 1,
+        "objective": 1
+      },
+      "decisions": [
+        {
+          "sim_t": 0,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-a2ed6bb6795e495592f36e316986280e",
+          "decision": {
+            "action": "rest",
+            "reason": "能量仅0.7，优先恢复体力；当前风险低且公共资源充足。",
+            "reflection": "初始能量偏低，暂无行动反馈；先休息可避免工作进一步消耗能量。",
+            "plan": [
+              "休息恢复能量",
+              "能量回升后执行工作以增加公共资源",
+              "根据风险变化参与互助"
+            ],
+            "target": [
+              7.124639337742535,
+              7.990622921465851
+            ],
+            "skill": [
+              "rest"
+            ]
+          }
+        },
+        {
+          "sim_t": 1,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-2d47bedf56284aa9848345265a3c2d36",
+          "decision": {
+            "action": "rest",
+            "reason": "能量仍偏低且只掌握休息技能，先恢复能量以避免后续工作或互助时资源不足。",
+            "reflection": "上次休息带来约0.15能量恢复，说明休息有效；当前无新行动反馈，继续巩固能量更稳妥。",
+            "plan": [
+              "休息恢复能量",
+              "能量充足后评估是否尝试工作或互助",
+              "根据资源与风险反馈选择下一步动作"
+            ],
+            "target": [
+              7.124639337742535,
+              7.990622921465851
+            ],
+            "skill": [
+              "rest"
+            ]
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "sim_t": 1,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        },
+        {
+          "sim_t": 2,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        }
+      ],
+      "llm_calls": [
+        {
+          "call_id": "LLM-a2ed6bb6795e495592f36e316986280e",
+          "purpose": "BEH132:skill-library",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:11:16.910344+00:00",
+          "request_sha256": "3752c5588a53ef4a5da554f4df97f7a854139938545050f7473dae29e2bdd5af",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2240,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 344,
+            "total_tokens": 808,
+            "completion_tokens": 464,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 344
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 367,
+              "text_tokens": 96
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "0f6868eacb7261b406c78d848008fba4c124196c14b624a15ddcffceb550e47b",
+          "duration_s": 3.883
+        },
+        {
+          "call_id": "LLM-2d47bedf56284aa9848345265a3c2d36",
+          "purpose": "BEH132:skill-library",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:11:20.795868+00:00",
+          "request_sha256": "eadb6b2dc162b217bfb16778fbe57466a9eae59965c62438d0e44dbf91219267",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2597,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 461,
+            "total_tokens": 1155,
+            "completion_tokens": 694,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 461
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 582,
+              "text_tokens": 111
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "fb6ec42cd235ff01700d59c4c3c77e00ac35adaf625421166ac3a344a9bf9d93",
+          "duration_s": 6.088
+        }
+      ]
+    },
+    {
+      "model_id": "BEH133",
+      "run_id": "R20261117T211132-b3d2176e543c4e6eac8a7590bd3e023b",
+      "parameters": {
+        "n": 1,
+        "scenario": "抽象社区居民通过工作和互助降低风险，维持能量与公共资源。",
+        "decision_interval": 1,
+        "max_llm_calls": 2,
+        "initial_energy": 0.7
+      },
+      "final_observation": {
+        "sim_t": 2,
+        "n_agents": 1,
+        "n_memories": 4,
+        "n_reflections": 2,
+        "llm_calls": 2,
+        "actions_executed": 2,
+        "mean_energy": 1,
+        "resources": 10,
+        "hazard": 1,
+        "objective": 1
+      },
+      "decisions": [
+        {
+          "sim_t": 0,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-edf0cc1ce5384982b9531b4ea3b06128",
+          "decision": {
+            "action": "rest",
+            "reason": "能量仅0.7，优先休息恢复以维持后续工作与互助能力。",
+            "reflection": "当前无行动反馈；初始状态能量偏低，不宜先消耗能量工作。",
+            "plan": [
+              "原地休息恢复能量",
+              "能量恢复后评估风险与资源，再决定工作或互助"
+            ],
+            "target": [
+              5.459902906755033,
+              7.344460755792656
+            ],
+            "skill": [
+              "rest"
+            ],
+            "allowed": true
+          }
+        },
+        {
+          "sim_t": 1,
+          "etype": "llm_decision",
+          "agent_id": 0,
+          "call_id": "LLM-0fc2b41ce1ad46fcb0ffd804aac9cb11",
+          "decision": {
+            "action": "rest",
+            "reason": "能量偏低，先恢复以降低后续工作风险。",
+            "reflection": "上次休息有恢复但能量仍不足；当前不宜消耗能量工作。",
+            "plan": [
+              "原地休息恢复能量",
+              "能量充足后评估公共资源与风险再决定工作或互助"
+            ],
+            "target": [
+              5.459902906755033,
+              7.344460755792656
+            ],
+            "skill": [
+              "rest"
+            ],
+            "allowed": true
+          }
+        }
+      ],
+      "outcomes": [
+        {
+          "sim_t": 1,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        },
+        {
+          "sim_t": 2,
+          "etype": "action_outcome",
+          "agent_id": 0,
+          "action": "rest",
+          "applied": true,
+          "reason": "",
+          "objective_delta": 0.15000000000000002
+        }
+      ],
+      "llm_calls": [
+        {
+          "call_id": "LLM-edf0cc1ce5384982b9531b4ea3b06128",
+          "purpose": "BEH133:game-master",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:11:27.126117+00:00",
+          "request_sha256": "3e9093d397f870e79edc4c2463b8d2e88af7d948e1035fcf61489dfa9e4935c6",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2238,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 345,
+            "total_tokens": 648,
+            "completion_tokens": 303,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 345
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 205,
+              "text_tokens": 97
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "d96a7a4ab51b1f85beb3625c4d04d7dcfc20d9bc7a9f776512da947dcee0a9ba",
+          "duration_s": 2.796
+        },
+        {
+          "call_id": "LLM-0fc2b41ce1ad46fcb0ffd804aac9cb11",
+          "purpose": "BEH133:game-master",
+          "model": "deepseek-v4.1-flash-1017",
+          "created_at": "2026-11-17T21:11:29.924260+00:00",
+          "request_sha256": "d60d63e1d8ae36d7eec6f6ffc30c686f204f8a2c94a12084620438cc806659a8",
+          "max_tokens": 393216,
+          "input_token_upper_bound": 2576,
+          "input_count_method": "UTF-8 bytes plus message-format margin (upper bound)",
+          "context_window": 1000000,
+          "provider_max_output_tokens": 393216,
+          "limit_source": "provider-metadata-and-official-documentation",
+          "limit_reference": "https://help.aliyun.cn/zh/model-studio/deepseek-v4-1-flash",
+          "ok": true,
+          "usage": {
+            "prompt_tokens": 457,
+            "total_tokens": 757,
+            "completion_tokens": 300,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "image_tokens": 0,
+              "text_tokens": 457
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 209,
+              "text_tokens": 90
+            }
+          },
+          "finish_reason": "stop",
+          "response_sha256": "9e57af8c1c3192bcd43dfa65040869722aae8dad25d94b0fea36ac4edf3b688f",
+          "duration_s": 3.045
+        }
+      ]
+    }
+  ]
+}

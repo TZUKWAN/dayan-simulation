@@ -1,0 +1,10844 @@
+{
+ "version": 1,
+ "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+ "python": "3.13.2",
+ "probe_ticks": 5,
+ "seed": 0,
+ "results": {
+  "APP001": {
+   "model_id": "APP001",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "policy_lever": [
+     "string"
+    ],
+    "vaccine_final": [
+     "object"
+    ],
+    "baseline_final": [
+     "object"
+    ]
+   },
+   "duration_s": 1.781,
+   "observables": []
+  },
+  "APP002": {
+   "model_id": "APP002",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "macro_kmean": [
+     "number"
+    ],
+    "congested_flux": [
+     "number"
+    ],
+    "congestion_loss": [
+     "number"
+    ],
+    "free_flow_flux": [
+     "number"
+    ]
+   },
+   "duration_s": 0.623,
+   "observables": [
+    "free_flow_flux",
+    "congested_flux",
+    "congestion_loss",
+    "macro_kmean"
+   ]
+  },
+  "APP003": {
+   "model_id": "APP003",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "final_opinion_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.145,
+   "observables": [
+    "final_opinion_mean"
+   ]
+  },
+  "APP004": {
+   "model_id": "APP004",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "final_obs": [
+     "object"
+    ]
+   },
+   "duration_s": 0.133,
+   "observables": []
+  },
+  "APP005": {
+   "model_id": "APP005",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "nk_fitness": [
+     "number"
+    ],
+    "march_explore": [
+     "number"
+    ],
+    "garbage_solved": [
+     "number"
+    ]
+   },
+   "duration_s": 0.14,
+   "observables": [
+    "march_explore",
+    "garbage_solved",
+    "nk_fitness"
+   ]
+  },
+  "APP006": {
+   "model_id": "APP006",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "battle_final": [
+     "object"
+    ],
+    "arms_race_final": [
+     "object"
+    ]
+   },
+   "duration_s": 0.452,
+   "observables": []
+  },
+  "APP007": {
+   "model_id": "APP007",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rasch_corr": [
+     "number"
+    ],
+    "bkt_mastery": [
+     "number"
+    ],
+    "pfa_accuracy": [
+     "number"
+    ]
+   },
+   "duration_s": 0.239,
+   "observables": [
+    "bkt_mastery",
+    "rasch_corr",
+    "pfa_accuracy"
+   ]
+  },
+  "APP008": {
+   "model_id": "APP008",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "cohort_final": [
+     "object"
+    ],
+    "queue_final": [
+     "object"
+    ]
+   },
+   "duration_s": 0.756,
+   "observables": []
+  },
+  "APP009": {
+   "model_id": "APP009",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fiscal_Y": [
+     "number"
+    ],
+    "conserv": [
+     "number"
+    ],
+    "tax_mtr": [
+     "array"
+    ]
+   },
+   "duration_s": 0.961,
+   "observables": [
+    "fiscal_Y",
+    "conserv"
+   ]
+  },
+  "APP010": {
+   "model_id": "APP010",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "sfm_final": [
+     "object"
+    ],
+    "zi_efficiency": [
+     "number"
+    ],
+    "lm_kurtosis": [
+     "number"
+    ]
+   },
+   "duration_s": 1.802,
+   "observables": [
+    "lm_kurtosis",
+    "zi_efficiency"
+   ]
+  },
+  "APP011": {
+   "model_id": "APP011",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "city_final": [
+     "object"
+    ],
+    "schelling_note": [
+     "string"
+    ]
+   },
+   "duration_s": 1.995,
+   "observables": []
+  },
+  "APP012": {
+   "model_id": "APP012",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "leecarter_fit": [
+     "number"
+    ],
+    "population_total": [
+     "number"
+    ],
+    "lambda1": [
+     "number"
+    ]
+   },
+   "duration_s": 0.476,
+   "observables": [
+    "population_total",
+    "lambda1",
+    "leecarter_fit"
+   ]
+  },
+  "APP013": {
+   "model_id": "APP013",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "naming_game": [
+     "object"
+    ],
+    "language_shift": [
+     "object"
+    ]
+   },
+   "duration_s": 0.161,
+   "observables": []
+  },
+  "APP014": {
+   "model_id": "APP014",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "hotelling_price": [
+     "number"
+    ],
+    "dice_final": [
+     "object"
+    ],
+    "world3_resources": [
+     "number"
+    ]
+   },
+   "duration_s": 0.656,
+   "observables": [
+    "world3_resources",
+    "hotelling_price"
+   ]
+  },
+  "APP015": {
+   "model_id": "APP015",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rounds": [
+     "array"
+    ],
+    "participatory_loop": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.189,
+   "observables": []
+  },
+  "APP016": {
+   "model_id": "APP016",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rounds": [
+     "number"
+    ],
+    "human_score": [
+     "number"
+    ],
+    "human_in_loop_hook": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.163,
+   "observables": [
+    "human_score",
+    "rounds"
+   ]
+  },
+  "APP017": {
+   "model_id": "APP017",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "zi_efficiency": [
+     "number"
+    ],
+    "mincer_rho_hat": [
+     "number"
+    ]
+   },
+   "duration_s": 0.588,
+   "observables": [
+    "zi_efficiency",
+    "mincer_rho_hat"
+   ]
+  },
+  "APP018": {
+   "model_id": "APP018",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "sync_loop": [
+     "boolean"
+    ],
+    "final_drift": [
+     "number"
+    ],
+    "drift_detected": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.222,
+   "observables": [
+    "final_drift"
+   ]
+  },
+  "APP019": {
+   "model_id": "APP019",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "grad_exact": [
+     "number"
+    ],
+    "gradient_ok": [
+     "boolean"
+    ],
+    "grad_fd": [
+     "number"
+    ]
+   },
+   "duration_s": 0.228,
+   "observables": [
+    "grad_fd",
+    "grad_exact"
+   ]
+  },
+  "APP020": {
+   "model_id": "APP020",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rule_respected": [
+     "boolean"
+    ],
+    "scores": [
+     "array"
+    ],
+    "scenario_binding": [
+     "string"
+    ],
+    "chosen": [
+     "string"
+    ]
+   },
+   "duration_s": 0.206,
+   "observables": []
+  },
+  "APP021": {
+   "model_id": "APP021",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "counterfactual_flux": [
+     "number"
+    ],
+    "counterfactual_gap": [
+     "number"
+    ],
+    "history_diverged": [
+     "boolean"
+    ],
+    "baseline_flux": [
+     "number"
+    ]
+   },
+   "duration_s": 1.575,
+   "observables": [
+    "baseline_flux",
+    "counterfactual_flux",
+    "counterfactual_gap"
+   ]
+  },
+  "APP022": {
+   "model_id": "APP022",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_components_before": [
+     "number"
+    ],
+    "constraint_min": [
+     "number"
+    ],
+    "structural_hole_broker": [
+     "boolean"
+    ],
+    "n_components_after_rewire": [
+     "number"
+    ]
+   },
+   "duration_s": 0.525,
+   "observables": [
+    "constraint_min",
+    "n_components_before",
+    "n_components_after_rewire"
+   ]
+  },
+  "BEH001": {
+   "model_id": "BEH001",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "segregation": [
+     "number"
+    ],
+    "unhappy_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.14,
+   "observables": [
+    "segregation",
+    "unhappy_frac"
+   ]
+  },
+  "BEH002": {
+   "model_id": "BEH002",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "segregation": [
+     "number"
+    ],
+    "tipped": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "segregation"
+   ]
+  },
+  "BEH003": {
+   "model_id": "BEH003",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "gini": [
+     "number"
+    ],
+    "inequality_emerged": [
+     "boolean"
+    ],
+    "alive": [
+     "number"
+    ]
+   },
+   "duration_s": 0.127,
+   "observables": [
+    "alive",
+    "gini"
+   ]
+  },
+  "BEH004": {
+   "model_id": "BEH004",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_trades": [
+     "number"
+    ],
+    "gini": [
+     "number"
+    ],
+    "alive": [
+     "number"
+    ],
+    "inequality_emerged": [
+     "boolean"
+    ],
+    "trade_price_mean": [
+     "null",
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "alive",
+    "gini",
+    "trade_price_mean",
+    "n_trades"
+   ]
+  },
+  "BEH005": {
+   "model_id": "BEH005",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "violence_frac": [
+     "number"
+    ],
+    "episodic": [
+     "boolean"
+    ],
+    "active_frac": [
+     "number"
+    ],
+    "mean_grievance": [
+     "number"
+    ],
+    "arrests": [
+     "number"
+    ],
+    "jailed_count": [
+     "number"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "violence_frac",
+    "active_frac",
+    "jailed_count",
+    "arrests",
+    "mean_grievance"
+   ]
+  },
+  "BEH006": {
+   "model_id": "BEH006",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "attack_frac": [
+     "number"
+    ],
+    "contagion_spread": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "attack_frac"
+   ]
+  },
+  "BEH007": {
+   "model_id": "BEH007",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "att_near_threshold": [
+     "boolean",
+     "null"
+    ],
+    "n_samples": [
+     "number"
+    ],
+    "mean_attendance": [
+     "null",
+     "number"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "mean_attendance",
+    "n_samples"
+   ]
+  },
+  "BEH008": {
+   "model_id": "BEH008",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "near_half": [
+     "boolean",
+     "null"
+    ],
+    "n_samples": [
+     "number"
+    ],
+    "mean_ones_share": [
+     "null",
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "mean_ones_share",
+    "n_samples"
+   ]
+  },
+  "BEH009": {
+   "model_id": "BEH009",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "hierarchy_emerged": [
+     "boolean"
+    ],
+    "power_std": [
+     "number"
+    ]
+   },
+   "duration_s": 1.091,
+   "observables": [
+    "power_std"
+   ]
+  },
+  "BEH010": {
+   "model_id": "BEH010",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "knowledge_mean": [
+     "number"
+    ],
+    "exploit_dominates": [
+     "boolean"
+    ],
+    "mean_explore": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "mean_explore",
+    "knowledge_mean"
+   ]
+  },
+  "BEH011": {
+   "model_id": "BEH011",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "flight_prob": [
+     "boolean"
+    ],
+    "solved_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.137,
+   "observables": [
+    "solved_frac"
+   ]
+  },
+  "BEH012": {
+   "model_id": "BEH012",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fitness": [
+     "number"
+    ],
+    "genome_std": [
+     "number"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "fitness",
+    "genome_std"
+   ]
+  },
+  "BEH013": {
+   "model_id": "BEH013",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_fit": [
+     "number"
+    ],
+    "explore_decay": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "mean_fit"
+   ]
+  },
+  "BEH014": {
+   "model_id": "BEH014",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "participation": [
+     "number"
+    ],
+    "cascade": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "participation"
+   ]
+  },
+  "BEH015": {
+   "model_id": "BEH015",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "spread"
+   ]
+  },
+  "BEH016": {
+   "model_id": "BEH016",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean": [
+     "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.115,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH017": {
+   "model_id": "BEH017",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_clusters": [
+     "number"
+    ],
+    "max_spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "n_clusters",
+    "max_spread"
+   ]
+  },
+  "BEH018": {
+   "model_id": "BEH018",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean": [
+     "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH019": {
+   "model_id": "BEH019",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 1.024,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH020": {
+   "model_id": "BEH020",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "consensus_value": [
+     "null"
+    ],
+    "frac1": [
+     "number"
+    ],
+    "consensus": [
+     "null"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "frac1"
+   ]
+  },
+  "BEH021": {
+   "model_id": "BEH021",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH022": {
+   "model_id": "BEH022",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH023": {
+   "model_id": "BEH023",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH024": {
+   "model_id": "BEH024",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.115,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH025": {
+   "model_id": "BEH025",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH026": {
+   "model_id": "BEH026",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH027": {
+   "model_id": "BEH027",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "clusters": [
+     "number"
+    ],
+    "action_share": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters",
+    "action_share"
+   ]
+  },
+  "BEH028": {
+   "model_id": "BEH028",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH029": {
+   "model_id": "BEH029",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ]
+   },
+   "duration_s": 1.459,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH030": {
+   "model_id": "BEH030",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.143,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH031": {
+   "model_id": "BEH031",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.149,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH032": {
+   "model_id": "BEH032",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "opinions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "mean",
+    "spread",
+    "clusters"
+   ]
+  },
+  "BEH033": {
+   "model_id": "BEH033",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "regions": [
+     "number"
+    ],
+    "regionalization": [
+     "boolean"
+    ],
+    "n_agents": [
+     "number"
+    ]
+   },
+   "duration_s": 0.158,
+   "observables": [
+    "regions",
+    "n_agents"
+   ]
+  },
+  "BEH034": {
+   "model_id": "BEH034",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_regions": [
+     "number"
+    ],
+    "largest": [
+     "number"
+    ]
+   },
+   "duration_s": 0.161,
+   "observables": [
+    "n_regions",
+    "largest"
+   ]
+  },
+  "BEH035": {
+   "model_id": "BEH035",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "adopted_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "adopted_frac"
+   ]
+  },
+  "BEH036": {
+   "model_id": "BEH036",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "frac1": [
+     "number"
+    ]
+   },
+   "duration_s": 0.136,
+   "observables": [
+    "frac1"
+   ]
+  },
+  "BEH037": {
+   "model_id": "BEH037",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_payoff": [
+     "number"
+    ],
+    "behavior_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.136,
+   "observables": [
+    "mean_payoff",
+    "behavior_frac"
+   ]
+  },
+  "BEH038": {
+   "model_id": "BEH038",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "elite_behavior_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.149,
+   "observables": [
+    "elite_behavior_frac"
+   ]
+  },
+  "BEH039": {
+   "model_id": "BEH039",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "learner_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 1.2,
+   "observables": [
+    "learner_frac"
+   ]
+  },
+  "BEH040": {
+   "model_id": "BEH040",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "skill": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "skill"
+   ]
+  },
+  "BEH041": {
+   "model_id": "BEH041",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "between_group_var": [
+     "number"
+    ],
+    "mean_norm": [
+     "number"
+    ],
+    "norm_survives": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "mean_norm",
+    "between_group_var"
+   ]
+  },
+  "BEH042": {
+   "model_id": "BEH042",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "gene": [
+     "number"
+    ],
+    "coevolved": [
+     "boolean"
+    ],
+    "culture": [
+     "number"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "culture",
+    "gene"
+   ]
+  },
+  "BEH043": {
+   "model_id": "BEH043",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "dominant": [
+     "boolean"
+    ],
+    "ethnocentrism_share": [
+     "number"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "ethnocentrism_share"
+   ]
+  },
+  "BEH044": {
+   "model_id": "BEH044",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "institution": [
+     "number"
+    ],
+    "culture": [
+     "number"
+    ],
+    "converged": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.147,
+   "observables": [
+    "institution",
+    "culture"
+   ]
+  },
+  "BEH045": {
+   "model_id": "BEH045",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "aligned_agents": [
+     "number"
+    ],
+    "success_rate": [
+     "number"
+    ],
+    "distinct_words": [
+     "number"
+    ]
+   },
+   "duration_s": 0.14,
+   "observables": [
+    "distinct_words",
+    "aligned_agents",
+    "success_rate"
+   ]
+  },
+  "BEH046": {
+   "model_id": "BEH046",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "X_frac": [
+     "number"
+    ],
+    "Y_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.141,
+   "observables": [
+    "X_frac",
+    "Y_frac"
+   ]
+  },
+  "BEH047": {
+   "model_id": "BEH047",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "bilingual_stationary": [
+     "boolean"
+    ],
+    "share_a": [
+     "number"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "share_a"
+   ]
+  },
+  "BEH048": {
+   "model_id": "BEH048",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "compositional": [
+     "number"
+    ],
+    "structured_emerged": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": [
+    "compositional"
+   ]
+  },
+  "BEH049": {
+   "model_id": "BEH049",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 1.056,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH050": {
+   "model_id": "BEH050",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH051": {
+   "model_id": "BEH051",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.14,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH052": {
+   "model_id": "BEH052",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.146,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH053": {
+   "model_id": "BEH053",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.136,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH054": {
+   "model_id": "BEH054",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.137,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH055": {
+   "model_id": "BEH055",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.142,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH056": {
+   "model_id": "BEH056",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH057": {
+   "model_id": "BEH057",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.185,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH058": {
+   "model_id": "BEH058",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq_hist_shape": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.153,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH059": {
+   "model_id": "BEH059",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 1.167,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH060": {
+   "model_id": "BEH060",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH061": {
+   "model_id": "BEH061",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.138,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH062": {
+   "model_id": "BEH062",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH063": {
+   "model_id": "BEH063",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "entropy": [
+     "number"
+    ],
+    "freq": [
+     "array"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.135,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH064": {
+   "model_id": "BEH064",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "shapley": [
+     "object"
+    ],
+    "sums_to_total": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.127,
+   "observables": []
+  },
+  "BEH065": {
+   "model_id": "BEH065",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "estate": [
+     "number"
+    ],
+    "nucleolus_approx": [
+     "array"
+    ],
+    "claims": [
+     "array"
+    ],
+    "efficiency": [
+     "null"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": [
+    "estate"
+   ]
+  },
+  "BEH066": {
+   "model_id": "BEH066",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "utility_mixed": [
+     "number"
+    ],
+    "same_type_optimal": [
+     "boolean"
+    ],
+    "partition_sizes": [
+     "object"
+    ],
+    "utility_same_type_grouping": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "utility_same_type_grouping",
+    "utility_mixed"
+   ]
+  },
+  "BEH067": {
+   "model_id": "BEH067",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "symmetric": [
+     "null"
+    ],
+    "solution": [
+     "array"
+    ],
+    "product": [
+     "number"
+    ]
+   },
+   "duration_s": 0.115,
+   "observables": [
+    "product"
+   ]
+  },
+  "BEH068": {
+   "model_id": "BEH068",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "finite_offer": [
+     "number"
+    ],
+    "limit_share1": [
+     "number"
+    ],
+    "converged": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "limit_share1",
+    "finite_offer"
+   ]
+  },
+  "BEH069": {
+   "model_id": "BEH069",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "score_vs_alld": [
+     "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
+    ],
+    "n_rounds": [
+     "number"
+    ]
+   },
+   "duration_s": 1.103,
+   "observables": [
+    "score_vs_alld",
+    "coop_rate",
+    "n_rounds"
+   ]
+  },
+  "BEH070": {
+   "model_id": "BEH070",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "score_vs_alld": [
+     "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
+    ],
+    "n_rounds": [
+     "number"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "score_vs_alld",
+    "coop_rate",
+    "n_rounds"
+   ]
+  },
+  "BEH071": {
+   "model_id": "BEH071",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "score_vs_alld": [
+     "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
+    ],
+    "n_rounds": [
+     "number"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "score_vs_alld",
+    "coop_rate",
+    "n_rounds"
+   ]
+  },
+  "BEH072": {
+   "model_id": "BEH072",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "score_vs_alld": [
+     "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
+    ],
+    "n_rounds": [
+     "number"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "score_vs_alld",
+    "coop_rate",
+    "n_rounds"
+   ]
+  },
+  "BEH073": {
+   "model_id": "BEH073",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "score_vs_alld": [
+     "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
+    ],
+    "n_rounds": [
+     "number"
+    ]
+   },
+   "duration_s": 0.156,
+   "observables": [
+    "score_vs_alld",
+    "coop_rate",
+    "n_rounds"
+   ]
+  },
+  "BEH075": {
+   "model_id": "BEH075",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "coop_rate": [
+     "number"
+    ],
+    "rep_pos_share": [
+     "number"
+    ]
+   },
+   "duration_s": 0.146,
+   "observables": [
+    "coop_rate",
+    "rep_pos_share"
+   ]
+  },
+  "BEH076": {
+   "model_id": "BEH076",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "coop_rate": [
+     "number"
+    ],
+    "rep_pos_share": [
+     "number"
+    ]
+   },
+   "duration_s": 0.153,
+   "observables": [
+    "coop_rate",
+    "rep_pos_share"
+   ]
+  },
+  "BEH077": {
+   "model_id": "BEH077",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "coop_rate": [
+     "number"
+    ],
+    "rep_pos_share": [
+     "number"
+    ]
+   },
+   "duration_s": 0.152,
+   "observables": [
+    "coop_rate",
+    "rep_pos_share"
+   ]
+  },
+  "BEH078": {
+   "model_id": "BEH078",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_vengeance": [
+     "null",
+     "number"
+    ],
+    "n_samples": [
+     "number"
+    ],
+    "norm_evolved": [
+     "boolean",
+     "null"
+    ]
+   },
+   "duration_s": 0.142,
+   "observables": [
+    "mean_vengeance",
+    "n_samples"
+   ]
+  },
+  "BEH079": {
+   "model_id": "BEH079",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_vengeance": [
+     "null",
+     "number"
+    ],
+    "meta_norm_stronger": [
+     "boolean",
+     "null"
+    ],
+    "n_samples": [
+     "number"
+    ]
+   },
+   "duration_s": 0.14,
+   "observables": [
+    "mean_vengeance",
+    "n_samples"
+   ]
+  },
+  "BEH080": {
+   "model_id": "BEH080",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "frac1": [
+     "number"
+    ]
+   },
+   "duration_s": 1.087,
+   "observables": [
+    "frac1"
+   ]
+  },
+  "BEH082": {
+   "model_id": "BEH082",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq": [
+     "array"
+    ],
+    "err_vs_star": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "err_vs_star"
+   ]
+  },
+  "BEH083": {
+   "model_id": "BEH083",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.137,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH084": {
+   "model_id": "BEH084",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH085": {
+   "model_id": "BEH085",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.175,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH086": {
+   "model_id": "BEH086",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.151,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH087": {
+   "model_id": "BEH087",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.135,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH088": {
+   "model_id": "BEH088",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "freq": [
+     "array"
+    ],
+    "entropy": [
+     "number"
+    ],
+    "freq_hist_shape": [
+     "array"
+    ]
+   },
+   "duration_s": 0.144,
+   "observables": [
+    "entropy"
+   ]
+  },
+  "BEH089": {
+   "model_id": "BEH089",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "best_arm_share": [
+     "number"
+    ],
+    "choice_shares": [
+     "array"
+    ]
+   },
+   "duration_s": 0.165,
+   "observables": [
+    "best_arm_share"
+   ]
+  },
+  "BEH090": {
+   "model_id": "BEH090",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "best_arm_share": [
+     "number"
+    ],
+    "choice_shares": [
+     "array"
+    ]
+   },
+   "duration_s": 0.168,
+   "observables": [
+    "best_arm_share"
+   ]
+  },
+  "BEH091": {
+   "model_id": "BEH091",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "best_arm_share": [
+     "number"
+    ],
+    "choice_shares": [
+     "array"
+    ]
+   },
+   "duration_s": 1.178,
+   "observables": [
+    "best_arm_share"
+   ]
+  },
+  "BEH092": {
+   "model_id": "BEH092",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "br_share": [
+     "number"
+    ],
+    "posterior_opp0": [
+     "number"
+    ],
+    "best_arm_share": [
+     "number"
+    ],
+    "choice_shares": [
+     "array"
+    ]
+   },
+   "duration_s": 0.155,
+   "observables": [
+    "best_arm_share",
+    "posterior_opp0",
+    "br_share"
+   ]
+  },
+  "BEH093": {
+   "model_id": "BEH093",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "best_arm_share": [
+     "number"
+    ],
+    "choice_shares": [
+     "array"
+    ]
+   },
+   "duration_s": 0.211,
+   "observables": [
+    "best_arm_share"
+   ]
+  },
+  "BEH094": {
+   "model_id": "BEH094",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "intentions": [
+     "array"
+    ],
+    "beliefs": [
+     "object"
+    ]
+   },
+   "duration_s": 0.152,
+   "observables": []
+  },
+  "BEH095": {
+   "model_id": "BEH095",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "dominant": [
+     "null",
+     "string"
+    ],
+    "retrieval_freq": [
+     "object"
+    ]
+   },
+   "duration_s": 0.166,
+   "observables": []
+  },
+  "BEH096": {
+   "model_id": "BEH096",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "impasse_count": [
+     "number"
+    ],
+    "state": [
+     "string"
+    ],
+    "solved": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.176,
+   "observables": [
+    "impasse_count"
+   ]
+  },
+  "BEH097": {
+   "model_id": "BEH097",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "implicit_Q": [
+     "array"
+    ],
+    "explicit_rules": [
+     "array"
+    ],
+    "rule_extracted": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.183,
+   "observables": []
+  },
+  "BEH098": {
+   "model_id": "BEH098",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "belief_X": [
+     "array"
+    ],
+    "belief_Y": [
+     "array"
+    ]
+   },
+   "duration_s": 0.203,
+   "observables": []
+  },
+  "BEH099": {
+   "model_id": "BEH099",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "emotions": [
+     "object"
+    ],
+    "n_emotions": [
+     "number"
+    ]
+   },
+   "duration_s": 0.206,
+   "observables": [
+    "n_emotions"
+   ]
+  },
+  "BEH100": {
+   "model_id": "BEH100",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "needs": [
+     "object"
+    ],
+    "behavior": [
+     "null",
+     "string"
+    ]
+   },
+   "duration_s": 0.178,
+   "observables": []
+  },
+  "BEH101": {
+   "model_id": "BEH101",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "need": [
+     "number"
+    ],
+    "strategy": [
+     "null",
+     "string"
+    ]
+   },
+   "duration_s": 1.19,
+   "observables": [
+    "need"
+   ]
+  },
+  "BEH102": {
+   "model_id": "BEH102",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "speed_accuracy_tradeoff": [
+     "boolean"
+    ],
+    "mean_rt": [
+     "number"
+    ],
+    "accuracy": [
+     "number"
+    ]
+   },
+   "duration_s": 0.183,
+   "observables": [
+    "mean_rt",
+    "accuracy"
+   ]
+  },
+  "BEH103": {
+   "model_id": "BEH103",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "behavior_rate": [
+     "number"
+    ],
+    "tpb_structure": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "behavior_rate"
+   ]
+  },
+  "BEH104": {
+   "model_id": "BEH104",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "large_p_underweight": [
+     "boolean"
+    ],
+    "values": [
+     "array"
+    ],
+    "reflection_ok": [
+     "boolean"
+    ],
+    "loss_aversion": [
+     "number"
+    ],
+    "small_p_overweight": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "loss_aversion"
+   ]
+  },
+  "BEH105": {
+   "model_id": "BEH105",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "w_curve": [
+     "array"
+    ],
+    "small_p_overweight": [
+     "boolean"
+    ],
+    "large_p_underweight": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": []
+  },
+  "BEH106": {
+   "model_id": "BEH106",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "u_equal": [
+     "number"
+    ],
+    "u_advantageous": [
+     "number"
+    ],
+    "inequality_averse": [
+     "boolean"
+    ],
+    "u_disadvantageous": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "u_equal",
+    "u_advantageous",
+    "u_disadvantageous"
+   ]
+  },
+  "BEH107": {
+   "model_id": "BEH107",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "conflict": [
+     "number"
+    ],
+    "claim_actual_gap": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "conflict",
+    "claim_actual_gap"
+   ]
+  },
+  "BEH108": {
+   "model_id": "BEH108",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "reciprocal_pair": [
+     "boolean"
+    ],
+    "kindness": [
+     "array"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": []
+  },
+  "BEH109": {
+   "model_id": "BEH109",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "winner": [
+     "number"
+    ],
+    "actions": [
+     "object"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "winner"
+   ]
+  },
+  "BEH110": {
+   "model_id": "BEH110",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "winning_number": [
+     "number"
+    ],
+    "below_50": [
+     "boolean"
+    ],
+    "distribution_head": [
+     "array"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "winning_number"
+   ]
+  },
+  "BEH111": {
+   "model_id": "BEH111",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "q_col": [
+     "array"
+    ],
+    "mixed_tendency": [
+     "boolean"
+    ],
+    "q_row": [
+     "array"
+    ]
+   },
+   "duration_s": 1.097,
+   "observables": []
+  },
+  "BEH112": {
+   "model_id": "BEH112",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "last_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.137,
+   "observables": [
+    "last_reward"
+   ]
+  },
+  "BEH113": {
+   "model_id": "BEH113",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "last_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": [
+    "last_reward"
+   ]
+  },
+  "BEH114": {
+   "model_id": "BEH114",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "recent_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.744,
+   "observables": [
+    "recent_reward"
+   ]
+  },
+  "BEH115": {
+   "model_id": "BEH115",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "recent_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.688,
+   "observables": [
+    "recent_reward"
+   ]
+  },
+  "BEH116": {
+   "model_id": "BEH116",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "recent_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.183,
+   "observables": [
+    "recent_reward"
+   ]
+  },
+  "BEH117": {
+   "model_id": "BEH117",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "recent_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.19,
+   "observables": [
+    "recent_reward"
+   ]
+  },
+  "BEH118": {
+   "model_id": "BEH118",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "recent_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.149,
+   "observables": [
+    "recent_reward"
+   ]
+  },
+  "BEH119": {
+   "model_id": "BEH119",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "recent_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.133,
+   "observables": [
+    "recent_reward"
+   ]
+  },
+  "BEH120": {
+   "model_id": "BEH120",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_right": [
+     "boolean"
+    ],
+    "recent_reward": [
+     "number"
+    ],
+    "greedy_actions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "recent_reward"
+   ]
+  },
+  "BEH121": {
+   "model_id": "BEH121",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "converged_to_target": [
+     "boolean"
+    ],
+    "mu": [
+     "number"
+    ]
+   },
+   "duration_s": 1.059,
+   "observables": [
+    "mu"
+   ]
+  },
+  "BEH122": {
+   "model_id": "BEH122",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "converged_to_target": [
+     "boolean"
+    ],
+    "mu": [
+     "number"
+    ]
+   },
+   "duration_s": 0.124,
+   "observables": [
+    "mu"
+   ]
+  },
+  "BEH123": {
+   "model_id": "BEH123",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "converged_to_target": [
+     "boolean"
+    ],
+    "mu": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "mu"
+   ]
+  },
+  "BEH124": {
+   "model_id": "BEH124",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_coop": [
+     "boolean"
+    ],
+    "coop_rate": [
+     "number"
+    ]
+   },
+   "duration_s": 0.127,
+   "observables": [
+    "coop_rate"
+   ]
+  },
+  "BEH125": {
+   "model_id": "BEH125",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_coop": [
+     "boolean"
+    ],
+    "coop_rate": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "coop_rate"
+   ]
+  },
+  "BEH126": {
+   "model_id": "BEH126",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_coop": [
+     "boolean"
+    ],
+    "coop_rate": [
+     "number"
+    ]
+   },
+   "duration_s": 0.133,
+   "observables": [
+    "coop_rate"
+   ]
+  },
+  "BEH127": {
+   "model_id": "BEH127",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_coop": [
+     "boolean"
+    ],
+    "coop_rate": [
+     "number"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "coop_rate"
+   ]
+  },
+  "BEH128": {
+   "model_id": "BEH128",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "learned_coop": [
+     "boolean"
+    ],
+    "coop_rate": [
+     "number"
+    ]
+   },
+   "duration_s": 0.135,
+   "observables": [
+    "coop_rate"
+   ]
+  },
+  "BEH129": {
+   "model_id": "BEH129",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "observables": [
+    "n_agents",
+    "n_memories",
+    "n_reflections",
+    "llm_calls",
+    "actions_executed",
+    "mean_energy",
+    "resources",
+    "hazard",
+    "objective"
+   ]
+  },
+  "BEH130": {
+   "model_id": "BEH130",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "observables": [
+    "n_agents",
+    "n_memories",
+    "n_reflections",
+    "llm_calls",
+    "actions_executed",
+    "mean_energy",
+    "resources",
+    "hazard",
+    "objective"
+   ]
+  },
+  "BEH131": {
+   "model_id": "BEH131",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "observables": [
+    "n_agents",
+    "n_memories",
+    "n_reflections",
+    "llm_calls",
+    "actions_executed",
+    "mean_energy",
+    "resources",
+    "hazard",
+    "objective"
+   ]
+  },
+  "BEH132": {
+   "model_id": "BEH132",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "observables": [
+    "n_agents",
+    "n_memories",
+    "n_reflections",
+    "llm_calls",
+    "actions_executed",
+    "mean_energy",
+    "resources",
+    "hazard",
+    "objective"
+   ]
+  },
+  "BEH133": {
+   "model_id": "BEH133",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "observables": [
+    "n_agents",
+    "n_memories",
+    "n_reflections",
+    "llm_calls",
+    "actions_executed",
+    "mean_energy",
+    "resources",
+    "hazard",
+    "objective"
+   ]
+  },
+  "BEH134": {
+   "model_id": "BEH134",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "retrieval_2hop": [
+     "boolean"
+    ],
+    "query": [
+     "string"
+    ],
+    "evidence": [
+     "array"
+    ]
+   },
+   "duration_s": 0.258,
+   "observables": []
+  },
+  "BEH135": {
+   "model_id": "BEH135",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rule_respected": [
+     "boolean"
+    ],
+    "scores": [
+     "array"
+    ],
+    "chosen": [
+     "string"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": []
+  },
+  "BEH136": {
+   "model_id": "BEH136",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "gap": [
+     "number"
+    ],
+    "positions": [
+     "array"
+    ],
+    "converged": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.15,
+   "observables": [
+    "gap"
+   ]
+  },
+  "BEH137": {
+   "model_id": "BEH137",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "depersonalized": [
+     "boolean"
+    ],
+    "mean_within_var": [
+     "number"
+    ]
+   },
+   "duration_s": 0.143,
+   "observables": [
+    "mean_within_var"
+   ]
+  },
+  "BEH138": {
+   "model_id": "BEH138",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "capital_means": [
+     "array"
+    ],
+    "conversion_active": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": []
+  },
+  "CPL001": {
+   "model_id": "CPL001",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "observables": [
+    "n_agents",
+    "represented_population",
+    "evacuated",
+    "remaining",
+    "elderly_remaining",
+    "bus_queue",
+    "on_bus",
+    "rumor_mean",
+    "exposure",
+    "evacuated_fraction"
+   ]
+  },
+  "ECO001": {
+   "model_id": "ECO001",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "x": [
+     "array"
+    ],
+    "total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "total"
+   ]
+  },
+  "ECO002": {
+   "model_id": "ECO002",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "p_min": [
+     "number"
+    ],
+    "p": [
+     "array"
+    ]
+   },
+   "duration_s": 1.098,
+   "observables": [
+    "p_min"
+   ]
+  },
+  "ECO003": {
+   "model_id": "ECO003",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "err": [
+     "number"
+    ],
+    "x": [
+     "array"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "err"
+   ]
+  },
+  "ECO004": {
+   "model_id": "ECO004",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "total": [
+     "number"
+    ],
+    "x": [
+     "array"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "total"
+   ]
+  },
+  "ECO005": {
+   "model_id": "ECO005",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "total": [
+     "number"
+    ],
+    "x": [
+     "array"
+    ],
+    "tick": [
+     "number"
+    ]
+   },
+   "duration_s": 0.124,
+   "observables": [
+    "total",
+    "tick"
+   ]
+  },
+  "ECO006": {
+   "model_id": "ECO006",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "err": [
+     "number"
+    ],
+    "x": [
+     "array"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "err"
+   ]
+  },
+  "ECO007": {
+   "model_id": "ECO007",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "err": [
+     "number"
+    ],
+    "x": [
+     "array"
+    ],
+    "poll_intensity": [
+     "number"
+    ],
+    "pollution": [
+     "number"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "pollution",
+    "err",
+    "poll_intensity"
+   ]
+  },
+  "ECO008": {
+   "model_id": "ECO008",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "y": [
+     "array"
+    ],
+    "err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "err"
+   ]
+  },
+  "ECO009": {
+   "model_id": "ECO009",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "converged": [
+     "boolean"
+    ],
+    "walras": [
+     "number"
+    ],
+    "p": [
+     "array"
+    ],
+    "cheap_expands": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "walras"
+   ]
+  },
+  "ECO010": {
+   "model_id": "ECO010",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "substitution": [
+     "boolean"
+    ],
+    "Y": [
+     "array"
+    ],
+    "energy_tax": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "energy_tax"
+   ]
+  },
+  "ECO011": {
+   "model_id": "ECO011",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "walras_excess": [
+     "number"
+    ],
+    "converged": [
+     "boolean"
+    ],
+    "p": [
+     "array"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "walras_excess"
+   ]
+  },
+  "ECO012": {
+   "model_id": "ECO012",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "K": [
+     "number"
+    ],
+    "converged": [
+     "boolean"
+    ],
+    "K_star": [
+     "number"
+    ]
+   },
+   "duration_s": 1.106,
+   "observables": [
+    "K",
+    "K_star"
+   ]
+  },
+  "ECO013": {
+   "model_id": "ECO013",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "spillover": [
+     "boolean"
+    ],
+    "K_final": [
+     "array"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": []
+  },
+  "ECO014": {
+   "model_id": "ECO014",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "convergence": [
+     "boolean"
+    ],
+    "Y_regions": [
+     "array"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": []
+  },
+  "ECO015": {
+   "model_id": "ECO015",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "k": [
+     "number"
+    ],
+    "k_star": [
+     "number"
+    ]
+   },
+   "duration_s": 0.136,
+   "observables": [
+    "k",
+    "k_star"
+   ]
+  },
+  "ECO016": {
+   "model_id": "ECO016",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "c": [
+     "number"
+    ],
+    "k": [
+     "number"
+    ],
+    "k_star": [
+     "number"
+    ]
+   },
+   "duration_s": 0.161,
+   "observables": [
+    "k",
+    "c",
+    "k_star"
+   ]
+  },
+  "ECO017": {
+   "model_id": "ECO017",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "g_theory": [
+     "number"
+    ],
+    "k_proj": [
+     "number"
+    ],
+    "k": [
+     "number"
+    ]
+   },
+   "duration_s": 0.164,
+   "observables": [
+    "k",
+    "g_theory",
+    "k_proj"
+   ]
+  },
+  "ECO018": {
+   "model_id": "ECO018",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "A": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "A"
+   ]
+  },
+  "ECO019": {
+   "model_id": "ECO019",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "wage_share_max": [
+     "number"
+    ],
+    "employment_min": [
+     "number"
+    ],
+    "wage_share": [
+     "number"
+    ],
+    "cycle_active": [
+     "boolean"
+    ],
+    "wage_share_min": [
+     "number"
+    ],
+    "employment_max": [
+     "number"
+    ],
+    "employment": [
+     "number"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "wage_share",
+    "employment",
+    "wage_share_min",
+    "wage_share_max",
+    "employment_min",
+    "employment_max"
+   ]
+  },
+  "ECO020": {
+   "model_id": "ECO020",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "K": [
+     "number"
+    ],
+    "gap": [
+     "number"
+    ],
+    "Y": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "Y",
+    "K",
+    "gap"
+   ]
+  },
+  "ECO021": {
+   "model_id": "ECO021",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "Y_std": [
+     "number"
+    ],
+    "osc": [
+     "boolean"
+    ],
+    "Y": [
+     "number"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "Y",
+    "Y_std"
+   ]
+  },
+  "ECO022": {
+   "model_id": "ECO022",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "Y_peak": [
+     "number"
+    ],
+    "persistence": [
+     "boolean"
+    ],
+    "Y_first20": [
+     "array"
+    ]
+   },
+   "duration_s": 1.018,
+   "observables": [
+    "Y_peak"
+   ]
+  },
+  "ECO023": {
+   "model_id": "ECO023",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "x": [
+     "number"
+    ],
+    "i": [
+     "number"
+    ],
+    "pi": [
+     "number"
+    ],
+    "taylor_ok": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "pi",
+    "x",
+    "i"
+   ]
+  },
+  "ECO024": {
+   "model_id": "ECO024",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "monetary_contraction": [
+     "boolean"
+    ],
+    "irf_output": [
+     "array"
+    ],
+    "irf_inflation": [
+     "array"
+    ],
+    "calibrated_not_estimated": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": []
+  },
+  "ECO025": {
+   "model_id": "ECO025",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "c_ric": [
+     "number"
+    ],
+    "c_rot": [
+     "number"
+    ],
+    "rot_more_volatile": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "c_ric",
+    "c_rot"
+   ]
+  },
+  "ECO026": {
+   "model_id": "ECO026",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "hand_to_mouth_friction": [
+     "boolean"
+    ],
+    "mean_illiquid": [
+     "number"
+    ],
+    "mean_liquid": [
+     "number"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "mean_liquid",
+    "mean_illiquid"
+   ]
+  },
+  "ECO027": {
+   "model_id": "ECO027",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_saving_rate": [
+     "number"
+    ],
+    "monotone_consumption": [
+     "boolean"
+    ],
+    "vf_last_delta": [
+     "number"
+    ],
+    "vf_converged": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.662,
+   "observables": [
+    "mean_saving_rate",
+    "vf_last_delta"
+   ]
+  },
+  "ECO028": {
+   "model_id": "ECO028",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "vf_converged": [
+     "boolean"
+    ],
+    "vf_last_delta": [
+     "number"
+    ],
+    "mean_saving_rate": [
+     "number"
+    ],
+    "r_market": [
+     "number"
+    ],
+    "monotone_consumption": [
+     "boolean"
+    ]
+   },
+   "duration_s": 5.047,
+   "observables": [
+    "mean_saving_rate",
+    "vf_last_delta",
+    "r_market"
+   ]
+  },
+  "ECO029": {
+   "model_id": "ECO029",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "vf_converged": [
+     "boolean"
+    ],
+    "r_equilibrium": [
+     "number"
+    ],
+    "K_equilibrium": [
+     "number"
+    ],
+    "vf_last_delta": [
+     "number"
+    ],
+    "mean_saving_rate": [
+     "number"
+    ],
+    "monotone_consumption": [
+     "boolean"
+    ]
+   },
+   "duration_s": 3.606,
+   "observables": [
+    "mean_saving_rate",
+    "vf_last_delta",
+    "K_equilibrium",
+    "r_equilibrium"
+   ]
+  },
+  "ECO030": {
+   "model_id": "ECO030",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "consumption_loan": [
+     "boolean"
+    ],
+    "savings": [
+     "number"
+    ],
+    "dynamically_inefficient": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "savings"
+   ]
+  },
+  "ECO031": {
+   "model_id": "ECO031",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "r": [
+     "number"
+    ],
+    "k_next": [
+     "number"
+    ],
+    "k": [
+     "number"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "k",
+    "k_next",
+    "r"
+   ]
+  },
+  "ECO032": {
+   "model_id": "ECO032",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "c_theory": [
+     "number"
+    ],
+    "c": [
+     "number"
+    ],
+    "W": [
+     "number"
+    ]
+   },
+   "duration_s": 1.035,
+   "observables": [
+    "W",
+    "c",
+    "c_theory"
+   ]
+  },
+  "ECO033": {
+   "model_id": "ECO033",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "savings": [
+     "number"
+    ],
+    "peak_age": [
+     "number"
+    ],
+    "end_zero": [
+     "boolean"
+    ],
+    "age": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "age",
+    "savings",
+    "peak_age"
+   ]
+  },
+  "ECO034": {
+   "model_id": "ECO034",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "buffer_target": [
+     "number"
+    ],
+    "target_stable": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "buffer_target"
+   ]
+  },
+  "ECO035": {
+   "model_id": "ECO035",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "conserv": [
+     "number"
+    ],
+    "Y": [
+     "number"
+    ],
+    "H_h": [
+     "number"
+    ],
+    "Y_star": [
+     "number"
+    ],
+    "H_g": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "Y",
+    "Y_star",
+    "H_h",
+    "H_g",
+    "conserv"
+   ]
+  },
+  "ECO036": {
+   "model_id": "ECO036",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "conserv": [
+     "number"
+    ],
+    "Y": [
+     "number"
+    ],
+    "G": [
+     "number"
+    ],
+    "H_h": [
+     "number"
+    ],
+    "H_g": [
+     "number"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "Y",
+    "G",
+    "H_g",
+    "H_h",
+    "conserv"
+   ]
+  },
+  "ECO037": {
+   "model_id": "ECO037",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "bills": [
+     "number"
+    ],
+    "r": [
+     "number"
+    ],
+    "money": [
+     "number"
+    ],
+    "Y": [
+     "number"
+    ]
+   },
+   "duration_s": 0.149,
+   "observables": [
+    "Y",
+    "bills",
+    "money",
+    "r"
+   ]
+  },
+  "ECO039": {
+   "model_id": "ECO039",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "irf_first": [
+     "array"
+    ],
+    "A_hat": [
+     "array"
+    ],
+    "irf_err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "irf_err"
+   ]
+  },
+  "ECO040": {
+   "model_id": "ECO040",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "cointegration_detected": [
+     "boolean"
+    ],
+    "theta_hat": [
+     "number"
+    ],
+    "adf_stationary_check": [
+     "number"
+    ],
+    "adf_cointegrated": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "adf_cointegrated",
+    "adf_stationary_check",
+    "theta_hat"
+   ]
+  },
+  "ECO041": {
+   "model_id": "ECO041",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "p_expansion": [
+     "number"
+    ],
+    "state_acc": [
+     "number"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "state_acc",
+    "p_expansion"
+   ]
+  },
+  "ECO042": {
+   "model_id": "ECO042",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "tracks_trend": [
+     "boolean"
+    ],
+    "slope_est": [
+     "number"
+    ],
+    "smoothed_last": [
+     "number"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": [
+    "smoothed_last",
+    "slope_est"
+   ]
+  },
+  "ECO043": {
+   "model_id": "ECO043",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "factor_corr": [
+     "number"
+    ],
+    "explained": [
+     "number"
+    ]
+   },
+   "duration_s": 1.306,
+   "observables": [
+    "factor_corr",
+    "explained"
+   ]
+  },
+  "ECO044": {
+   "model_id": "ECO044",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "clustering_ratio": [
+     "number"
+    ],
+    "arch_detected": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.164,
+   "observables": [
+    "clustering_ratio"
+   ]
+  },
+  "ECO046": {
+   "model_id": "ECO046",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_returns": [
+     "number"
+    ],
+    "price": [
+     "number"
+    ],
+    "vol_ratio": [
+     "null",
+     "number"
+    ],
+    "fundamental": [
+     "number"
+    ],
+    "converge_err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.15,
+   "observables": [
+    "price",
+    "fundamental",
+    "converge_err",
+    "vol_ratio",
+    "n_returns"
+   ]
+  },
+  "ECO047": {
+   "model_id": "ECO047",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "w_trend": [
+     "number"
+    ],
+    "belief_switching": [
+     "boolean"
+    ],
+    "deviation_std": [
+     "number"
+    ],
+    "price": [
+     "number"
+    ]
+   },
+   "duration_s": 0.141,
+   "observables": [
+    "price",
+    "w_trend",
+    "deviation_std"
+   ]
+  },
+  "ECO048": {
+   "model_id": "ECO048",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_returns": [
+     "number"
+    ],
+    "fat_tails": [
+     "boolean",
+     "null"
+    ],
+    "excess_kurtosis": [
+     "null",
+     "number"
+    ],
+    "price": [
+     "number"
+    ]
+   },
+   "duration_s": 0.146,
+   "observables": [
+    "price",
+    "excess_kurtosis",
+    "n_returns"
+   ]
+  },
+  "ECO049": {
+   "model_id": "ECO049",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "share_std": [
+     "null",
+     "number"
+    ],
+    "n_samples": [
+     "number"
+    ],
+    "mean_share": [
+     "null",
+     "number"
+    ],
+    "theory_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.146,
+   "observables": [
+    "mean_share",
+    "share_std",
+    "theory_mean",
+    "n_samples"
+   ]
+  },
+  "ECO050": {
+   "model_id": "ECO050",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "defaults_recent": [
+     "number"
+    ],
+    "financial_accelerator": [
+     "boolean"
+    ],
+    "mean_net_worth": [
+     "number"
+    ]
+   },
+   "duration_s": 0.153,
+   "observables": [
+    "mean_net_worth",
+    "defaults_recent"
+   ]
+  },
+  "ECO051": {
+   "model_id": "ECO051",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "bankruptcies": [
+     "number"
+    ],
+    "bank_capital": [
+     "number"
+    ],
+    "n_firms": [
+     "number"
+    ],
+    "right_skew": [
+     "boolean"
+    ],
+    "size_skew": [
+     "number"
+    ]
+   },
+   "duration_s": 0.143,
+   "observables": [
+    "n_firms",
+    "bankruptcies",
+    "size_skew",
+    "bank_capital"
+   ]
+  },
+  "ECO052": {
+   "model_id": "ECO052",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "productivity_std": [
+     "number"
+    ],
+    "frontier": [
+     "number"
+    ],
+    "schumpeterian_gap": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.137,
+   "observables": [
+    "frontier",
+    "productivity_std"
+   ]
+  },
+  "ECO053": {
+   "model_id": "ECO053",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "credit_allocated": [
+     "boolean"
+    ],
+    "south_output": [
+     "number"
+    ],
+    "north_output": [
+     "number"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "north_output",
+    "south_output"
+   ]
+  },
+  "ECO054": {
+   "model_id": "ECO054",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "alloc_efficiency": [
+     "number"
+    ],
+    "in_equilibrium_frac": [
+     "number"
+    ],
+    "n_trades": [
+     "number"
+    ],
+    "mean_price": [
+     "number"
+    ]
+   },
+   "duration_s": 1.081,
+   "observables": [
+    "n_trades",
+    "in_equilibrium_frac",
+    "mean_price",
+    "alloc_efficiency"
+   ]
+  },
+  "ECO055": {
+   "model_id": "ECO055",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "alloc_efficiency": [
+     "number"
+    ],
+    "n_trades": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "n_trades",
+    "alloc_efficiency"
+   ]
+  },
+  "ECO056": {
+   "model_id": "ECO056",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "avg_spread": [
+     "null",
+     "number"
+    ],
+    "book_bids": [
+     "number"
+    ],
+    "book_asks": [
+     "number"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "book_bids",
+    "book_asks",
+    "avg_spread"
+   ]
+  },
+  "ECO057": {
+   "model_id": "ECO057",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "dist": [
+     "array"
+    ],
+    "lambda1": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "total",
+    "lambda1"
+   ]
+  },
+  "ECO058": {
+   "model_id": "ECO058",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n": [
+     "array"
+    ],
+    "lambda1": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "total",
+    "lambda1"
+   ]
+  },
+  "ECO059": {
+   "model_id": "ECO059",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "total": [
+     "number"
+    ],
+    "sex_ratio": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "total",
+    "sex_ratio"
+   ]
+  },
+  "ECO060": {
+   "model_id": "ECO060",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "pop": [
+     "array"
+    ],
+    "total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.14,
+   "observables": [
+    "total"
+   ]
+  },
+  "ECO061": {
+   "model_id": "ECO061",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "resid_ratio": [
+     "number"
+    ],
+    "good_fit": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "resid_ratio"
+   ]
+  },
+  "ECO062": {
+   "model_id": "ECO062",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "resid_ratio": [
+     "number"
+    ],
+    "cohort_included": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.162,
+   "observables": [
+    "resid_ratio"
+   ]
+  },
+  "ECO063": {
+   "model_id": "ECO063",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "beta": [
+     "number"
+    ],
+    "fit_r2": [
+     "number"
+    ],
+    "alpha": [
+     "number"
+    ]
+   },
+   "duration_s": 0.147,
+   "observables": [
+    "alpha",
+    "beta",
+    "fit_r2"
+   ]
+  },
+  "ECO064": {
+   "model_id": "ECO064",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "b": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "b_hat": [
+     "number"
+    ]
+   },
+   "duration_s": 0.982,
+   "observables": [
+    "b",
+    "b_hat",
+    "err"
+   ]
+  },
+  "ECO065": {
+   "model_id": "ECO065",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "std_age": [
+     "number"
+    ],
+    "mean_age": [
+     "number"
+    ],
+    "peak_reasonable": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "mean_age",
+    "std_age"
+   ]
+  },
+  "ECO066": {
+   "model_id": "ECO066",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "unimodal": [
+     "boolean"
+    ],
+    "peak_age": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "peak_age"
+   ]
+  },
+  "ECO068": {
+   "model_id": "ECO068",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "converged": [
+     "boolean"
+    ],
+    "row_err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.115,
+   "observables": [
+    "row_err"
+   ]
+  },
+  "ECO069": {
+   "model_id": "ECO069",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "col_err": [
+     "number"
+    ],
+    "row_err": [
+     "number"
+    ],
+    "converged": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "row_err",
+    "col_err"
+   ]
+  },
+  "ECO070": {
+   "model_id": "ECO070",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "total_flow": [
+     "number"
+    ],
+    "decay": [
+     "boolean"
+    ],
+    "corr_dist_flow": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "corr_dist_flow",
+    "total_flow"
+   ]
+  },
+  "ECO071": {
+   "model_id": "ECO071",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "expected_u": [
+     "number"
+    ],
+    "gap": [
+     "number"
+    ],
+    "w_r": [
+     "number"
+    ],
+    "unemp_rate": [
+     "number"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "expected_u",
+    "w_r",
+    "gap",
+    "unemp_rate"
+   ]
+  },
+  "ECO072": {
+   "model_id": "ECO072",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "migration_prob": [
+     "number"
+    ],
+    "pull_dominates": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "migration_prob"
+   ]
+  },
+  "ECO073": {
+   "model_id": "ECO073",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "assortative_optimal": [
+     "boolean"
+    ],
+    "gain": [
+     "number"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "gain"
+   ]
+  },
+  "ECO074": {
+   "model_id": "ECO074",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "blocking_pairs": [
+     "number"
+    ],
+    "stable": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "blocking_pairs"
+   ]
+  },
+  "ECO075": {
+   "model_id": "ECO075",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "births": [
+     "number"
+    ],
+    "kin_links_alive": [
+     "number"
+    ],
+    "population": [
+     "number"
+    ]
+   },
+   "duration_s": 1.024,
+   "observables": [
+    "population",
+    "births",
+    "kin_links_alive"
+   ]
+  },
+  "ECO076": {
+   "model_id": "ECO076",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "y": [
+     "number"
+    ],
+    "mean_revert": [
+     "boolean"
+    ],
+    "log_autocorr": [
+     "number"
+    ],
+    "gen_elast": [
+     "number"
+    ]
+   },
+   "duration_s": 0.169,
+   "observables": [
+    "y",
+    "gen_elast",
+    "log_autocorr"
+   ]
+  },
+  "ECO077": {
+   "model_id": "ECO077",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "dist": [
+     "array"
+    ],
+    "stationary_err": [
+     "number"
+    ],
+    "converged": [
+     "boolean"
+    ],
+    "spectral_gap": [
+     "number"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "spectral_gap",
+    "stationary_err"
+   ]
+  },
+  "ECO078": {
+   "model_id": "ECO078",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "res_wage": [
+     "number"
+    ],
+    "accepted": [
+     "null",
+     "number"
+    ],
+    "mean_wage": [
+     "number"
+    ]
+   },
+   "duration_s": 0.142,
+   "observables": [
+    "res_wage",
+    "accepted",
+    "mean_wage"
+   ]
+  },
+  "ECO079": {
+   "model_id": "ECO079",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "vacancies": [
+     "number"
+    ],
+    "beveridge": [
+     "array"
+    ],
+    "unemployment": [
+     "number"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "unemployment",
+    "vacancies"
+   ]
+  },
+  "ECO080": {
+   "model_id": "ECO080",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "wage_grid": [
+     "array"
+    ],
+    "cdf": [
+     "array"
+    ],
+    "non_degenerate": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.127,
+   "observables": []
+  },
+  "ECO081": {
+   "model_id": "ECO081",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "hunter_skill_mean": [
+     "number"
+    ],
+    "positive_selection": [
+     "boolean"
+    ],
+    "farmer_skill_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "hunter_skill_mean",
+    "farmer_skill_mean"
+   ]
+  },
+  "ECO082": {
+   "model_id": "ECO082",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "h": [
+     "number"
+    ],
+    "invest_early": [
+     "number"
+    ],
+    "invest_late": [
+     "number"
+    ],
+    "decreasing": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.124,
+   "observables": [
+    "h",
+    "invest_early",
+    "invest_late"
+   ]
+  },
+  "ECO083": {
+   "model_id": "ECO083",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rho": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "rho_hat": [
+     "number"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "rho",
+    "rho_hat",
+    "err"
+   ]
+  },
+  "ECO084": {
+   "model_id": "ECO084",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "inverted_U": [
+     "boolean"
+    ],
+    "sep_rate_path": [
+     "array"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": []
+  },
+  "ECO085": {
+   "model_id": "ECO085",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "steady_entry_exit": [
+     "boolean"
+    ],
+    "exit_rate": [
+     "number"
+    ]
+   },
+   "duration_s": 1.057,
+   "observables": [
+    "exit_rate"
+   ]
+  },
+  "ECO086": {
+   "model_id": "ECO086",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "cutoff_selection": [
+     "boolean"
+    ],
+    "exporter_share": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "exporter_share"
+   ]
+  },
+  "ECO087": {
+   "model_id": "ECO087",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "size_cv": [
+     "number"
+    ],
+    "log_skew": [
+     "number"
+    ],
+    "log_std": [
+     "number"
+    ],
+    "mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "mean",
+    "log_skew",
+    "log_std",
+    "size_cv"
+   ]
+  },
+  "ECO088": {
+   "model_id": "ECO088",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "item_b_corr": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "item_b_corr"
+   ]
+  },
+  "ECO089": {
+   "model_id": "ECO089",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_a": [
+     "number"
+    ],
+    "monotone_icc": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "mean_a"
+   ]
+  },
+  "ECO090": {
+   "model_id": "ECO090",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "c_mean": [
+     "number"
+    ],
+    "guess_visible": [
+     "boolean"
+    ],
+    "low_theta_acc": [
+     "number"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "c_mean",
+    "low_theta_acc"
+   ]
+  },
+  "ECO091": {
+   "model_id": "ECO091",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "p_rising": [
+     "boolean"
+    ],
+    "n_correct": [
+     "number"
+    ],
+    "p_now": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "p_now",
+    "n_correct"
+   ]
+  },
+  "ECO092": {
+   "model_id": "ECO092",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "better_than_chance": [
+     "boolean"
+    ],
+    "sequence_model": [
+     "boolean"
+    ],
+    "pred_accuracy": [
+     "number"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "pred_accuracy"
+   ]
+  },
+  "ECO093": {
+   "model_id": "ECO093",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "pfa_valid": [
+     "boolean"
+    ],
+    "stepwise_accuracy": [
+     "number"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "stepwise_accuracy"
+   ]
+  },
+  "ECO094": {
+   "model_id": "ECO094",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "ordered_thresholds": [
+     "boolean"
+    ],
+    "category_curves_sum": [
+     "number"
+    ],
+    "sums_to_one": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "category_curves_sum"
+   ]
+  },
+  "ECO095": {
+   "model_id": "ECO095",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "partial_credit_peak_theta": [
+     "number"
+    ],
+    "prob_sum": [
+     "number"
+    ],
+    "between_thresholds": [
+     "boolean"
+    ]
+   },
+   "duration_s": 1.007,
+   "observables": [
+    "partial_credit_peak_theta",
+    "prob_sum"
+   ]
+  },
+  "ECO096": {
+   "model_id": "ECO096",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_tax": [
+     "number"
+    ],
+    "mtr_path": [
+     "array"
+    ],
+    "mtr_nondecreasing": [
+     "boolean"
+    ],
+    "net_monotone": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "mean_tax"
+   ]
+  },
+  "ECO097": {
+   "model_id": "ECO097",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "interior_max": [
+     "boolean"
+    ],
+    "choice_prob": [
+     "array"
+    ],
+    "hours_basket": [
+     "array"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": []
+  },
+  "ECO098": {
+   "model_id": "ECO098",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "lifetime_earnings_mean": [
+     "number"
+    ],
+    "pension_mean": [
+     "number"
+    ],
+    "retiree_income_replaced": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.142,
+   "observables": [
+    "lifetime_earnings_mean",
+    "pension_mean"
+   ]
+  },
+  "ECO099": {
+   "model_id": "ECO099",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "dead": [
+     "number"
+    ],
+    "ICER_finite": [
+     "boolean"
+    ],
+    "total_cost": [
+     "number"
+    ],
+    "total_qaly": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "dead",
+    "total_cost",
+    "total_qaly"
+   ]
+  },
+  "ECO100": {
+   "model_id": "ECO100",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "partitioned_valid": [
+     "boolean"
+    ],
+    "QALY": [
+     "number"
+    ],
+    "life_years": [
+     "number"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "life_years",
+    "QALY"
+   ]
+  },
+  "ECO101": {
+   "model_id": "ECO101",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "microsim_vs_cohort": [
+     "boolean"
+    ],
+    "n_dead": [
+     "number"
+    ],
+    "total_cost": [
+     "number"
+    ]
+   },
+   "duration_s": 0.162,
+   "observables": [
+    "n_dead",
+    "total_cost"
+   ]
+  },
+  "ECO102": {
+   "model_id": "ECO102",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "population": [
+     "number"
+    ],
+    "resources": [
+     "number"
+    ],
+    "pollution": [
+     "number"
+    ],
+    "overshoot": [
+     "boolean"
+    ],
+    "capital": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "population",
+    "capital",
+    "pollution",
+    "resources"
+   ]
+  },
+  "ECO103": {
+   "model_id": "ECO103",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "population": [
+     "number"
+    ],
+    "jobs_ratio": [
+     "number"
+    ],
+    "firms": [
+     "number"
+    ],
+    "housing": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "population",
+    "firms",
+    "housing",
+    "jobs_ratio"
+   ]
+  },
+  "ECO104": {
+   "model_id": "ECO104",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "order_var": [
+     "array"
+    ],
+    "orders": [
+     "array"
+    ],
+    "bullwhip": [
+     "number"
+    ],
+    "var_up_gt_down": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "bullwhip"
+   ]
+  },
+  "ECO105": {
+   "model_id": "ECO105",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "quality_falls_with_n": [
+     "boolean"
+    ],
+    "tradeoff_table": [
+     "array"
+    ]
+   },
+   "duration_s": 0.986,
+   "observables": []
+  },
+  "ECO106": {
+   "model_id": "ECO106",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "forcing": [
+     "number"
+    ],
+    "T": [
+     "number"
+    ],
+    "M": [
+     "number"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "M",
+    "T",
+    "forcing"
+   ]
+  },
+  "ECO107": {
+   "model_id": "ECO107",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "K_north": [
+     "number"
+    ],
+    "T": [
+     "number"
+    ],
+    "K_south": [
+     "number"
+    ],
+    "M": [
+     "number"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "K_north",
+    "K_south",
+    "M",
+    "T"
+   ]
+  },
+  "ECO108": {
+   "model_id": "ECO108",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "non_monotone_ag": [
+     "boolean"
+    ],
+    "total": [
+     "number"
+    ],
+    "T": [
+     "number"
+    ],
+    "sector_losses": [
+     "object"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "T",
+    "total"
+   ]
+  },
+  "ECO109": {
+   "model_id": "ECO109",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "T_p95": [
+     "number"
+    ],
+    "T_mean": [
+     "number"
+    ],
+    "dmg_mean_pct": [
+     "number"
+    ],
+    "fat_tail": [
+     "boolean"
+    ],
+    "dmg_p95_pct": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "T_mean",
+    "T_p95",
+    "dmg_mean_pct",
+    "dmg_p95_pct"
+   ]
+  },
+  "ECO110": {
+   "model_id": "ECO110",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "eq_x2": [
+     "number"
+    ],
+    "stable": [
+     "boolean"
+    ],
+    "eq_x1": [
+     "number"
+    ],
+    "x1": [
+     "number"
+    ],
+    "x2": [
+     "number"
+    ]
+   },
+   "duration_s": 0.172,
+   "observables": [
+    "x1",
+    "x2",
+    "eq_x1",
+    "eq_x2"
+   ]
+  },
+  "ECO111": {
+   "model_id": "ECO111",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "N1": [
+     "number"
+    ],
+    "invariant": [
+     "number"
+    ],
+    "N2": [
+     "number"
+    ],
+    "inv0": [
+     "number"
+    ]
+   },
+   "duration_s": 0.178,
+   "observables": [
+    "N1",
+    "N2",
+    "invariant",
+    "inv0"
+   ]
+  },
+  "ECO112": {
+   "model_id": "ECO112",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "N1": [
+     "number"
+    ],
+    "lin0": [
+     "number"
+    ],
+    "N2": [
+     "number"
+    ],
+    "lin_invariant": [
+     "number"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "N1",
+    "N2",
+    "lin_invariant",
+    "lin0"
+   ]
+  },
+  "ECO113": {
+   "model_id": "ECO113",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "B_eq": [
+     "number"
+    ],
+    "B_at_MSY": [
+     "number"
+    ],
+    "B": [
+     "number"
+    ],
+    "MSY": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "B",
+    "MSY",
+    "B_at_MSY",
+    "B_eq"
+   ]
+  },
+  "ECO115": {
+   "model_id": "ECO115",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "hotelling_delta": [
+     "number"
+    ],
+    "price_growth": [
+     "number"
+    ],
+    "stock": [
+     "number"
+    ],
+    "price": [
+     "number"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": [
+    "price",
+    "stock",
+    "price_growth",
+    "hotelling_delta"
+   ]
+  },
+  "MET-DTMC": {
+   "model_id": "MET-DTMC",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "frac_state1": [
+     "number"
+    ],
+    "state": [
+     "number"
+    ]
+   },
+   "duration_s": 1.261,
+   "observables": [
+    "frac_state1",
+    "state"
+   ]
+  },
+  "MET-MM1": {
+   "model_id": "MET-MM1",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "queue": [
+     "number"
+    ],
+    "served": [
+     "number"
+    ]
+   },
+   "duration_s": 0.115,
+   "observables": [
+    "queue",
+    "served"
+   ]
+  },
+  "MET001": {
+   "model_id": "MET001",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "exact": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "est",
+    "exact",
+    "err"
+   ]
+  },
+  "MET002": {
+   "model_id": "MET002",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "exact": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "est",
+    "exact",
+    "err"
+   ]
+  },
+  "MET003": {
+   "model_id": "MET003",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "exact": [
+     "number"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "est",
+    "exact"
+   ]
+  },
+  "MET004": {
+   "model_id": "MET004",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "exact": [
+     "number"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "est",
+    "exact"
+   ]
+  },
+  "MET005": {
+   "model_id": "MET005",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "exact": [
+     "number"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.124,
+   "observables": [
+    "est",
+    "exact"
+   ]
+  },
+  "MET006": {
+   "model_id": "MET006",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "stable": [
+     "boolean"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "est"
+   ]
+  },
+  "MET007": {
+   "model_id": "MET007",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "exact": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.133,
+   "observables": [
+    "est",
+    "exact",
+    "err"
+   ]
+  },
+  "MET008": {
+   "model_id": "MET008",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "note": [
+     "string"
+    ],
+    "strong_err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "strong_err"
+   ]
+  },
+  "MET009": {
+   "model_id": "MET009",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.989,
+   "observables": [
+    "n"
+   ]
+  },
+  "MET010": {
+   "model_id": "MET010",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "n"
+   ]
+  },
+  "MET011": {
+   "model_id": "MET011",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "n"
+   ]
+  },
+  "MET012": {
+   "model_id": "MET012",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "E": [
+     "number"
+    ],
+    "events": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "events",
+    "E"
+   ]
+  },
+  "MET013": {
+   "model_id": "MET013",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "est": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "se": [
+     "number"
+    ],
+    "exact": [
+     "number"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "est",
+    "se",
+    "exact",
+    "err"
+   ]
+  },
+  "MET014": {
+   "model_id": "MET014",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "est": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "exact": [
+     "number"
+    ]
+   },
+   "duration_s": 0.149,
+   "observables": [
+    "est",
+    "exact",
+    "err"
+   ]
+  },
+  "MET015": {
+   "model_id": "MET015",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "est": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "exact": [
+     "number"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "est",
+    "exact",
+    "err"
+   ]
+  },
+  "MET016": {
+   "model_id": "MET016",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "est": [
+     "number"
+    ],
+    "exact": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "est",
+    "exact"
+   ]
+  },
+  "MET017": {
+   "model_id": "MET017",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "est": [
+     "number"
+    ],
+    "exact": [
+     "number"
+    ]
+   },
+   "duration_s": 0.129,
+   "observables": [
+    "est",
+    "exact"
+   ]
+  },
+  "MET018": {
+   "model_id": "MET018",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "est": [
+     "number"
+    ],
+    "exact": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "est",
+    "exact"
+   ]
+  },
+  "MET019": {
+   "model_id": "MET019",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "paired_diff": [
+     "number"
+    ],
+    "naive_diff": [
+     "number"
+    ]
+   },
+   "duration_s": 1.018,
+   "observables": [
+    "paired_diff",
+    "naive_diff"
+   ]
+  },
+  "MET020": {
+   "model_id": "MET020",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "exact": [
+     "number"
+    ],
+    "est": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "est",
+    "exact"
+   ]
+  },
+  "MET021": {
+   "model_id": "MET021",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "dim": [
+     "number"
+    ],
+    "n_points": [
+     "number"
+    ],
+    "mean_val": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "n_points",
+    "dim",
+    "mean_val"
+   ]
+  },
+  "MET022": {
+   "model_id": "MET022",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "dim": [
+     "number"
+    ],
+    "n_points": [
+     "number"
+    ],
+    "mean_val": [
+     "number"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "n_points",
+    "dim",
+    "mean_val"
+   ]
+  },
+  "MET023": {
+   "model_id": "MET023",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "dim": [
+     "number"
+    ],
+    "n_points": [
+     "number"
+    ],
+    "mean_val": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "n_points",
+    "dim",
+    "mean_val"
+   ]
+  },
+  "MET024": {
+   "model_id": "MET024",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "dim": [
+     "number"
+    ],
+    "n_points": [
+     "number"
+    ],
+    "mean_val": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "n_points",
+    "dim",
+    "mean_val"
+   ]
+  },
+  "MET025": {
+   "model_id": "MET025",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "mean": [
+     "number"
+    ],
+    "var": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "mean",
+    "var",
+    "err"
+   ]
+  },
+  "MET026": {
+   "model_id": "MET026",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "mean": [
+     "number"
+    ],
+    "std": [
+     "number"
+    ]
+   },
+   "duration_s": 0.144,
+   "observables": [
+    "mean",
+    "std"
+   ]
+  },
+  "MET027": {
+   "model_id": "MET027",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "mean": [
+     "number"
+    ],
+    "var": [
+     "number"
+    ]
+   },
+   "duration_s": 0.232,
+   "observables": [
+    "mean",
+    "var"
+   ]
+  },
+  "MET028": {
+   "model_id": "MET028",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "mean": [
+     "number"
+    ],
+    "var": [
+     "number"
+    ]
+   },
+   "duration_s": 0.296,
+   "observables": [
+    "mean",
+    "var"
+   ]
+  },
+  "MET029": {
+   "model_id": "MET029",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "trials": [
+     "number"
+    ],
+    "posterior_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 1.01,
+   "observables": [
+    "posterior_mean",
+    "trials"
+   ]
+  },
+  "MET030": {
+   "model_id": "MET030",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "posterior_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "posterior_mean"
+   ]
+  },
+  "MET031": {
+   "model_id": "MET031",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "posterior_mean": [
+     "number"
+    ],
+    "posterior_sd": [
+     "number"
+    ]
+   },
+   "duration_s": 0.209,
+   "observables": [
+    "posterior_mean",
+    "posterior_sd"
+   ]
+  },
+  "MET032": {
+   "model_id": "MET032",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "posterior_mean": [
+     "number"
+    ],
+    "posterior_sd": [
+     "number"
+    ],
+    "rounds": [
+     "number"
+    ]
+   },
+   "duration_s": 0.248,
+   "observables": [
+    "posterior_mean",
+    "posterior_sd",
+    "rounds"
+   ]
+  },
+  "MET033": {
+   "model_id": "MET033",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "posterior_mean": [
+     "number"
+    ],
+    "posterior_sd": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "posterior_mean",
+    "posterior_sd"
+   ]
+  },
+  "MET034": {
+   "model_id": "MET034",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "classifier_acc_proxy": [
+     "number"
+    ],
+    "favors_theta1": [
+     "boolean"
+    ],
+    "log_likelihood_ratio": [
+     "number"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "log_likelihood_ratio",
+    "classifier_acc_proxy"
+   ]
+  },
+  "MET035": {
+   "model_id": "MET035",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "posterior_mean": [
+     "number"
+    ],
+    "posterior_sd": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "posterior_mean",
+    "posterior_sd"
+   ]
+  },
+  "MET036": {
+   "model_id": "MET036",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "theta": [
+     "number"
+    ],
+    "dist": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "theta",
+    "dist"
+   ]
+  },
+  "MET037": {
+   "model_id": "MET037",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "aux_dist": [
+     "number"
+    ],
+    "theta_hat": [
+     "number"
+    ],
+    "target_coef": [
+     "number"
+    ]
+   },
+   "duration_s": 0.161,
+   "observables": [
+    "theta_hat",
+    "aux_dist",
+    "target_coef"
+   ]
+  },
+  "MET038": {
+   "model_id": "MET038",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "theta_mean": [
+     "number"
+    ],
+    "err": [
+     "number"
+    ],
+    "theta_sd": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "theta_mean",
+    "theta_sd",
+    "err"
+   ]
+  },
+  "MET039": {
+   "model_id": "MET039",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "target": [
+     "number"
+    ],
+    "x": [
+     "number"
+    ]
+   },
+   "duration_s": 1.035,
+   "observables": [
+    "x",
+    "target"
+   ]
+  },
+  "MET040": {
+   "model_id": "MET040",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "target": [
+     "number"
+    ],
+    "x": [
+     "number"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "x",
+    "target"
+   ]
+  },
+  "MET041": {
+   "model_id": "MET041",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "target": [
+     "number"
+    ],
+    "x": [
+     "number"
+    ]
+   },
+   "duration_s": 0.331,
+   "observables": [
+    "x",
+    "target"
+   ]
+  },
+  "MET042": {
+   "model_id": "MET042",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "front_size": [
+     "number"
+    ]
+   },
+   "duration_s": 0.158,
+   "observables": [
+    "front_size"
+   ]
+  },
+  "MET043": {
+   "model_id": "MET043",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "rmse": [
+     "number"
+    ],
+    "rmse_obs": [
+     "number"
+    ],
+    "better_than_obs": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "rmse_obs",
+    "rmse"
+   ]
+  },
+  "MET044": {
+   "model_id": "MET044",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "rmse": [
+     "number"
+    ],
+    "rmse_obs": [
+     "number"
+    ],
+    "better_than_obs": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "rmse_obs",
+    "rmse"
+   ]
+  },
+  "MET045": {
+   "model_id": "MET045",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "rmse": [
+     "null"
+    ],
+    "rmse_obs": [
+     "number"
+    ],
+    "better_than_obs": [
+     "boolean"
+    ],
+    "note": [
+     "string"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "rmse_obs"
+   ]
+  },
+  "MET046": {
+   "model_id": "MET046",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "rmse": [
+     "number"
+    ],
+    "rmse_obs": [
+     "number"
+    ],
+    "better_than_obs": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "rmse_obs",
+    "rmse"
+   ]
+  },
+  "MET047": {
+   "model_id": "MET047",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "rmse": [
+     "number"
+    ],
+    "rmse_obs": [
+     "number"
+    ],
+    "better_than_obs": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "rmse_obs",
+    "rmse"
+   ]
+  },
+  "MET048": {
+   "model_id": "MET048",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "rmse": [
+     "number"
+    ],
+    "rmse_obs": [
+     "number"
+    ],
+    "better_than_obs": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": [
+    "rmse_obs",
+    "rmse"
+   ]
+  },
+  "MET049": {
+   "model_id": "MET049",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "theta_std": [
+     "number"
+    ],
+    "theta_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 4.142,
+   "observables": [
+    "theta_mean",
+    "theta_std"
+   ]
+  },
+  "MET050": {
+   "model_id": "MET050",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "est": [
+     "number"
+    ],
+    "true_end": [
+     "number"
+    ]
+   },
+   "duration_s": 0.131,
+   "observables": [
+    "est",
+    "true_end"
+   ]
+  },
+  "MET051": {
+   "model_id": "MET051",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "grad": [
+     "array"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": []
+  },
+  "MET052": {
+   "model_id": "MET052",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "mu_star": [
+     "array"
+    ],
+    "rank_ok": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": []
+  },
+  "MET053": {
+   "model_id": "MET053",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "S1": [
+     "array"
+    ],
+    "ST": [
+     "array"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": []
+  },
+  "MET054": {
+   "model_id": "MET054",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "share": [
+     "array"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": []
+  },
+  "MET055": {
+   "model_id": "MET055",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "ks": [
+     "array"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": []
+  },
+  "MET056": {
+   "model_id": "MET056",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "shapley": [
+     "array"
+    ]
+   },
+   "duration_s": 0.127,
+   "observables": []
+  },
+  "MET057": {
+   "model_id": "MET057",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "hi": [
+     "number"
+    ],
+    "lo": [
+     "number"
+    ],
+    "sample_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "lo",
+    "hi",
+    "sample_mean"
+   ]
+  },
+  "MET058": {
+   "model_id": "MET058",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "p_value": [
+     "number"
+    ],
+    "obs_stat": [
+     "number"
+    ],
+    "inside_95": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "p_value",
+    "obs_stat"
+   ]
+  },
+  "MET059": {
+   "model_id": "MET059",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "ok": [
+     "boolean"
+    ],
+    "output_mse": [
+     "number"
+    ],
+    "param_err": [
+     "number"
+    ]
+   },
+   "duration_s": 1.045,
+   "observables": [
+    "param_err",
+    "output_mse"
+   ]
+  },
+  "MET060": {
+   "model_id": "MET060",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "col_err": [
+     "number"
+    ],
+    "row_err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "row_err",
+    "col_err"
+   ]
+  },
+  "MET061": {
+   "model_id": "MET061",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "w": [
+     "array"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": []
+  },
+  "MET062": {
+   "model_id": "MET062",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "counts": [
+     "object"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.141,
+   "observables": [
+    "n"
+   ]
+  },
+  "MET063": {
+   "model_id": "MET063",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "picked": [
+     "array"
+    ],
+    "unique": [
+     "number"
+    ]
+   },
+   "duration_s": 0.136,
+   "observables": [
+    "unique"
+   ]
+  },
+  "MET064": {
+   "model_id": "MET064",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 1,
+   "output_types": {
+    "cost": [
+     "number"
+    ],
+    "counts": [
+     "array"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "cost"
+   ]
+  },
+  "NET-SIR": {
+   "model_id": "NET-SIR",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "I": [
+     "number"
+    ],
+    "infected_peak_passed": [
+     "boolean"
+    ],
+    "R": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "S",
+    "I",
+    "R",
+    "total"
+   ]
+  },
+  "NET001": {
+   "model_id": "NET001",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "last_symmetry": [
+     "number"
+    ],
+    "rule": [
+     "number"
+    ],
+    "density": [
+     "number"
+    ],
+    "n_steps": [
+     "number"
+    ],
+    "n_patterns": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "rule",
+    "density",
+    "n_steps",
+    "last_symmetry",
+    "n_patterns"
+   ]
+  },
+  "NET002": {
+   "model_id": "NET002",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "last_symmetry": [
+     "number"
+    ],
+    "rule": [
+     "number"
+    ],
+    "density": [
+     "number"
+    ],
+    "n_steps": [
+     "number"
+    ],
+    "n_patterns": [
+     "number"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "rule",
+    "density",
+    "n_steps",
+    "last_symmetry",
+    "n_patterns"
+   ]
+  },
+  "NET003": {
+   "model_id": "NET003",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "last_symmetry": [
+     "number"
+    ],
+    "rule": [
+     "number"
+    ],
+    "density": [
+     "number"
+    ],
+    "n_steps": [
+     "number"
+    ],
+    "n_patterns": [
+     "number"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "rule",
+    "density",
+    "n_steps",
+    "last_symmetry",
+    "n_patterns"
+   ]
+  },
+  "NET004": {
+   "model_id": "NET004",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "cars": [
+     "number"
+    ],
+    "rule": [
+     "number"
+    ],
+    "density": [
+     "number"
+    ],
+    "cars_conserved": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.989,
+   "observables": [
+    "rule",
+    "cars",
+    "density"
+   ]
+  },
+  "NET005": {
+   "model_id": "NET005",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "alive": [
+     "number"
+    ],
+    "tick": [
+     "number"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "alive",
+    "tick"
+   ]
+  },
+  "NET006": {
+   "model_id": "NET006",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "excited": [
+     "number"
+    ],
+    "wave_active": [
+     "boolean"
+    ],
+    "resting": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "excited",
+    "resting"
+   ]
+  },
+  "NET007": {
+   "model_id": "NET007",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "diversity": [
+     "number"
+    ],
+    "counts": [
+     "array"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "diversity"
+   ]
+  },
+  "NET008": {
+   "model_id": "NET008",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "trees_frac": [
+     "number"
+    ],
+    "lightning_fires": [
+     "number"
+    ],
+    "trees": [
+     "number"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "trees",
+    "trees_frac",
+    "lightning_fires"
+   ]
+  },
+  "NET009": {
+   "model_id": "NET009",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "city_frac": [
+     "number"
+    ],
+    "forest_frac": [
+     "number"
+    ],
+    "farm_frac": [
+     "number"
+    ],
+    "urban_growth": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "city_frac",
+    "farm_frac",
+    "forest_frac"
+   ]
+  },
+  "NET010": {
+   "model_id": "NET010",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "city_frac": [
+     "number"
+    ],
+    "forest_frac": [
+     "number"
+    ],
+    "farm_frac": [
+     "number"
+    ],
+    "diffusion_growth": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.128,
+   "observables": [
+    "city_frac",
+    "farm_frac",
+    "forest_frac"
+   ]
+  },
+  "NET011": {
+   "model_id": "NET011",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "city_frac": [
+     "number"
+    ],
+    "forest_frac": [
+     "number"
+    ],
+    "farm_frac": [
+     "number"
+    ],
+    "demand_met": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.144,
+   "observables": [
+    "city_frac",
+    "farm_frac",
+    "forest_frac"
+   ]
+  },
+  "NET012": {
+   "model_id": "NET012",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "dynamic_demand": [
+     "boolean"
+    ],
+    "farm_frac": [
+     "number"
+    ],
+    "demand_met": [
+     "boolean"
+    ],
+    "city_frac": [
+     "number"
+    ],
+    "forest_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.143,
+   "observables": [
+    "city_frac",
+    "farm_frac",
+    "forest_frac"
+   ]
+  },
+  "NET013": {
+   "model_id": "NET013",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "city_frac": [
+     "number"
+    ],
+    "forest_frac": [
+     "number"
+    ],
+    "farm_frac": [
+     "number"
+    ],
+    "roulette_allocation": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.133,
+   "observables": [
+    "city_frac",
+    "farm_frac",
+    "forest_frac"
+   ]
+  },
+  "NET014": {
+   "model_id": "NET014",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "farm_frac": [
+     "number"
+    ],
+    "forest_frac": [
+     "number"
+    ],
+    "city_frac": [
+     "number"
+    ],
+    "patch_generation": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.987,
+   "observables": [
+    "city_frac",
+    "farm_frac",
+    "forest_frac"
+   ]
+  },
+  "NET015": {
+   "model_id": "NET015",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "farm_frac": [
+     "number"
+    ],
+    "forest_frac": [
+     "number"
+    ],
+    "city_frac": [
+     "number"
+    ],
+    "markov_ca_coupled": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "city_frac",
+    "farm_frac",
+    "forest_frac"
+   ]
+  },
+  "NET016": {
+   "model_id": "NET016",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "total": [
+     "number"
+    ],
+    "occupied_frac": [
+     "number"
+    ],
+    "spreading": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.137,
+   "observables": [
+    "occupied_frac",
+    "total"
+   ]
+  },
+  "NET017": {
+   "model_id": "NET017",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_degree": [
+     "number"
+    ],
+    "n_edges": [
+     "number"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "mean_degree",
+    "n_edges"
+   ]
+  },
+  "NET018": {
+   "model_id": "NET018",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.635,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree"
+   ]
+  },
+  "NET019": {
+   "model_id": "NET019",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.145,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET020": {
+   "model_id": "NET020",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "directed": [
+     "boolean"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.145,
+   "observables": [
+    "n",
+    "m"
+   ]
+  },
+  "NET021": {
+   "model_id": "NET021",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.133,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET022": {
+   "model_id": "NET022",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET023": {
+   "model_id": "NET023",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "clustering": [
+     "number"
+    ],
+    "n_edges": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "n_edges",
+    "clustering"
+   ]
+  },
+  "NET024": {
+   "model_id": "NET024",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ]
+   },
+   "duration_s": 1.472,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET025": {
+   "model_id": "NET025",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_edges": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ],
+    "tail_slope": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "n_edges",
+    "mean_degree",
+    "tail_slope"
+   ]
+  },
+  "NET026": {
+   "model_id": "NET026",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET027": {
+   "model_id": "NET027",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fitness_effect": [
+     "boolean"
+    ],
+    "n": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "n",
+    "mean_degree"
+   ]
+  },
+  "NET028": {
+   "model_id": "NET028",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET029": {
+   "model_id": "NET029",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "soft_connection": [
+     "boolean"
+    ],
+    "n": [
+     "number"
+    ],
+    "edges": [
+     "number"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "n",
+    "edges"
+   ]
+  },
+  "NET030": {
+   "model_id": "NET030",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "hidden_metric": [
+     "boolean"
+    ],
+    "n": [
+     "number"
+    ],
+    "edges": [
+     "number"
+    ]
+   },
+   "duration_s": 0.115,
+   "observables": [
+    "n",
+    "edges"
+   ]
+  },
+  "NET031": {
+   "model_id": "NET031",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET032": {
+   "model_id": "NET032",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET033": {
+   "model_id": "NET033",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "degree_correction": [
+     "boolean"
+    ],
+    "n": [
+     "number"
+    ],
+    "edges": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "n",
+    "edges"
+   ]
+  },
+  "NET034": {
+   "model_id": "NET034",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "edges": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "mixed_membership": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.975,
+   "observables": [
+    "n",
+    "edges"
+   ]
+  },
+  "NET035": {
+   "model_id": "NET035",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "generator_fallback": [
+     "string"
+    ],
+    "n_communities_detected": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "benchmark_valid": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.462,
+   "observables": [
+    "n",
+    "n_communities_detected"
+   ]
+  },
+  "NET036": {
+   "model_id": "NET036",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_components": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "m": [
+     "number"
+    ],
+    "mean_degree": [
+     "number"
+    ]
+   },
+   "duration_s": 0.139,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET037": {
+   "model_id": "NET037",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "edges": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "latent_distance": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "n",
+    "edges"
+   ]
+  },
+  "NET038": {
+   "model_id": "NET038",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "edges": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ],
+    "cluster_recovery": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "n",
+    "edges"
+   ]
+  },
+  "NET039": {
+   "model_id": "NET039",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "sampler_mixed": [
+     "boolean"
+    ],
+    "edges": [
+     "number"
+    ],
+    "n_nodes": [
+     "number"
+    ],
+    "triangles": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "edges",
+    "triangles",
+    "n_nodes"
+   ]
+  },
+  "NET040": {
+   "model_id": "NET040",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "reciprocity": [
+     "number"
+    ],
+    "stability": [
+     "number"
+    ],
+    "temporal_dependence": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "stability",
+    "reciprocity"
+   ]
+  },
+  "NET041": {
+   "model_id": "NET041",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "dissolutions": [
+     "number"
+    ],
+    "edges": [
+     "number"
+    ],
+    "formations": [
+     "number"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "formations",
+    "dissolutions",
+    "edges"
+   ]
+  },
+  "NET042": {
+   "model_id": "NET042",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "reciprocity": [
+     "number"
+    ],
+    "density": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "density",
+    "reciprocity"
+   ]
+  },
+  "NET043": {
+   "model_id": "NET043",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "reciprocity": [
+     "number"
+    ],
+    "density": [
+     "number"
+    ],
+    "behavior_consensus": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "density",
+    "reciprocity",
+    "behavior_consensus"
+   ]
+  },
+  "NET044": {
+   "model_id": "NET044",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_events": [
+     "number"
+    ],
+    "recip_rate": [
+     "number"
+    ],
+    "beta_detected": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.985,
+   "observables": [
+    "n_events",
+    "recip_rate"
+   ]
+  },
+  "NET045": {
+   "model_id": "NET045",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 3,
+   "output_types": {
+    "events": [
+     "array"
+    ],
+    "self_exciting": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": []
+  },
+  "NET046": {
+   "model_id": "NET046",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_edges_aggregated": [
+     "number"
+    ],
+    "n_active_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "n_edges_aggregated",
+    "n_active_mean"
+   ]
+  },
+  "NET047": {
+   "model_id": "NET047",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "simplices": [
+     "number"
+    ],
+    "higher_order": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": [
+    "simplices"
+   ]
+  },
+  "NET048": {
+   "model_id": "NET048",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mean_degree": [
+     "number"
+    ],
+    "m": [
+     "number"
+    ],
+    "n_components": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.453,
+   "observables": [
+    "n",
+    "m",
+    "mean_degree",
+    "n_components"
+   ]
+  },
+  "NET049": {
+   "model_id": "NET049",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_nodes": [
+     "number"
+    ],
+    "n_edges": [
+     "number"
+    ],
+    "intersection_defined": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "n_nodes",
+    "n_edges"
+   ]
+  },
+  "NET050": {
+   "model_id": "NET050",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "edges": [
+     "number"
+    ],
+    "bottom_nodes": [
+     "number"
+    ],
+    "top_nodes": [
+     "number"
+    ]
+   },
+   "duration_s": 0.133,
+   "observables": [
+    "top_nodes",
+    "bottom_nodes",
+    "edges"
+   ]
+  },
+  "NET051": {
+   "model_id": "NET051",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "S",
+    "I"
+   ]
+  },
+  "NET052": {
+   "model_id": "NET052",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "I_frac": [
+     "number"
+    ],
+    "I_star": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "I",
+    "I_frac",
+    "I_star"
+   ]
+  },
+  "NET053": {
+   "model_id": "NET053",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "total": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ],
+    "infected_peak_passed": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "S",
+    "I",
+    "R",
+    "total"
+   ]
+  },
+  "NET054": {
+   "model_id": "NET054",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.987,
+   "observables": [
+    "S",
+    "I",
+    "R"
+   ]
+  },
+  "NET055": {
+   "model_id": "NET055",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "R": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ],
+    "E": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": [
+    "S",
+    "E",
+    "I",
+    "R",
+    "total"
+   ]
+  },
+  "NET056": {
+   "model_id": "NET056",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ],
+    "E": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "S",
+    "E",
+    "I",
+    "R"
+   ]
+  },
+  "NET057": {
+   "model_id": "NET057",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "R": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "E": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ],
+    "D": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "S",
+    "E",
+    "I",
+    "R",
+    "D"
+   ]
+  },
+  "NET058": {
+   "model_id": "NET058",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "R": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "A": [
+     "number"
+    ],
+    "E": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "S",
+    "E",
+    "I",
+    "A",
+    "R"
+   ]
+  },
+  "NET059": {
+   "model_id": "NET059",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "S",
+    "I",
+    "R"
+   ]
+  },
+  "NET060": {
+   "model_id": "NET060",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "V": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "S",
+    "V",
+    "I",
+    "R"
+   ]
+  },
+  "NET061": {
+   "model_id": "NET061",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "E_total": [
+     "number"
+    ],
+    "R": [
+     "array"
+    ],
+    "S_total": [
+     "number"
+    ],
+    "I": [
+     "array"
+    ],
+    "R_total": [
+     "number"
+    ],
+    "S": [
+     "array"
+    ],
+    "age_matrix": [
+     "boolean"
+    ],
+    "I_total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.122,
+   "observables": [
+    "S_total",
+    "E_total",
+    "I_total",
+    "R_total"
+   ]
+  },
+  "NET062": {
+   "model_id": "NET062",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "city0_I": [
+     "number"
+    ],
+    "city3_I": [
+     "number"
+    ],
+    "city1_I": [
+     "number"
+    ],
+    "city2_I": [
+     "number"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "city0_I",
+    "city1_I",
+    "city2_I",
+    "city3_I"
+   ]
+  },
+  "NET063": {
+   "model_id": "NET063",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 9,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "S",
+    "I",
+    "R"
+   ]
+  },
+  "NET064": {
+   "model_id": "NET064",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ],
+    "conserv": [
+     "number"
+    ]
+   },
+   "duration_s": 0.966,
+   "observables": [
+    "S",
+    "I",
+    "R",
+    "conserv"
+   ]
+  },
+  "NET064_jump": {
+   "model_id": "NET064_jump",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 2,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.104,
+   "observables": [
+    "S",
+    "I",
+    "R"
+   ]
+  },
+  "NET065": {
+   "model_id": "NET065",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "gen_curve": [
+     "array"
+    ],
+    "susceptible": [
+     "number"
+    ],
+    "infected_gen": [
+     "number"
+    ]
+   },
+   "duration_s": 0.107,
+   "observables": [
+    "infected_gen",
+    "susceptible"
+   ]
+  },
+  "NET066": {
+   "model_id": "NET066",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "I_total": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ],
+    "stages": [
+     "array"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "S",
+    "I_total",
+    "R"
+   ]
+  },
+  "NET067": {
+   "model_id": "NET067",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "renewal_eq": [
+     "boolean"
+    ],
+    "incidence_recent": [
+     "array"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": []
+  },
+  "NET068": {
+   "model_id": "NET068",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "prev_v": [
+     "number"
+    ],
+    "prev_h": [
+     "number"
+    ],
+    "Ih": [
+     "number"
+    ],
+    "endemic": [
+     "boolean"
+    ],
+    "Iv": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "Ih",
+    "Iv",
+    "prev_h",
+    "prev_v"
+   ]
+  },
+  "NET069": {
+   "model_id": "NET069",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "pair_approximation": [
+     "boolean"
+    ],
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "S",
+    "I",
+    "R"
+   ]
+  },
+  "NET070": {
+   "model_id": "NET070",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "ebcm_solved": [
+     "boolean"
+    ],
+    "final_size_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "final_size_frac"
+   ]
+  },
+  "NET071": {
+   "model_id": "NET071",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 242,
+   "output_types": {
+    "infected_cells": [
+     "number"
+    ],
+    "contact_process": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "infected_cells"
+   ]
+  },
+  "NET072": {
+   "model_id": "NET072",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "adaptive_coevolution": [
+     "boolean"
+    ],
+    "rewires": [
+     "number"
+    ],
+    "infected_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "infected_frac",
+    "rewires"
+   ]
+  },
+  "NET073": {
+   "model_id": "NET073",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "alive": [
+     "number"
+    ],
+    "extinct": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.936,
+   "observables": [
+    "alive"
+   ]
+  },
+  "NET074": {
+   "model_id": "NET074",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "adopted": [
+     "number"
+    ],
+    "frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.116,
+   "observables": [
+    "adopted",
+    "frac"
+   ]
+  },
+  "NET075": {
+   "model_id": "NET075",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "F_theory": [
+     "number"
+    ],
+    "adopted_frac": [
+     "number"
+    ]
+   },
+   "duration_s": 0.119,
+   "observables": [
+    "adopted_frac",
+    "F_theory"
+   ]
+  },
+  "NET076": {
+   "model_id": "NET076",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "n"
+   ]
+  },
+  "NET077": {
+   "model_id": "NET077",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.138,
+   "observables": [
+    "n"
+   ]
+  },
+  "NET078": {
+   "model_id": "NET078",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "cascade_frac": [
+     "number"
+    ],
+    "global_cascade": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "cascade_frac"
+   ]
+  },
+  "NET079": {
+   "model_id": "NET079",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "infected_frac": [
+     "number"
+    ],
+    "dose_model_active": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.118,
+   "observables": [
+    "infected_frac"
+   ]
+  },
+  "NET080": {
+   "model_id": "NET080",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rumor_dies": [
+     "boolean"
+    ],
+    "spreaders": [
+     "number"
+    ],
+    "stiflers": [
+     "number"
+    ],
+    "ignorants": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "ignorants",
+    "spreaders",
+    "stiflers"
+   ]
+  },
+  "NET081": {
+   "model_id": "NET081",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rumor_dies": [
+     "boolean"
+    ],
+    "spreaders": [
+     "number"
+    ],
+    "stiflers": [
+     "number"
+    ],
+    "ignorants": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "ignorants",
+    "spreaders",
+    "stiflers"
+   ]
+  },
+  "NET082": {
+   "model_id": "NET082",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_triangles": [
+     "number"
+    ],
+    "infected": [
+     "number"
+    ],
+    "higher_order_effect": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "infected",
+    "n_triangles"
+   ]
+  },
+  "NET083": {
+   "model_id": "NET083",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "per_community": [
+     "array"
+    ],
+    "overall": [
+     "number"
+    ]
+   },
+   "duration_s": 1.09,
+   "observables": [
+    "overall"
+   ]
+  },
+  "NET084": {
+   "model_id": "NET084",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "overall": [
+     "number"
+    ],
+    "cross_community_exposure": [
+     "number"
+    ]
+   },
+   "duration_s": 0.134,
+   "observables": [
+    "overall",
+    "cross_community_exposure"
+   ]
+  },
+  "NET085": {
+   "model_id": "NET085",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "p=0.25": [
+     "object"
+    ],
+    "p_critical": [
+     "number"
+    ],
+    "p=0.15": [
+     "object"
+    ],
+    "p=0.35": [
+     "object"
+    ]
+   },
+   "duration_s": 0.477,
+   "observables": [
+    "p_critical"
+   ]
+  },
+  "NET086": {
+   "model_id": "NET086",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "p=0.4": [
+     "number"
+    ],
+    "p=0.5": [
+     "number"
+    ],
+    "p_critical_approx": [
+     "number"
+    ],
+    "p=0.3": [
+     "number"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "p=0.3",
+    "p=0.4",
+    "p=0.5",
+    "p_critical_approx"
+   ]
+  },
+  "NET087": {
+   "model_id": "NET087",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "core_dist": [
+     "object"
+    ],
+    "max_core": [
+     "number"
+    ],
+    "hub_has_high_core": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "max_core"
+   ]
+  },
+  "NET088": {
+   "model_id": "NET088",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "active_frac": [
+     "number"
+    ],
+    "full_activation": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "active_frac"
+   ]
+  },
+  "NET089": {
+   "model_id": "NET089",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "largest_component_frac": [
+     "number"
+    ],
+    "failed_edges": [
+     "number"
+    ],
+    "cascade_happened": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.13,
+   "observables": [
+    "failed_edges",
+    "largest_component_frac"
+   ]
+  },
+  "NET090": {
+   "model_id": "NET090",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "alive_a": [
+     "number"
+    ],
+    "failed_a": [
+     "number"
+    ],
+    "failed_b": [
+     "number"
+    ],
+    "catastrophic": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.124,
+   "observables": [
+    "alive_a",
+    "failed_a",
+    "failed_b"
+   ]
+  },
+  "NET091": {
+   "model_id": "NET091",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "clearing_payments": [
+     "array"
+    ],
+    "total_debt": [
+     "number"
+    ],
+    "clearing_feasible": [
+     "boolean"
+    ],
+    "total_paid": [
+     "number"
+    ]
+   },
+   "duration_s": 0.123,
+   "observables": [
+    "total_debt",
+    "total_paid"
+   ]
+  },
+  "NET092": {
+   "model_id": "NET092",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_defaults": [
+     "number"
+    ],
+    "loss_amplified": [
+     "boolean"
+    ],
+    "payments": [
+     "array"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "n_defaults"
+   ]
+  },
+  "NET093": {
+   "model_id": "NET093",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "debt_rank_pct": [
+     "number"
+    ],
+    "contagion": [
+     "boolean"
+    ],
+    "h_vector": [
+     "array"
+    ]
+   },
+   "duration_s": 1.054,
+   "observables": [
+    "debt_rank_pct"
+   ]
+  },
+  "NET094": {
+   "model_id": "NET094",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fire_sale_spiral": [
+     "boolean"
+    ],
+    "n_defaults": [
+     "number"
+    ],
+    "price": [
+     "number"
+    ]
+   },
+   "duration_s": 0.124,
+   "observables": [
+    "price",
+    "n_defaults"
+   ]
+  },
+  "NET095": {
+   "model_id": "NET095",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "k_mean": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ],
+    "flux": [
+     "number"
+    ]
+   },
+   "duration_s": 0.132,
+   "observables": [
+    "total",
+    "k_mean",
+    "flux"
+   ]
+  },
+  "NET096": {
+   "model_id": "NET096",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "k_mean": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ],
+    "queue": [
+     "number"
+    ]
+   },
+   "duration_s": 0.127,
+   "observables": [
+    "total",
+    "k_mean",
+    "queue"
+   ]
+  },
+  "NET097": {
+   "model_id": "NET097",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_std": [
+     "number"
+    ],
+    "k_mean": [
+     "number"
+    ],
+    "v_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "k_mean",
+    "v_std",
+    "v_mean"
+   ]
+  },
+  "NET098": {
+   "model_id": "NET098",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ],
+    "v_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.135,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET099": {
+   "model_id": "NET099",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ],
+    "v_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET100": {
+   "model_id": "NET100",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ],
+    "v_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.104,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET101": {
+   "model_id": "NET101",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ],
+    "v_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET102": {
+   "model_id": "NET102",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ],
+    "v_mean": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET103": {
+   "model_id": "NET103",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_mean": [
+     "number"
+    ],
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ]
+   },
+   "duration_s": 0.989,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET104": {
+   "model_id": "NET104",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_mean": [
+     "number"
+    ],
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET105": {
+   "model_id": "NET105",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_mean": [
+     "number"
+    ],
+    "v_std": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "v_mean",
+    "min_gap",
+    "v_std"
+   ]
+  },
+  "NET106": {
+   "model_id": "NET106",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "flux": [
+     "number"
+    ],
+    "density": [
+     "number"
+    ],
+    "n_cars": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "n_cars",
+    "density",
+    "flux"
+   ]
+  },
+  "NET107": {
+   "model_id": "NET107",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "mobility": [
+     "number"
+    ],
+    "n_east": [
+     "number"
+    ],
+    "n_north": [
+     "number"
+    ],
+    "empty": [
+     "number"
+    ],
+    "cars": [
+     "number"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "n_east",
+    "n_north",
+    "cars",
+    "empty",
+    "mobility"
+   ]
+  },
+  "NET108": {
+   "model_id": "NET108",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "flux": [
+     "number"
+    ],
+    "n_cars": [
+     "number"
+    ]
+   },
+   "duration_s": 0.111,
+   "observables": [
+    "n_cars",
+    "flux"
+   ]
+  },
+  "NET109": {
+   "model_id": "NET109",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "queue": [
+     "number"
+    ],
+    "served": [
+     "number"
+    ],
+    "delay": [
+     "number"
+    ]
+   },
+   "duration_s": 0.11,
+   "observables": [
+    "queue",
+    "served",
+    "delay"
+   ]
+  },
+  "NET110": {
+   "model_id": "NET110",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "f1": [
+     "number"
+    ],
+    "cost1": [
+     "number"
+    ],
+    "cost2": [
+     "number"
+    ],
+    "cost_gap": [
+     "number"
+    ],
+    "total_cost": [
+     "number"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "f1",
+    "cost1",
+    "cost2",
+    "cost_gap",
+    "total_cost"
+   ]
+  },
+  "NET111": {
+   "model_id": "NET111",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "f1": [
+     "number"
+    ],
+    "cost1": [
+     "number"
+    ],
+    "cost2": [
+     "number"
+    ],
+    "cost_gap": [
+     "number"
+    ],
+    "total_cost": [
+     "number"
+    ]
+   },
+   "duration_s": 0.103,
+   "observables": [
+    "f1",
+    "cost1",
+    "cost2",
+    "cost_gap",
+    "total_cost"
+   ]
+  },
+  "NET112": {
+   "model_id": "NET112",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "v_std": [
+     "number"
+    ],
+    "changes": [
+     "number"
+    ],
+    "v_mean": [
+     "number"
+    ],
+    "min_gap": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "min_gap",
+    "v_std",
+    "changes",
+    "v_mean"
+   ]
+  },
+  "NET113": {
+   "model_id": "NET113",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "min_separation": [
+     "number"
+    ],
+    "in_bounds": [
+     "boolean"
+    ],
+    "evacuated": [
+     "number"
+    ],
+    "alive": [
+     "number"
+    ]
+   },
+   "duration_s": 0.996,
+   "observables": [
+    "evacuated",
+    "alive",
+    "min_separation"
+   ]
+  },
+  "NET114": {
+   "model_id": "NET114",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "min_separation": [
+     "number"
+    ],
+    "in_bounds": [
+     "boolean"
+    ],
+    "evacuated": [
+     "number"
+    ],
+    "alive": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "evacuated",
+    "alive",
+    "min_separation"
+   ]
+  },
+  "NET115": {
+   "model_id": "NET115",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "min_separation": [
+     "number"
+    ],
+    "in_bounds": [
+     "boolean"
+    ],
+    "evacuated": [
+     "number"
+    ],
+    "alive": [
+     "number"
+    ]
+   },
+   "duration_s": 0.142,
+   "observables": [
+    "evacuated",
+    "alive",
+    "min_separation"
+   ]
+  },
+  "NET116": {
+   "model_id": "NET116",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "arrived": [
+     "number"
+    ],
+    "alive": [
+     "number"
+    ],
+    "collisions": [
+     "number"
+    ]
+   },
+   "duration_s": 0.137,
+   "observables": [
+    "arrived",
+    "alive",
+    "collisions"
+   ]
+  },
+  "NET117": {
+   "model_id": "NET117",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "arrived": [
+     "number"
+    ],
+    "alive": [
+     "number"
+    ],
+    "collisions": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "arrived",
+    "alive",
+    "collisions"
+   ]
+  },
+  "NET118": {
+   "model_id": "NET118",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "arrived": [
+     "number"
+    ],
+    "alive": [
+     "number"
+    ],
+    "collisions": [
+     "number"
+    ]
+   },
+   "duration_s": 0.121,
+   "observables": [
+    "arrived",
+    "alive",
+    "collisions"
+   ]
+  },
+  "NET119": {
+   "model_id": "NET119",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "steps": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ],
+    "max_remaining": [
+     "number"
+    ],
+    "at_exit": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "at_exit",
+    "total",
+    "max_remaining",
+    "steps"
+   ]
+  },
+  "NET120": {
+   "model_id": "NET120",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "arrived": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "arrived",
+    "total"
+   ]
+  },
+  "SYS001": {
+   "model_id": "SYS001",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "served": [
+     "number"
+    ],
+    "queue": [
+     "number"
+    ]
+   },
+   "duration_s": 0.104,
+   "observables": [
+    "queue",
+    "served"
+   ]
+  },
+  "SYS002": {
+   "model_id": "SYS002",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n_arrived": [
+     "number"
+    ],
+    "Wq_sim": [
+     "number"
+    ],
+    "Wq_erlangc": [
+     "number"
+    ],
+    "n_service_starts": [
+     "number"
+    ],
+    "n_served": [
+     "number"
+    ]
+   },
+   "duration_s": 0.107,
+   "observables": [
+    "Wq_sim",
+    "Wq_erlangc",
+    "n_served",
+    "n_service_starts",
+    "n_arrived"
+   ]
+  },
+  "SYS003": {
+   "model_id": "SYS003",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "blocked": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ],
+    "B_formula": [
+     "number"
+    ],
+    "B_sim": [
+     "number"
+    ]
+   },
+   "duration_s": 0.896,
+   "observables": [
+    "B_formula",
+    "B_sim",
+    "blocked",
+    "total"
+   ]
+  },
+  "SYS004": {
+   "model_id": "SYS004",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "drop_frac": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ],
+    "reneged": [
+     "number"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": [
+    "reneged",
+    "total",
+    "drop_frac"
+   ]
+  },
+  "SYS006": {
+   "model_id": "SYS006",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "L": [
+     "number"
+    ],
+    "L_little": [
+     "number"
+    ]
+   },
+   "duration_s": 0.112,
+   "observables": [
+    "L",
+    "L_little"
+   ]
+  },
+  "SYS007": {
+   "model_id": "SYS007",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "Wq_md1": [
+     "number"
+    ],
+    "Wq_sim": [
+     "number"
+    ]
+   },
+   "duration_s": 0.113,
+   "observables": [
+    "Wq_sim",
+    "Wq_md1"
+   ]
+  },
+  "SYS008": {
+   "model_id": "SYS008",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "Wq_md1": [
+     "number"
+    ],
+    "Wq_sim": [
+     "number"
+    ]
+   },
+   "duration_s": 0.1,
+   "observables": [
+    "Wq_sim",
+    "Wq_md1"
+   ]
+  },
+  "SYS009": {
+   "model_id": "SYS009",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "Wq_kingman": [
+     "number"
+    ],
+    "Wq_sim": [
+     "number"
+    ]
+   },
+   "duration_s": 0.103,
+   "observables": [
+    "Wq_sim",
+    "Wq_kingman"
+   ]
+  },
+  "SYS010": {
+   "model_id": "SYS010",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "L_jackson": [
+     "array"
+    ],
+    "rho": [
+     "array"
+    ],
+    "L_sim": [
+     "array"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": []
+  },
+  "SYS011": {
+   "model_id": "SYS011",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "n": [
+     "array"
+    ],
+    "X_mva": [
+     "number"
+    ],
+    "X_sim": [
+     "number"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": [
+    "X_mva",
+    "X_sim"
+   ]
+  },
+  "SYS012": {
+   "model_id": "SYS012",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "L_ps_formula": [
+     "array"
+    ],
+    "rho": [
+     "number"
+    ],
+    "L_sim": [
+     "array"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "rho"
+   ]
+  },
+  "SYS013": {
+   "model_id": "SYS013",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "W_low": [
+     "null"
+    ],
+    "W_high": [
+     "null"
+    ],
+    "priority_holds": [
+     "boolean"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": []
+  },
+  "SYS015": {
+   "model_id": "SYS015",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fired": [
+     "number"
+    ],
+    "enabled": [
+     "number"
+    ],
+    "marking": [
+     "array"
+    ],
+    "total_tokens": [
+     "number"
+    ]
+   },
+   "duration_s": 0.921,
+   "observables": [
+    "fired",
+    "total_tokens",
+    "enabled"
+   ]
+  },
+  "SYS016": {
+   "model_id": "SYS016",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fired": [
+     "number"
+    ],
+    "per_color": [
+     "object"
+    ],
+    "marking": [
+     "object"
+    ]
+   },
+   "duration_s": 0.103,
+   "observables": [
+    "fired"
+   ]
+  },
+  "SYS017": {
+   "model_id": "SYS017",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fired": [
+     "number"
+    ],
+    "enabled": [
+     "number"
+    ],
+    "marking": [
+     "array"
+    ],
+    "total_tokens": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "fired",
+    "total_tokens",
+    "enabled"
+   ]
+  },
+  "SYS018": {
+   "model_id": "SYS018",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 3,
+   "output_types": {
+    "fired": [
+     "number"
+    ],
+    "marking": [
+     "array"
+    ]
+   },
+   "duration_s": 0.106,
+   "observables": [
+    "fired"
+   ]
+  },
+  "SYS019": {
+   "model_id": "SYS019",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 2,
+   "output_types": {
+    "fired": [
+     "number"
+    ],
+    "marking": [
+     "array"
+    ]
+   },
+   "duration_s": 0.103,
+   "observables": [
+    "fired"
+   ]
+  },
+  "SYS020": {
+   "model_id": "SYS020",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "fired": [
+     "number"
+    ],
+    "enabled": [
+     "number"
+    ],
+    "marking": [
+     "array"
+    ],
+    "total_tokens": [
+     "number"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "fired",
+    "total_tokens",
+    "enabled"
+   ]
+  },
+  "SYS021": {
+   "model_id": "SYS021",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "events": [
+     "number"
+    ],
+    "expected": [
+     "number"
+    ],
+    "clock": [
+     "number"
+    ]
+   },
+   "duration_s": 0.104,
+   "observables": [
+    "events",
+    "clock",
+    "expected"
+   ]
+  },
+  "SYS022": {
+   "model_id": "SYS022",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "queued": [
+     "number"
+    ],
+    "conserv": [
+     "number"
+    ],
+    "generated": [
+     "number"
+    ],
+    "processed": [
+     "number"
+    ]
+   },
+   "duration_s": 0.108,
+   "observables": [
+    "generated",
+    "processed",
+    "queued",
+    "conserv"
+   ]
+  },
+  "SYS023": {
+   "model_id": "SYS023",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "events_per_atom": [
+     "array"
+    ],
+    "total": [
+     "number"
+    ],
+    "expected_total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.107,
+   "observables": [
+    "total",
+    "expected_total"
+   ]
+  },
+  "SYS024": {
+   "model_id": "SYS024",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "arrived": [
+     "number"
+    ],
+    "queued": [
+     "number"
+    ],
+    "completed": [
+     "number"
+    ],
+    "conserv": [
+     "number"
+    ],
+    "workers": [
+     "number"
+    ]
+   },
+   "duration_s": 0.103,
+   "observables": [
+    "workers",
+    "arrived",
+    "completed",
+    "queued",
+    "conserv"
+   ]
+  },
+  "SYS025": {
+   "model_id": "SYS025",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "max": [
+     "number"
+    ],
+    "total": [
+     "number"
+    ]
+   },
+   "duration_s": 0.954,
+   "observables": [
+    "total",
+    "max"
+   ]
+  },
+  "SYS027": {
+   "model_id": "SYS027",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "pi_analytic": [
+     "array"
+    ],
+    "visit_freq": [
+     "array"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": []
+  },
+  "SYS028": {
+   "model_id": "SYS028",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 2,
+   "output_types": {
+    "pi_stationary": [
+     "array"
+    ],
+    "pi_sim": [
+     "array"
+    ],
+    "state": [
+     "number"
+    ]
+   },
+   "duration_s": 0.126,
+   "observables": [
+    "state"
+   ]
+  },
+  "SYS029": {
+   "model_id": "SYS029",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "transitions": [
+     "number"
+    ],
+    "state": [
+     "number"
+    ]
+   },
+   "duration_s": 0.114,
+   "observables": [
+    "state",
+    "transitions"
+   ]
+  },
+  "SYS030": {
+   "model_id": "SYS030",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 9,
+   "output_types": {
+    "n": [
+     "number"
+    ],
+    "E_analytic": [
+     "number"
+    ]
+   },
+   "duration_s": 0.102,
+   "observables": [
+    "n",
+    "E_analytic"
+   ]
+  },
+  "SYS031": {
+   "model_id": "SYS031",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "E": [
+     "number"
+    ],
+    "var_theory": [
+     "number"
+    ],
+    "count": [
+     "number"
+    ]
+   },
+   "duration_s": 0.107,
+   "observables": [
+    "count",
+    "E",
+    "var_theory"
+   ]
+  },
+  "SYS033": {
+   "model_id": "SYS033",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "E_analytic": [
+     "number"
+    ],
+    "extinct": [
+     "boolean"
+    ],
+    "alive": [
+     "number"
+    ]
+   },
+   "duration_s": 0.107,
+   "observables": [
+    "alive",
+    "E_analytic"
+   ]
+  },
+  "SYS034": {
+   "model_id": "SYS034",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "E_S": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ]
+   },
+   "duration_s": 0.107,
+   "observables": [
+    "S",
+    "E_S"
+   ]
+  },
+  "SYS035": {
+   "model_id": "SYS035",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "x": [
+     "number"
+    ],
+    "stationary_var": [
+     "number"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "x",
+    "stationary_var"
+   ]
+  },
+  "SYS036": {
+   "model_id": "SYS036",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "feller_ok": [
+     "boolean"
+    ],
+    "x": [
+     "number"
+    ],
+    "theta": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "x",
+    "theta"
+   ]
+  },
+  "SYS037": {
+   "model_id": "SYS037",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "S": [
+     "number"
+    ],
+    "v": [
+     "number"
+    ],
+    "theta": [
+     "number"
+    ]
+   },
+   "duration_s": 1.005,
+   "observables": [
+    "S",
+    "v",
+    "theta"
+   ]
+  },
+  "SYS038": {
+   "model_id": "SYS038",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "var_theory": [
+     "number"
+    ],
+    "x": [
+     "number"
+    ]
+   },
+   "duration_s": 0.117,
+   "observables": [
+    "x",
+    "var_theory"
+   ]
+  },
+  "SYS039": {
+   "model_id": "SYS039",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 4,
+   "output_types": {
+    "E_S": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ],
+    "n": [
+     "number"
+    ]
+   },
+   "duration_s": 0.12,
+   "observables": [
+    "S",
+    "n",
+    "E_S"
+   ]
+  },
+  "SYS042": {
+   "model_id": "SYS042",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "viterbi_acc": [
+     "number"
+    ],
+    "loglik": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "loglik",
+    "viterbi_acc"
+   ]
+  },
+  "SYS043": {
+   "model_id": "SYS043",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "filter_acc": [
+     "number"
+    ]
+   },
+   "duration_s": 0.124,
+   "observables": [
+    "filter_acc"
+   ]
+  },
+  "SYS044": {
+   "model_id": "SYS044",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rmse_prior": [
+     "number"
+    ],
+    "rmse_post": [
+     "number"
+    ],
+    "P_final": [
+     "number"
+    ]
+   },
+   "duration_s": 0.115,
+   "observables": [
+    "rmse_prior",
+    "rmse_post",
+    "P_final"
+   ]
+  },
+  "SYS045": {
+   "model_id": "SYS045",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "final_P_rain": [
+     "number"
+    ],
+    "filter_acc": [
+     "number"
+    ],
+    "mean_filter_err": [
+     "number"
+    ]
+   },
+   "duration_s": 0.125,
+   "observables": [
+    "mean_filter_err",
+    "filter_acc",
+    "final_P_rain"
+   ]
+  }
+ },
+ "scope": "离线参考运行，不是现实数据、机制忠实度、校准或留出有效性的证明"
+}

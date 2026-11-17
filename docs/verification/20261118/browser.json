@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "checks": [
+    "actual WebGL renderer initialized",
+    "professional mode exposes every real parameter",
+    "professional action creates actual saved requested configuration",
+    "rendered persistent IDs equal archived entity IDs",
+    "rendered ring positions transform actual saved cells",
+    "playback advances the actual shared clock",
+    "pause and seek never rerun a model",
+    "paused workbench stops repeated chart and clock repaint",
+    "entity selection and camera follow use the same persistent ID",
+    "intervention timeline displays one actual event",
+    "aggregate animation explicitly discloses no individual tracks",
+    "queue scene retains persistent server and customer types",
+    "large run retains final frame and discloses render sampling",
+    "large-scene GPU instances retain actual entity IDs and coordinates",
+    "large-scene render remains bounded",
+    "dataset names render as text without executable markup",
+    "viewport resize keeps one renderer canvas",
+    "simple mode retains AI interaction",
+    "reload restores the saved run without creating a new one",
+    "no uncaught application JavaScript errors"
+  ],
+  "errors": [],
+  "performance": {
+    "timing": "completed GPU render (WebGL finish)",
+    "render_ms": [
+      9,
+      8,
+      6,
+      7,
+      6
+    ],
+    "geometries": 27,
+    "draw_calls": 36,
+    "triangles": 45686,
+    "archived_entities": 4000,
+    "frames": 85
+  },
+  "run_ids": [
+    "R20261117T212018-bec1c9d681824333ab8dcf11668a5c27",
+    "R20261117T212025-431aae153fac490b820401ddc1d42795",
+    "R20261117T212029-4f91a62bdb734b298a394541939e9b29",
+    "R20261117T212036-ff16e3ad92df4c66a3fe70a5e0880031"
+  ]
+}

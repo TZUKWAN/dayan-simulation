@@ -36,15 +36,15 @@
   },
   {
    "entity_id": "engine/games/mixed_nash_2x2",
-   "fidelity": "prototype",
-   "basis": "混合纳什公式互换：行玩家概率误用A的无差异式、列玩家误用B，仅对称博弈碰巧正确，非对称博弈输出非均衡组合",
+   "fidelity": "full",
+   "basis": "行混合概率由B无差异条件决定、列混合概率由A决定；非对称A=[[3,0],[0,1]],B=[[1,0],[0,4]]实际得到p=[.8,.2],q=[.25,.75]。",
    "simplifications": [
-    "p0/q0 张冠李戴",
-    "对称博弈掩盖缺陷",
-    "58-70 为 return 后死代码，内含正确推导",
-    "性别大战应得行2/3列1/3，代码返回行1/3列2/3"
+    "仅2x2内部混合均衡；退化与越界返回None"
    ],
-   "evidence": "games.py:37-57 实现体；58-70 死代码"
+   "evidence": "dayan/engines/games.py:MatrixGame.mixed_nash_2x2；tests/test_game_contract.py",
+   "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+   "reviewed_at": "2026-11-18",
+   "review_status": "current_targeted"
   },
   {
    "entity_id": "engine/games/replicator",
@@ -60,13 +60,15 @@
   {
    "entity_id": "engine/games/llm_player",
    "fidelity": "lite",
-   "basis": "LLM 玩家明确简化：遮蔽博弈名 prompt+JSON 解析可用，但回退随机脱离随机流合同，未遮蔽路径有潜伏错误",
+   "basis": "博弈名/行动语义按masked区分；行列玩家和矩形收益按本人方位构造，完整历史传入。解析失败只消耗调用方派生rng并记录rng-fallback，不创建固定种子。",
    "simplifications": [
-    "回退 rng 种子硬编码 0，不走 RngStreams",
-    "masked=False 时 game.name AttributeError",
-    "历史窗口固定 5 轮"
+    "有限动作正则式博弈和JSON行动合同；不证明真实人类策略或原论文行为",
+    "无rng时解析失败明确报错；本地LMStudio在离线CI中未执行，实际五类生成式主体服务验收另列"
    ],
-   "evidence": "games.py:107-140 实现；125 name；140 回退"
+   "evidence": "dayan/engines/games.py:llm_game_action；tests/test_game_contract.py 三项回归；不存在旧name AttributeError或固定0回退",
+   "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+   "reviewed_at": "2026-11-18",
+   "review_status": "current_targeted"
   },
   {
    "entity_id": "engine/or/lp",
@@ -101,37 +103,43 @@
   {
    "entity_id": "coupled/goodwin_sd",
    "fidelity": "full",
-   "basis": "Goodwin 1967 线性形式忠实：工资份额-就业率 Lotka-Volterra 方程与手写 RK4 系数正确",
+   "basis": "线性Goodwin两变量核心方程与RK4；不裁剪状态，目录模型与核心采用同一经过时长，正轨道第一积分经数值验证。",
    "simplifications": [
-    "线性菲利普斯",
-    "clip 边界轻微破坏闭轨道",
-    "手写 RK4 与内核编排器并存"
+    "线性工资增长函数、规范化参数，非全部宏观经济结构",
+    "任意初态不保证两个经济比例都小于1；sd_bounded仅报告本次轨迹"
    ],
-   "evidence": "coupled.py:16-42"
+   "evidence": "dayan/coupled.py:GoodwinSDCore；dayan/models/eco_final.py:GoodwinCatalogModel；tests/test_coupling_contracts.py",
+   "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+   "reviewed_at": "2026-11-18",
+   "review_status": "current_targeted"
   },
   {
    "entity_id": "coupled/micro_abm",
    "fidelity": "prototype",
-   "basis": "微观就业 ABM 为示意级：纯工资阈值 Bernoulli 进出，无劳动需求侧，就业率不受岗位数约束",
+   "basis": "保留工资异质性驱动的就业进出原型，过渡概率按实际dt转换为等效风险；没有企业/空缺需求侧，工资是规范化代理。",
    "simplifications": [
-    "无企业/岗位/空缺约束",
-    "保留工资静态均匀分布",
-    "p_join/p_leave 参数拍定",
-    "逐个体 Python 循环"
+    "无企业、岗位与空缺约束",
+    "保留工资均匀分布及基础过渡率是机制假设",
+    "money为虚拟工资账面值，不是货币守恒律"
    ],
-   "evidence": "coupled.py:45-74"
+   "evidence": "dayan/coupled.py:MicroABMSector；tests/test_coupling_contracts.py",
+   "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+   "reviewed_at": "2026-11-18",
+   "review_status": "current_targeted"
   },
   {
    "entity_id": "coupled/coupled_simulation",
    "fidelity": "lite",
-   "basis": "三模式耦合器明确简化：共享种子与标量语义接口属实，但单向模式量纲混用、cyclic 反馈为截断加性扰动",
+   "basis": "共同初始/结束时刻、末尾短步、起点取样和端口轨迹、完整深快照与随机恢复均实际验证；reference模式与独立核心匹配。",
    "simplifications": [
-    "one-way 把工资份额 ω 当工资水平注入，量纲混用",
-    "cyclic 反馈为 clip ±0.01 加性扰动，非结构耦合",
-    "self.rng 死属性",
-    "len≤20 时 corr 返回 0.0"
+    "工资代理=.7*宏观就业率，非工资份额冒充货币工资；映射是显式假设",
+    "cyclic反馈为有界变化率×dt，不是已识别的结构方程",
+    "恒定或不足样本相关系数为None；未做现实数据校准"
    ],
-   "evidence": "coupled.py:77-134"
+   "evidence": "dayan/coupled.py:CoupledSimulation；tests/test_coupling_contracts.py 五项实际时钟/方程/端口/恢复/预算测试",
+   "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+   "reviewed_at": "2026-11-18",
+   "review_status": "current_targeted"
   },
   {
    "entity_id": "core/registry",
@@ -247,5 +255,6 @@
    ],
    "evidence": "core.py:311-316"
   }
- ]
+ ],
+ "archive_note": "未带当前源码指纹与明确复核日期的条目是历史审查，不作为当前实现证明；本轮只更新下列有实际读码与定向回归证据的引擎。"
 }

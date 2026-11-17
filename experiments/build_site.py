@@ -23,6 +23,7 @@ from src.kernel.registry import default_registry  # noqa: E402
 import src.packs  # noqa: E402,F401  (导入即注册全部包——list_packs 才完整)
 
 SITE = ROOT / "site"
+TEACHINGS = ROOT / 'site' / 'teachings'
 
 CSS = """
 body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; max-width: 1100px;
@@ -141,7 +142,7 @@ def build_packs():
 def build_teachings():
     import yaml
     cards = []
-    for yf in sorted((SITE / "teachings").glob("*.yaml")):
+    for yf in sorted(TEACHINGS.glob("*.yaml")):
         raw = yaml.safe_load(yf.read_text(encoding="utf-8"))
         cards.append(f"""<h3>{html.escape(raw.get('scenario',''))}</h3>
 <p><code>{yf.name}</code> · 包：{html.escape(raw.get('pack',''))} ·
@@ -184,12 +185,18 @@ def register_teachings():
     """把 3 个教学规约登记入注册表（演示 R5 联动）。"""
     import yaml
     reg = default_registry()
-    for yf in sorted((SITE / "teachings").glob("*.yaml")):
+    for yf in sorted(TEACHINGS.glob("*.yaml")):
         reg.register(yf.read_text(encoding="utf-8"), author="msim-teaching",
                      tags=["教学"], summary=yf.stem)
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--output', type=Path, default=SITE)
+    args = parser.parse_args()
+    SITE = args.output.resolve()
+    (SITE / 'teachings').mkdir(parents=True, exist_ok=True)
     register_teachings()
     build_index()
     build_packs()

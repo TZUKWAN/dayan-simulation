@@ -20,6 +20,8 @@ agents为{count:表达式,initial:{属性:表达式},update:{属性:下一时刻
 设施tone为可选状态表达式，0中性/1停止红色/2警示琥珀/3通行青色，必须对应真实行为状态；不提供时不猜测红绿含义。信号灯可用tone表达实际相位，value显示实际数值。
 model_refs例如agents.count、agents.update.x、rates.water、space或parameters.exit_x；visual_refs例如scenario.facilities.gate、agents.initial、visualization.color_by。设施引用使用id而非数组下标。每条对应关系都要给出真实可解析路径，不能只引用name/description/mechanisms。必须覆盖人数/角色、地点/设施/布局、行为和用户指定约束，不能用随机游走替代目标行为。
 用户显式参数必须作为同名有效参数实际使用（37名主体会映射n），不得改变数量/单位/初始条件以便套模型。二维DSL不实现楼层、刚体碰撞、烟气/流体场，不得假装生成。空间复杂或表达能力不足时返回error和具体缺口。
+出口（x=数值,y=数值）的坐标按用户显式约束规范为exit_x/exit_y，目的地或目标坐标为target_x/target_y，起点或初始位置为start_x/start_y；这些是设施参数，不能与主体属性x/y重名。以传入的用户显式约束为准。
+scenario.requirements只对应真实模型、空间与视觉约束；运行步数/步长/种子由平台执行选项核验，不要给它们伪造模型或场景引用。语义复核另有execution记录。
 每步主体更新同时使用上一步状态；可读mean_属性,sum_属性,min_属性,max_属性,n_agents。不要用这些名称作为主体属性。
 主体初始化和更新可使用uniform(a,b)、normal(mu,sigma)。存量方程和observables不得使用随机调用。
 目标移动必须避免越过目标后振荡：每步位移不得大于当前到目标的距离，到达后停止。所有更新同时读旧值，不要把缓存的旧distance当成当前坐标的距离；直接用当前x/y计算距离，注意除零与dt。固定速度/目标移动不应偷偷改成随机游走。
@@ -73,7 +75,7 @@ def build_model(request=None, definition=None, parameters=None, ticks=100, seed=
                         {"role": "user", "content": "原始需求：" + request+"\n用户显式约束："+json.dumps(parsed,ensure_ascii=False)+"\n已有实际模型（如有）："+json.dumps(context,ensure_ascii=False)}]
             for attempt in range(2):
                 emit(f"正在{'修正' if attempt else '生成'}实际模型方程与场景合同…")
-                raw = complete(messages, max_tokens=16384 if attempt else 8192, timeout=150 if attempt else 90,
+                raw = complete(messages, timeout=180,
                                purpose="build-model", audit=audit,thinking=True if attempt else None)
                 drafts = directory() / "drafts"
                 drafts.mkdir(parents=True, exist_ok=True)

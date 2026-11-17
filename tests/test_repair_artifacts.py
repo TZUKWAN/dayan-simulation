@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from fastapi.testclient import TestClient
+from api_client import local_client as TestClient
 from dayan import server
 from dayan.run_store import get_store, RunStore
 from dayan.research.specs import ExperimentSpec
@@ -30,14 +30,19 @@ def run_tests():
         stream = client.post('/api/state_stream', json={'run_id': live['run_id'], 'sample_every': 1}).json()
         assert stream['run_id'] == live['run_id']
         assert stream['observations'] == live['observations'] and live['n'] == 401
-        assert len(stream['frames']) == 401
-        for obs, frame in zip(live['observations'], stream['frames']):
+        from dayan.limits import limits
+        assert 2<=len(stream['frames'])<=limits().frames
+        assert stream['frames'][0]['sim_t']==live['observations'][0]['sim_t']
+        assert stream['frames'][-1]['sim_t']==live['observations'][-1]['sim_t']
+        observations_by_time={o['sim_t']:o for o in live['observations']}
+        for frame in stream['frames']:
+            obs=observations_by_time[frame['sim_t']]
             assert obs['sim_t'] == frame['sim_t'] and obs['flux'] == frame['aggregates']['flux']
         assert len(get_store().history()) == 1, 'Reading state must not create a second run'
         assert len(client.get('/api/history').json()['entries'][0]['observations']) == 401
         fresh = RunStore(get_store().directory).load(live['run_id'])
         assert fresh['observations'] == live['observations']
-        print('[PASS] one saved execution supplies identical 401 observations/frames/history after reload')
+        print('[PASS] saved execution retains all 401 observations/history and budgeted matching first/final state frames')
 
         raw = client.get(live['data_url']).content.decode('utf-8-sig')
         assert len(list(csv.DictReader(io.StringIO(raw)))) == 401

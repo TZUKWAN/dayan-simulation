@@ -16,9 +16,10 @@ import numpy as np
 import pandas as pd
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
+from .access import WorkbenchAccess
+from .task_manager import managed_endpoint, get_manager
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -26,10 +27,15 @@ sys.path.insert(0, str(ROOT))
 
 
 app = FastAPI(title="大衍 DAYAN", version="2.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"],
-                   allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(WorkbenchAccess)
 
 _state: dict = {}
+
+
+@app.on_event('shutdown')
+async def shutdown():
+    from .task_manager import close_managers
+    close_managers()
 
 
 def _dt_now():
@@ -37,49 +43,32 @@ def _dt_now():
     return _d.now()
 
 
+def configure_planner():
+    from .agent import intent
+    from .agent.llm_planner import llm_planner
+    from .llm_client import configured
+    available=configured()
+    intent.set_llm_planner(llm_planner if available else None)
+    _state['llm_planner']='configured-not-probed' if available else 'unconfigured'
+    return _state['llm_planner']
+
+
 def _load_catalog():
-    cat_path = ROOT / "data" / "dayan_catalog.json"
-    cat = json.loads(cat_path.read_text(encoding="utf-8")) if cat_path.exists() else {"models": []}
-    from .custom_models import capabilities
-    extra = [{"model_id": c["model_id"], "name": c.get("name", c["model_id"]),
-              "kind": "自定义可执行规约", "layer": "模型层",
-              "status": "未独立审查" if c["runnable"] else "规约未通过"} for c in capabilities()]
-    extra.append({"model_id": "CPL001", "name": "路网疏散 老年行动 信息 公交耦合", "kind": "复合机制模型", "layer": "模型层", "status": "情景原型 需真实数据输入"})
-    existing = {m["model_id"] for m in cat["models"]}
-    cat["models"] += [m for m in extra if m["model_id"] not in existing]
-    cat["count"] = len(cat["models"])
-    return cat
+    from .fidelity import get_catalog
+    catalog=get_catalog()
+    return {'count':catalog['counts']['total'],'counts':catalog['counts'],'models':catalog['models']}
 
 
 @app.on_event("startup")
 async def startup():
+    from .access import access_token
+    access_token()  # Native DSH may use tools before any page has been opened.
     _state["catalog"] = _load_catalog()
-    # 前端缓存自动爆破：每次启动把 index.html 的 ?v=N 统一替换为启动时间戳
-    try:
-        _html_path = ROOT / "site" / "console" / "index.html"
-        if _html_path.exists():
-            _h = _html_path.read_text(encoding="utf-8")
-            _stamp = _dt_now().strftime("%H%M%S%f")[:-3]
-            import re as _re
-            _h2 = _re.sub(r"v=\d+", "v=" + _stamp, _h)
-            if _h2 != _h:
-                _html_path.write_text(_h2, encoding="utf-8")
-                print("[DAYAN] 前端版本号已自动更新: v=" + _stamp)
-    except Exception as _e:
-        print("[DAYAN] 版本号更新失败(不影响运行):", _e)
+    # Asset versions are transformed in the response, never in tracked sources.
     print(f"[DAYAN] 目录加载：{_state['catalog']['count']} 条")
     # 注入阿里云 MaaS LLM planner（失败时规则路由自动保底）
     try:
-        from .agent import intent as _intent
-        from .agent.llm_planner import llm_planner
-        from .llm_client import configured
-        if configured():
-            _intent.set_llm_planner(llm_planner)
-            _state["llm_planner"] = "configured-not-probed"
-            print("[DAYAN] LLM planner 已配置；实际请求结果单独记录")
-        else:
-            _state["llm_planner"] = "unreachable"
-            print("[DAYAN] LLM planner 不可达，使用规则路由")
+        print('[DAYAN] planner '+configure_planner()+'；实际请求结果单独记录')
     except Exception as e:
         _state["llm_planner"] = f"error:{e}"
         print(f"[DAYAN] LLM planner 注入失败：{e}")
@@ -91,7 +80,12 @@ async def index():
     html_path = ROOT / "site" / "console" / "index.html"
     if html_path.exists():
         # no-cache：JS/CSS 有 ?v= 版本号，但 HTML 本身必须每次拉新，否则更新后用户拿旧页
-        return HTMLResponse(html_path.read_text(encoding="utf-8"),
+        import hashlib
+        digest=hashlib.sha256()
+        for file in sorted((ROOT/'site'/'console').glob('*')):
+            if file.suffix in ('.js','.css','.html'):digest.update(file.read_bytes())
+        html=re.sub(r'([?&]v=)[^"&\s<>]+',lambda m:m.group(1)+digest.hexdigest()[:12],html_path.read_text(encoding='utf-8'))
+        return HTMLResponse(html,
                             headers={"Cache-Control": "no-cache"})
     html_path2 = ROOT / "site" / "dayan_ui.html"
     if html_path2.exists():
@@ -106,6 +100,14 @@ async def root_js():
         return HTMLResponse(fp.read_text(encoding="utf-8"),
                             media_type="application/javascript", headers={"Cache-Control": "no-store"})
     raise HTTPException(404)
+
+
+@app.get('/vendor/three.min.js')
+async def local_three():
+    from fastapi.responses import FileResponse
+    path=ROOT/'site/console/vendor/three.min.js'
+    if not path.is_file():raise HTTPException(404,'缺少本地3D运行库')
+    return FileResponse(path,media_type='application/javascript',headers={'Cache-Control':'no-cache'})
 
 
 @app.get("/pages.js")
@@ -162,13 +164,20 @@ async def console_css():
 
 @app.get("/console/assets/{filename}")
 async def console_assets(filename: str):
-    fp = ROOT / "site" / "console" / "assets" / filename
-    if fp.exists():
+    # Validate before touching the filesystem: POSIX realpath rejects NUL,
+    # whereas a bad asset name must consistently return 404 on every OS.
+    if not re.fullmatch(r'[A-Za-z0-9_.-]+',filename):
+        raise HTTPException(404,'资源路径不在允许目录')
+    base=(ROOT/'site'/'console'/'assets').resolve()
+    fp=(base/filename).resolve()
+    if fp.parent!=base:
+        raise HTTPException(404,'资源路径不在允许目录')
+    if fp.is_file():
         suffix = fp.suffix.lower()
-        media = {"webp": "image/webp", "png": "image/png",
+        media = {".webp": "image/webp", ".png": "image/png",
                  ".jpg": "image/jpeg", ".svg": "image/svg+xml"}
-        return HTMLResponse(fp.read_bytes(),
-                            media_type=media.get(suffix, "application/octet-stream"))
+        if suffix not in media:raise HTTPException(404,'资源类型不允许')
+        return Response(fp.read_bytes(),media_type=media[suffix])
     raise HTTPException(404)
 
 
@@ -352,7 +361,7 @@ async def api_models_search(theme: str = "", limit: int = 60):
     if matched:
         rx = re.compile("|".join(MECHANISMS[m] for m in matched), re.I)
         for m in models:
-            blob = " ".join([m.get("basis") or "", m.get("model_id") or "",
+            blob = " ".join([m.get("name") or "", m.get("description") or "", " ".join(m.get("mechanisms") or []), m.get("basis") or "", m.get("model_id") or "",
                              " ".join(m.get("simplifications") or []),
                              m.get("evidence") or "", m.get("fidelity_zh") or ""])
             if rx.search(blob):
@@ -411,6 +420,7 @@ async def api_implemented():
 
 # ============ API: 运行仿真 ============
 @app.post("/api/custom_models")
+@managed_endpoint
 async def api_custom_model(req: dict):
     from .agent.model_tools import build_model
     try:
@@ -445,6 +455,7 @@ class DatasetInput(BaseModel):
 
 
 @app.post("/api/datasets/import")
+@managed_endpoint
 async def api_dataset_import(req: DatasetInput):
     from .datasets import ingest
     try:
@@ -459,6 +470,7 @@ async def api_dataset_import(req: DatasetInput):
 
 
 @app.post("/api/datasets/collect")
+@managed_endpoint
 async def api_dataset_collect(req: dict):
     from .agent.data_tools import collect_data
     result = await asyncio.to_thread(collect_data, **req)
@@ -514,6 +526,7 @@ class SimRequest(BaseModel):
 
 
 @app.post("/api/run")
+@managed_endpoint
 async def api_run(req: SimRequest):
     """统一运行入口（WP3/WP4/WP5）：run_model_full → 单次初始化、
     参数合同、派生随机流、sim_t 时间戳、RunManifest。
@@ -555,6 +568,7 @@ class ResumeRequest(BaseModel):
 
 
 @app.post("/api/runs/{run_id}/resume")
+@managed_endpoint
 async def api_resume(run_id: str, req: ResumeRequest):
     from .run_store import resume_saved_run
     try:
@@ -577,6 +591,7 @@ class StateStreamRequest(BaseModel):
 
 
 @app.post("/api/state_stream")
+@managed_endpoint
 async def api_state_stream(req: StateStreamRequest):
     """WP7 状态同源沙盘：运行模型并采样状态帧。
     provenance=entity：主体位置/状态来自模型真实计算；
@@ -624,6 +639,7 @@ async def api_saved_run(run_id: str):
 
 
 @app.post("/api/experiments")
+@managed_endpoint
 async def api_experiment(body: dict):
     from .research.specs import ExperimentSpec
     from .research.experiment import run_experiment, experiment_payload
@@ -717,15 +733,21 @@ async def api_saved_csv(run_id: str):
 
 @app.get("/api/runs/{run_id}/bundle.zip")
 async def api_saved_bundle(run_id: str):
-    from .run_store import get_store
+    from fastapi.responses import FileResponse
+    from .task_manager import get_manager
     try:
-        data = await asyncio.to_thread(get_store().bundle, run_id)
-        return Response(data, media_type="application/zip",
-                        headers={"Content-Disposition": f'attachment; filename="{run_id}.zip"'})
+        result=await get_manager().execute('api_prepare_bundle',{'run_id':run_id})
+        return FileResponse(result['path'],media_type='application/zip',filename=run_id+'.zip')
     except KeyError as e:
         raise HTTPException(404, str(e))
     except ValueError as e:
         raise HTTPException(400, str(e))
+
+
+async def api_prepare_bundle(run_id: str):
+    from .run_store import get_store
+    try:return {'path':str(get_store().prepare_bundle(run_id))}
+    except KeyError as exc:raise HTTPException(404,str(exc))
 
 
 def _log_history(entry: dict):
@@ -798,102 +820,39 @@ class AgentRequest(BaseModel):
     async_job: bool = True
 
 
-# ---- 异步 job：LLM 规划+多工具执行可达 60s+，前端轮询 stage 流式反馈 ----
-_JOBS: dict = {}
-
-
-def _persist_agent_job(job_id,text):
-    from .agent.job_store import save_job
-    try:save_job(job_id,_JOBS[job_id],text)
-    except (OSError,ValueError,TypeError) as exc:
-        _JOBS[job_id]['audit_warning']='任务日志保存失败：'+str(exc)
-
-
-def _run_agent_job(job_id, text, history, last_run):
-    job = _JOBS[job_id]
-
-    def progress(msg):
-        job["stages"].append(str(msg))
-        _persist_agent_job(job_id,text)
-
-    try:
-        from .agent.agent import get_agent
-        agent = get_agent()
-        job["stages"].append("AI 理解需求并规划中…")
-        result = agent.fulfill(text, history=history, last_run=last_run,
-                               progress=progress)
-        job["result"] = {"ok": result.get("ok", False),
-                         "planner": result.get("planner"),
-                         "intent": result.get("intent"),
-                         "scene": result.get("scene"),
-                         "requirements":result.get("requirements"),"errors":result.get("errors",[]),
-                         "constraint_corrections":result.get("constraint_corrections",[]),
-                         "planner_error":result.get("planner_error"),
-                         "summary": agent.summarize(result),
-                         "executed": result.get("executed", [])}
-        # Tools persist complete artifacts before returning. Do not create a second truncated history.
-        from .run_store import get_store
-        intent = result.get("intent") or ""
-        for e in result.get("executed", []):
-            if not e.get("ok"):
-                continue
-            payload = e.get("payload") or {}
-            rid = payload.get("analysis_id") or payload.get("experiment_id") or payload.get("run_id")
-            if rid:
-                get_store().annotate(rid, intent, text)
-        job["status"] = "done"
-    except Exception as e:                             # noqa: BLE001
-        import traceback
-        job["status"] = "error"
-        job["error"] = f"{type(e).__name__}: {e} | " + traceback.format_exc()[-400:]
-    finally:
-        _persist_agent_job(job_id,text)
-
+# Expensive work is queued in supervised processes; no thread per request.
 
 @app.post("/api/agent")
+@managed_endpoint
 async def api_agent(req: AgentRequest):
-    """DAYAN Agent：自然语言 → 意图路由 → 工具执行 → 报告。
-    async_job=True 时立即返回 job_id，前端轮询 /api/jobs/{id} 获取阶段流。"""
-    if req.async_job:
-        import threading
-        import time as _time
-        import uuid
-        job_id = uuid.uuid4().hex
-        _JOBS[job_id] = {"status": "running", "stages": [],
-                         "result": None, "ts": _time.time()}
-        _persist_agent_job(job_id,req.text)
-        threading.Thread(target=_run_agent_job,
-                         args=(job_id, req.text, req.history, req.last_run),
-                         daemon=True).start()
-        return {"job_id": job_id}
+    """One grounded agent result. managed_endpoint handles sync/queued delivery."""
     from .agent.agent import get_agent
-    agent = get_agent()
-    try:
-        result = await asyncio.to_thread(agent.fulfill, req.text,
-                                         history=req.history, last_run=req.last_run)
-        summary = agent.summarize(result)
-        return {"ok": result.get("ok", False),
-                "planner": result.get("planner"),
-                "intent": result.get("intent"),
-                "scene": result.get("scene"),
-                "requirements": result.get("requirements"),
-                "errors": result.get("errors", []),
-                "summary": summary,
-                "executed": result.get("executed", [])}
-    except Exception as e:                     # noqa: BLE001
-        raise HTTPException(500, f"{type(e).__name__}: {e}")
+    from .task_worker import progress
+    agent=get_agent()
+    callback=progress if __import__('os').environ.get('DAYAN_TASK_DIR') else None
+    result=await asyncio.to_thread(agent.fulfill,req.text,history=req.history,last_run=req.last_run,progress=callback)
+    return {"ok":result.get("ok",False),"planner":result.get("planner"),
+            "intent":result.get("intent"),"scene":result.get("scene"),
+            "requirements":result.get("requirements"),"errors":result.get("errors",[]),
+            "constraint_corrections":result.get("constraint_corrections",[]),
+            "planner_error":result.get("planner_error"),
+            "summary":agent.summarize(result),"executed":result.get("executed",[])}
 
 
 @app.get("/api/jobs/{job_id}")
 async def api_job(job_id: str):
-    job = _JOBS.get(job_id)
-    if job is None:
+    try:
+        return get_manager().get(job_id)
+    except (KeyError,ValueError):
         from .agent.job_store import load_job
-        try:job=await asyncio.to_thread(load_job,job_id)
-        except (KeyError,ValueError,OSError):raise HTTPException(404,"job 不存在或无法核验")
-    if not job:
-        raise HTTPException(404, "job 不存在")
-    return job
+        try:return await asyncio.to_thread(load_job,job_id)
+        except (KeyError,ValueError,OSError):raise HTTPException(404,'job不存在或无法核验')
+
+
+@app.delete('/api/jobs/{job_id}')
+async def api_job_cancel(job_id: str):
+    try:return get_manager().cancel(job_id)
+    except (KeyError,ValueError):raise HTTPException(404,'job不存在')
 
 
 @app.get("/api/agent/planner_status")
@@ -920,6 +879,7 @@ class ReportRequest(BaseModel):
 
 
 @app.post("/api/report")
+@managed_endpoint
 async def api_report(req: ReportRequest):
     """生成 Word 仿真实验事实报告（程序统计 + docx + 结果图）。
     报告基于 manifest 实际配置与程序分析，不用默认值叙事。"""
@@ -1019,6 +979,7 @@ async def api_collection_presets():
 
 
 @app.post("/api/collection/run_preset")
+@managed_endpoint
 async def api_run_preset(body: dict):
     """执行采集预设。"""
     from .agent.data_tools import run_preset
@@ -1053,6 +1014,7 @@ async def api_collection_report_docx(filename: str, legacy: bool = False):
 
 
 @app.post("/api/collection/reports/render_docx")
+@managed_endpoint
 async def api_render_collection_reports(body: dict):
     """Reports always require a concrete immutable study; legacy templates never overwrite outputs."""
     from .agent.data_tools import research_report
@@ -1065,10 +1027,13 @@ async def api_render_collection_reports(body: dict):
 
 @app.get("/api/health")
 async def api_health():
-    return {"ok": True, "service": "dayan", "contract_version": "research-integrity-1"}
+    from .access import access_token
+    access_token()
+    return {"ok": True, "service": "dayan", "contract_version": "research-integrity-1", "access_contract": "loopback-capability-1", "task_contract": "bounded-process-1"}
 
 
 @app.post("/api/tools/{tool_name}")
+@managed_endpoint
 async def api_platform_tool(tool_name: str, body: dict):
     """Shared explicit tool execution for DSH and professional UI. No second LLM planner."""
     from .agent.tools import call_tool, TOOL_IMPL
@@ -1175,6 +1140,7 @@ class ChatMessage(BaseModel):
 
 
 @app.post("/api/ai/chat")
+@managed_endpoint
 async def api_ai_chat(msg: ChatMessage):
     """Compatibility endpoint using the same grounded agent, not a second promise-only chatbot."""
     from .agent.agent import get_agent

@@ -20,6 +20,6 @@ def explain(request,last_run=None,history=None):
                  'source_run_id':source_id,'llm_calls':[],'mode':'capability_facts'}}
     audit=[]
     reply=complete([{'role':'system','content':'你是大衍的只读研究解释助手。依据所提供的真实归档回答，清楚区分观察、机制假设与因果结论。未提供的结果不能编造，不能声称重新运行、创建模型、采集数据或改变了画面。没有数据时只能解释一般方法。用简洁中文。'},
-                    {'role':'user','content':json.dumps({'question':request,'history':(history or [])[-8:],'actual_context':context},ensure_ascii=False)}],
-                   max_tokens=2200,timeout=60,purpose='explain-archived-result',audit=audit)
+                    {'role':'user','content':json.dumps({'question':request,'history':history or [],'actual_context':context},ensure_ascii=False)}],
+                   timeout=180,purpose='explain-archived-result',audit=audit)
     return {'ok':True,'payload':{'reply':reply,'source_run_id':source_id,'llm_calls':audit,'mode':'explanation'}}

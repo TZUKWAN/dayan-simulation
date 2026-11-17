@@ -1,0 +1,2014 @@
+{
+  "version": 1,
+  "scope": "Actual model-internal paired counterfactual computations, not empirical validation or real-world causal identification",
+  "aggregation": "window_mean is the arithmetic mean of recorded observations; jump-process event samples are not a duration-weighted time average",
+  "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+  "cases": [
+    {
+      "case": "epidemic",
+      "model_id": "NET052",
+      "spec": {
+        "experiment_id": "EX-d275b649",
+        "research_id": "",
+        "version": "1.0",
+        "created_at": "2026-11-18T05:07:25",
+        "model_id": "NET052",
+        "title": "Audit epidemic",
+        "baseline_params": {
+          "beta": 0.4,
+          "gamma": 0.2
+        },
+        "baseline_interventions": [],
+        "data_bindings": [],
+        "arms": [
+          {
+            "label": "t2 beta halved",
+            "interventions": [
+              {
+                "at_t": 2.0,
+                "params": {
+                  "beta": 0.2
+                }
+              }
+            ]
+          }
+        ],
+        "seeds": [
+          7,
+          8
+        ],
+        "rng_domain": "exp0",
+        "ticks": 40,
+        "dt": 0.1,
+        "primary_metric": "I",
+        "warmup_ticks": 0,
+        "analysis_window": [],
+        "purpose": "mechanism",
+        "hypothesis": "",
+        "notes": []
+      },
+      "runs": [
+        {
+          "arm": "基线",
+          "seed": 7,
+          "run_id": "R20261117T210726-fcc3039217b042e8b0df1fea6cee2788",
+          "effective_parameters": {
+            "beta": 0.4,
+            "gamma": 0.2,
+            "i0": 0.1,
+            "N": 1.0
+          },
+          "requested": {
+            "parameters": {
+              "beta": 0.4,
+              "gamma": 0.2
+            },
+            "ticks": 40,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "I": 0.1,
+            "I_frac": 0.1,
+            "I_star": 0.5
+          },
+          "final_observation": {
+            "sim_t": 4.0,
+            "I": 0.1787427754257988,
+            "I_frac": 0.1787427754257988,
+            "I_star": 0.5
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "098a3c816be0461263ad7e4dbd8a91b6c5624993eb01814f4baf7df0a74c1e53",
+            "observations.json": "642153bc67f5b1faedb6dfddfb52e5a89f108c4bcf2991ed4b2e305600e8bfb2",
+            "state_frames.json": "2dd4b57eac449da2d3e8ef1133b54c928143c72b90a0d3ac01628683ca5e1247",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "9cfc450b14a0df0328ffc6db3e37e07024db5c20ddc79473fed4cb485ef4c798"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "基线",
+          "seed": 8,
+          "run_id": "R20261117T210728-98b4c7febb3a4e518c0dd0e1fe9b546d",
+          "effective_parameters": {
+            "beta": 0.4,
+            "gamma": 0.2,
+            "i0": 0.1,
+            "N": 1.0
+          },
+          "requested": {
+            "parameters": {
+              "beta": 0.4,
+              "gamma": 0.2
+            },
+            "ticks": 40,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "I": 0.1,
+            "I_frac": 0.1,
+            "I_star": 0.5
+          },
+          "final_observation": {
+            "sim_t": 4.0,
+            "I": 0.1787427754257988,
+            "I_frac": 0.1787427754257988,
+            "I_star": 0.5
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "fc5860fce0dedf3bf9e02baf9d803cd860099f456d1412d76c9ee20d69b29500",
+            "observations.json": "642153bc67f5b1faedb6dfddfb52e5a89f108c4bcf2991ed4b2e305600e8bfb2",
+            "state_frames.json": "e34e962860c4bc85006019cad2769b2a8c9154ae89e8cc75f01c188807a08c6a",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "f26cff3ba12f0afddb01e8153a09d5d013db1e770e3c74861d332f60464229ea"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "t2 beta halved",
+          "seed": 7,
+          "run_id": "R20261117T210729-a29781d859cd43e9b5d55470c28db7e3",
+          "effective_parameters": {
+            "beta": 0.4,
+            "gamma": 0.2,
+            "i0": 0.1,
+            "N": 1.0
+          },
+          "requested": {
+            "parameters": {
+              "beta": 0.4,
+              "gamma": 0.2
+            },
+            "ticks": 40,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": [
+              {
+                "at_t": 2.0,
+                "params": {
+                  "beta": 0.2
+                }
+              }
+            ]
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "I": 0.1,
+            "I_frac": 0.1,
+            "I_star": 0.5
+          },
+          "final_observation": {
+            "sim_t": 4.0,
+            "I": 0.12882347478913914,
+            "I_frac": 0.12882347478913914,
+            "I_star": 0.0
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "5a77d20f308bcde5fc53d9668a5f2fbbb722afe24bad04db51d7ca4cba311587",
+            "observations.json": "4983cafcda43804b1987b50bb4a0f56d225b52e5095b8f9c042b32927d13f645",
+            "state_frames.json": "8ca0f097695bb152291609a9677f9bc2f12498ac159a7f6ea1fea636271979f6",
+            "events.json": "35b3665ccd49d1ab0bf0076de3bc1f8c3db54a77abd4642673c5b70b1438b9b5",
+            "checkpoint.json": "9cfc450b14a0df0328ffc6db3e37e07024db5c20ddc79473fed4cb485ef4c798"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "t2 beta halved",
+          "seed": 8,
+          "run_id": "R20261117T210729-09c402eb5b624cc8999063e78a1eae53",
+          "effective_parameters": {
+            "beta": 0.4,
+            "gamma": 0.2,
+            "i0": 0.1,
+            "N": 1.0
+          },
+          "requested": {
+            "parameters": {
+              "beta": 0.4,
+              "gamma": 0.2
+            },
+            "ticks": 40,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": [
+              {
+                "at_t": 2.0,
+                "params": {
+                  "beta": 0.2
+                }
+              }
+            ]
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "I": 0.1,
+            "I_frac": 0.1,
+            "I_star": 0.5
+          },
+          "final_observation": {
+            "sim_t": 4.0,
+            "I": 0.12882347478913914,
+            "I_frac": 0.12882347478913914,
+            "I_star": 0.0
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "9c41bb2a1cf471d2ac61b812b04104e8044c8a7c98760526a97dbf069ea0a97a",
+            "observations.json": "4983cafcda43804b1987b50bb4a0f56d225b52e5095b8f9c042b32927d13f645",
+            "state_frames.json": "41bf694e26da67227208e476296c1b00c637922db786b37ad256b99a6ab35996",
+            "events.json": "35b3665ccd49d1ab0bf0076de3bc1f8c3db54a77abd4642673c5b70b1438b9b5",
+            "checkpoint.json": "f26cff3ba12f0afddb01e8153a09d5d013db1e770e3c74861d332f60464229ea"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        }
+      ],
+      "analysis": {
+        "metric": "I",
+        "model_id": "NET052",
+        "n_seeds": 2,
+        "paired_by_seed": true,
+        "causality_note": "模型内反事实比较，不构成现实因果识别",
+        "significance_note": "多次仿真重复不是现实被试样本；此处报告效应量与配对差，不宣称现实显著性",
+        "baseline": {
+          "window_mean": {
+            "per_seed": [
+              0.13707292730490656,
+              0.13707292730490656
+            ],
+            "mean": 0.13707292730490656,
+            "std": 0.0
+          },
+          "trend_slope_per_t": {
+            "per_seed": [
+              0.019722776631257852,
+              0.019722776631257852
+            ],
+            "mean": 0.019722776631257852,
+            "std": 0.0
+          },
+          "peak": {
+            "per_seed": [
+              0.1787427754257988,
+              0.1787427754257988
+            ],
+            "mean": 0.1787427754257988,
+            "std": 0.0
+          },
+          "peak_t": {
+            "per_seed": [
+              4.0,
+              4.0
+            ],
+            "mean": 4.0,
+            "std": 0.0
+          }
+        },
+        "arms": {
+          "t2 beta halved": {
+            "window_mean": {
+              "per_seed": [
+                0.12451796444070541,
+                0.12451796444070541
+              ],
+              "mean": 0.12451796444070541,
+              "std": 0.0
+            },
+            "trend_slope_per_t": {
+              "per_seed": [
+                0.0074049065478998324,
+                0.0074049065478998324
+              ],
+              "mean": 0.0074049065478998324,
+              "std": 0.0
+            },
+            "peak": {
+              "per_seed": [
+                0.13582231586244828,
+                0.13582231586244828
+              ],
+              "mean": 0.13582231586244828,
+              "std": 0.0
+            },
+            "paired_diff": {
+              "mean": -0.012554962864201144,
+              "std": 0.0,
+              "n": 2
+            },
+            "effect_rel": -0.0915933081101693,
+            "cohens_d": null
+          }
+        },
+        "baseline_window_mean": 0.13707292730490656
+      },
+      "validity_scope": "Homogeneous SIS fractions; no empirical calibration",
+      "checks_passed": [
+        "four actual archived runs",
+        "paired seed IDs and effective parameters",
+        "artifact hashes loaded and verified",
+        "actual final time and saved frame agree",
+        "finite requested metric",
+        "explicit counterfactual effect"
+      ]
+    },
+    {
+      "case": "evacuation",
+      "model_id": "NET113",
+      "spec": {
+        "experiment_id": "EX-67e206ba",
+        "research_id": "",
+        "version": "1.0",
+        "created_at": "2026-11-18T05:07:29",
+        "model_id": "NET113",
+        "title": "Audit evacuation",
+        "baseline_params": {
+          "n": 37,
+          "v_des": 0.8
+        },
+        "baseline_interventions": [],
+        "data_bindings": [],
+        "arms": [
+          {
+            "label": "desired speed 1.6",
+            "params": {
+              "v_des": 1.6
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          8
+        ],
+        "rng_domain": "exp0",
+        "ticks": 250,
+        "dt": 0.05,
+        "primary_metric": "evacuated",
+        "warmup_ticks": 0,
+        "analysis_window": [],
+        "purpose": "mechanism",
+        "hypothesis": "",
+        "notes": []
+      },
+      "runs": [
+        {
+          "arm": "基线",
+          "seed": 7,
+          "run_id": "R20261117T210730-9cbd1feb54c74119b8719d95fb418f04",
+          "effective_parameters": {
+            "n": 37,
+            "bounds": [
+              0,
+              0,
+              12,
+              12
+            ],
+            "exit_half": 1.5,
+            "v_des": 0.8,
+            "dt": 0.05
+          },
+          "requested": {
+            "parameters": {
+              "n": 37,
+              "v_des": 0.8
+            },
+            "ticks": 250,
+            "dt": 0.05,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "evacuated": 0,
+            "alive": 37,
+            "min_separation": 0.03298336544917494,
+            "in_bounds": true
+          },
+          "final_observation": {
+            "sim_t": 12.5,
+            "evacuated": 30,
+            "alive": 7,
+            "min_separation": 0.9509662514573801,
+            "in_bounds": true
+          },
+          "observation_count": 251,
+          "saved_frames": 126,
+          "entity_count_initial": 37,
+          "artifact_hashes": {
+            "manifest.json": "03b26bab3a1f61804971c0339fab719dffa80d2a310f4a7347f344ea9aa9fffb",
+            "observations.json": "cf515b2e49de9f2bd0ee5dbd220943a4558611c234ca4277b3e4214454982672",
+            "state_frames.json": "f2fe36d5b481672a291621151d33990dc568712e2103f39498e8e215522e17b5",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "69be17d889b9a6d8c9f1d9321cf288177f865180b23d9bfac777d219586f348e"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "基线",
+          "seed": 8,
+          "run_id": "R20261117T210730-31999e91d6094b90be1e091cbf630d71",
+          "effective_parameters": {
+            "n": 37,
+            "bounds": [
+              0,
+              0,
+              12,
+              12
+            ],
+            "exit_half": 1.5,
+            "v_des": 0.8,
+            "dt": 0.05
+          },
+          "requested": {
+            "parameters": {
+              "n": 37,
+              "v_des": 0.8
+            },
+            "ticks": 250,
+            "dt": 0.05,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "evacuated": 0,
+            "alive": 37,
+            "min_separation": 0.0742680432553694,
+            "in_bounds": true
+          },
+          "final_observation": {
+            "sim_t": 12.5,
+            "evacuated": 32,
+            "alive": 5,
+            "min_separation": 0.9093116932219555,
+            "in_bounds": true
+          },
+          "observation_count": 251,
+          "saved_frames": 126,
+          "entity_count_initial": 37,
+          "artifact_hashes": {
+            "manifest.json": "85ab4fde649fda28e130ce84c1ab72f789b2782e16b888643b0ac1c96aaa364c",
+            "observations.json": "d75b69ec1d83545a24a1b5151a5a32ce0ba2d5a4a759922a52bed3cfcfdc6fd0",
+            "state_frames.json": "5cc9818294dde59836afd769fe19e7aec56d924bfa90e61027419958ff8be4a5",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "592d81c5fb732576b10099346dcbd5f22f8be2814c6ff92d6c830c21e9f12be8"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "desired speed 1.6",
+          "seed": 7,
+          "run_id": "R20261117T210730-1e01e6625ba74394b7b74ebb109d1d16",
+          "effective_parameters": {
+            "n": 37,
+            "bounds": [
+              0,
+              0,
+              12,
+              12
+            ],
+            "exit_half": 1.5,
+            "v_des": 1.6,
+            "dt": 0.05
+          },
+          "requested": {
+            "parameters": {
+              "n": 37,
+              "v_des": 1.6
+            },
+            "ticks": 250,
+            "dt": 0.05,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "evacuated": 0,
+            "alive": 37,
+            "min_separation": 0.03298336544917494,
+            "in_bounds": true
+          },
+          "final_observation": {
+            "sim_t": 12.5,
+            "evacuated": 37,
+            "alive": 0,
+            "min_separation": null,
+            "in_bounds": true
+          },
+          "observation_count": 251,
+          "saved_frames": 126,
+          "entity_count_initial": 37,
+          "artifact_hashes": {
+            "manifest.json": "5734f425e19953480e44dcbd53d7914f9d1a38041ee35bbce5641b31fd0bcd63",
+            "observations.json": "18ab514cf21a02cdea6eea029c48c41581eefd1fc1033a60b23d57e7e8e2beb7",
+            "state_frames.json": "2195ee6cd38589e56db7a549235c256646f889d773a5892f61c0ff2f7bfdc2c9",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "03048bd63820010e10d774aeae5f2c9d1f652087fb98efdac7959c87775655fb"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "desired speed 1.6",
+          "seed": 8,
+          "run_id": "R20261117T210731-286ea713bca44e4da7e8a5f540858cc9",
+          "effective_parameters": {
+            "n": 37,
+            "bounds": [
+              0,
+              0,
+              12,
+              12
+            ],
+            "exit_half": 1.5,
+            "v_des": 1.6,
+            "dt": 0.05
+          },
+          "requested": {
+            "parameters": {
+              "n": 37,
+              "v_des": 1.6
+            },
+            "ticks": 250,
+            "dt": 0.05,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "evacuated": 0,
+            "alive": 37,
+            "min_separation": 0.0742680432553694,
+            "in_bounds": true
+          },
+          "final_observation": {
+            "sim_t": 12.5,
+            "evacuated": 37,
+            "alive": 0,
+            "min_separation": null,
+            "in_bounds": true
+          },
+          "observation_count": 251,
+          "saved_frames": 126,
+          "entity_count_initial": 37,
+          "artifact_hashes": {
+            "manifest.json": "d3f86d6a6698daffae42f942a7789dc025d074acce7863c69a1a9d1f034b304b",
+            "observations.json": "83dfee7861684a240a98c037dea72b0c6c6a8e21fcb9800b543bb4b001cb82bc",
+            "state_frames.json": "e8d0f4816a8605d6d3515684726c2e444f193cfc4fd3527312b8d16cc7bc4ba6",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "d7062dea188d623c181847ec0c8ed5d0fba843eca730dba7abbba506ff4f3c5f"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        }
+      ],
+      "analysis": {
+        "metric": "evacuated",
+        "model_id": "NET113",
+        "n_seeds": 2,
+        "paired_by_seed": true,
+        "causality_note": "模型内反事实比较，不构成现实因果识别",
+        "significance_note": "多次仿真重复不是现实被试样本；此处报告效应量与配对差，不宣称现实显著性",
+        "baseline": {
+          "window_mean": {
+            "per_seed": [
+              13.159362549800797,
+              12.294820717131474
+            ],
+            "mean": 12.727091633466134,
+            "std": 0.6113233924999236
+          },
+          "trend_slope_per_t": {
+            "per_seed": [
+              2.815101498766837,
+              2.8784670840447726
+            ],
+            "mean": 2.846784291405805,
+            "std": 0.0448062350438827
+          },
+          "peak": {
+            "per_seed": [
+              30.0,
+              32.0
+            ],
+            "mean": 31.0,
+            "std": 1.4142135623730951
+          },
+          "peak_t": {
+            "per_seed": [
+              12.15,
+              12.5
+            ],
+            "mean": 12.325,
+            "std": 0.24748737341529137
+          }
+        },
+        "arms": {
+          "desired speed 1.6": {
+            "window_mean": {
+              "per_seed": [
+                24.163346613545816,
+                23.83266932270916
+              ],
+              "mean": 23.99800796812749,
+              "std": 0.23382415473499424
+            },
+            "trend_slope_per_t": {
+              "per_seed": [
+                3.6364105482830578,
+                3.76799848226143
+              ],
+              "mean": 3.7022045152722436,
+              "std": 0.09304672043843462
+            },
+            "peak": {
+              "per_seed": [
+                37.0,
+                37.0
+              ],
+              "mean": 37.0,
+              "std": 0.0
+            },
+            "paired_diff": {
+              "mean": 11.270916334661354,
+              "std": 0.3774992377649294,
+              "n": 2
+            },
+            "effect_rel": 0.8855845985287213,
+            "cohens_d": 24.353116628582917
+          }
+        },
+        "baseline_window_mean": 12.727091633466134
+      },
+      "validity_scope": "Synthetic single room, social-force approximation; no city topology or real population",
+      "checks_passed": [
+        "four actual archived runs",
+        "paired seed IDs and effective parameters",
+        "artifact hashes loaded and verified",
+        "actual final time and saved frame agree",
+        "finite requested metric",
+        "explicit counterfactual effect"
+      ]
+    },
+    {
+      "case": "queue",
+      "model_id": "SYS002",
+      "spec": {
+        "experiment_id": "EX-8b3bdcb8",
+        "research_id": "",
+        "version": "1.0",
+        "created_at": "2026-11-18T05:07:32",
+        "model_id": "SYS002",
+        "title": "Audit queue",
+        "baseline_params": {
+          "c": 2,
+          "lam": 1.5,
+          "mu": 1.0
+        },
+        "baseline_interventions": [],
+        "data_bindings": [],
+        "arms": [
+          {
+            "label": "service rate 1.5",
+            "params": {
+              "mu": 1.5
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          8
+        ],
+        "rng_domain": "exp0",
+        "ticks": 600,
+        "dt": 0.1,
+        "primary_metric": "Wq_sim",
+        "warmup_ticks": 0,
+        "analysis_window": [],
+        "purpose": "mechanism",
+        "hypothesis": "",
+        "notes": []
+      },
+      "runs": [
+        {
+          "arm": "基线",
+          "seed": 7,
+          "run_id": "R20261117T210732-b5f83ef7aa1e45a3a96866a45305d6f6",
+          "effective_parameters": {
+            "c": 2,
+            "lam": 1.5,
+            "mu": 1.0
+          },
+          "requested": {
+            "parameters": {
+              "c": 2,
+              "lam": 1.5,
+              "mu": 1.0
+            },
+            "ticks": 600,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "Wq_sim": 0.0,
+            "Wq_erlangc": 1.2857142857142858,
+            "n_served": 0,
+            "n_service_starts": 0,
+            "n_arrived": 0
+          },
+          "final_observation": {
+            "sim_t": 60.0,
+            "Wq_sim": 0.6307692307692367,
+            "Wq_erlangc": 1.2857142857142858,
+            "n_served": 90,
+            "n_service_starts": 91,
+            "n_arrived": 91
+          },
+          "observation_count": 601,
+          "saved_frames": 201,
+          "entity_count_initial": 2,
+          "artifact_hashes": {
+            "manifest.json": "c062a9dcfd6273c06bca2a3421279fd05dbef12e0a886eae84585e4d6ca3daad",
+            "observations.json": "05b4d151d9333efa91b549f90b07d6f11e131465433acb4294e6d9cf75103d67",
+            "state_frames.json": "1a1c08fd81f9d14847e396a9596066e3e34a3af4dccc67943fba21642c2668d4",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "e155afa8f0fe8b68274b943e82410f02cbee6d63d9cce81ebe1a155c4d658c85"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "基线",
+          "seed": 8,
+          "run_id": "R20261117T210733-62dc912df8f74621bb5bd30e764941fb",
+          "effective_parameters": {
+            "c": 2,
+            "lam": 1.5,
+            "mu": 1.0
+          },
+          "requested": {
+            "parameters": {
+              "c": 2,
+              "lam": 1.5,
+              "mu": 1.0
+            },
+            "ticks": 600,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "Wq_sim": 0.0,
+            "Wq_erlangc": 1.2857142857142858,
+            "n_served": 0,
+            "n_service_starts": 0,
+            "n_arrived": 0
+          },
+          "final_observation": {
+            "sim_t": 60.0,
+            "Wq_sim": 1.9352941176470726,
+            "Wq_erlangc": 1.2857142857142858,
+            "n_served": 100,
+            "n_service_starts": 102,
+            "n_arrived": 103
+          },
+          "observation_count": 601,
+          "saved_frames": 201,
+          "entity_count_initial": 2,
+          "artifact_hashes": {
+            "manifest.json": "8c5fc935d0b3bcd807a5cf82efb17d9c9e9c9c5968bc3d673a085e4a8a17e689",
+            "observations.json": "f614940ab8bd6b4a0821a6e1cf524fdb3872577068cbc216d97207cd56172ec4",
+            "state_frames.json": "68f7c96d83a26c1994dfe2e16f4fd428216deedd64e625c4fc58f07fd5902bd5",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "c4c4d0bffb140562245a5566b114601252ee75dca7450f3dcadc0d9fc0b21f14"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "service rate 1.5",
+          "seed": 7,
+          "run_id": "R20261117T210734-f9eede7843684e86bfefa9a45c251f64",
+          "effective_parameters": {
+            "c": 2,
+            "lam": 1.5,
+            "mu": 1.5
+          },
+          "requested": {
+            "parameters": {
+              "c": 2,
+              "lam": 1.5,
+              "mu": 1.5
+            },
+            "ticks": 600,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "Wq_sim": 0.0,
+            "Wq_erlangc": 0.2222222222222222,
+            "n_served": 0,
+            "n_service_starts": 0,
+            "n_arrived": 0
+          },
+          "final_observation": {
+            "sim_t": 60.0,
+            "Wq_sim": 0.13132530120482075,
+            "Wq_erlangc": 0.2222222222222222,
+            "n_served": 81,
+            "n_service_starts": 83,
+            "n_arrived": 84
+          },
+          "observation_count": 601,
+          "saved_frames": 201,
+          "entity_count_initial": 2,
+          "artifact_hashes": {
+            "manifest.json": "c865590edc7cbabe330b837b0edad3a26b83cfef9d9cd93d681a0229e3f0f0a1",
+            "observations.json": "2b2acb1a7de86fe1eee9c4cb70b78a23c447d3657f8aa9fcebddca05aa7d4bca",
+            "state_frames.json": "114b2fd42d5beb130c205eb9fdd8718f8d248ae1d6989ca8a4b07a3deb084f4a",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "8576a8122d56bab96abdb38f9b6468b1ddf7a6a95e22ecc07a069598b0c67743"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "service rate 1.5",
+          "seed": 8,
+          "run_id": "R20261117T210735-3a13b11195cf455f9fd977b8094a656e",
+          "effective_parameters": {
+            "c": 2,
+            "lam": 1.5,
+            "mu": 1.5
+          },
+          "requested": {
+            "parameters": {
+              "c": 2,
+              "lam": 1.5,
+              "mu": 1.5
+            },
+            "ticks": 600,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "Wq_sim": 0.0,
+            "Wq_erlangc": 0.2222222222222222,
+            "n_served": 0,
+            "n_service_starts": 0,
+            "n_arrived": 0
+          },
+          "final_observation": {
+            "sim_t": 60.0,
+            "Wq_sim": 0.6803921568627462,
+            "Wq_erlangc": 0.2222222222222222,
+            "n_served": 102,
+            "n_service_starts": 102,
+            "n_arrived": 102
+          },
+          "observation_count": 601,
+          "saved_frames": 201,
+          "entity_count_initial": 2,
+          "artifact_hashes": {
+            "manifest.json": "451642c31cab523a1fc8ff6b6eb9ffb4e239a94b3be7000936cce76d7cd9f0c8",
+            "observations.json": "46611bd227f28f439371ace8216dc7b2ee79327d999810506e4a9613e2e4f59e",
+            "state_frames.json": "1759bf28c454ab76b6a4c50fa95a3014b36cd27ee0db26a57da76be6ca5d01dc",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "37ed0c8d8f8320c0ce8ca022375ff479be69f772b14d8a1b0e86470dbf6ef64e"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        }
+      ],
+      "analysis": {
+        "metric": "Wq_sim",
+        "model_id": "SYS002",
+        "n_seeds": 2,
+        "paired_by_seed": true,
+        "causality_note": "模型内反事实比较，不构成现实因果识别",
+        "significance_note": "多次仿真重复不是现实被试样本；此处报告效应量与配对差，不宣称现实显著性",
+        "baseline": {
+          "window_mean": {
+            "per_seed": [
+              0.45940313955702855,
+              1.9212884810635005
+            ],
+            "mean": 1.1903458103102644,
+            "std": 1.033709038296438
+          },
+          "trend_slope_per_t": {
+            "per_seed": [
+              0.009725870106792229,
+              0.031299076115099314
+            ],
+            "mean": 0.02051247311094577,
+            "std": 0.01525456026040831
+          },
+          "peak": {
+            "per_seed": [
+              0.7013888888888951,
+              3.197560975609768
+            ],
+            "mean": 1.9494749322493314,
+            "std": 1.7650602095289039
+          },
+          "peak_t": {
+            "per_seed": [
+              45.7,
+              23.1
+            ],
+            "mean": 34.400000000000006,
+            "std": 15.980613254815976
+          }
+        },
+        "arms": {
+          "service rate 1.5": {
+            "window_mean": {
+              "per_seed": [
+                0.08082321496913719,
+                0.8465228807669102
+              ],
+              "mean": 0.46367304786802366,
+              "std": 0.5414314260378784
+            },
+            "trend_slope_per_t": {
+              "per_seed": [
+                0.0025512188099436543,
+                0.005986464703958901
+              ],
+              "mean": 0.0042688417569512775,
+              "std": 0.002429085666701425
+            },
+            "peak": {
+              "per_seed": [
+                0.15538461538461706,
+                1.5363636363636322
+              ],
+              "mean": 0.8458741258741246,
+              "std": 0.976499630410621
+            },
+            "paired_diff": {
+              "mean": -0.7266727624422409,
+              "std": 0.49227761225855976,
+              "n": 2
+            },
+            "effect_rel": -0.6104719789393245,
+            "cohens_d": -0.8806691516209999
+          }
+        },
+        "baseline_window_mean": 1.1903458103102644
+      },
+      "validity_scope": "Fixed-step M/M/2 approximation; no measured arrival/service records",
+      "checks_passed": [
+        "four actual archived runs",
+        "paired seed IDs and effective parameters",
+        "artifact hashes loaded and verified",
+        "actual final time and saved frame agree",
+        "finite requested metric",
+        "explicit counterfactual effect"
+      ]
+    },
+    {
+      "case": "network_spread",
+      "model_id": "NET063",
+      "spec": {
+        "experiment_id": "EX-05d44ec7",
+        "research_id": "",
+        "version": "1.0",
+        "created_at": "2026-11-18T05:07:36",
+        "model_id": "NET063",
+        "title": "Audit network_spread",
+        "baseline_params": {
+          "n": 100,
+          "k_avg": 6,
+          "beta": 0.3,
+          "gamma": 0.1,
+          "n_seed": 3
+        },
+        "baseline_interventions": [],
+        "data_bindings": [],
+        "arms": [
+          {
+            "label": "edge infection rate .1",
+            "params": {
+              "beta": 0.1
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          8
+        ],
+        "rng_domain": "exp0",
+        "ticks": 100,
+        "dt": 0.1,
+        "primary_metric": "I",
+        "warmup_ticks": 0,
+        "analysis_window": [],
+        "purpose": "mechanism",
+        "hypothesis": "",
+        "notes": []
+      },
+      "runs": [
+        {
+          "arm": "基线",
+          "seed": 7,
+          "run_id": "R20261117T210736-9f51a3ab718c4cb1bfa4f68ac9e8658c",
+          "effective_parameters": {
+            "n": 100,
+            "k_avg": 6,
+            "beta": 0.3,
+            "gamma": 0.1,
+            "n_seed": 3
+          },
+          "requested": {
+            "parameters": {
+              "n": 100,
+              "k_avg": 6,
+              "beta": 0.3,
+              "gamma": 0.1,
+              "n_seed": 3
+            },
+            "ticks": 100,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "S": 97,
+            "I": 3,
+            "R": 0
+          },
+          "final_observation": {
+            "sim_t": 10.0,
+            "S": 3,
+            "I": 39,
+            "R": 58
+          },
+          "observation_count": 154,
+          "saved_frames": 154,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "792bd14b6c6b5c47ca80151f2a439c64feb70dda19bcb994e7f074da013a5af7",
+            "observations.json": "aeec10d8e95a43580f238c01e8d39df6a618bec055ba9be4a4b16264a1da556a",
+            "state_frames.json": "6d62bcc11b5b9090e595907bee560f86f98928ef1fac92054cac7ac09932e72f",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "48848aaa9c2417162551c2247b54e2a3ef44714ba4321000a9285267735b32b5"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "基线",
+          "seed": 8,
+          "run_id": "R20261117T210737-447534ba21324b38b62e483b7f7084e7",
+          "effective_parameters": {
+            "n": 100,
+            "k_avg": 6,
+            "beta": 0.3,
+            "gamma": 0.1,
+            "n_seed": 3
+          },
+          "requested": {
+            "parameters": {
+              "n": 100,
+              "k_avg": 6,
+              "beta": 0.3,
+              "gamma": 0.1,
+              "n_seed": 3
+            },
+            "ticks": 100,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "S": 97,
+            "I": 3,
+            "R": 0
+          },
+          "final_observation": {
+            "sim_t": 10.0,
+            "S": 2,
+            "I": 47,
+            "R": 51
+          },
+          "observation_count": 148,
+          "saved_frames": 148,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "4d1586a61221074371040b2c53d5afc546ade9ae703b6e175df80d05f1cbb7b6",
+            "observations.json": "7a285c10cc5c690a201a8271eefe0cbdae439d07ea52e7feb398802a05c2f85a",
+            "state_frames.json": "2d8af53a9168b6869be3d78f04d339ebd6b5567062aa3d949ebf7454e9fb4786",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "9cfdd831de1f289304da68bedd41a443afc33f4ce9b1f075ec58708748b67cfe"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "edge infection rate .1",
+          "seed": 7,
+          "run_id": "R20261117T210737-e350f6e7a0a14874809f8ef2776e4e3d",
+          "effective_parameters": {
+            "n": 100,
+            "k_avg": 6,
+            "beta": 0.1,
+            "gamma": 0.1,
+            "n_seed": 3
+          },
+          "requested": {
+            "parameters": {
+              "n": 100,
+              "k_avg": 6,
+              "beta": 0.1,
+              "gamma": 0.1,
+              "n_seed": 3
+            },
+            "ticks": 100,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "S": 97,
+            "I": 3,
+            "R": 0
+          },
+          "final_observation": {
+            "sim_t": 10.0,
+            "S": 33,
+            "I": 44,
+            "R": 23
+          },
+          "observation_count": 89,
+          "saved_frames": 89,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "e4567c0f64e1923f98c842a9444ed6931d1ec5618240518f86f33b96c0cd0af6",
+            "observations.json": "1a817521f65ea17c545bb6f4769c0dda107c25eaa74c186ed55662f4ef23bcd3",
+            "state_frames.json": "1e020dee5a2eaa339f34ed7c15af7161acae2fd013354703d205651cee0946ad",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "c8d48d8d6bef19027bac993460e389b7d7381345f3a1ca747a720a476abfaeab"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "edge infection rate .1",
+          "seed": 8,
+          "run_id": "R20261117T210737-f360e72c45584d90a2dc6804a9cf40db",
+          "effective_parameters": {
+            "n": 100,
+            "k_avg": 6,
+            "beta": 0.1,
+            "gamma": 0.1,
+            "n_seed": 3
+          },
+          "requested": {
+            "parameters": {
+              "n": 100,
+              "k_avg": 6,
+              "beta": 0.1,
+              "gamma": 0.1,
+              "n_seed": 3
+            },
+            "ticks": 100,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "S": 97,
+            "I": 3,
+            "R": 0
+          },
+          "final_observation": {
+            "sim_t": 10.0,
+            "S": 25,
+            "I": 57,
+            "R": 18
+          },
+          "observation_count": 92,
+          "saved_frames": 92,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "daa72cbd23e4bee842c5682a5e3e30ca8240510e274f604c7ed31574fbbed07a",
+            "observations.json": "acad1adab7407e12c62b4cb795e625060c019042b6f0b1fe36f7f4da22aa608e",
+            "state_frames.json": "94fa7aecc2b96310a91f9c03a87f2bc3c835f7edb0d531299987d5feb9c8aee4",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "9a5c4ffdc028f9f0ce5c70d83201030b574a1b620ad6001f8e6f3e3cd1b82ef2"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        }
+      ],
+      "analysis": {
+        "metric": "I",
+        "model_id": "NET063",
+        "n_seeds": 2,
+        "paired_by_seed": true,
+        "causality_note": "模型内反事实比较，不构成现实因果识别",
+        "significance_note": "多次仿真重复不是现实被试样本；此处报告效应量与配对差，不宣称现实显著性",
+        "baseline": {
+          "window_mean": {
+            "per_seed": [
+              48.38961038961039,
+              50.398648648648646
+            ],
+            "mean": 49.39412951912952,
+            "std": 1.4206045766291666
+          },
+          "trend_slope_per_t": {
+            "per_seed": [
+              3.9327405357370986,
+              4.851827538002869
+            ],
+            "mean": 4.392284036869984,
+            "std": 0.6498926518025421
+          },
+          "peak": {
+            "per_seed": [
+              75.0,
+              75.0
+            ],
+            "mean": 75.0,
+            "std": 0.0
+          },
+          "peak_t": {
+            "per_seed": [
+              4.502323819,
+              3.374872091
+            ],
+            "mean": 3.9385979549999997,
+            "std": 0.797228762329291
+          }
+        },
+        "arms": {
+          "edge infection rate .1": {
+            "window_mean": {
+              "per_seed": [
+                29.168539325842698,
+                32.29347826086956
+              ],
+              "mean": 30.731008793356132,
+              "std": 2.209665511751364
+            },
+            "trend_slope_per_t": {
+              "per_seed": [
+                4.226793410090995,
+                6.49202889441253
+              ],
+              "mean": 5.359411152251763,
+              "std": 1.601763371948151
+            },
+            "peak": {
+              "per_seed": [
+                45.0,
+                57.0
+              ],
+              "mean": 51.0,
+              "std": 8.48528137423857
+            },
+            "paired_diff": {
+              "mean": -18.66312072577339,
+              "std": 0.7890609351221979,
+              "n": 2
+            },
+            "effect_rel": -0.3778408670719761,
+            "cohens_d": -10.04734837939189
+          }
+        },
+        "baseline_window_mean": 49.39412951912952
+      },
+      "validity_scope": "Synthetic fixed seed-0 adjacency with possible repeated edges; infection/recovery use the paired experiment RNG; no measured social network",
+      "checks_passed": [
+        "four actual archived runs",
+        "paired seed IDs and effective parameters",
+        "artifact hashes loaded and verified",
+        "actual final time and saved frame agree",
+        "finite requested metric",
+        "explicit counterfactual effect"
+      ]
+    },
+    {
+      "case": "economy",
+      "model_id": "ECO019",
+      "spec": {
+        "experiment_id": "EX-92acea59",
+        "research_id": "",
+        "version": "1.0",
+        "created_at": "2026-11-18T05:07:38",
+        "model_id": "ECO019",
+        "title": "Audit economy",
+        "baseline_params": {
+          "nu": 2.5,
+          "delta": 0.03,
+          "a": 0.045,
+          "b": 0.06,
+          "x0": [
+            0.87875,
+            0.7875
+          ]
+        },
+        "baseline_interventions": [],
+        "data_bindings": [],
+        "arms": [
+          {
+            "label": "depreciation .05",
+            "params": {
+              "delta": 0.05
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          8
+        ],
+        "rng_domain": "exp0",
+        "ticks": 200,
+        "dt": 0.1,
+        "primary_metric": "employment",
+        "warmup_ticks": 0,
+        "analysis_window": [],
+        "purpose": "mechanism",
+        "hypothesis": "",
+        "notes": []
+      },
+      "runs": [
+        {
+          "arm": "基线",
+          "seed": 7,
+          "run_id": "R20261117T210738-6cc5d9d23a7342328e967ab6c46b2f9f",
+          "effective_parameters": {
+            "nu": 2.5,
+            "delta": 0.03,
+            "a": 0.045,
+            "b": 0.06,
+            "x0": [
+              0.87875,
+              0.7875
+            ]
+          },
+          "requested": {
+            "parameters": {
+              "nu": 2.5,
+              "delta": 0.03,
+              "a": 0.045,
+              "b": 0.06,
+              "x0": [
+                0.87875,
+                0.7875
+              ]
+            },
+            "ticks": 200,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "wage_share": 0.87875,
+            "employment": 0.7875,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.87875,
+            "employment_min": 0.7875,
+            "employment_max": 0.7875,
+            "cycle_active": false
+          },
+          "final_observation": {
+            "sim_t": 20.0,
+            "wage_share": 0.975064503079738,
+            "employment": 0.7657769114856299,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.975064503079738,
+            "employment_min": 0.7657769114856299,
+            "employment_max": 0.8714254914882307,
+            "cycle_active": true
+          },
+          "observation_count": 201,
+          "saved_frames": 201,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "37bb711bf3b3352ae69fd6e8c2f7c1c150bda4ff7af2cefc62571abea3fd6f46",
+            "observations.json": "b7a6a2ece14f2f20f0dcc3c5ea96b7f6053a9562582054970a7aa7d20cfb17ae",
+            "state_frames.json": "86f92f05cac527d43025852b9251b613622d6ecba662071dd056b353c3d7c708",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "dfeadf5ca7ff613862685f57a6c2869a48bdeddc3a7f0aaf4906e03003170e2e"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "基线",
+          "seed": 8,
+          "run_id": "R20261117T210738-2db339eeadeb499b9f8a139c0c66b93f",
+          "effective_parameters": {
+            "nu": 2.5,
+            "delta": 0.03,
+            "a": 0.045,
+            "b": 0.06,
+            "x0": [
+              0.87875,
+              0.7875
+            ]
+          },
+          "requested": {
+            "parameters": {
+              "nu": 2.5,
+              "delta": 0.03,
+              "a": 0.045,
+              "b": 0.06,
+              "x0": [
+                0.87875,
+                0.7875
+              ]
+            },
+            "ticks": 200,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "wage_share": 0.87875,
+            "employment": 0.7875,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.87875,
+            "employment_min": 0.7875,
+            "employment_max": 0.7875,
+            "cycle_active": false
+          },
+          "final_observation": {
+            "sim_t": 20.0,
+            "wage_share": 0.975064503079738,
+            "employment": 0.7657769114856299,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.975064503079738,
+            "employment_min": 0.7657769114856299,
+            "employment_max": 0.8714254914882307,
+            "cycle_active": true
+          },
+          "observation_count": 201,
+          "saved_frames": 201,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "34fbb4e344e5f48fddd831bb3ee76b2abc23f15e2d11ac4747e26833530f9c62",
+            "observations.json": "b7a6a2ece14f2f20f0dcc3c5ea96b7f6053a9562582054970a7aa7d20cfb17ae",
+            "state_frames.json": "00fc68df4ac37dd71b1587e3f108679f7ab4bcd1c6fc51c429e1b8c017afff0d",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "b56229faf83fd033cd9139a6604c7bb7557fe17d137fb844098af86c8dd49362"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "depreciation .05",
+          "seed": 7,
+          "run_id": "R20261117T210739-755c80a83ed449478738eccbe8363f0b",
+          "effective_parameters": {
+            "nu": 2.5,
+            "delta": 0.05,
+            "a": 0.045,
+            "b": 0.06,
+            "x0": [
+              0.87875,
+              0.7875
+            ]
+          },
+          "requested": {
+            "parameters": {
+              "nu": 2.5,
+              "delta": 0.05,
+              "a": 0.045,
+              "b": 0.06,
+              "x0": [
+                0.87875,
+                0.7875
+              ]
+            },
+            "ticks": 200,
+            "dt": 0.1,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "wage_share": 0.87875,
+            "employment": 0.7875,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.87875,
+            "employment_min": 0.7875,
+            "employment_max": 0.7875,
+            "cycle_active": false
+          },
+          "final_observation": {
+            "sim_t": 20.0,
+            "wage_share": 0.8809046312818657,
+            "employment": 0.715296003542871,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.8909772067128378,
+            "employment_min": 0.715296003542871,
+            "employment_max": 0.7875,
+            "cycle_active": false
+          },
+          "observation_count": 201,
+          "saved_frames": 201,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "37b3f39db1e4d57403cb7a31a4d58c141b4a80632794e230ad2d87650434d35d",
+            "observations.json": "e5d3cfa75564bd11c284d39bb17d23e4e6e34c5d88b347a72db986dec594f58c",
+            "state_frames.json": "f8eb92cfcdc383b5ccc432dad3de286f78d2b95502ccae326e7d1138a1d7a521",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "571b4051bf880a6ddda70029d811a1331c7e043f80db8904b2f142f3cfd4d51c"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "depreciation .05",
+          "seed": 8,
+          "run_id": "R20261117T210739-ee78418dd64148a2a67fbb901ffd0258",
+          "effective_parameters": {
+            "nu": 2.5,
+            "delta": 0.05,
+            "a": 0.045,
+            "b": 0.06,
+            "x0": [
+              0.87875,
+              0.7875
+            ]
+          },
+          "requested": {
+            "parameters": {
+              "nu": 2.5,
+              "delta": 0.05,
+              "a": 0.045,
+              "b": 0.06,
+              "x0": [
+                0.87875,
+                0.7875
+              ]
+            },
+            "ticks": 200,
+            "dt": 0.1,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "wage_share": 0.87875,
+            "employment": 0.7875,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.87875,
+            "employment_min": 0.7875,
+            "employment_max": 0.7875,
+            "cycle_active": false
+          },
+          "final_observation": {
+            "sim_t": 20.0,
+            "wage_share": 0.8809046312818657,
+            "employment": 0.715296003542871,
+            "wage_share_min": 0.87875,
+            "wage_share_max": 0.8909772067128378,
+            "employment_min": 0.715296003542871,
+            "employment_max": 0.7875,
+            "cycle_active": false
+          },
+          "observation_count": 201,
+          "saved_frames": 201,
+          "entity_count_initial": 0,
+          "artifact_hashes": {
+            "manifest.json": "91e4b850e9e90681d30988c85b4138294af0dbccc21b287bb023ec2eab12d600",
+            "observations.json": "e5d3cfa75564bd11c284d39bb17d23e4e6e34c5d88b347a72db986dec594f58c",
+            "state_frames.json": "0f290a0decca509965dc1259b503154fe60783438191f1d6a98fa75854a31a14",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "da2330beee84ec26f65bc766929413193d68db511e7c723f4feeb554d33d32db"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        }
+      ],
+      "analysis": {
+        "metric": "employment",
+        "model_id": "ECO019",
+        "n_seeds": 2,
+        "paired_by_seed": true,
+        "causality_note": "模型内反事实比较，不构成现实因果识别",
+        "significance_note": "多次仿真重复不是现实被试样本；此处报告效应量与配对差，不宣称现实显著性",
+        "baseline": {
+          "window_mean": {
+            "per_seed": [
+              0.8363694180904242,
+              0.8363694180904242
+            ],
+            "mean": 0.8363694180904242,
+            "std": 0.0
+          },
+          "trend_slope_per_t": {
+            "per_seed": [
+              -0.0012300470919384147,
+              -0.0012300470919384147
+            ],
+            "mean": -0.0012300470919384147,
+            "std": 0.0
+          },
+          "peak": {
+            "per_seed": [
+              0.8714254914882307,
+              0.8714254914882307
+            ],
+            "mean": 0.8714254914882307,
+            "std": 0.0
+          },
+          "peak_t": {
+            "per_seed": [
+              9.4,
+              9.4
+            ],
+            "mean": 9.4,
+            "std": 0.0
+          }
+        },
+        "arms": {
+          "depreciation .05": {
+            "window_mean": {
+              "per_seed": [
+                0.7520375530865474,
+                0.7520375530865474
+              ],
+              "mean": 0.7520375530865474,
+              "std": 0.0
+            },
+            "trend_slope_per_t": {
+              "per_seed": [
+                -0.004061171652568629,
+                -0.004061171652568629
+              ],
+              "mean": -0.004061171652568629,
+              "std": 0.0
+            },
+            "peak": {
+              "per_seed": [
+                0.7875,
+                0.7875
+              ],
+              "mean": 0.7875,
+              "std": 0.0
+            },
+            "paired_diff": {
+              "mean": -0.0843318650038768,
+              "std": 0.0,
+              "n": 2
+            },
+            "effect_rel": -0.10083088068478281,
+            "cohens_d": null
+          }
+        },
+        "baseline_window_mean": 0.8363694180904242
+      },
+      "validity_scope": "Positive classical Goodwin equations; common explicit initial state, no clipping and no claim all orbits stay below one",
+      "checks_passed": [
+        "four actual archived runs",
+        "paired seed IDs and effective parameters",
+        "artifact hashes loaded and verified",
+        "actual final time and saved frame agree",
+        "finite requested metric",
+        "explicit counterfactual effect"
+      ]
+    },
+    {
+      "case": "multi_agent",
+      "model_id": "BEH001",
+      "spec": {
+        "experiment_id": "EX-18fe39a4",
+        "research_id": "",
+        "version": "1.0",
+        "created_at": "2026-11-18T05:07:40",
+        "model_id": "BEH001",
+        "title": "Audit multi_agent",
+        "baseline_params": {
+          "size": 12,
+          "density": 0.8,
+          "threshold": 0.4
+        },
+        "baseline_interventions": [],
+        "data_bindings": [],
+        "arms": [
+          {
+            "label": "similarity threshold .7",
+            "params": {
+              "threshold": 0.7
+            }
+          }
+        ],
+        "seeds": [
+          7,
+          8
+        ],
+        "rng_domain": "exp0",
+        "ticks": 40,
+        "dt": 1.0,
+        "primary_metric": "segregation",
+        "warmup_ticks": 0,
+        "analysis_window": [],
+        "purpose": "mechanism",
+        "hypothesis": "",
+        "notes": []
+      },
+      "runs": [
+        {
+          "arm": "基线",
+          "seed": 7,
+          "run_id": "R20261117T210740-59dc7492df104d9abf8326fe3c9201d8",
+          "effective_parameters": {
+            "size": 12,
+            "threshold": 0.4,
+            "density": 0.8
+          },
+          "requested": {
+            "parameters": {
+              "size": 12,
+              "density": 0.8,
+              "threshold": 0.4
+            },
+            "ticks": 40,
+            "dt": 1.0,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "segregation": 0.5414891395154553,
+            "unhappy_frac": 0.24561403508771928
+          },
+          "final_observation": {
+            "sim_t": 40.0,
+            "segregation": 0.7740810359231411,
+            "unhappy_frac": 0.0
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 114,
+          "artifact_hashes": {
+            "manifest.json": "fefbbe650d43a1f51fb0dce3126ee3dbbbea2691d5e94114af62366dc01ac1bd",
+            "observations.json": "64cebc0bdcd890012580f1b12d72ef80477c12878fbea21255e50396cd5f6819",
+            "state_frames.json": "bed64dcfa6acb742293b8bf990e19405933122bfce9d71a1bef374a1bbde79f9",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "57e84c557d366b4930f3e08eedf250c658ad3360e16516f560604f107cd2453d"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "基线",
+          "seed": 8,
+          "run_id": "R20261117T210740-dbe4a67d591f4b0fae0cd4e79afbeda9",
+          "effective_parameters": {
+            "size": 12,
+            "threshold": 0.4,
+            "density": 0.8
+          },
+          "requested": {
+            "parameters": {
+              "size": 12,
+              "density": 0.8,
+              "threshold": 0.4
+            },
+            "ticks": 40,
+            "dt": 1.0,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "segregation": 0.48473214285714283,
+            "unhappy_frac": 0.3
+          },
+          "final_observation": {
+            "sim_t": 40.0,
+            "segregation": 0.7636011904761905,
+            "unhappy_frac": 0.0
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 120,
+          "artifact_hashes": {
+            "manifest.json": "5cca7a91b4e2acad6b738b5b3acc4b7c85315f2193380c358c04f3c5f35cc036",
+            "observations.json": "5abae6b83f103a8a8f4fe0b4eb4d31fcca201eccf55da7c33b1b801a4ca01425",
+            "state_frames.json": "c3e88f0b254181700bda6d0183868401e2c6f0aca52c9d2f0351fcc0d9dde04d",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "eeb46314682cc68cfe30981a2d29074d600ef6ef60737149c2ed71e41cef3450"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "similarity threshold .7",
+          "seed": 7,
+          "run_id": "R20261117T210741-0f13ca0c379f4c9f88d6b71e1bc61564",
+          "effective_parameters": {
+            "size": 12,
+            "threshold": 0.7,
+            "density": 0.8
+          },
+          "requested": {
+            "parameters": {
+              "size": 12,
+              "density": 0.8,
+              "threshold": 0.7
+            },
+            "ticks": 40,
+            "dt": 1.0,
+            "seed": 7,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "segregation": 0.5414891395154553,
+            "unhappy_frac": 0.7456140350877193
+          },
+          "final_observation": {
+            "sim_t": 40.0,
+            "segregation": 0.8121136173767752,
+            "unhappy_frac": 0.2543859649122807
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 114,
+          "artifact_hashes": {
+            "manifest.json": "4c7e82da819ccd5412fadb46eec1da0cf5e35f524183f9a29518fb4894aad595",
+            "observations.json": "3821d48fb886dc6b15cb43f60d47657f889959d169d2b12b0b759e98d8e985be",
+            "state_frames.json": "e9d4a31cb6febd8bff45b66e6e8f1f9738baecd355c7497699019e48d143feb4",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "106a627db2bce924267bffc5e47449d4f0301b747d24dd4a366482d83586f83a"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        },
+        {
+          "arm": "similarity threshold .7",
+          "seed": 8,
+          "run_id": "R20261117T210741-8dde14bbce5241928463bcd04d0777de",
+          "effective_parameters": {
+            "size": 12,
+            "threshold": 0.7,
+            "density": 0.8
+          },
+          "requested": {
+            "parameters": {
+              "size": 12,
+              "density": 0.8,
+              "threshold": 0.7
+            },
+            "ticks": 40,
+            "dt": 1.0,
+            "seed": 8,
+            "experiment": "exp0",
+            "interventions": []
+          },
+          "initial_observation": {
+            "sim_t": 0.0,
+            "segregation": 0.48473214285714283,
+            "unhappy_frac": 0.875
+          },
+          "final_observation": {
+            "sim_t": 40.0,
+            "segregation": 0.8459821428571428,
+            "unhappy_frac": 0.16666666666666666
+          },
+          "observation_count": 41,
+          "saved_frames": 41,
+          "entity_count_initial": 120,
+          "artifact_hashes": {
+            "manifest.json": "528739ece3e97921016006854c201e8c161ee88d201b17b240e3a7215794d103",
+            "observations.json": "fb988177ab1360e2f5d17be30c8c49b09254d38fe1f6566b313a67ffd9612cd7",
+            "state_frames.json": "4d5e3bc5dd5bca0382b02d09850e639c432e14b3567b0e55ae24d0a6be73758f",
+            "events.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "checkpoint.json": "100c22adb4710ad920d1b7951fc6fde5ae6050ae85ecd7f8a2f7abfe85cf0abb"
+          },
+          "code_archive_sha256": "067c39572853ac2cf11f67d80f6e19a3b62543ec80257da1e0626d6a39de34fe"
+        }
+      ],
+      "analysis": {
+        "metric": "segregation",
+        "model_id": "BEH001",
+        "n_seeds": 2,
+        "paired_by_seed": true,
+        "causality_note": "模型内反事实比较，不构成现实因果识别",
+        "significance_note": "多次仿真重复不是现实被试样本；此处报告效应量与配对差，不宣称现实显著性",
+        "baseline": {
+          "window_mean": {
+            "per_seed": [
+              0.7612145200399372,
+              0.7465602013162989
+            ],
+            "mean": 0.753887360678118,
+            "std": 0.010362168143153645
+          },
+          "trend_slope_per_t": {
+            "per_seed": [
+              0.0017347975775676146,
+              0.0022849278939217977
+            ],
+            "mean": 0.002009862735744706,
+            "std": 0.0003890008772303435
+          },
+          "peak": {
+            "per_seed": [
+              0.7740810359231411,
+              0.7636011904761905
+            ],
+            "mean": 0.7688411131996657,
+            "std": 0.007410369781325796
+          },
+          "peak_t": {
+            "per_seed": [
+              6.0,
+              7.0
+            ],
+            "mean": 6.5,
+            "std": 0.7071067811865476
+          }
+        },
+        "arms": {
+          "similarity threshold .7": {
+            "window_mean": {
+              "per_seed": [
+                0.7001571510076003,
+                0.6801202574525745
+              ],
+              "mean": 0.6901387042300875,
+              "std": 0.014168223306671775
+            },
+            "trend_slope_per_t": {
+              "per_seed": [
+                0.006581812763616359,
+                0.007514602690669762
+              ],
+              "mean": 0.00704820772714306,
+              "std": 0.0006595820828419666
+            },
+            "peak": {
+              "per_seed": [
+                0.8389515455304929,
+                0.8459821428571428
+              ],
+              "mean": 0.8424668441938179,
+              "std": 0.004971383045466158
+            },
+            "paired_diff": {
+              "mean": -0.06374865644803057,
+              "std": 0.00380605516351813,
+              "n": 2
+            },
+            "effect_rel": -0.08455992204284864,
+            "cohens_d": -5.13607037744857
+          }
+        },
+        "baseline_window_mean": 0.753887360678118
+      },
+      "validity_scope": "Periodic two-type Schelling grid with batch relocation; no real residential calibration",
+      "checks_passed": [
+        "four actual archived runs",
+        "paired seed IDs and effective parameters",
+        "artifact hashes loaded and verified",
+        "actual final time and saved frame agree",
+        "finite requested metric",
+        "explicit counterfactual effect"
+      ]
+    }
+  ]
+}

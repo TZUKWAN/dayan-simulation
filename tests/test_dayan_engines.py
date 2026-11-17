@@ -119,6 +119,10 @@ def _lmstudio_up(url="http://127.0.0.1:1234/v1") -> bool:
 def test_game_llm_player_live():
     """LLM 玩家（真实 LM Studio）：遮蔽博弈名，动作合法即通过。
     LM Studio 未运行时自动 SKIP（回归测试不依赖服务在线）。"""
+    import os
+    if os.environ.get('DAYAN_TEST_LLM') != '1':
+        print('[SKIP] 真实LLM测试未显式启用；未调用外部服务')
+        return
     if not _lmstudio_up():
         print("[SKIP] LM Studio 未运行——该测试仅在服务在线时执行")
         return
@@ -127,11 +131,14 @@ def test_game_llm_player_live():
     client = LMStudioClient(base_url="http://127.0.0.1:1234/v1",
                             model="qwen3.5-4b",
                             cache_path="results/smoke_games/cache.jsonl",
-                            max_workers=2, default_max_tokens=120)
+                            max_workers=2, default_max_tokens=None)
     from dayan.engines.games import llm_game_action
+    from dayan.core import RngStreams
+    game_rng = RngStreams(7).stream('game', 'player0')
     acts = set()
     for h in [None, [(0, 1), (1, 1)], [(1, 1)]]:
-        acts.add(llm_game_action(client, g, my_index=0, history=h))
+        acts.add(llm_game_action(client, g, my_index=0, history=h,
+                                 rng=game_rng))
     assert acts <= {0, 1}, f"LLM 动作越界：{acts}"
     print(f"[PASS] LLM 玩家（遮蔽 PD）：动作分布 {sorted(acts)}（真实在环 ✓）")
 

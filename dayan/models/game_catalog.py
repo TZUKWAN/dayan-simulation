@@ -645,7 +645,8 @@ class _StrategyDuel(DayanModel):
 
     def observe(self):
         return {"score_vs_alld": float(self.my_score),
-                "coop_rate": float(np.mean([m == "C" for m in self.my_hist]))}
+                "coop_rate": float(np.mean([m == "C" for m in self.my_hist])) if self.my_hist else None,
+                'n_rounds':len(self.my_hist)}
 
     def validate_state(self):
         return []
@@ -818,8 +819,8 @@ class AxelrodNormCatalogModel(DayanModel):
 
     def observe(self):
         tail = self.venge_hist[-30:]
-        return {"mean_vengeance": float(np.mean(tail)),
-                "norm_evolved": bool(np.mean(tail) > 0.5)}
+        return {"mean_vengeance": float(np.mean(tail)) if tail else None,
+                "norm_evolved": bool(np.mean(tail) > 0.5) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []
@@ -846,8 +847,8 @@ class MetaNormModel(DayanModel):
 
     def observe(self):
         tail = self.venge_hist[-30:]
-        return {"mean_vengeance": float(np.mean(tail)),
-                "meta_norm_stronger": bool(np.mean(tail) > 0.5)}
+        return {"mean_vengeance": float(np.mean(tail)) if tail else None,
+                "meta_norm_stronger": bool(np.mean(tail) > 0.5) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []
@@ -963,9 +964,9 @@ class ElFarolModel(DayanModel):
 
     def observe(self):
         tail = self.history[-50:]
-        return {"mean_attendance": float(np.mean(tail)),
+        return {"mean_attendance": float(np.mean(tail)) if tail else None,
                 "att_near_threshold": bool(abs(np.mean(tail) - self.threshold)
-                                           < 0.15)}
+                                           < 0.15) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []
@@ -997,8 +998,8 @@ class MinorityGameModel(DayanModel):
 
     def observe(self):
         tail = self.att_hist[-50:]
-        return {"mean_ones_share": float(np.mean(tail)),
-                "near_half": bool(abs(np.mean(tail) - 0.5) < 0.12)}
+        return {"mean_ones_share": float(np.mean(tail)) if tail else None,
+                "near_half": bool(abs(np.mean(tail) - 0.5) < 0.12) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []

@@ -1,0 +1,51 @@
+{
+  "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+  "counts": {
+    "total": 561,
+    "static_registered": 557,
+    "factory_entries": 497,
+    "registered_by_layer": {
+      "模型层": 483,
+      "应用层": 22,
+      "软件层": 52
+    },
+    "compatibility_or_benchmark_entries": 4,
+    "registered_model_factories": 493,
+    "registered_models_without_factory": 12,
+    "runnable": 497,
+    "registered_no_factory": 64,
+    "factory_outside_static": [
+      "MET-DTMC",
+      "MET-MM1",
+      "NET-SIR",
+      "NET064_jump"
+    ],
+    "probe_passed": 491,
+    "probe_failed": 0,
+    "probe_skipped_external": 6,
+    "probe_not_run": 0,
+    "fidelity": {
+      "full": 5,
+      "lite": 3,
+      "prototype": 425,
+      "method_demo": 64,
+      "registered": 64
+    },
+    "reviewed": 8,
+    "historical_reviews_stale": 486
+  },
+  "cold_metadata_seconds_with_probe_evidence": 1.4557053999742493,
+  "current_review_count": 8,
+  "historical_unanchored_count": 486,
+  "current_review_ids": [
+    "BEH001",
+    "BEH005",
+    "ECO019",
+    "NET-SIR",
+    "NET052",
+    "NET053",
+    "NET106",
+    "SYS002"
+  ],
+  "execution_only_scope": "离线参考运行，不是现实数据、机制忠实度、校准或留出有效性的证明"
+}

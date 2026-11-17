@@ -1,0 +1,10 @@
+{
+  "ok": true,
+  "fresh_clone": true,
+  "autocrlf": true,
+  "isolated_venv": true,
+  "tracked_files_clean": true,
+  "canonical_source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+  "vendor_sha256": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
+  "targeted_tests": 39
+}

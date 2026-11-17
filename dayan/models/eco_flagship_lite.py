@@ -568,7 +568,8 @@ class BrockHommesModel(DayanModel):
 
 class KirmanModel(DayanModel):
     """ECO049 Kirman 双状态招募：蠕虫-蚂蚁观点 Herndorf 招募+自转换；
-    平衡份额 Beta 分布，均值 = p_conv/(p_conv+p_self)。"""
+    对称自转换与对称复制无方向偏置，p_self>0时平稳均值=1/2。
+    这里是离散逐人招募近似，不据此声明已实现原连续时间Beta分布。"""
 
     model_id = "ECO049"
     clock_type = "fixed_step"
@@ -598,10 +599,9 @@ class KirmanModel(DayanModel):
     def observe(self):
         tail = self.share_hist[-100:] if len(self.share_hist) >= 100 \
             else self.share_hist
-        theory = self.p_conv / (self.p_conv + self.p_self)
-        return {"mean_share": float(np.mean(tail)),
-                "share_std": float(np.std(tail)),
-                "theory_mean": float(theory)}
+        return {"mean_share": float(np.mean(tail)) if tail else None,
+                "share_std": float(np.std(tail)) if len(tail)>1 else None,
+                "theory_mean": .5 if self.p_self>0 else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []
@@ -615,6 +615,8 @@ class SantaFeLiteModel(DayanModel):
     clock_type = "fixed_step"
 
     def __init__(self, f=100.0, n_f=30, n_t=30, n_n=30, T=250):
+        if f<=0 or any(isinstance(n,bool) or not isinstance(n,int) or n<0 for n in (n_f,n_t,n_n)) or n_f+n_t+n_n==0:
+            raise ValueError('基本面须为正，交易者计数须为非负整数且总数大于0')
         self.f, self.n_f, self.n_t, self.n_n, self.T = f, n_f, n_t, n_n, T
         self.p = f
 
@@ -631,20 +633,24 @@ class SantaFeLiteModel(DayanModel):
         self.tick += 1
         d_p = self.p - self.p_hist[-2] if len(self.p_hist) > 1 else 0.0
         self.momentum = 0.9 * self.momentum + 0.1 * d_p
-        dem_f = 0.02 * (self.f - self.p)              # 基本面均值回复
-        dem_t = 0.05 * self.momentum                   # 技术趋势
-        dem_n = self.rng_.normal(0, 0.4)               # 噪声流动性
+        # Reference group size 30 preserves the documented default coefficients;
+        # group counts really weight demand (aggregate-lite, not individual traders).
+        dem_f = 0.02 * (self.f - self.p) * self.n_f/30
+        dem_t = 0.05 * self.momentum * self.n_t/30
+        dem_n = self.rng_.normal(0, 0.4) * np.sqrt(self.n_n/30)
         self.p = max(1.0, self.p + 0.02 * (dem_f + dem_t + dem_n))
         self.p_hist.append(self.p)
 
     def observe(self):
         tail = np.array(self.p_hist[-80:])
         ret = np.diff(np.log(tail))
-        vol_hi = np.abs(ret[ret.size // 2:]).std()
-        vol_lo = np.abs(ret[:ret.size // 2]).std() + 1e-9
+        ratio=None
+        if len(ret)>=4:
+            vol_hi=np.abs(ret[ret.size//2:]).std();vol_lo=np.abs(ret[:ret.size//2]).std()
+            if vol_lo>0:ratio=float(vol_hi/vol_lo)
         return {"price": float(self.p), "fundamental": self.f,
                 "converge_err": abs(self.p - self.f) / self.f,
-                "vol_ratio": float(vol_hi / vol_lo)}
+                "vol_ratio": ratio,'n_returns':len(ret)}
 
     def validate_state(self):
         return []
@@ -687,10 +693,9 @@ class LuxMarchesiLiteModel(DayanModel):
 
     def observe(self):
         rets = np.array(self.ret_hist[-200:])
-        excess_kurt = float(((rets - rets.mean()) ** 4).mean()
-                            / max(rets.var() ** 2, 1e-12) - 3)
+        excess_kurt = float(((rets - rets.mean()) ** 4).mean()/rets.var()**2-3) if len(rets)>=4 and rets.var()>0 else None
         return {"price": float(self.p), "excess_kurtosis": excess_kurt,
-                "fat_tails": bool(excess_kurt > 0.5)}
+                "fat_tails": bool(excess_kurt > 0.5) if excess_kurt is not None else None,'n_returns':len(rets)}
 
     def validate_state(self):
         return []

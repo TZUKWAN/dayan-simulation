@@ -46,6 +46,7 @@
     const live=$(".live");if(live)live.innerHTML='<i></i>'+(state.playing?"回放中":"已暂停");
     const tiny=$(".tiny-live");if(tiny)tiny.innerHTML='<i class="dot"></i>'+(state.playing?(state.runs[state.selected]?.run_id?"已保存状态回放中":"观测回放中"):"回放已暂停");
     if (window.DAYAN3D) state.playing ? DAYAN3D.resume() : DAYAN3D.pause();
+    if(!state.playing){paint();window.DAYAN3D?.renderAt?.(state.time);}
   }
   function seek(t) {
     state.time = Math.min(state.end, Math.max(state.start, Number(t)));
@@ -137,7 +138,8 @@
     if(revision!==requestRevision)return;
     if(pack&&run.run_id&&pack.run_id!==run.run_id)throw new Error('动画运行标识与结果不一致，已停止显示');
     state.selected=selected;state.stream=pack;state.followEntity=false;
-    state.events=[...(pack?.events||[]),...(pack?.manifest?.interventions||[]).filter(i=>i.applied).map(i=>({etype:'intervention',label:i.label||'参数干预生效',sim_t:i.actual_t,params:i.params}))];state.eventPaintKey=null;
+    state.events=DAYAN_ANALYSIS.savedEvents(pack);state.eventPaintKey=null;
+    if(pack)pack.events=state.events;
     if(pack){run.stream=pack;run.observations=pack.observations;run.manifest=pack.manifest;DAYAN3D.visualizeState(pack);}
     state.start=Math.min(...state.runs.map(r=>r.observations[0]?.sim_t??0));state.end=Math.max(...state.runs.map(r=>r.observations.at(-1)?.sim_t??0));
     state.time=options.fresh?state.start:Math.min(state.end,Math.max(state.start,previousTime));
@@ -264,12 +266,14 @@
     if(!Object.keys(changes).length)throw new Error("参数没有变化，未创建干预实验");
     $("#applyPolicy").disabled=true;
     const common=(m.interventions||[]).filter(i=>i.applied).map(i=>({at_t:i.requested_t,params:i.params,label:i.label}));
-    const bindings=(m.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>["dataset_id","path","field","aggregate","parameter","scale"].includes(k))));
+    const bindings=(m.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>["dataset_id","path","field","aggregate","parameter","scale","source_unit","target_unit","source_scope","target_scope","filters","order_by"].includes(k))));
     const body={model_id:run.model_id,baseline_params:m.requested.parameters,baseline_interventions:common,data_bindings:bindings,ticks:m.requested.ticks,dt:m.requested.dt,seeds:[m.rng.seed],rng_domain:m.rng.experiment,purpose:"policy",primary_metric:state.metric,title:"明确参数的配对干预",arms:[{label:"干预组",params:{},interventions:[{at_t:when,params:changes,label:"用户参数干预"}]}]};
       try{const p=await api("/api/experiments",body);await showResult("experiment",p,{intent:"用户设置的配对干预",question:state.question});}finally{if($("#applyPolicy"))$("#applyPolicy").disabled=!controls.length;}
   }
   async function restore(id) {
+    const revision=++requestRevision;
     const record=await api(`/api/runs/${encodeURIComponent(id)}`);
+    if(revision!==requestRevision)return false;
     if(record.kind==="run")await showResult("run",{...record,state_url:`/api/runs/${id}/state`},{intent:record.intent});
     else if(record.kind==="analysis")await showResult(record.tool,record.analysis,{intent:record.intent});
     else {const byArm=record.observations;await showResult("experiment",{...record,experiment_id:record.run_id,observations_by_arm:byArm,observations:(byArm["基线"]||[[]])[0]},{intent:record.intent});}
@@ -303,7 +307,7 @@
       }
       if(!result.ok){message("本次请求未全部完成，请查看上面的具体原因。");setStatus('本次需求未完成；当前画面保留此前的归档结果。','error');}
       else if(!published)setStatus('解释已返回，引用的运行记录保持可追溯。');
-      window._aiMsgs=[...(window._aiMsgs||[]),{role:'user',content:text},{role:'assistant',content:(result.summary||[]).join('\n')}].slice(-16);
+      window._aiMsgs=[...(window._aiMsgs||[]),{role:'user',content:text},{role:'assistant',content:(result.summary||[]).join('\n')}];
   }
   async function watchAssistantJob(jobId,text,thinking) {
     let consumed=false;
@@ -320,8 +324,8 @@
   async function send() {
     const input=$('#aiInput'),text=input.value.trim();if(!text)return;if(window.DAYAN_NATIVE_BRIDGE){DAYAN_NATIVE_BRIDGE.draft(text);input.value='';return;}if($('#aiSend').disabled||window.DAYAN_COMMAND?.busy)return notice('当前任务仍在执行，新的草稿已保留。');input.value='';message(text,'ai-user');$('#aiSend').disabled=true;
     const localAction=window.DAYAN_COMMAND?.assistantAction(text);
-    if(localAction){try{const result=await localAction(),item=message(result.text);if(result.url){const link=document.createElement('a');link.href=result.url;link.download='';link.textContent=result.label;link.className='ws-button';item.appendChild(link);}window._aiMsgs=[...(window._aiMsgs||[]),{role:'user',content:text},{role:'assistant',content:result.text}].slice(-16);}catch(error){message('操作未完成：'+error.message);}finally{$('#aiSend').disabled=false;}return;}
-    const last=window._lastRun,history=(window._aiMsgs||[]).slice(-8),thinking=message('正在校验需求与执行计划…');
+    if(localAction){try{const result=await localAction(),item=message(result.text);if(result.url){const link=document.createElement('a');link.href=result.url;link.download='';link.textContent=result.label;link.className='ws-button';item.appendChild(link);}window._aiMsgs=[...(window._aiMsgs||[]),{role:'user',content:text},{role:'assistant',content:result.text}];}catch(error){message('操作未完成：'+error.message);}finally{$('#aiSend').disabled=false;}return;}
+    const last=window._lastRun,history=(window._aiMsgs||[]),thinking=message('正在校验需求与执行计划…');
     setPlaying(false);setStatus('正在处理新需求；当前画面仍为已保存的上一结果。','working');
     try{const job=await api('/api/agent',{text,history,last_run:last?.run_id?{model_id:last.model_id,run_id:last.run_id,params:last.params,ticks:last.ticks,seed:last.seed,dt:last.manifest?.requested?.dt,study_id:window.DAYAN_STUDY?.study_id}:{study_id:window.DAYAN_STUDY?.study_id},async_job:true});
       if(!job.job_id)throw new Error('未取得任务标识');savePendingJob(job.job_id,text);await watchAssistantJob(job.job_id,text,thinking);
@@ -338,11 +342,11 @@
       const contract=run?(await api(`/api/models/contract/${run.model_id}?include_fidelity=false`)).contract:null;
       const box=$('#datasetAnalysis');box.innerHTML=`<h3>${esc(d.name)} · 数据概况</h3><div class="data-quality"><div><span>完整记录数</span><b>${stats.n_rows}</b></div><div><span>字段数</span><b>${stats.fields.length}</b></div><div><span>数值字段数</span><b>${numeric.length}</b></div><div><span>存在缺失的数值字段</span><b>${numeric.filter(([,v])=>v.missing_or_non_numeric>0).length}</b></div></div><h4>数值字段质量</h4><canvas id="datasetQualityChart" class="data-chart" aria-label="各数值字段的缺失或非数值记录数"></canvas><div style="overflow-x:auto"><table class="data-stat-table"><thead><tr><th>字段</th><th>有效数</th><th>缺失/非数值</th><th>最小</th><th>最大</th><th>均值</th></tr></thead><tbody>${stats.fields.map(k=>{const v=stats.numeric[k];return v?`<tr><td>${esc(k)}</td><td>${v.n}</td><td>${v.missing_or_non_numeric}</td><td>${fmt(v.min)}</td><td>${fmt(v.max)}</td><td>${fmt(v.mean)}</td></tr>`:`<tr><td>${esc(k)}</td><td colspan="5">未识别为可统计的数值字段</td></tr>`;}).join('')}</tbody></table></div><p class="chart-caption">缺失与非数值统计以每个字段的完整记录为分母；不静默补值。</p>`;
       DAYAN_ANALYSIS.drawBars($('#datasetQualityChart'),numeric.map(([field,v])=>({label:field,count:v.missing_or_non_numeric})),'#eebb79','缺失/非数值记录数');
-      if(run?.run_id&&run.manifest?.requested&&contract&&numeric.length){box.insertAdjacentHTML('beforeend',`<h4>将数据用于 ${esc(run.model_id)}</h4><div class="binding-controls"><label>字段<select id="bindingField">${numeric.map(([k])=>`<option>${esc(k)}</option>`).join('')}</select></label><label>汇总方式<select id="bindingAggregate">${[['last','末值'],['first','首值'],['mean','均值'],['sum','总和'],['min','最小值'],['max','最大值']].map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select></label><label>模型参数<select id="bindingParameter">${Object.entries(contract.params).filter(([k,v])=>['float','int'].includes(v.type)).map(([k])=>`<option>${esc(k)}</option>`).join('')}</select></label><label>换算系数<input id="bindingScale" type="number" value="1" step="any"></label><button class="ws-button ws-primary" id="runWithDataset">按映射创建新运行</button></div><p id="bindingPreview" class="data-status"></p>`);
+      if(run?.run_id&&run.manifest?.requested&&contract&&numeric.length){box.insertAdjacentHTML('beforeend',`<h4>将数据用于 ${esc(run.model_id)}</h4><div class="binding-controls"><label>字段<select id="bindingField">${numeric.map(([k])=>`<option>${esc(k)}</option>`).join('')}</select></label><label>汇总方式<select id="bindingAggregate">${[['last','末值'],['first','首值'],['mean','均值'],['sum','总和'],['min','最小值'],['max','最大值']].map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select></label><label>模型参数<select id="bindingParameter">${Object.entries(contract.params).filter(([k,v])=>['float','int'].includes(v.type)).map(([k])=>`<option>${esc(k)}</option>`).join('')}</select></label><label>换算系数<input id="bindingScale" type="number" value="1" step="any"></label><label>源单位<input id="bindingSourceUnit" value="${esc(d.metadata?.unit||'')}" placeholder="例如 %"></label><label>目标参数单位<input id="bindingTargetUnit" placeholder="例如 fraction"></label><label>源地区/主体范围<input id="bindingSourceScope" value="${esc(d.metadata?.scope||'')}" placeholder="与数据元数据一致"></label><label>目标地区/主体范围<input id="bindingTargetScope" placeholder="本次研究对象"></label><button class="ws-button ws-primary" id="runWithDataset">按映射创建新运行</button></div><p id="bindingPreview" class="data-status"></p>`);
         const preview=()=>{const field=$('#bindingField').value,aggregate=$('#bindingAggregate').value,v=stats.numeric[field],scale=Number($('#bindingScale').value);$('#bindingPreview').textContent=`${field} 的${$('#bindingAggregate option:checked').textContent} ${fmt(v[aggregate])} × ${fmt(scale)} → ${$('#bindingParameter').value} = ${fmt(v[aggregate]*scale)}${v.missing_or_non_numeric?'；含缺失/非数值，不能直接映射':''}`;$('#runWithDataset').disabled=Boolean(v.missing_or_non_numeric)||!finite(scale);};
         for(const id of ['#bindingField','#bindingAggregate','#bindingParameter','#bindingScale'])$(id).addEventListener('input',preview);preview();
         $('#runWithDataset').onclick=async()=>{const button=$('#runWithDataset');button.disabled=true;try{const parameter=$('#bindingParameter').value,parameters={...(run.manifest?.actual?.effective_parameters||{})};delete parameters[parameter];
-          const result=await api('/api/run',{model_id:run.model_id,parameters,ticks:run.manifest.requested.ticks,dt:run.manifest.requested.dt,seed:run.manifest.rng.seed,data_bindings:[{dataset_id:d.dataset_id,path,field:$('#bindingField').value,aggregate:$('#bindingAggregate').value,parameter,scale:Number($('#bindingScale').value)}]});
+          const result=await api('/api/run',{model_id:run.model_id,parameters,ticks:run.manifest.requested.ticks,dt:run.manifest.requested.dt,seed:run.manifest.rng.seed,data_bindings:[{dataset_id:d.dataset_id,path,field:$('#bindingField').value,aggregate:$('#bindingAggregate').value,parameter,scale:Number($('#bindingScale').value),...Object.fromEntries([['source_unit','#bindingSourceUnit'],['target_unit','#bindingTargetUnit'],['source_scope','#bindingSourceScope'],['target_scope','#bindingTargetScope']].map(([key,id])=>[key,$(id).value.trim()]).filter(([,value])=>value))}]});
           await showResult('run',result,{intent:'输入数据映射',question:state.question||`用导入数据研究 ${run.model_id}`});
         }catch(error){status('映射未完成：'+error.message);button.disabled=false;}};
       }else box.insertAdjacentHTML('beforeend','<p class="data-status">选择并运行模型后，可在这里将数值字段映射到相应参数。</p>');
@@ -363,8 +367,9 @@
     await refresh();if(focusId){const d=datasets.find(d=>d.dataset_id===focusId);if(d)await analyzeDataset(d);}
   }
   Object.assign(controller,{setPlaying,seek,clear,paint,showResult,restore,applyPolicy,loadReplay,openDataManager,select,generateReport,send,
+    cancelPendingView:()=>{requestRevision++;},
     addEvent:(type,title,desc)=>{setStatus([title,desc].filter(Boolean).join(' · '));},
-    tick(ts){if(state.lastWall!==null&&state.playing){const next=state.time+(ts-state.lastWall)/1000*state.rate;if(next>=state.end){if(state.loop&&state.end>state.start)state.time=state.start+(next-state.start)%(state.end-state.start);else{state.time=state.end;setPlaying(false);}}else state.time=next;}state.lastWall=ts;if(ts-lastPaint>80){paint();lastPaint=ts;}}});
+    tick(ts){const wasPlaying=state.playing;if(state.lastWall!==null&&state.playing){const next=state.time+(ts-state.lastWall)/1000*state.rate;if(next>=state.end){if(state.loop&&state.end>state.start)state.time=state.start+(next-state.start)%(state.end-state.start);else{state.time=state.end;setPlaying(false);}}else state.time=next;}state.lastWall=ts;if(wasPlaying&&ts-lastPaint>80){paint();lastPaint=ts;}}});
   function boot() {
     DAYAN_ANALYSIS.bind(state,paint,notice);
     $('#loopPlayback').onchange=e=>{state.loop=e.target.checked;};

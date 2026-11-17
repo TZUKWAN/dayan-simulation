@@ -28,8 +28,8 @@ class RoadEvacuationModel:
                  bus_capacity=20, bus_count=2, bus_speed=300.):
         if any(isinstance(v, bool) or int(v) != v for v in (n, bus_capacity, bus_count)):
             raise ValueError("主体数、公交容量和车辆数必须为整数")
-        if not 1 <= n <= 2000 or not 0 <= bus_capacity <= 500 or not 1 <= bus_count <= 20:
-            raise ValueError("主体1–2000、容量0–500、车辆1–20")
+        if not 1 <= n <= 2000 or not 0 <= bus_capacity <= 500 or not 0 <= bus_count <= 20:
+            raise ValueError("主体1–2000、容量0–500、车辆0–20；车辆或容量为0时全部步行")
         for v in (elderly_fraction, elderly_speed_factor, initial_rumor_fraction, rumor_effect, flood_severity):
             if not math.isfinite(v) or not 0 <= v <= 1:
                 raise ValueError("比例与减速因子须在0–1内")
@@ -166,7 +166,8 @@ class RoadEvacuationModel:
             row = int(self.rng.choice(len(origins), p=probabilities))
             source = origins[row]
             elder = bool(self.rng.random() < elderly[row])
-            bus = elder or self.rng.random() < .3
+            preference = elder or self.rng.random() < .3
+            bus = bool(self.bus_count and self.bus_capacity and preference)
             target = self.pickup if bus else self.shelter
             self.agents.append({"id": i, "x": self.points[source][0], "y": self.points[source][1],
                                 "elderly": elder, "belief": float(self.rng.random() < self.initial_rumor_fraction),

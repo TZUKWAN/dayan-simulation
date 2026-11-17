@@ -132,19 +132,39 @@ execution.prior存在时还要对比原模型与本次修改，原始主体/场�
 不能因标题、mechanisms列表或漂亮外观就判定满足；必须阅读实际表达式。设施被画出但未影响用户要求的行为，应判定missing。
 如用户要求的具体场景被抽象汇总模型、随机游走或无关机制替代，matched=false。refs只能引用实际DSL字段路径；不能引用description/name/mechanisms作为实现证据。
 不要要求平台不支持的任意代码，不把数学模型当成现实校准；模型简化与用户明确要求有冲突时不能判定满足。'''
-    raw=complete([{'role':'system','content':prompt},{'role':'user','content':json.dumps({'request':request,'definition':definition,'execution':execution or {}},ensure_ascii=False)}],
-                 max_tokens=16384,timeout=150,purpose='scene-semantic-review',audit=audit,thinking=True)
-    result=json_object(raw)
-    if not isinstance(result.get('matched'),bool) or not isinstance(result.get('missing'),list) or not isinstance(result.get('checks'),list):
-        raise ValueError('场景语义审核未返回有效结构')
-    for check in result['checks']:
-        if not isinstance(check,dict) or not isinstance(check.get('quote'),str) or not check['quote'] or check['quote'] not in request:
-            raise ValueError('语义审核证据不是用户原文')
-        if not isinstance(check.get('refs'),list) or not check['refs']:raise ValueError('语义审核缺少实际字段证据')
-        for path in check['refs']:
-            if not isinstance(path,str) or path.split('.')[0] in ('description','name','mechanisms','assumptions','limitations'):
-                raise ValueError('语义审核用文字声明冒充实现证据')
-            reference({**definition,'execution':execution or {}},path)
+    evidence={**definition,'execution':execution or {}}
+    paths=[]
+    def collect(node,path=''):
+        if node in (None,'',{},[]):return
+        if path:paths.append(path)
+        if isinstance(node,dict):
+            for key,value in node.items():
+                if key not in ('description','name','mechanisms','assumptions','limitations','source_request','requirements','title','setting'):
+                    collect(value,(path+'.' if path else '')+key)
+        elif isinstance(node,list):
+            for item in node:
+                if isinstance(item,dict) and isinstance(item.get('id'),str):collect(item,path+'.'+item['id'])
+    collect(evidence)
+    prompt+='\nrefs必须从提供的真实可用路径中选择，不能写顶层type或虚构字段。检查排除的机制时引用完整agents.update/rates及实际表达式，不能仅引用limitations。不要为了引用错误改变模型。'
+    messages=[{'role':'system','content':prompt},{'role':'user','content':json.dumps({'request':request,'definition':definition,'execution':execution or {},'available_refs':paths},ensure_ascii=False)}]
+    for attempt in range(2):
+        raw=complete(messages,timeout=180,purpose='scene-semantic-review',audit=audit,thinking=True)
+        try:
+            result=json_object(raw)
+            if not isinstance(result.get('matched'),bool) or not isinstance(result.get('missing'),list) or not isinstance(result.get('checks'),list):
+                raise ValueError('场景语义审核未返回有效结构')
+            for check in result['checks']:
+                if not isinstance(check,dict) or not isinstance(check.get('quote'),str) or not check['quote'] or check['quote'] not in request:
+                    raise ValueError('语义审核证据不是用户原文')
+                if not isinstance(check.get('refs'),list) or not check['refs']:raise ValueError('语义审核缺少实际字段证据')
+                for path in check['refs']:
+                    if not isinstance(path,str) or path not in paths:raise ValueError('语义审核引用不在真实可用路径中：'+str(path))
+                    reference(evidence,path)
+            break
+        except (ValueError,SyntaxError) as exc:
+            if audit:audit[-1]['review_validation_error']=str(exc)
+            if attempt:raise
+            messages+=[{'role':'assistant','content':raw},{'role':'user','content':'审核回执格式或引用错误：'+str(exc)+'。保持对同一原模型的独立判断，只修正回执引用；若实际机制不满足则仍须matched=false并列出缺失项。'}]
     if not result['matched'] or result['missing'] or not result['checks']:
         raise ValueError('模型与用户场景尚不对应：'+'；'.join(map(str,result.get('missing') or ['缺少有效覆盖证据'])))
     return {**result,'method':'真实LLM语义复核 + 本地引用/数据流校验','scientific_validation':False}

@@ -156,8 +156,9 @@
       const rect=dom.getBoundingClientRect(),ray=new THREE.Raycaster();ray.params.Points.threshold=1;
       ray.setFromCamera(new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1),camera);
       const group=getScene().children.find(c=>c.userData?.isStateGroup);
-      const hit=ray.intersectObjects(group?.children.filter(m=>m.userData.entityId!==undefined)||[],true)[0];
-      if(hit){let object=hit.object;while(object&&object.userData.entityId===undefined)object=object.parent;if(object)selectStateEntity(String(object.userData.entityId),true);}
+      const hit=ray.intersectObjects(group?.children.filter(m=>m.userData.entityId!==undefined||m.userData.instanceIds)||[],true)[0];
+      if(hit?.instanceId!==undefined&&hit.object.userData.instanceIds){selectStateEntity(String(hit.object.userData.instanceIds[hit.instanceId]),true);}
+      else if(hit){let object=hit.object;while(object&&object.userData.entityId===undefined)object=object.parent;if(object)selectStateEntity(String(object.userData.entityId),true);}
     });
     dom.addEventListener('pointerleave',()=>{isDown=false;});
     dom.addEventListener('pointermove', e => {
@@ -2338,6 +2339,7 @@
     selectedStateEntity=String(id||'');
     const group=getScene().children.find(c=>c.userData?.isStateGroup);
     group?.children.forEach(mesh=>{if(mesh.material?.emissive){mesh.material.emissive.setHex(String(mesh.userData.entityId)===selectedStateEntity?0x51decc:0x000000);mesh.material.emissiveIntensity=.65;}});
+    syncStateInstances(group);
     if(notify&&id)document.dispatchEvent(new CustomEvent('dayan:entity-selected',{detail:{id:selectedStateEntity}}));
     if(renderer&&sceneObj)renderer.render(sceneObj,camera);
   }
@@ -2357,6 +2359,30 @@
 
   function stateMeshFor(ent) {
     return DAYAN_SCENE_STUDIO.entity(ent,studioProfile);
+  }
+
+  const displaySamples=new WeakMap();
+  function displayEntities(frame) {
+    const entities=frame.entities||[];if(entities.length<=3000)return entities;
+    if(!displaySamples.has(frame)){
+      const priority=id=>{let h=2166136261;for(const c of String(id))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;};
+      displaySamples.set(frame,[...entities].sort((a,b)=>priority(a.id)-priority(b.id)||String(a.id).localeCompare(String(b.id))).slice(0,3000));
+    }
+    return displaySamples.get(frame);
+  }
+
+  function syncStateInstances(group) {
+    const batch=group?.userData.carBatch;if(!batch)return;
+    const ids=[];
+    group.userData.meshMap.forEach(m=>{
+      if(!m.userData.instancedCar||!m.visible)return;
+      m.updateMatrix();batch.setMatrixAt(ids.length,m.matrix);
+      batch.setColorAt(ids.length,new THREE.Color(String(m.userData.entityId)===selectedStateEntity?0x51decc:m.userData.stateColor));
+      ids.push(m.userData.entityId);
+    });
+    batch.count=ids.length;batch.userData.instanceIds=ids;
+    batch.instanceMatrix.needsUpdate=true;if(batch.instanceColor)batch.instanceColor.needsUpdate=true;
+    batch.computeBoundingSphere();
   }
 
   function stateWorldXY(ent, fr) {
@@ -2403,11 +2429,24 @@
     }
     const meshMap = group.userData.meshMap = group.userData.meshMap || new Map();
     const seen = new Set((fr.facilities||[]).map(f=>"fac_"+f.id));
-    (fr.entities || []).slice(0, 3000).forEach(ent => {
+    displayEntities(fr).forEach(ent => {
       seen.add(ent.id);
       let m = meshMap.get(ent.id);
       if (!m) {
-        m = stateMeshFor(ent);
+        if(studioProfile.kind==='ring-road'&&!studioProfile.rich&&ent.type==='car'){
+          if(!group.userData.carBatch){
+            const template=stateMeshFor(ent);template.material.color.setHex(0xffffff);
+            // At this density each vehicle is a few pixels wide. Retain its
+            // dimensions/color/pose with a shared 12-triangle body instead of
+            // thousands of independently bevelled meshes and shadow casters.
+            template.geometry.dispose();
+            const batch=new THREE.InstancedMesh(new THREE.BoxGeometry(1.55,.42,.85),template.material,3000);
+            batch.castShadow=true;batch.receiveShadow=true;batch.frustumCulled=false;
+            batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            group.userData.carBatch=batch;group.add(batch);
+          }
+          m=new THREE.Object3D();m.userData.instancedCar=true;m.userData.glyph='vehicle';
+        }else m = stateMeshFor(ent);
         m.userData.entityId=ent.id;
         meshMap.set(ent.id, m);
         group.add(m);
@@ -2421,11 +2460,16 @@
       m.visible = String(ent.state) !== "exited" || ent.type !== "pedestrian";
       if(m.userData.cohort){const h=.35+Math.max(0,ent.I||0)/Math.max(1,studioProfile.hi)*12;m.scale.y=h;m.position.y=h/2;const sp=m.userData.cohortLabel;sp.scale.set(9,2.8/h,1);sp.position.y=.5+2.2/h;sp.userData.redraw([String(ent.id),'I = '+Number((ent.I||0).toPrecision(5))]);}
       const stateColor=DAYAN_SCENE_STUDIO.color(ent,studioProfile);
+      if(m.userData.instancedCar)m.userData.stateColor=stateColor;
       if(m.material?.color)m.material.color.set(stateColor);
       m.children.forEach(part=>{if(part.userData.stateColor)part.material.color.set(stateColor);});
-      if(studioProfile.kind==='ring-road'&&m.userData.glyph==='vehicle'){const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100;m.rotation.y=-(ent.x/length*Math.PI*2)-Math.PI/2;}
-      if(m.material.emissive){m.material.emissive.setHex(String(ent.id)===selectedStateEntity?0x51decc:0x000000);m.material.emissiveIntensity=.65;}
-      if (ent.type === "server" && m.material.color) {
+      if(studioProfile.kind==='ring-road'&&m.userData.glyph==='vehicle'){
+        const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100;
+        m.rotation.y=-(ent.x/length*Math.PI*2)-Math.PI/2;
+        if(m.userData.instancedCar)m.scale.x=Math.min(1,Math.PI*60/length*.85/1.55);
+      }
+      if(m.material?.emissive){m.material.emissive.setHex(String(ent.id)===selectedStateEntity?0x51decc:0x000000);m.material.emissiveIntensity=.65;}
+      if (ent.type === "server" && m.material?.color) {
         m.material.color.setHex(ent.state === "busy" ? 0xffb74d : 0x3a4a5a);
       }
     });
@@ -2479,6 +2523,7 @@
         }
       }
     });
+    syncStateInstances(group);
   }
 
   function buildStateLegend() {
@@ -2502,7 +2547,7 @@
     const span=next.sim_t-fr.sim_t,alpha=span>0?THREE.MathUtils.clamp((t-fr.sim_t)/span,0,1):0;
     if(!alpha)return;
     const nextMap=new Map((next.entities||[]).map(e=>[e.id,e]));
-    for(const e of (fr.entities||[]).slice(0,3000)){
+    for(const e of displayEntities(fr)){
       const m=stateEntityMesh(e.id),n=nextMap.get(e.id);if(!m||!n||n.type!==e.type||!m.visible)continue;
       if(studioProfile.kind==='ring-road'&&e.type==='car'){
         const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100,delta=((n.x-e.x)%length+length)%length;
@@ -2564,6 +2609,7 @@
       }
     }
     interpolateState(t,idx);
+    syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup));
     if(previous&&followingStateEntity){const mesh=stateEntityMesh(followingStateEntity);if(mesh?.visible){camera.position.add(mesh.position.clone().sub(previous));camera.lookAt(mesh.position);}else followStateEntity('',false);}
   }
 
@@ -2870,11 +2916,11 @@
     }
     const dark = window._vizDarkness || 0;
     let haloN = 0, trailN = 0;
-    (fr.entities || []).slice(0, 3000).forEach(ent => {
+    displayEntities(fr).forEach(ent => {
       const m = stateEntityMesh(ent.id);
       if (!m) return;
       // --- 车灯（夜）+ 刹车闪红 ---
-      if (ent.type === 'car') {
+      if (ent.type === 'car' && !m.userData.instancedCar) {
         if (!m.userData.lightsFx) {
           const head = new THREE.Group();
           [-0.34, 0.34].forEach(off => {
@@ -2970,6 +3016,7 @@
     const t0 = prevFr ? (prevFr.sim_t ?? -1e9) : -1e9;
     const t1 = fr.sim_t ?? 1e9;
     st.events.forEach(ev => {
+      if(ev.etype!=='intervention'||ev.applied===false)return;
       const et = ev.sim_t ?? ev.t;
       if (typeof et !== 'number' || et <= t0 || et > t1) return;
       if (FXREG.waves.length >= 2) return;
