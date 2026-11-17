@@ -265,12 +265,14 @@
     if(!Object.keys(changes).length)throw new Error("参数没有变化，未创建干预实验");
     $("#applyPolicy").disabled=true;
     const common=(m.interventions||[]).filter(i=>i.applied).map(i=>({at_t:i.requested_t,params:i.params,label:i.label}));
-    const bindings=(m.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>["dataset_id","path","field","aggregate","parameter","scale"].includes(k))));
+    const bindings=(m.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>["dataset_id","path","field","aggregate","parameter","scale","source_unit","target_unit","source_scope","target_scope","filters","order_by"].includes(k))));
     const body={model_id:run.model_id,baseline_params:m.requested.parameters,baseline_interventions:common,data_bindings:bindings,ticks:m.requested.ticks,dt:m.requested.dt,seeds:[m.rng.seed],rng_domain:m.rng.experiment,purpose:"policy",primary_metric:state.metric,title:"明确参数的配对干预",arms:[{label:"干预组",params:{},interventions:[{at_t:when,params:changes,label:"用户参数干预"}]}]};
       try{const p=await api("/api/experiments",body);await showResult("experiment",p,{intent:"用户设置的配对干预",question:state.question});}finally{if($("#applyPolicy"))$("#applyPolicy").disabled=!controls.length;}
   }
   async function restore(id) {
+    const revision=++requestRevision;
     const record=await api(`/api/runs/${encodeURIComponent(id)}`);
+    if(revision!==requestRevision)return false;
     if(record.kind==="run")await showResult("run",{...record,state_url:`/api/runs/${id}/state`},{intent:record.intent});
     else if(record.kind==="analysis")await showResult(record.tool,record.analysis,{intent:record.intent});
     else {const byArm=record.observations;await showResult("experiment",{...record,experiment_id:record.run_id,observations_by_arm:byArm,observations:(byArm["基线"]||[[]])[0]},{intent:record.intent});}
@@ -364,6 +366,7 @@
     await refresh();if(focusId){const d=datasets.find(d=>d.dataset_id===focusId);if(d)await analyzeDataset(d);}
   }
   Object.assign(controller,{setPlaying,seek,clear,paint,showResult,restore,applyPolicy,loadReplay,openDataManager,select,generateReport,send,
+    cancelPendingView:()=>{requestRevision++;},
     addEvent:(type,title,desc)=>{setStatus([title,desc].filter(Boolean).join(' · '));},
     tick(ts){if(state.lastWall!==null&&state.playing){const next=state.time+(ts-state.lastWall)/1000*state.rate;if(next>=state.end){if(state.loop&&state.end>state.start)state.time=state.start+(next-state.start)%(state.end-state.start);else{state.time=state.end;setPlaying(false);}}else state.time=next;}state.lastWall=ts;if(ts-lastPaint>80){paint();lastPaint=ts;}}});
   function boot() {

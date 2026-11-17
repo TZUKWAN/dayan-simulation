@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createConnection } from 'node:net';
 
 export const PROJECT_ROOT = process.env.DAYAN_PROJECT_ROOT || fileURLToPath(new URL('../../../', import.meta.url));
 export const BACKEND_URL = process.env.DAYAN_BACKEND_URL || 'http://127.0.0.1:8899';
@@ -38,17 +39,28 @@ export function spawnBackend() {
   } finally { closeSync(log); }
 }
 
-export async function ensureBackend() {
+async function portBound() {
+  return new Promise(resolve=>{
+    const socket=createConnection({host:endpoint.hostname.replace(/^\[|\]$/g,''),port:Number(endpoint.port||80)});
+    let settled=false;const finish=value=>{if(settled)return;settled=true;socket.destroy();resolve(value);};
+    socket.setTimeout(400,()=>finish(false));socket.once('connect',()=>finish(true));socket.once('error',()=>finish(false));
+  });
+}
+
+export async function ensureBackend({timeoutMs=30000}={}) {
   if (await backendOnline()) return { online: true, url: BACKEND_URL };
   if (!startup) startup = (async () => {
-    const spawnResult = spawnBackend();
-    const deadline = Date.now() + 30000;
+    // A slow/busy listener is not permission to start a competing backend.
+    const occupied=await portBound();
+    const spawnResult = occupied?{started:false}:spawnBackend();
+    const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       if (spawnFailure) throw spawnFailure;
       if (await backendOnline(1000)) return { online: true, url: BACKEND_URL, ...spawnResult };
       await new Promise(r => setTimeout(r, 350));
     }
-    throw new Error('Backend did not become ready in 30s; inspect server_dsh.log in DAYAN_DATA_DIR');
+    throw new Error(occupied?'Backend port is already occupied but health is unavailable; no competing process was started':
+      'Backend did not become ready within startup timeout; inspect server_dsh.log in DAYAN_DATA_DIR');
   })().finally(() => { startup = null; });
   return startup;
 }

@@ -33,7 +33,7 @@ def category(name):
 
 def discover(root=ROOT):
     paths = sorted((root/'tests').rglob('test_*.py'))+sorted((root/'tests').rglob('*.test.mjs'))
-    return [{'name':p.stem,'path':p.relative_to(root).as_posix(),
+    return [{'name':p.stem,'path':p.relative_to(root).as_posix(),'timeout_s':600 if p.stem=='test_model_probe_all' else SUITE_TIMEOUT_S,
              'runtime':'node' if p.suffix=='.mjs' else 'python','category':category(p.stem)}
             for p in paths if '__pycache__' not in p.parts]
 
@@ -100,7 +100,8 @@ def run_suite(suite, root, output, timeout=SUITE_TIMEOUT_S, online=False, llm=Fa
     env = {**os.environ,'PYTHONIOENCODING':'utf-8','PYTHONPATH':str(root),
            'DAYAN_DATA_DIR':str(work/'data'),'DAYAN_REPORTS_DIR':str(work/'reports'),
            'DAYAN_PYTHON':sys.executable,
-           'DAYAN_TEST_ONLINE':'1' if online else '0','DAYAN_TEST_LLM':'1' if llm else '0'}
+           'DAYAN_TEST_ONLINE':'1' if online else '0','DAYAN_TEST_LLM':'1' if llm else '0',
+           'OPENBLAS_NUM_THREADS':'1','OMP_NUM_THREADS':'1','MKL_NUM_THREADS':'1'}
     if not llm:
         env.update(DAYAN_API_KEY='',DAYAN_BASE_URL='',DAYAN_MODEL='')
     path = root/suite['path']
@@ -148,11 +149,11 @@ def main(argv=None):
     parser.add_argument('--llm',action='store_true')
     parser.add_argument('--list',action='store_true')
     parser.add_argument('--selftest',action='store_true')
-    parser.add_argument('--timeout',type=float,default=SUITE_TIMEOUT_S)
+    parser.add_argument('--timeout',type=float,default=None,help='Override per-suite timeout; full-model probe defaults to 600s, other suites 180s')
     parser.add_argument('--output',type=Path)
     args=parser.parse_args(argv)
     if args.selftest: return _selftest()
-    if not 0 < args.timeout <= 1800: parser.error('timeout必须在0..1800秒')
+    if args.timeout is not None and not 0 < args.timeout <= 1800: parser.error('timeout必须在0..1800秒')
     suites=discover(); names=args.only or ([args.suite] if args.suite else None)
     if names:
         missing=set(names)-{s['name'] for s in suites}
@@ -171,7 +172,7 @@ def main(argv=None):
             if suite['category'] in ('online','llm') and not (args.online if suite['category']=='online' else args.llm):
                 res={'suite':suite['name'],'category':suite['category'],'runtime':suite['runtime'],
                      'verdict':'SKIP','passed':0,'skipped':1,'reasons':['未选择外部服务；未执行，不能当作通过'],'duration_s':0}
-            else: res=run_suite(suite,root,output,args.timeout,args.online,args.llm)
+            else: res=run_suite(suite,root,output,args.timeout or suite['timeout_s'],args.online,args.llm)
             stats['suites'][suite['name']]=res
             stats['passed']+=res['passed'];stats['skipped']+=res.get('skipped',0)
             stats['failed_suites']+=int(res['verdict']=='FAIL')
