@@ -137,7 +137,8 @@
     if(revision!==requestRevision)return;
     if(pack&&run.run_id&&pack.run_id!==run.run_id)throw new Error('动画运行标识与结果不一致，已停止显示');
     state.selected=selected;state.stream=pack;state.followEntity=false;
-    state.events=[...(pack?.events||[]),...(pack?.manifest?.interventions||[]).filter(i=>i.applied).map(i=>({etype:'intervention',label:i.label||'参数干预生效',sim_t:i.actual_t,params:i.params}))];state.eventPaintKey=null;
+    state.events=DAYAN_ANALYSIS.savedEvents(pack);state.eventPaintKey=null;
+    if(pack)pack.events=state.events;
     if(pack){run.stream=pack;run.observations=pack.observations;run.manifest=pack.manifest;DAYAN3D.visualizeState(pack);}
     state.start=Math.min(...state.runs.map(r=>r.observations[0]?.sim_t??0));state.end=Math.max(...state.runs.map(r=>r.observations.at(-1)?.sim_t??0));
     state.time=options.fresh?state.start:Math.min(state.end,Math.max(state.start,previousTime));

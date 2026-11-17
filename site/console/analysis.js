@@ -4,6 +4,16 @@
   const finite = x => typeof x === 'number' && Number.isFinite(x);
   const numericFields = rows => [...new Set(rows.flatMap(r => Object.keys(r || {})))].filter(k => k !== 'sim_t' && rows.some(r => finite(r[k])));
   const mean = xs => xs.length ? xs.reduce((s,x) => s+x,0)/xs.length : null;
+  function savedEvents(stream) {
+    const events=(stream?.events||[]).filter(e=>finite(e.sim_t??e.t)).map(e=>({...e,sim_t:e.sim_t??e.t}));
+    const ordered=params=>JSON.stringify(Object.fromEntries(Object.entries(params||{}).sort(([a],[b])=>a.localeCompare(b))));
+    for(const iv of stream?.manifest?.interventions||[]){
+      if(!iv.applied||!finite(iv.actual_t))continue;
+      const exists=events.some(e=>e.etype==='intervention'&&Math.abs(e.sim_t-iv.actual_t)<1e-9&&ordered(e.params)===ordered(iv.params));
+      if(!exists)events.push({etype:'intervention',applied:true,label:iv.label||'参数干预生效',sim_t:iv.actual_t,params:{...iv.params}});
+    }
+    return events.sort((a,b)=>a.sim_t-b.sim_t);
+  }
   function windowRows(rows, window) {
     return rows.filter(o => !window || ((window.exclusive ? o.sim_t > window.from + 1e-9 : o.sim_t >= window.from - 1e-9) && o.sim_t <= window.to + 1e-9));
   }
@@ -214,5 +224,5 @@
     }
     let scheduled=false;new ResizeObserver(()=>{if(!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;paint();});}}).observe($('.workspace-grid'));
   }
-  window.DAYAN_ANALYSIS = {finite,numericFields,mean,windowRows,label,metricInfo,interventionTime,resolvedWindow,summarize,histogram,categories,drawLine,drawBars,render,bind,fmt,esc,colorFor};
+  window.DAYAN_ANALYSIS = {finite,numericFields,mean,savedEvents,windowRows,label,metricInfo,interventionTime,resolvedWindow,summarize,histogram,categories,drawLine,drawBars,render,bind,fmt,esc,colorFor};
 })();
