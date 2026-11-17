@@ -11,6 +11,18 @@ from dayan import fidelity,source_version
 
 
 class Catalogue(unittest.TestCase):
+    def test_checkout_newlines_preserve_identity_but_code_changes_invalidate(self):
+        with tempfile.TemporaryDirectory() as td,patch.object(source_version,'ROOT',Path(td)):
+            directory=Path(td)/'dayan';directory.mkdir();path=directory/'example.py'
+            path.write_bytes(b'value = 1\n')
+            source_version._digest.cache_clear()
+            original=source_version.source_fingerprint()
+            path.write_bytes(b'value = 1\r\n')
+            self.assertEqual(source_version.source_fingerprint(),original)
+            path.write_bytes(b'value = 2\n')
+            self.assertNotEqual(source_version.source_fingerprint(),original)
+        source_version._digest.cache_clear()
+
     def test_cold_catalog_never_probes(self):
         with tempfile.TemporaryDirectory() as td,patch.object(fidelity,'CATALOG_PATH',Path(td)/'catalog.json'),\
              patch.object(fidelity,'PROBE_CACHE',Path(td)/'no-probes.json'),\

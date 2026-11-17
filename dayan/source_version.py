@@ -1,4 +1,8 @@
-"""Content identity of every first-party Python execution dependency."""
+"""Canonical text identity of every first-party execution dependency.
+
+Python normalizes CRLF on input. Ignore checkout line-ending conversion here;
+reproducibility archives independently hash and retain every exact source byte.
+"""
 from __future__ import annotations
 from functools import lru_cache
 import hashlib
@@ -23,7 +27,7 @@ def _digest(signature):
     for relative,_,_ in signature:
         path=ROOT/relative
         value.update(relative.encode());value.update(b'\0')
-        value.update(hashlib.sha256(path.read_bytes()).digest())
+        value.update(hashlib.sha256(path.read_bytes().replace(b'\r\n',b'\n')).digest())
     return value.hexdigest()
 
 
