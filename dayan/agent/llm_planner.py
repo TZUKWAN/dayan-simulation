@@ -21,7 +21,7 @@ SIS/SIR只适用于相应传染病假设，不得用来替代疏散、舆情、�
 每轮最多4个动作。"""
 
 
-def _post(messages, max_tokens=8192, temperature=.3, timeout=60):
+def _post(messages, max_tokens=None, temperature=.3, timeout=180):
     return complete(messages, max_tokens=max_tokens, temperature=temperature,
                     timeout=timeout, purpose="planner")
 
@@ -40,7 +40,7 @@ def _extract_plan(raw):
 
 
 def llm_planner(text, tool_manifest_json, history=None, last_run=None, feedback=None):
-    context = json.dumps({"history": (history or [])[-4:], "last_run": last_run,
+    context = json.dumps({"history": history or [], "last_run": last_run,
                           "tool_feedback": feedback or []}, ensure_ascii=False, default=str)
     try:
         raw = _post([{"role": "system", "content": SYSTEM_PROMPT},
@@ -57,7 +57,7 @@ def llm_planner(text, tool_manifest_json, history=None, last_run=None, feedback=
 
 def simple_chat(text, system="", timeout=60):
     return complete([{"role": "system", "content": system or "请用简洁中文回答。"},
-                     {"role": "user", "content": text}], max_tokens=8192,
+                     {"role": "user", "content": text}],
                     temperature=.4, timeout=timeout, purpose="chat")
 
 
@@ -66,6 +66,6 @@ def health():
         return False
     try:
         return bool(complete([{"role": "user", "content": "Reply only OK."}],
-                             max_tokens=256, timeout=15, purpose="health").strip())
+                             timeout=30, purpose="health").strip())
     except Exception:
         return False

@@ -133,7 +133,7 @@ execution.prior存在时还要对比原模型与本次修改，原始主体/场�
 如用户要求的具体场景被抽象汇总模型、随机游走或无关机制替代，matched=false。refs只能引用实际DSL字段路径；不能引用description/name/mechanisms作为实现证据。
 不要要求平台不支持的任意代码，不把数学模型当成现实校准；模型简化与用户明确要求有冲突时不能判定满足。'''
     raw=complete([{'role':'system','content':prompt},{'role':'user','content':json.dumps({'request':request,'definition':definition,'execution':execution or {}},ensure_ascii=False)}],
-                 max_tokens=16384,timeout=150,purpose='scene-semantic-review',audit=audit,thinking=True)
+                 timeout=180,purpose='scene-semantic-review',audit=audit,thinking=True)
     result=json_object(raw)
     if not isinstance(result.get('matched'),bool) or not isinstance(result.get('missing'),list) or not isinstance(result.get('checks'),list):
         raise ValueError('场景语义审核未返回有效结构')

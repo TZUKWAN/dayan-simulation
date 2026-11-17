@@ -63,7 +63,7 @@ class CognitiveSimulation:
                   "Concordia裁决模式另返回allowed布尔值，程序只执行通过裁决且满足资源约束的动作。")
         raw = complete([{"role": "system", "content": prompt},
                         {"role": "user", "content": json.dumps(context, ensure_ascii=False)}],
-                       max_tokens=4096, timeout=60, purpose=self.model_id + ":" + self.cognitive_mode,
+                       timeout=180, purpose=self.model_id + ":" + self.cognitive_mode,
                        audit=self.llm_audit)
         decision = json_object(raw)
         if decision.get("action") not in ("rest", "work", "help", "share", "move"):

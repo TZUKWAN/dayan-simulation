@@ -73,7 +73,7 @@ def build_model(request=None, definition=None, parameters=None, ticks=100, seed=
                         {"role": "user", "content": "原始需求：" + request+"\n用户显式约束："+json.dumps(parsed,ensure_ascii=False)+"\n已有实际模型（如有）："+json.dumps(context,ensure_ascii=False)}]
             for attempt in range(2):
                 emit(f"正在{'修正' if attempt else '生成'}实际模型方程与场景合同…")
-                raw = complete(messages, max_tokens=16384 if attempt else 8192, timeout=150 if attempt else 90,
+                raw = complete(messages, timeout=180,
                                purpose="build-model", audit=audit,thinking=True if attempt else None)
                 drafts = directory() / "drafts"
                 drafts.mkdir(parents=True, exist_ok=True)

@@ -131,7 +131,7 @@ def test_game_llm_player_live():
     client = LMStudioClient(base_url="http://127.0.0.1:1234/v1",
                             model="qwen3.5-4b",
                             cache_path="results/smoke_games/cache.jsonl",
-                            max_workers=2, default_max_tokens=120)
+                            max_workers=2, default_max_tokens=None)
     from dayan.engines.games import llm_game_action
     from dayan.core import RngStreams
     game_rng = RngStreams(7).stream('game', 'player0')

@@ -154,7 +154,7 @@ def _constrain(planned, request, last_run):
 def plan(text, history=None, last_run=None, feedback=None):
     rule = plan_rule_based(text, last_run)
     for action in rule.get("plan",[]):
-        if action.get("tool")=="explain":action["args"]["history"]=(history or [])[-8:]
+        if action.get("tool")=="explain":action["args"]["history"]=history or []
     if rule.get("intent") in ("resume", "run_preset", "calibrate_model"):return rule
     if (rule.get("requirements") or {}).get("scene_requirements",{}).get("unsupported") or ((rule.get("requirements") or {}).get("missing_context") and rule.get("intent")!="explain"):
         return rule
@@ -172,7 +172,7 @@ def plan(text, history=None, last_run=None, feedback=None):
                 return {**result, "plan": [], "requirements": rule["requirements"],
                         "errors": ["原始需求校验失败：" + str(exc)]}
             for action in result.get("plan",[]):
-                if action.get("tool")=="explain":action["args"]["history"]=(history or [])[-8:]
+                if action.get("tool")=="explain":action["args"]["history"]=history or []
             issues = []
             for action in result["plan"]:
                 if action.get("tool")=="resume" and rule["requirements"]["kind"]!="resume":

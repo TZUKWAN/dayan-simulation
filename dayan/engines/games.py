@@ -138,7 +138,7 @@ def llm_game_action(client, game: MatrixGame, my_index: int,
     ]
     import json as _json
     try:
-        raw = client.chat(msgs, temperature=0.2, max_tokens=120)
+        raw = client.chat(msgs, temperature=0.2)
         d = _json.loads(raw[raw.index("{"): raw.rindex("}") + 1])
         act = d.get("action")
         if isinstance(act, bool) or not isinstance(act, int) or not 0 <= act < len(mine):
