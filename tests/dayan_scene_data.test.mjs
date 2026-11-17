@@ -7,6 +7,14 @@ const context = { window: {}, Intl };
 vm.runInNewContext(await readFile(new URL('../site/console/analysis.js',import.meta.url),'utf8'),context);
 const { savedEvents }=context.window.DAYAN_ANALYSIS;
 
+test('constant decimal observations have undefined correlation instead of a floating-point false one',()=>{
+  const {correlation}=context.window.DAYAN_ANALYSIS;
+  const rows=Array.from({length:251},(_,i)=>({density:.8,flux:i}));
+  assert.equal(correlation(rows,'density','density').value,null);
+  assert.equal(correlation(rows,'density','flux').value,null);
+  assert.ok(Math.abs(correlation(rows.map(r=>({...r,opposite:-r.flux})),'flux','opposite').value+1)<1e-12);
+});
+
 test('saved interventions appear once across event log and manifest without losing real simultaneous events',()=>{
   const stream={events:[{etype:'bus_arrival',sim_t:2,bus_id:1},{etype:'bus_arrival',sim_t:2,bus_id:2},
     {etype:'intervention',sim_t:1,params:{beta:.2,gamma:.1},label:'actual event'}],

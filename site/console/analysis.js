@@ -4,6 +4,15 @@
   const finite = x => typeof x === 'number' && Number.isFinite(x);
   const numericFields = rows => [...new Set(rows.flatMap(r => Object.keys(r || {})))].filter(k => k !== 'sim_t' && rows.some(r => finite(r[k])));
   const mean = xs => xs.length ? xs.reduce((s,x) => s+x,0)/xs.length : null;
+  function correlation(rows,a,b) {
+    let n=0,ma=0,mb=0,cov=0,va=0,vb=0;
+    for(const r of rows){
+      if(!finite(r[a])||!finite(r[b]))continue;
+      n++;const dx=r[a]-ma,dy=r[b]-mb;ma+=dx/n;mb+=dy/n;
+      cov+=dx*(r[b]-mb);va+=dx*(r[a]-ma);vb+=dy*(r[b]-mb);
+    }
+    return {value:n>=3&&va>0&&vb>0?Math.max(-1,Math.min(1,cov/Math.sqrt(va*vb))):null,n};
+  }
   function savedEvents(stream) {
     const events=(stream?.events||[]).filter(e=>finite(e.sim_t??e.t)).map(e=>({...e,sim_t:e.sim_t??e.t}));
     const ordered=params=>JSON.stringify(Object.fromEntries(Object.entries(params||{}).sort(([a],[b])=>a.localeCompare(b))));
@@ -224,5 +233,5 @@
     }
     let scheduled=false;new ResizeObserver(()=>{if(!scheduled){scheduled=true;requestAnimationFrame(()=>{scheduled=false;paint();});}}).observe($('.workspace-grid'));
   }
-  window.DAYAN_ANALYSIS = {finite,numericFields,mean,savedEvents,windowRows,label,metricInfo,interventionTime,resolvedWindow,summarize,histogram,categories,drawLine,drawBars,render,bind,fmt,esc,colorFor};
+  window.DAYAN_ANALYSIS = {finite,numericFields,mean,correlation,savedEvents,windowRows,label,metricInfo,interventionTime,resolvedWindow,summarize,histogram,categories,drawLine,drawBars,render,bind,fmt,esc,colorFor};
 })();

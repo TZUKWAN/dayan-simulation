@@ -11,14 +11,7 @@
     const mean=sum/xs.length;
     return {n:xs.length,min,max,mean,std:Math.sqrt(xs.reduce((s,x)=>s+(x-mean)**2,0)/xs.length)};
   }
-  function correlation(rows,a,b) {
-    const pairs=rows.filter(r=>finite(r[a])&&finite(r[b]));
-    if (pairs.length<3) return {value:null,n:pairs.length};
-    const ax=stats(pairs.map(r=>r[a])).mean,bx=stats(pairs.map(r=>r[b])).mean;
-    let xy=0,xx=0,yy=0;
-    for (const r of pairs) {const x=r[a]-ax,y=r[b]-bx;xy+=x*y;xx+=x*x;yy+=y*y;}
-    return {value:xx>0&&yy>0?Math.max(-1,Math.min(1,xy/Math.sqrt(xx*yy))):null,n:pairs.length};
-  }
+  const correlation=(rows,a,b)=>DAYAN_ANALYSIS.correlation(rows,a,b);
   function changes(rows,key) {
     return rows.map((r,i)=>({sim_t:r.sim_t,change:i>0&&finite(r[key])&&finite(rows[i-1][key])?r[key]-rows[i-1][key]:null}));
   }
