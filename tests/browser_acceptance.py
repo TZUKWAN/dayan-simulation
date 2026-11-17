@@ -67,6 +67,9 @@ def run(base,output,engine='firefox'):
             check('playback advances the actual shared clock',page.evaluate('DAYAN_RESULTS.time>DAYAN_RESULTS.start'))
             page.evaluate('DAYAN_RESULTS.setPlaying(false)');paused=page.evaluate('DAYAN_RESULTS.time');page.wait_for_timeout(120)
             check('pause and seek never rerun a model',page.evaluate('DAYAN_RESULTS.time')==paused and len(posts)==before)
+            page.evaluate("window._idleClockChanges=0;window._idleClockObserver=new MutationObserver(()=>_idleClockChanges++);_idleClockObserver.observe(document.getElementById('simClock'),{subtree:true,childList:true,characterData:true});")
+            page.wait_for_timeout(250)
+            check('paused workbench stops repeated chart and clock repaint',page.evaluate('(()=>{_idleClockObserver.disconnect();return _idleClockChanges===0;})()'))
             page.locator('#entitySelect').select_option(str(frame['entities'][0]['id']))
             page.locator('#focusEntity').click();page.locator('#followEntity').click()
             check('entity selection and camera follow use the same persistent ID',page.evaluate('DAYAN_RESULTS.entityId')==str(frame['entities'][0]['id']) and page.evaluate('DAYAN3D.cameraState.following')==str(frame['entities'][0]['id']))
@@ -85,7 +88,9 @@ def run(base,output,engine='firefox'):
             check('large-scene GPU instances retain actual entity IDs and coordinates',page.evaluate('''()=>{const g=_scene.children.find(c=>c.userData.isStateGroup),b=g.userData.carBatch,f=_vizStateStream.frames.at(-1),road=f.facilities.find(f=>f.type==='road');if(!b||b.count!==3000)return false;const saved=new Map(f.entities.map(e=>[String(e.id),e])),m=new THREE.Matrix4(),v=new THREE.Vector3();return b.userData.instanceIds.every((id,i)=>{const e=saved.get(String(id));b.getMatrixAt(i,m);v.setFromMatrixPosition(m);return !!e&&Math.abs(v.x-30*Math.cos(e.x/road.length*Math.PI*2))<1e-4&&Math.abs(v.z-30*Math.sin(e.x/road.length*Math.PI*2))<1e-4;});}'''))
             performance=page.evaluate('''()=>{const times=[];for(let i=0;i<5;i++){const start=performance.now();DAYAN3D.renderAt(DAYAN_RESULTS.end);_vizRenderer.getContext().finish();times.push(performance.now()-start);}return {timing:'completed GPU render (WebGL finish)',render_ms:times,geometries:_vizRenderer.info.memory.geometries,draw_calls:_vizRenderer.info.render.calls,triangles:_vizRenderer.info.render.triangles,archived_entities:_vizStateStream.n_entities_max,frames:_vizStateStream.frames.length};}''')
             check('large-scene render remains bounded',max(performance['render_ms'])<5000 and performance['frames']<=201)
-            page.screenshot(path=str(output/'large.png'),full_page=True)
+            # Keep the actual visible WebGL viewport; expanding a large canvas
+            # for a full-page capture can stall Chromium's software compositor.
+            page.screenshot(path=str(output/'large.png'),full_page=False)
             ds=api('/api/datasets/import',{'name':'<img src=x onerror="window.UNIT_XSS=1"> security fixture','format':'csv','content':'value\n1\n','source':'explicit browser security fixture; not empirical'})
             page.evaluate('(id)=>DAYAN_RESULTS.openDataManager(id)',ds['dataset_id'])
             check('dataset names render as text without executable markup',page.evaluate('!window.UNIT_XSS') and page.locator('#datasetList img').count()==0)

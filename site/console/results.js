@@ -46,6 +46,7 @@
     const live=$(".live");if(live)live.innerHTML='<i></i>'+(state.playing?"回放中":"已暂停");
     const tiny=$(".tiny-live");if(tiny)tiny.innerHTML='<i class="dot"></i>'+(state.playing?(state.runs[state.selected]?.run_id?"已保存状态回放中":"观测回放中"):"回放已暂停");
     if (window.DAYAN3D) state.playing ? DAYAN3D.resume() : DAYAN3D.pause();
+    if(!state.playing){paint();window.DAYAN3D?.renderAt?.(state.time);}
   }
   function seek(t) {
     state.time = Math.min(state.end, Math.max(state.start, Number(t)));
@@ -368,7 +369,7 @@
   Object.assign(controller,{setPlaying,seek,clear,paint,showResult,restore,applyPolicy,loadReplay,openDataManager,select,generateReport,send,
     cancelPendingView:()=>{requestRevision++;},
     addEvent:(type,title,desc)=>{setStatus([title,desc].filter(Boolean).join(' · '));},
-    tick(ts){if(state.lastWall!==null&&state.playing){const next=state.time+(ts-state.lastWall)/1000*state.rate;if(next>=state.end){if(state.loop&&state.end>state.start)state.time=state.start+(next-state.start)%(state.end-state.start);else{state.time=state.end;setPlaying(false);}}else state.time=next;}state.lastWall=ts;if(ts-lastPaint>80){paint();lastPaint=ts;}}});
+    tick(ts){const wasPlaying=state.playing;if(state.lastWall!==null&&state.playing){const next=state.time+(ts-state.lastWall)/1000*state.rate;if(next>=state.end){if(state.loop&&state.end>state.start)state.time=state.start+(next-state.start)%(state.end-state.start);else{state.time=state.end;setPlaying(false);}}else state.time=next;}state.lastWall=ts;if(wasPlaying&&ts-lastPaint>80){paint();lastPaint=ts;}}});
   function boot() {
     DAYAN_ANALYSIS.bind(state,paint,notice);
     $('#loopPlayback').onchange=e=>{state.loop=e.target.checked;};
