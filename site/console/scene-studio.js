@@ -23,7 +23,7 @@
       : ['pedestrian','customer'].includes(type) ? 'person' : 'point';
     const field = kind === 'ring-road' ? 'speed' : kind==='cohorts' ? 'I' : visual.color_by || definition.agents?.color_by || 'state';
     const values = new Set(); let lo = Infinity, hi = -Infinity;
-    for (const frame of frames) for (const e of (frame.entities || []).slice(0,3000)) {
+    for (const frame of frames) for (const e of (frame.entities || [])) {
       const v = e[field];
       if (typeof v === 'number' && Number.isFinite(v)) { lo = Math.min(lo,v); hi = Math.max(hi,v); }
       if (v !== undefined && values.size < 64) values.add(String(v));
@@ -70,7 +70,8 @@
     const lights=new THREE.Group();scene.add(lights);
     lights.add(new THREE.HemisphereLight(0xd3e8ff,0x243549,2.2));
     const key=new THREE.DirectionalLight(0xffedd7,3.1);key.position.set(-26,55,30);key.castShadow=true;
-    key.shadow.mapSize.set(2048,2048);Object.assign(key.shadow.camera,{left:-48,right:48,top:48,bottom:-48,near:1,far:150});
+    const shadowSize=profile.rich?2048:1024;
+    key.shadow.mapSize.set(shadowSize,shadowSize);Object.assign(key.shadow.camera,{left:-48,right:48,top:48,bottom:-48,near:1,far:150});
     key.shadow.bias=-.00035;key.shadow.normalBias=.08;key.shadow.radius=3;lights.add(key);
     const rim=new THREE.DirectionalLight(0x86bcf2,1.9);rim.position.set(32,25,-32);lights.add(rim);
     const floor=mesh(scene,new THREE.PlaneGeometry(450,450),material(0x101f2e,{roughness:1,metalness:0}),0,-2.4,0);floor.rotation.x=-Math.PI/2;

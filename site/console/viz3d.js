@@ -2361,6 +2361,16 @@
     return DAYAN_SCENE_STUDIO.entity(ent,studioProfile);
   }
 
+  const displaySamples=new WeakMap();
+  function displayEntities(frame) {
+    const entities=frame.entities||[];if(entities.length<=3000)return entities;
+    if(!displaySamples.has(frame)){
+      const priority=id=>{let h=2166136261;for(const c of String(id))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;};
+      displaySamples.set(frame,[...entities].sort((a,b)=>priority(a.id)-priority(b.id)||String(a.id).localeCompare(String(b.id))).slice(0,3000));
+    }
+    return displaySamples.get(frame);
+  }
+
   function syncStateInstances(group) {
     const batch=group?.userData.carBatch;if(!batch)return;
     const ids=[];
@@ -2419,14 +2429,18 @@
     }
     const meshMap = group.userData.meshMap = group.userData.meshMap || new Map();
     const seen = new Set((fr.facilities||[]).map(f=>"fac_"+f.id));
-    (fr.entities || []).slice(0, 3000).forEach(ent => {
+    displayEntities(fr).forEach(ent => {
       seen.add(ent.id);
       let m = meshMap.get(ent.id);
       if (!m) {
         if(studioProfile.kind==='ring-road'&&!studioProfile.rich&&ent.type==='car'){
           if(!group.userData.carBatch){
             const template=stateMeshFor(ent);template.material.color.setHex(0xffffff);
-            const batch=new THREE.InstancedMesh(template.geometry,template.material,3000);
+            // At this density each vehicle is a few pixels wide. Retain its
+            // dimensions/color/pose with a shared 12-triangle body instead of
+            // thousands of independently bevelled meshes and shadow casters.
+            template.geometry.dispose();
+            const batch=new THREE.InstancedMesh(new THREE.BoxGeometry(1.55,.42,.85),template.material,3000);
             batch.castShadow=true;batch.receiveShadow=true;batch.frustumCulled=false;
             batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
             group.userData.carBatch=batch;group.add(batch);
@@ -2449,7 +2463,11 @@
       if(m.userData.instancedCar)m.userData.stateColor=stateColor;
       if(m.material?.color)m.material.color.set(stateColor);
       m.children.forEach(part=>{if(part.userData.stateColor)part.material.color.set(stateColor);});
-      if(studioProfile.kind==='ring-road'&&m.userData.glyph==='vehicle'){const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100;m.rotation.y=-(ent.x/length*Math.PI*2)-Math.PI/2;}
+      if(studioProfile.kind==='ring-road'&&m.userData.glyph==='vehicle'){
+        const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100;
+        m.rotation.y=-(ent.x/length*Math.PI*2)-Math.PI/2;
+        if(m.userData.instancedCar)m.scale.x=Math.min(1,Math.PI*60/length*.85/1.55);
+      }
       if(m.material?.emissive){m.material.emissive.setHex(String(ent.id)===selectedStateEntity?0x51decc:0x000000);m.material.emissiveIntensity=.65;}
       if (ent.type === "server" && m.material?.color) {
         m.material.color.setHex(ent.state === "busy" ? 0xffb74d : 0x3a4a5a);
@@ -2529,7 +2547,7 @@
     const span=next.sim_t-fr.sim_t,alpha=span>0?THREE.MathUtils.clamp((t-fr.sim_t)/span,0,1):0;
     if(!alpha)return;
     const nextMap=new Map((next.entities||[]).map(e=>[e.id,e]));
-    for(const e of (fr.entities||[]).slice(0,3000)){
+    for(const e of displayEntities(fr)){
       const m=stateEntityMesh(e.id),n=nextMap.get(e.id);if(!m||!n||n.type!==e.type||!m.visible)continue;
       if(studioProfile.kind==='ring-road'&&e.type==='car'){
         const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100,delta=((n.x-e.x)%length+length)%length;
@@ -2898,7 +2916,7 @@
     }
     const dark = window._vizDarkness || 0;
     let haloN = 0, trailN = 0;
-    (fr.entities || []).slice(0, 3000).forEach(ent => {
+    displayEntities(fr).forEach(ent => {
       const m = stateEntityMesh(ent.id);
       if (!m) return;
       // --- 车灯（夜）+ 刹车闪红 ---
