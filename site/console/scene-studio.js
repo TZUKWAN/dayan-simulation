@@ -62,11 +62,11 @@
     sp.scale.set(w,h,1);parent.add(sp);
     const draw=(lines)=>{const ctx=canvas.getContext('2d');ctx.clearRect(0,0,512,160);ctx.textAlign='center';
       if(typeof lines==='string')lines=[lines];lines.forEach((line,i)=>{ctx.fillStyle=i===0?color:'#a8c1d0';let size=i===0?64:48;ctx.font=`500 ${size}px "Segoe UI", "Microsoft YaHei", sans-serif`;while(ctx.measureText(line).width>490&&size>16){size-=2;ctx.font=`500 ${size}px "Segoe UI", "Microsoft YaHei", sans-serif`;}ctx.fillText(line,256,65+i*62);});texture.needsUpdate=true;};
-    draw(text);sp.userData.redraw=draw;return sp;
+    draw(text);sp.userData.redraw=draw;sp.userData.sceneLayer='labels';return sp;
   }
   function stage(scene,profile,first) {
     // A display plinth is a visual reference, never a simulated geographic feature.
-    scene.background=new THREE.Color(0x101f2e);scene.fog=new THREE.Fog(0x101f2e,135,280);
+    scene.background=new THREE.Color(0x081420);scene.fog=new THREE.Fog(0x081420,100,280);
     const lights=new THREE.Group();scene.add(lights);
     lights.add(new THREE.HemisphereLight(0xd3e8ff,0x243549,2.2));
     const key=new THREE.DirectionalLight(0xffedd7,3.1);key.position.set(-26,55,30);key.castShadow=true;
@@ -74,7 +74,7 @@
     key.shadow.mapSize.set(shadowSize,shadowSize);Object.assign(key.shadow.camera,{left:-48,right:48,top:48,bottom:-48,near:1,far:150});
     key.shadow.bias=-.00035;key.shadow.normalBias=.08;key.shadow.radius=3;lights.add(key);
     const rim=new THREE.DirectionalLight(0x86bcf2,1.9);rim.position.set(32,25,-32);lights.add(rim);
-    const floor=mesh(scene,new THREE.PlaneGeometry(450,450),material(0x101f2e,{roughness:1,metalness:0}),0,-2.4,0);floor.rotation.x=-Math.PI/2;
+    const floor=mesh(scene,new THREE.PlaneGeometry(450,450),material(0x0c1b2c,{roughness:1,metalness:0}),0,-2.4,0);floor.rotation.x=-Math.PI/2;floor.userData.sceneLayer='base';
     const g=new THREE.Group();g.userData.isStudioStage=true;scene.add(g);
     const circular=['ring-road','indicators','queue','cohorts'].includes(profile.kind);
     if(circular){
@@ -85,6 +85,9 @@
       const geo=new THREE.BufferGeometry(),p=[];
       for(let i=0;i<120;i++){const a=i/120*Math.PI*2,r=radius-(i%5===0?1.9:1.3);p.push(Math.cos(a)*r,-.23,Math.sin(a)*r,Math.cos(a)*(radius-.8),-.23,Math.sin(a)*(radius-.8));}
       geo.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0x83a5b3,transparent:true,opacity:.32})));
+    }else if(profile.kind==='geographic'){
+      const grid=new THREE.GridHelper(220,55,0x537696,0x3b5871);
+      grid.position.y=-.7;grid.material.transparent=true;grid.material.opacity=.27;g.add(grid);
     }else{
       mesh(g,rounded(77,1.6,77,.5),material(0x20394a),0,-1.1,0);
       mesh(g,rounded(76,.12,76,.25),material(profile.kind==='geographic'?0x193141:0x2d4755,{roughness:.85}),0,-.24,0);
@@ -92,20 +95,22 @@
       const bounds=first.space?.bounds;
       if(bounds&&profile.kind!=='geographic'){const sp=label(g,[`${bounds[2]-bounds[0]} × ${bounds[3]-bounds[1]} ${first.space.unit||''}`,'模型空间 · 坐标等比映射'],26,4);sp.position.set(0,0,41);}
     }
+    for(const part of g.children)part.userData.sceneLayer||='base';
     if(profile.kind==='ring-road'){
-      mesh(g,new THREE.CylinderGeometry(32,32,.35,160),material(0x152733,{roughness:.92}),0,-.03,0);
-      const road=mesh(g,new THREE.RingGeometry(28.3,31.7,192),material(0x45515b,{roughness:.94,side:THREE.DoubleSide}),0,.17,0);road.rotation.x=-Math.PI/2;
-      ring(g,28.35,.065,.19,0xd0d7d2,.8);ring(g,31.65,.065,.19,0xd0d7d2,.8);
-      ring(g,27.9,.1,.18,0x6b9399,.45);ring(g,32.05,.1,.18,0x6b9399,.45);
+      const roadGroup=new THREE.Group();roadGroup.userData.sceneLayer='roads';g.add(roadGroup);
+      mesh(roadGroup,new THREE.CylinderGeometry(32,32,.35,160),material(0x152733,{roughness:.92}),0,-.03,0);
+      const road=mesh(roadGroup,new THREE.RingGeometry(28.3,31.7,192),material(0x45515b,{roughness:.94,side:THREE.DoubleSide}),0,.17,0);road.rotation.x=-Math.PI/2;
+      ring(roadGroup,28.35,.065,.19,0xd0d7d2,.8);ring(roadGroup,31.65,.065,.19,0xd0d7d2,.8);
+      ring(roadGroup,27.9,.1,.18,0x6b9399,.45);ring(roadGroup,32.05,.1,.18,0x6b9399,.45);
       // Road-edge dashes: no fictitious additional lane or intersection.
       const dashes=new THREE.InstancedMesh(new THREE.PlaneGeometry(.45,.11),new THREE.MeshBasicMaterial({color:0xb8c7cb,transparent:true,opacity:.6}),100),stamp=new THREE.Object3D();
       for(let i=0;i<100;i++){
         const a=i/100*Math.PI*2;
         stamp.position.set(Math.cos(a)*31.25,.195,Math.sin(a)*31.25);stamp.rotation.set(-Math.PI/2,0,-a-Math.PI/2);stamp.updateMatrix();dashes.setMatrixAt(i,stamp.matrix);
       }
-      g.add(dashes);
+      roadGroup.add(dashes);
       const length=first.facilities.find(f=>f.type==='road').length;
-      [0,.25,.5,.75].forEach(f=>{const a=f*Math.PI*2,sp=label(g,String(Math.round(length*f)),4,1);sp.position.set(Math.cos(a)*34.1,.5,Math.sin(a)*34.1);});
+      [0,.25,.5,.75].forEach(f=>{const a=f*Math.PI*2,sp=label(roadGroup,String(Math.round(length*f)),4,1);sp.position.set(Math.cos(a)*34.1,.5,Math.sin(a)*34.1);});
       ring(g,21,.045,-.22,0x93b8c4,.16);ring(g,19.5,.04,-.22,0x93b8c4,.09);
       mesh(g,new THREE.CylinderGeometry(18.8,19.1,.45,128),material(0x233f50,{roughness:.65}),0,-.06,0);
       ring(g,18.75,.055,.18,0x7dbbc3,.55);ring(g,16.9,.08,.19,0x8196a0,.25);

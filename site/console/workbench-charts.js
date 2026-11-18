@@ -44,7 +44,8 @@
       return command+x(p[0]).toFixed(2)+' '+y(p[1]).toFixed(2);
     }).join(' ');
   }
-  const textAttr = 'font-family="system-ui,sans-serif" font-size="11" fill="#a7bdd1"';
+  const textAttr = 'font-family="system-ui,sans-serif" font-size="12" fill="#b7cbe0"';
+  const disabledSeries = new WeakMap();
   function plot(host, spec) {
     if(!host)return;
     const series = spec.series || [];
@@ -66,7 +67,13 @@
     const yTicks=Array.from({length:5},(_,i)=>loY+i*(hiY-loY)/4);
     const axes=yTicks.map(v=>`<line x1="${L}" y1="${y(v)}" x2="${R}" y2="${y(v)}" stroke="#2b4159"/><text x="${L-9}" y="${y(v)+4}" text-anchor="end" ${textAttr}>${esc(nfmt(v))}</text>`).join('')
       +xTicks.map(([v,label])=>`<text x="${x(v)}" y="${B+18}" text-anchor="middle" ${textAttr}>${esc(label)}</text>`).join('');
+    const zones=(spec.zones||[]).filter(z=>finite(z.from)&&finite(z.to)&&z.to>=loX&&z.from<=hiX).map(z=>{
+      const left=x(Math.max(loX,z.from)),right=x(Math.min(hiX,z.to));
+      return `<rect x="${left}" y="${T}" width="${Math.max(0,right-left)}" height="${B-T}" fill="${esc(z.color)}" opacity=".15"><title>${esc(z.label)}</title></rect>`;
+    }).join('');
     const references=(spec.events||[]).filter(e=>finite(e.x)&&e.x>=loX&&e.x<=hiX).slice(0,25).map(e=>`<line x1="${x(e.x)}" x2="${x(e.x)}" y1="${T}" y2="${B}" stroke="#f4c783" stroke-dasharray="3 5"><title>${esc(e.label)} · ${esc(nfmt(e.x))}</title></line>`).join('');
+    const muted=disabledSeries.get(host)||new Set();
+    disabledSeries.set(host,muted);
     const markers=series.map((trace,i)=>{
       const color=trace.color || colors[i%colors.length], marks=compact(trace.points,1100);
       const tip=p=>esc(`${trace.label} · ${p[2] || nfmt(p[0])} · ${nfmt(p[1])} ${spec.yUnit||''}`);
@@ -94,43 +101,83 @@
         shape+=`<path d="${line}" fill="none" stroke="${color}" stroke-width="1.85" vector-effect="non-scaling-stroke"${trace.dashed?' stroke-dasharray="5 4"':''}/>`;
         if (marks.length===1) shape+=`<circle cx="${x(marks[0][0])}" cy="${y(marks[0][1])}" r="3" fill="${color}"><title>${tip(marks[0])}</title></circle>`;
       }
-      return shape;
+      return `<g data-chart-series="${i}"${muted.has(trace.label)?' display="none"':''}>${shape}</g>`;
     }).join('');
-    const legends=series.map((trace,i)=>`<span><i style="background:${trace.color||colors[i%colors.length]}"></i>${esc(trace.label)}</span>`).join('');
-    host.innerHTML=`<svg tabindex="0" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${esc(spec.title)}" xmlns="http://www.w3.org/2000/svg">
-      <title>${esc(spec.title)}</title><rect width="${w}" height="${h}" fill="#0d1826"/>${axes}${references}${markers}
+    const legends=series.map((trace,i)=>`<button data-chart-legend="${i}" aria-pressed="${!muted.has(trace.label)}" title="切换 ${esc(trace.label)} 曲线"><i style="background:${trace.color||colors[i%colors.length]}"></i>${esc(trace.label)}</button>`).join('');
+    host.innerHTML=`<div class="plot-stage"><svg tabindex="0" ${spec.onWindow?'data-brush-chart':''} viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${esc(spec.title)}" xmlns="http://www.w3.org/2000/svg">
+      <title>${esc(spec.title)}</title><rect width="${w}" height="${h}" rx="6" fill="#101b2b"/>${zones}${axes}${references}${markers}
       <path d="M${L} ${T}V${B}H${R}" stroke="#627b93" fill="none"/>
       <text x="${L}" y="15" ${textAttr}>${esc(spec.yUnit||'')}</text><text x="${(R+L)/2}" y="${h-8}" text-anchor="middle" ${textAttr}>${esc(spec.xUnit||'')}</text>
       <line data-chart-cursor display="none" y1="${T}" y2="${B}" stroke="#f8fdff" stroke-dasharray="2 4" pointer-events="none"/>
-      </svg><div class="chart-legend">${legends}</div><output class="chart-readout">${esc(spec.note||'移动指针或按方向键查看观测。')}</output>`;
-    const svg=host.querySelector('svg'), cursor=host.querySelector('[data-chart-cursor]'), info=host.querySelector('output');
+      <g data-chart-points pointer-events="none"></g>
+      <rect data-chart-brush display="none" y="${T}" height="${B-T}" fill="#a99aef33" stroke="#bdadff" pointer-events="none"/>
+      </svg><div class="chart-tooltip" aria-hidden="true" hidden></div></div><div class="chart-legend">${legends}</div><output class="chart-readout" aria-live="off">移至曲线或按方向键查看观测。</output>${spec.note?`<p class="chart-method">${esc(spec.note)}</p>`:''}`;
+    const svg=host.querySelector('svg'), cursor=host.querySelector('[data-chart-cursor]'), info=host.querySelector('output'), points=host.querySelector('[data-chart-points]');
+    const tooltip=host.querySelector('.chart-tooltip'), brush=host.querySelector('[data-chart-brush]');
     const xs=[...new Set(defined.map(p=>p[0]))].sort((a,b)=>a-b);
     const lookup=series.map(trace=>new Map(trace.points.filter(p=>finite(p[1])).map(p=>[p[0],p])));
-    let selected = 0;
-    const seek = (raw,broadcast = true) => {
+    let selected = 0, drag;
+    const nearest = raw => {
       let a=0,b=xs.length-1;
       while(a<b) {const m=(a+b)>>1;if(xs[m]<raw)a=m+1;else b=m;}
       if(a>0 && Math.abs(raw-xs[a-1])<Math.abs(raw-xs[a]))a--;
-      const value=xs[a];selected=a;
+      return a;
+    };
+    const seek = (raw,broadcast = true) => {
+      selected=nearest(raw);
+      const value=xs[selected];
       cursor.setAttribute('x1',x(value));cursor.setAttribute('x2',x(value));cursor.removeAttribute('display');
-      const details=series.map((trace,i)=>{
+      const dots=[];
+      const details=series.flatMap((trace,i)=>{
+        if(muted.has(trace.label))return [];
         const p=lookup[i].get(value);
         const reading=!p?'—':trace.band?.find(r=>r[0]===value)?.slice(1).map(nfmt).join('–');
+        if(p&&(!trace.kind||trace.kind==='area'||trace.kind==='scatter')) dots.push(`<circle cx="${x(value)}" cy="${y(p[1])}" r="3.2" fill="${trace.color||colors[i%colors.length]}" stroke="#101b2b"/>`);
         return `${trace.label} ${nfmt(p?.[1])}${reading&&reading!=='—'?' ['+reading+']':''}${p?.[2]?' · '+p[2]:''}`;
       });
-      info.textContent=[`${nfmt(value)} ${spec.xUnit||''}`,...details].join('  |  ');
+      points.innerHTML=dots.join('');
+      const timestamp=`${nfmt(value)} ${spec.xUnit||''}`;
+      info.textContent=[timestamp,...details].join('  |  ');
+      if(!tooltip.hidden)tooltip.innerHTML=`<b>${esc(timestamp)}</b>${details.slice(0,8).map(line=>`<span>${esc(line)}</span>`).join('')}`;
       if(broadcast)spec.onHover?.(value);
     };
+    const atPointer=e=>new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    const fromX=xx=>loX+(Math.max(L,Math.min(R,xx))-L)/(R-L)*(hiX-loX);
+    svg.addEventListener('pointerdown',e=>{
+      if(!spec.onWindow||e.button!==0)return;
+      const p=atPointer(e);if(p.x<L||p.x>R||p.y<T||p.y>B)return;
+      drag=p.x;svg.setPointerCapture(e.pointerId);tooltip.hidden=true;
+    });
     svg.addEventListener('pointermove',e=>{
-      const point = new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());
-      if(point.x<L||point.x>R||point.y<T||point.y>B)return;
-      seek(loX+(point.x-L)/(R-L)*(hiX-loX));
+      const p=atPointer(e);
+      if(drag!==undefined){
+        const target=Math.max(L,Math.min(R,p.x));
+        brush.setAttribute('x',Math.min(drag,target));brush.setAttribute('width',Math.abs(target-drag));brush.removeAttribute('display');return;
+      }
+      tooltip.hidden=p.x<L||p.x>R||p.y<T||p.y>B;
+      if(tooltip.hidden)return;
+      tooltip.classList.toggle('place-left',p.x>(L+R)/2);
+      seek(fromX(p.x));
+    });
+    svg.addEventListener('pointerleave',()=>{tooltip.hidden=true;});
+    svg.addEventListener('lostpointercapture',()=>{drag=undefined;brush.setAttribute('display','none');});
+    svg.addEventListener('pointerup',e=>{
+      if(drag===undefined)return;
+      const end=atPointer(e).x, a=xs[nearest(fromX(drag))], b=xs[nearest(fromX(end))];
+      if(Math.abs(drag-end)>=10&&b!==a)spec.onWindow(Math.min(a,b),Math.max(a,b));
+      else seek(fromX(end));
     });
     svg.addEventListener('keydown',e=>{
       if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;
       e.preventDefault();
       seek(xs[Math.max(0,Math.min(xs.length-1,selected+(e.key==='ArrowRight'?1:-1)))]);
     });
+    for(const button of host.querySelectorAll('[data-chart-legend]'))button.onclick=()=>{
+      const i=Number(button.dataset.chartLegend), label=series[i].label, marks=svg.querySelector(`[data-chart-series="${i}"]`);
+      if(muted.delete(label)) marks.removeAttribute('display');
+      else {muted.add(label);marks.setAttribute('display','none');}
+      button.setAttribute('aria-pressed',String(!muted.has(label)));seek(xs[selected],false);
+    };
     if (finite(spec.cursor)) seek(spec.cursor,false);
     return {seek,svg};
   }

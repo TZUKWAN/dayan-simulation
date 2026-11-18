@@ -65,13 +65,13 @@ function createAIDrawer() {
   document.getElementById("aiInput").addEventListener("keydown", e => {
     if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {e.preventDefault();aiSend();}
   });
-  // C5: planner 状态披露徽标（LLM 在线 / 规则兜底）
+  // Configuration is reported separately from actual tool activity.
   fetch("/api/agent/planner_status").then(r => r.json()).then(d => {
     const head = drawer.querySelector(".ai-head b");
     if (!head) return;
     const badge = document.createElement("span");
-    const isLlm = d.planner && !["rule", "unreachable"].includes(d.planner) && !String(d.planner).startsWith("error");
-    badge.textContent = isLlm ? "LLM 规划已配置" : "规则模式";
+    const isLlm = d.planner === 'configured-not-probed';
+    badge.textContent = isLlm ? '模型服务已配置' : '规则规划';
     badge.style.cssText = "margin-left:8px;font-size:8px;padding:2px 6px;border-radius:3px;" +
       (isLlm ? "color:#00ffa3;border:1px solid rgba(0,255,163,.4);background:rgba(0,255,163,.08)"
              : "color:#8fa2c2;border:1px solid rgba(143,162,194,.3);background:rgba(143,162,194,.08)");

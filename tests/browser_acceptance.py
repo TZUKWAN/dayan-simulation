@@ -61,6 +61,11 @@ def run(base,output,engine='firefox'):
             page.locator('#modelRows [data-model-open="NET106"]').click()
             expect(page.locator('#modelDetail')).to_contain_text('density',timeout=20000)
             check('library exposes model-specific inputs and semantic relationships',page.locator('.model-network svg').count()==1)
+            network=page.locator('.model-network svg')
+            network.focus();network.press('ArrowRight')
+            check('model network can be explored and reset with the keyboard',
+                  'translate(-30 0)' in page.locator('[data-network-world]').get_attribute('transform'))
+            page.locator('[data-network-reset]').click()
             page.locator('#runModelDetail').click()
             page.wait_for_selector('[data-model-param="density"]')
             contract=api('/api/models/contract/NET106?include_fidelity=false')['contract']
@@ -71,6 +76,15 @@ def run(base,output,engine='firefox'):
             page.wait_for_function('DAYAN_RESULTS.runs[0]?.run_id',timeout=45000)
             rid=page.evaluate('DAYAN_RESULTS.runs[DAYAN_RESULTS.selected].run_id');saved=api('/api/runs/'+rid)
             check('professional action creates actual saved requested configuration',saved['manifest']['actual']['effective_parameters']['cells']==80 and saved['manifest']['rng']['seed']==7 and len(saved['observations'])==21)
+            cold=browser.new_page(viewport={'width':1680,'height':1100})
+            try:
+                cold.goto(base,wait_until='domcontentloaded')
+                cold.locator(f'#missionHistory [data-open-run="{rid}"]').click()
+                cold.wait_for_function('!DAYAN_RESULTS.stream?.partial && DAYAN_RESULTS.stream?.n_frames>0')
+                check('the first scene opened from the overview expands the renderer and its HUD',
+                      cold.evaluate("()=>{const c=document.querySelector('#viz3dContainer canvas').getBoundingClientRect();return c.width>300&&c.height>300&&document.querySelector('#vizStateHud')?.offsetHeight>0;}"))
+            finally:
+                cold.close()
             restore(rid)
             page.evaluate('DAYAN_RESULTS.seek(DAYAN_RESULTS.end)')
             frame=page.evaluate('_vizStateStream.frames[_vizStateIdx]')
@@ -78,6 +92,21 @@ def run(base,output,engine='firefox'):
             by_id={str(m['id']):m for m in meshes};length=next(f['length'] for f in frame['facilities'] if f['type']=='road')
             check('rendered persistent IDs equal archived entity IDs',set(by_id)=={str(e['id']) for e in frame['entities']})
             check('rendered ring positions transform actual saved cells',all(abs(by_id[str(e['id'])]['position'][0]-30*math.cos(e['x']/length*2*math.pi))<1e-8 and abs(by_id[str(e['id'])]['position'][2]-30*math.sin(e['x']/length*2*math.pi))<1e-8 for e in frame['entities']))
+            page.locator('[data-layer=roadFlow]').click()
+            expect(page.locator('#layerReadout')).to_contain_text('整条环路归档通量')
+            check('traffic layer visualizes the actual archived whole-road flux',
+                  page.evaluate('_vizStateStream.frames[_vizStateIdx].aggregates.flux')==frame['aggregates']['flux'])
+            page.locator('[data-layer=flow]').click()
+            page.locator('#trackAgent').click()
+            expect(page.locator('#inspectionRail #inspectorEvidence')).to_contain_text('环路近邻')
+            page.locator('#sceneFullscreen').click()
+            page.wait_for_function("document.fullscreenElement?.classList.contains('live-panel')")
+            expect(page.locator('#mapInspector #entityPanel')).to_be_visible()
+            page.locator('#sceneFullscreen').click()
+            page.wait_for_function('!document.fullscreenElement')
+            page.locator('#closeInspector').click()
+            check('full-screen scene retains the same single inspector and archived selection',
+                  page.locator('#entityPanel').count()==1 and page.evaluate('DAYAN_RESULTS.runs[0].run_id')==rid)
             page.screenshot(path=str(output/'traffic.png'),full_page=True)
             timeline=page.locator('#timeline').bounding_box()
             page.mouse.click(timeline['x']+timeline['width']*.65,timeline['y']+timeline['height']/2)
@@ -122,7 +151,17 @@ def run(base,output,engine='firefox'):
             check('a delayed older archive cannot overwrite the newly selected run',
                   page.evaluate('async(id)=>await testDelayedRestore===false&&DAYAN_RESULTS.runs[0].run_id===id',queue['run_id']))
             large=api('/api/run',{'model_id':'NET106','parameters':{'cells':5000,'density':.8},'ticks':250,'dt':1,'seed':7})
-            restore(large['run_id']);page.evaluate('DAYAN_RESULTS.seek(DAYAN_RESULTS.end)')
+            exact_url=base+'/api/runs/'+large['run_id']
+            exact_requests=[];page.route(exact_url,lambda route:exact_requests.append(route))
+            with page.expect_request(exact_url):
+                page.evaluate('(id)=>{window.testProgressive=DAYAN_RESULTS.restore(id);}',large['run_id'])
+            page.wait_for_function('DAYAN_RESULTS.stream?.partial && DAYAN3D.diagnostics.visibleEntities===3000',timeout=45000)
+            check('a real labelled frame sample is interactive while full playback waits for the verified archive',
+                  page.locator('#playButton').is_disabled() and page.evaluate('DAYAN_RESULTS.stream.n_frames<DAYAN_RESULTS.stream.total_frames'))
+            exact_requests[0].continue_();page.unroute(exact_url)
+            check('the full archive replaces the sample and enables exact playback',
+                  page.evaluate('()=>testProgressive') and page.locator('#playButton').is_enabled())
+            page.evaluate('DAYAN3D.setSmoothing(false);DAYAN_RESULTS.seek(DAYAN_RESULTS.end)')
             check('large run retains final frame and discloses render sampling',page.evaluate('_vizStateStream.frames.at(-1).sim_t===DAYAN_RESULTS.end') and '采样3000' in page.locator('#vizStateHud').inner_text())
             check('large-scene GPU instances retain actual entity IDs and coordinates',page.evaluate('''()=>{const g=_scene.children.find(c=>c.userData.isStateGroup),b=g.userData.carBatch,f=_vizStateStream.frames.at(-1),road=f.facilities.find(f=>f.type==='road');if(!b||b.count!==3000)return false;const saved=new Map(f.entities.map(e=>[String(e.id),e])),m=new THREE.Matrix4(),v=new THREE.Vector3();return b.userData.instanceIds.every((id,i)=>{const e=saved.get(String(id));b.getMatrixAt(i,m);v.setFromMatrixPosition(m);return !!e&&Math.abs(v.x-30*Math.cos(e.x/road.length*Math.PI*2))<1e-4&&Math.abs(v.z-30*Math.sin(e.x/road.length*Math.PI*2))<1e-4;});}'''))
             performance=page.evaluate('''()=>{const times=[];for(let i=0;i<5;i++){const start=performance.now();DAYAN3D.renderAt(DAYAN_RESULTS.end);_vizRenderer.getContext().finish();times.push(performance.now()-start);}return {timing:'completed GPU render (WebGL finish)',render_ms:times,geometries:_vizRenderer.info.memory.geometries,draw_calls:_vizRenderer.info.render.calls,triangles:_vizRenderer.info.render.triangles,archived_entities:_vizStateStream.n_entities_max,frames:_vizStateStream.frames.length};}''')
@@ -132,6 +171,10 @@ def run(base,output,engine='firefox'):
             # for a full-page capture can stall Chromium's software compositor.
             page.screenshot(path=str(output/'large.png'),full_page=False)
             ds=api('/api/datasets/import',{'name':'<img src=x onerror="window.UNIT_XSS=1"> security fixture','format':'csv','content':'value\n1\n','source':'explicit browser security fixture; not empirical'})
+            page.locator('[data-nav="data"]').click()
+            expect(page.locator('#showDatasetFixtures')).to_be_visible()
+            check('default catalogue hides the verification fixture and offers a localized file chooser',
+                  page.locator(f'[data-asset-id="{ds["dataset_id"]}"]').count()==0 and page.locator('#chooseDatasetFile').is_visible())
             page.evaluate('(id)=>DAYAN_RESULTS.openDataManager(id)',ds['dataset_id'])
             check('dataset names render as text without executable markup',page.evaluate('!window.UNIT_XSS') and page.locator('#datasetList img').count()==0)
             page.locator('[data-nav="lab"]').click()
@@ -156,6 +199,20 @@ def run(base,output,engine='firefox'):
             expect(page.locator('#analyticsTrend svg')).to_be_visible(timeout=25000)
             expect(page.locator('#analyticsEffect svg')).to_be_visible()
             expect(page.locator('#analyticsMetric')).to_have_value('flux')
+            chart=page.locator('#analyticsTrend svg')
+            legend=page.locator('#analyticsTrend [data-chart-legend]').first
+            legend.click()
+            check('chart legend switches actual traces without changing archived observations',
+                  legend.get_attribute('aria-pressed')=='false' and page.locator('#analyticsTrend [data-chart-series="0"]').get_attribute('display')=='none')
+            legend.click();chart.scroll_into_view_if_needed()
+            x,y,end=chart.evaluate('''svg=>{const m=svg.getScreenCTM(),w=svg.viewBox.baseVal.width;
+                const a=new DOMPoint(w*.3,125).matrixTransform(m),b=new DOMPoint(w*.75,125).matrixTransform(m);return [a.x,a.y,b.x];}''')
+            page.mouse.move(x,y);page.mouse.down();page.mouse.move(end,y,steps=8);page.mouse.up()
+            check('range brush selects real observation times',
+                  0<float(page.locator('#analyticsFrom').input_value())<float(page.locator('#analyticsTo').input_value())<18)
+            page.locator('#analyticsResetWindow').click()
+            page.locator('#analyticsLayout').select_option('four')
+            check('the four-chart layout shows precisely four graph panels',page.locator('[data-plot-panel]:visible').count()==4)
             slider=page.locator('#analyticsCursor')
             box=slider.bounding_box()
             page.mouse.click(box['x']+box['width']*.65,box['y']+box['height']/2)

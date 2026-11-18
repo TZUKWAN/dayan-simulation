@@ -140,14 +140,16 @@
     text('#archiveBadge',run?(run.run_id?'归档状态回放 · 非实时采集':'旧记录观测回放'):'尚无运行数据');
     text('#railContext',run?`${run.model_id} · sim_t=${fmt(s.time)} · ${entities.length?entities.length+'主体':cache.keys.length+'项汇总观测'}`:'描述场景、目标和约束，AI会规划并执行');
     text('#commandRecord',run?.run_id||'等待归档');
-    if(run)text('#scenarioTitle',run.manifest?.model_definition?.scenario?.title||window.DAYAN3D?.presentation?.title||run.model_id);
+    if(run)text('#scenarioTitle',s.question||run.manifest?.model_definition?.scenario?.title||window.DAYAN3D?.presentation?.title||run.model_id);
     text('#commandClock','sim_t '+fmt(s.time));
   }
   function selectRail(tab) {
-    railTab=mode==='simple'?'ai':tab;
+    railTab=mode==='simple'&&tab==='parameters'?'ai':tab;
     $('#aiDrawer').hidden=railTab!=='ai';$('#proConsole').hidden=railTab!=='parameters';
+    $('#inspectionRail').hidden=railTab!=='inspector';
     for(const b of document.querySelectorAll('[data-rail-tab]'))b.setAttribute('aria-selected',String(b.dataset.railTab===railTab));
     $('#aiDrawer').classList.add('open');
+    window.DAYAN_RESULTS?.dockInspector(railTab==='inspector');
   }
   let defaultRestoreCancelled=false;
   function manualIntent() {defaultRestoreCancelled=true;window.DAYAN_RESULTS?.cancelPendingView();}
@@ -289,7 +291,12 @@
     for(const page of document.querySelectorAll('[data-workspace-page]'))main.append(page);
     const rail=document.createElement('aside');rail.id='operationRail';rail.setAttribute('aria-label','AI与专业操作');shell.append(rail);
     rail.innerHTML=`<div class="rail-title"><span>OPERATIONS</span><b id="modeDescription"></b></div><div class="rail-tabs" role="tablist" aria-label="操作工具"><button data-rail-tab="ai" role="tab" aria-selected="true">◈ AI协作</button><button data-rail-tab="parameters" role="tab" aria-selected="false">全部参数</button></div><div id="railContext"></div><section id="aiRail"></section><section id="proConsole" hidden><div class="pro-heading"><b>模型与运行控制</b><span id="parameterCount"></span></div><form id="proForm"><div class="pro-model"><input id="proModel" type="text" list="proModelList" placeholder="选择或输入模型ID" aria-label="专业模型ID"><datalist id="proModelList"></datalist><button type="button" id="proLoad">读取</button></div><div id="proParameters"><p>载入当前模型的全部真实参数。</p></div><div class="pro-runtime"><label>步数<input id="proTicks" type="number" min="0" max="10000" step="1" value="100"></label><label>dt<input id="proDt" type="number" min="0" step="any" placeholder="模型默认"></label><label>随机种子<input id="proSeed" type="number" min="0" step="1" placeholder="引擎默认"></label></div><details class="pro-advanced"><summary>定时干预、数据映射与检查点</summary><label>interventions · 定时干预<textarea id="proInterventions" rows="4">[]</textarea></label><label>data_bindings · 数据参数映射<textarea id="proBindings" rows="4">[]</textarea></label><label>checkpoint_at · 保存检查点步数<input id="proCheckpoint" type="number" min="0" step="1" placeholder="默认末步"></label><p>沿用真实接口结构；不支持的参数/组合由引擎明确拒绝。</p></details><div class="pro-buttons"><button type="button" id="proReset">恢复模型默认</button><button type="submit" id="proRun" disabled>执行新运行 ↗</button></div><p id="proStatus" role="status">等待参数合同</p></form><button id="askAboutParameters" class="rail-ai-link">让 AI 帮我解释和调整参数 →</button></section><div class="rail-records"><span>最近归档 · 读取不重新计算</span><div id="recentRecords"></div></div>`;
+    const inspectTab=document.createElement('button');inspectTab.dataset.railTab='inspector';inspectTab.setAttribute('role','tab');inspectTab.setAttribute('aria-selected','false');inspectTab.setAttribute('aria-controls','inspectionRail');inspectTab.textContent='主体检查';
+    $('.rail-tabs').append(inspectTab);
+    const inspection=document.createElement('section');inspection.id='inspectionRail';inspection.hidden=true;
+    $('#proConsole').after(inspection);
     $('#aiRail').append($('#aiDrawer'));$('#aiDrawer').classList.add('open');
+    $('#aiChatBody').before(Object.assign(document.createElement('section'),{id:'assistantTaskSteps',hidden:true}));
     const tools=document.createElement('div');tools.className='ai-command-chips';tools.innerHTML='<button data-draft="解释当前结果，并指出主要变化和局限">解释结果</button><button data-draft="生成研究报告">研究报告</button><button data-draft="导出原始数据">原始数据</button><label title="导入真实CSV/JSON数据">＋ 数据<input id="chatDataFile" type="file" accept=".csv,.json,.geojson" hidden></label>';
     $('#aiDrawer .ai-input-row').before(tools);
     const left=document.createElement('aside');left.className='command-left';left.innerHTML='<section class="panel signal-panel"><div class="panel-head"><h2>全域指标</h2><span id="signalCount" class="micro"></span></div><div id="signalDeck"></div><p class="chart-caption" id="signalFoot"></p></section><section class="panel activity-panel"><div class="panel-head"><h2>主体运动构成</h2><span class="micro">POSITION DELTA</span></div><canvas id="activityChart" aria-label="实际相邻帧主体位置变化占比"></canvas><p class="chart-caption" id="activityNote"></p></section>';
@@ -303,11 +310,11 @@
     const record=document.createElement('span');record.id='commandRecord';record.className='micro';$('#workspaceStatus').after(record);
     const events=$('.events');events.open=true;
     $('#aiInput').placeholder='描述场景、修改参数、分析结果…';
-    $('#aiChatBody').innerHTML='<div class="ai-msg ai-bot"><span class="assistant-mark">DAYAN ASSISTANT</span><b>从一句话，进入一个可观察的世界。</b><p>告诉我场景、主体与研究目标。我会选择或构建模型，执行计算，再将实际结果呈现在指挥屏。</p><p>也可以直接说：调整参数、解释当前结果、生成研究报告。</p></div>';
+    $('#aiChatBody').innerHTML='<div class="ai-msg ai-bot"><b>您想模拟什么？</b><p>描述场景、主体、规则和观察目标，也可在已有运行上调整参数或生成研究报告。</p></div>';
     for(const b of modes.querySelectorAll('button'))b.onclick=()=>setMode(b.dataset.operationMode);
     for(const b of rail.querySelectorAll('[data-rail-tab]'))b.onclick=()=>selectRail(b.dataset.railTab);
     for(const b of tools.querySelectorAll('[data-draft]'))b.onclick=()=>prefill(b.dataset.draft);
-    window.toggleAIDrawer=()=>{if(document.body.dataset.page!=='overview')window.switchPage?.('overview');selectRail('ai');$('#aiInput').focus({preventScroll:true});if(innerWidth<1000)rail.scrollIntoView({block:'start'});};
+    window.toggleAIDrawer=()=>{if(document.body.dataset.page!=='overview')window.switchPage?.('overview');if(document.body.classList.contains('view-immersive'))$('[data-workspace-view=combined]').click();selectRail('ai');$('#aiInput').focus({preventScroll:true});if(innerWidth<1000)rail.scrollIntoView({block:'start'});};
     $('#proLoad').onclick=()=>{manualIntent();return loadParameters($('#proModel').value.trim().toUpperCase()).catch(e=>proError(e.message));};
     $('#aiInput').addEventListener('input',manualIntent);
     $('#proReset').onclick=()=>{try{sessionStorage.removeItem(draftKey);}catch{}if(pro.modelId)loadParameters(pro.modelId);};

@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "checks": [
+    "Native chat, reserved project and workbench share one session",
+    "Bridge is connected to the owned backend",
+    "Native AI sent a successful actual run tool receipt",
+    "Native result matches archived model and requested inputs",
+    "The iframe hides its standalone chat entry",
+    "Narrow embedded layout gives the scene its full width and clears the data rail",
+    "Native divider actually moves and preserves draft and session",
+    "Professional controls contain the native run values",
+    "Professional edits ran and created a second independent archive",
+    "Reload preserves the bound session, edited run and panel width",
+    "Actual CSV download contains 13 verified archived steps",
+    "Actual ZIP belongs to the edited run",
+    "No unhandled native or iframe errors"
+  ],
+  "native_tool": {
+    "tool": "run",
+    "seq": 2,
+    "ok": true,
+    "run_id": "R20261118T092346-4b0914d28c924dbea3c54345cfeb2e6c",
+    "session_sha256": "a689bd8e11a5bedea3fb3fc3fe1636ff6040b64ef7193174c0b852b4fad00ed1"
+  },
+  "manual_run": "R20261118T092402-27dfa610477449d292696a2ed5f2a0f3",
+  "edited_density": 0.38,
+  "resize_delta_px": 110.20001220703125,
+  "frame_count": 13,
+  "archive_code": "67f5c87e7089e60b6fc48fb0892542265ca7aea8b1eb4245fe13cc0a3cbff43e",
+  "csv_sha256": "e1d271ba615ae37febcda14de2ff9a4cb40541ddd899214c5a2985dc35f5befa",
+  "bundle_sha256": "beb3d2f9aba5e754bc770a2c6ee19522b145fb811712c2b82f5e63d16be9023b"
+}

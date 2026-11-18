@@ -4,6 +4,8 @@
   const $ = s => document.querySelector(s), esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const query = new URLSearchParams(location.search), nativeSession = query.get('dsh_session');
   let currentStudy = query.get('study'), currentCollection = null, studyRevision = 0;
+  const validationLabels={pass:'独立留出通过',failed_holdout:'独立留出未通过',failed_tolerance:'训练阈值未通过',prepared:'规约待校准'};
+  const roleColors={train:'#71dfd3',validation:'#b8abfb',test:'#ebc17f'};
   async function request(path, body) {
     const response = await fetch(path, body === undefined ? {} : {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
     const result = await response.json(); if (!response.ok) throw new Error(result.detail || result.error || '请求失败'); return result;
@@ -92,7 +94,7 @@
     const plots=window.DAYAN_CHARTS;if(!plots)return;
     const fit=new Map(s.predictions.map(r=>[r.date,r.predicted]));
     const validation=cal.selection?.validation, test=cal.holdout, uncertainty=cal.uncertainty;
-    const stages=[['训练',cal.training],...(validation?[['验证',validation]]:[]),['独立测试',test]];
+    const stages=[['训练',cal.training,'train'],...(validation?[['验证',validation,'validation']]:[]),['独立测试',test,'test']];
     const years=s.records.map(r=>r.date);
     const stride=Math.max(1,Math.ceil((years.length-1)/5));
     const yearTicks=years.filter((_,i)=>i%stride===0||i===years.length-1).map(year=>[year,String(year)]);
@@ -108,7 +110,8 @@
     if(document.body.dataset.page==='lab'&&$('#labCalibration'))$('#labCalibration').append(section);
     else $('#pageOverview .workspace-grid')?.after(section);
     const host=section.querySelectorAll('.chart-host');
-    plots.plot(host[0],{title:titles[0],xUnit:'年度',yUnit:s.unit,xTicks:yearTicks,events,series:[
+    const zones=stages.map(([label,stage,role])=>({label,color:roleColors[role],from:stage.dates[0]-.5,to:stage.dates.at(-1)+.5}));
+    plots.plot(host[0],{title:titles[0],xUnit:'年度',yUnit:s.unit,xTicks:yearTicks,events,zones,series:[
       {label:'统计观测',points:s.records.map(r=>[r.date,r.value])},
       {label:'模型运行'+(band?' / 训练残差经验带':''),points:s.predictions.map(r=>[r.date,r.predicted]),band,dashed:true},
     ]});
@@ -120,7 +123,7 @@
       {label:'事前测试阈值',dashed:true,points:[[0,s.tolerance],[metrics.length-1,s.tolerance]]},
     ]});
     plots.plot(host[2],{title:titles[2],xUnit:'年度',yUnit:s.unit,xTicks:yearTicks,zero:true,events,
-      series:stages.map(([label,role])=>({label,kind:'bars',points:role.dates.map((year,i)=>[year,role.actual[i]-fit.get(year),label])})),
+      series:stages.map(([label,role,key])=>({label,color:roleColors[key],kind:'bars',points:role.dates.map((year,i)=>[year,role.actual[i]-fit.get(year),label])})),
       note:'残差为实际观测减模型预测。'});
     plots.plot(host[3],{title:titles[3],xUnit:variable||'组合序号',yUnit:'RMSE · '+s.unit,
       series:[{label:'训练损失',kind:'scatter',points:grid.map(e=>[evaluated(e),e.loss])},
@@ -177,13 +180,17 @@
     const r=await request('/api/research/studies/'+encodeURIComponent(id));if(revision!==studyRevision||!accepted())return;
     const s=r.study;currentStudy=id;window.DAYAN_STUDY=s;
     const cal=s.calibration, host=$('#researchEvidence');if(!host)return;
+    window.dispatchEvent(new CustomEvent('dayan:study',{detail:s}));
     paintDiagnostics(s);
     let validationBar=$('#studyValidationBar');
-    if(!validationBar){validationBar=document.createElement('div');validationBar.id='studyValidationBar';validationBar.style.cssText='padding:8px 12px;font-size:12px;line-height:1.6;border-bottom:1px solid #40536a;background:#142331';$('#pageOverview')?.prepend(validationBar);}
-    validationBar.innerHTML=`${esc(s.contract.country)} · ${esc(s.contract.definition.concept)} · ${esc(s.contract.date)}　<strong class="${cal&&cal.status!=='pass'?'research-error':''}">${esc(cal?.status||'尚未校准')}</strong>${cal?`　训练 RMSE ${esc(cal.best_loss?.toPrecision(5))} · 留出 ${esc(cal.holdout?.rmse?.toPrecision(5))} · 事前阈值 ${esc(s.tolerance)}（${esc(s.unit)}原单位）`:''}`;
+    if(!validationBar){validationBar=document.createElement('div');validationBar.id='studyValidationBar';$('#pageOverview')?.prepend(validationBar);}
+    const outcome=validationLabels[cal?.status||s.phase]||cal?.status||s.phase;
+    validationBar.dataset.state=cal?.status||s.phase;
+    validationBar.innerHTML=`<strong>${esc(outcome)}</strong><span>${esc(s.contract.country)} · ${esc(s.contract.definition.concept)} · ${esc(s.contract.date)}</span>${cal?`<span>留出 RMSE ${esc(cal.holdout?.rmse?.toPrecision(6))} · 事前阈值 ${esc(s.tolerance)} ${esc(s.unit)}</span>`:''}`;
+    const timeRoles=[['训练',s.training,'train',cal?.best_loss],['验证',s.validation,'validation',cal?.selection?.validation?.rmse],['独立测试',s.holdout,'test',cal?.holdout?.rmse]];
     host.innerHTML=`<strong>${esc(s.question)}</strong><p>${esc(s.study_id)}<br>${esc(s.model_family)} · ${esc(s.contract.country)} · ${esc(s.contract.indicator)} · ${esc(s.unit)}</p>
-    <div class="research-time-roles">${[['训练',s.training],['验证',s.validation],['独立测试',s.holdout]].filter(([,rows])=>rows?.length).map(([name,rows])=>`<span><b>${name}</b> <code>${rows[0].date}–${rows.at(-1).date}</code></span>`).join('')}</div>
-    <p>${cal?`执行 ${esc(s.phase)} · 验证 <b class="${cal.status==='pass'?'':'research-error'}">${esc(cal.status)}</b><br>训练 RMSE ${esc(cal.best_loss?.toPrecision(6))}${cal.selection?.validation?` · 验证 ${esc(cal.selection.validation.rmse.toPrecision(6))}`:''} · 测试 ${esc(cal.holdout?.rmse?.toPrecision(6))} · 事前阈值 ${esc(s.tolerance)} ${esc(s.unit)}`:'合同已保存，可执行校准与独立测试。'}</p>
+    <section class="study-outcome" data-state="${esc(cal?.status||s.phase)}"><b>${esc(outcome)}</b>${cal?.holdout?`<span>测试 RMSE <strong>${esc(cal.holdout.rmse?.toPrecision(6))}</strong> · 阈值 ${esc(s.tolerance)} ${esc(s.unit)}</span>`:''}</section>
+    <div class="research-time-roles">${timeRoles.filter(([,rows])=>rows?.length).map(([name,rows,role,rmse])=>`<div data-role="${role}"><b>${name} · ${rows.length} 点</b><code>${rows[0].date}–${rows.at(-1).date}</code>${Number.isFinite(rmse)?`<small>RMSE ${esc(rmse.toPrecision(6))}</small>`:''}</div>`).join('')}</div>
     <details><summary>数据绑定与模型依据</summary><pre>${esc(JSON.stringify({collection_id:s.collection_id,dataset_id:s.training_dataset.dataset_id,data_binding:s.data_binding,run_id:s.run_id,model_id:s.model_id,best_params:cal?.best_params,study_sha256:s.artifact_sha256,limitations:s.limitations},null,2))}</pre></details>
     ${s.run_id?`<button type="button" id="openStudyRun">在大屏查看实际运行</button>`:''}<div id="studyReportLinks"></div>`;
     if(s.run_id){$('#openStudyRun').onclick=()=>window.DAYAN_RESULTS?.restore(s.run_id);if(restore)await window.DAYAN_RESULTS?.restore(s.run_id);}
@@ -195,7 +202,7 @@
     $('#studyEditor').open=false;
     $('#calibrateStudy').disabled=$('#calibrateStudy').hidden=s.phase!=='prepared';
     for(const b of document.querySelectorAll('[data-study-report]'))b.disabled=!s.run_id||!Number.isFinite(cal?.holdout?.rmse);
-    status(cal?`实际研究已保存 · ${cal.status}；报告将保留这个验证结论。`:'研究合同已准备；使用独立留出集执行校准。');
+    status(cal?`归档验证结论 · ${outcome}`:'研究合同已准备，可执行校准和独立测试。');
     return s;
   }
   function boot() {
