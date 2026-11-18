@@ -252,6 +252,8 @@ def build_catalog(force: bool = False) -> dict:
     reviews=load_reviews();mids=sorted(set(ALL_INDEX)|{c['model_id'] for c in custom})
     probes=_existing_probes(fp);models=[]
     refs=_all_test_refs()
+    from .research.semantics import registry as semantics_registry
+    semantics = semantics_registry()
     for mid in sorted(set(mids)|set(declared)):
         registered=declared.get(mid,{})
         protocol,factory=resolve(mid)
@@ -271,6 +273,7 @@ def build_catalog(force: bool = False) -> dict:
             'protocol':protocol,'has_factory':has_factory,'runnable':has_factory,
             'entry_kind':'software_reference' if registered.get('layer')=='软件层' else 'compatibility_or_benchmark' if mid not in declared else 'application' if registered.get('layer')=='应用层' else 'model',
             'requires_external':external,'output_contract':schema,'mechanisms':sorted(model_mechanisms(mid)),
+            'required_data':semantics.get(mid,{}).get('required_data',[]),
             'probe':{'status':probe_status,**(pr or {'ok':None,'error':'没有当前源码对应的实际探针证据'})},
             'fidelity':level,'fidelity_zh':FIDELITY_ZH[level],
             'basis':'目录声明但无实现入口' if not has_factory else rv.get('basis','无当前源码审查；运行入口不代表科学有效'),

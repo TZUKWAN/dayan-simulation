@@ -113,7 +113,10 @@ async function loadPageContent(page) {
   } else if (page === "replay") {
     loadReplayPage();
   } else if (page === "data") {
-    await window.DAYAN_RESULTS?.openDataManager(window.DAYAN_RESULTS?.datasetFocus);
+    await Promise.all([
+      window.DAYAN_RESULTS?.openDataManager(window.DAYAN_RESULTS?.datasetFocus),
+      window.DAYAN_RESEARCH?.loadSources(),
+    ]);
   }
 }
 

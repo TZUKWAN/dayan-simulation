@@ -14,7 +14,7 @@
     api_run_preset:'数据采集', api_dataset_collect:'数据下载', api_report:'生成研究报告',
     api_prepare_bundle:'复现包', api_resume:'检查点续算',
   };
-  const validations = {passed:'独立留出通过', failed_holdout:'独立留出未通过', prepared:'规约已建立', calibrated:'已校准'};
+  const validations = {pass:'独立留出通过', failed_holdout:'独立留出未通过', prepared:'规约已建立', calibrated:'已校准'};
   const embedded = new URLSearchParams(location.search).get('embed') === 'dsh';
   const telemetry = [];
   let status, catalogTask, assets, assetsPromise, pollTimer;
@@ -269,11 +269,7 @@
       try {
         if (nav || go) { window.DAYAN_CLOSE_MODAL(); switchPage(nav || go); }
         if (openRun) await window.DAYAN_RESULTS.restore(openRun);
-        if (study) {
-          switchPage('lab');
-          await window.DAYAN_RESEARCH.showStudy(study);
-          $('#researchPanel').open = true;
-        }
+        if (study) await window.DAYAN_TOOLS.openStudy(study);
         if (cancelJob) {
           button.disabled = true;
           await api('/api/jobs/'+encodeURIComponent(cancelJob), undefined, 'DELETE');
@@ -290,6 +286,11 @@
     const initial = embedded || params.has('run') ? 'overview' : Object.hasOwn(pageIds, saved) ? saved : 'mission';
     switchPage(initial, false);
     if (initial === 'overview' && !embedded && !params.has('run')) window.DAYAN_COMMAND.restoreDefault();
+    if (!embedded) {
+      const input = $('#aiInput');
+      input.value = preference('dayan_assistant_draft_vnext',undefined,true) || '';
+      input.addEventListener('input', () => preference('dayan_assistant_draft_vnext', input.value, true));
+    }
     poll();
   }
   window.DAYAN_WORKBENCH = {api, catalog, esc, date, number, empty, write, preference, validations, refreshStatus,

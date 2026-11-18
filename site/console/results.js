@@ -46,6 +46,7 @@
     const live=$(".live");if(live)live.innerHTML='<i></i>'+(state.playing?"回放中":"已暂停");
     const tiny=$(".tiny-live");if(tiny)tiny.innerHTML='<i class="dot"></i>'+(state.playing?(state.runs[state.selected]?.run_id?"已保存状态回放中":"观测回放中"):"回放已暂停");
     if (window.DAYAN3D) state.playing ? DAYAN3D.resume() : DAYAN3D.pause();
+    if (state.playing) window.DAYAN_SCHEDULE_TICK?.();
     if(!state.playing){paint();window.DAYAN3D?.renderAt?.(state.time);}
   }
   function seek(t) {
@@ -67,6 +68,8 @@
     const run=state.runs[state.selected],rows=run?.observations||[],idx=rows.length?at(rows,state.time):0,obs=rows[idx]||{};
     const frame=state.stream?.frames?.[at(state.stream.frames,state.time)],entities=frame?.entities||[];
     $('#playButton').disabled=!run||state.end<=state.start;$('#timeline').disabled=!run||state.end<=state.start;$('#resetButton').disabled=!run;$('#loopPlayback').disabled=!run;
+    $('#stepBack').disabled=!run||idx<=0;
+    $('#stepForward').disabled=!run||idx>=rows.length-1;
     $('#sceneEmptyState').hidden=Boolean(run);
     $('#sceneProvenance').textContent=run?(state.stream?.provenance==='entity'?'主体状态来自本次模型计算 · 点击主体可查看轨迹':'汇总指标驱动的场景示意 · 不是个体轨迹'):'运行后呈现对应模型世界';
     const scenario=run?.manifest?.model_definition?.scenario;
@@ -81,6 +84,10 @@
     const legend=state.runs.map((r,i)=>`<span><i style="background:${DAYAN_ANALYSIS.colorFor(state,r,i)}"></i>${esc(r.label+(r.observations.some(o=>finite(o[state.metric]))?'':'（无该指标）'))}</span>`).join('');
     if($('#obsLegend').innerHTML!==legend)$('#obsLegend').innerHTML=legend;
     $('#trackAgent').disabled=!entities.length;
+    const layers = {flow:true,heat:entities.some(e=>finite(e.x)&&finite(e.y)),network:!!frame?.relations?.length,
+      trajectory:state.time>state.start&&!!state.entityId&&entities.some(e=>String(e.id)===String(state.entityId)&&finite(e.x)&&finite(e.y))};
+    for(const button of document.querySelectorAll('[data-layer]')) button.disabled=!layers[button.dataset.layer];
+    if(document.querySelector('[data-layer].active')?.disabled) selectLayer('flow');
     const context=[...document.querySelectorAll('.scenario-strip .context>span')];
     if(context[0])context[0].textContent=run?(entities.length?entities.length+' 个模型主体':'汇总模型'):'暂无运行';
     if(context[1])context[1].textContent=(frame?.space?.time_unit?.includes('观测序号')?'观测序号 ':'模型时间 ')+fmt(state.start)+'–'+fmt(state.end);
@@ -140,7 +147,7 @@
     state.selected=selected;state.stream=pack;state.followEntity=false;
     state.events=DAYAN_ANALYSIS.savedEvents(pack);state.eventPaintKey=null;
     if(pack)pack.events=state.events;
-    if(pack){run.stream=pack;run.observations=pack.observations;run.manifest=pack.manifest;DAYAN3D.visualizeState(pack);}
+    if(pack){run.stream=pack;run.observations=pack.observations;run.manifest=pack.manifest;selectLayer('flow',false);DAYAN3D.visualizeState(pack);}
     state.start=Math.min(...state.runs.map(r=>r.observations[0]?.sim_t??0));state.end=Math.max(...state.runs.map(r=>r.observations.at(-1)?.sim_t??0));
     state.time=options.fresh?state.start:Math.min(state.end,Math.max(state.start,previousTime));
     const metrics=fields(run.observations);
@@ -152,6 +159,15 @@
     if(options.fresh&&state.entityId)window.DAYAN3D?.selectEntity(state.entityId);
     setPlaying(options.fresh?true:previousPlaying);
     updateActions();
+    window.dispatchEvent(new CustomEvent('dayan:result',{detail:run.run_id}));
+  }
+  function selectLayer(mode,render=true) {
+    if (render) window.DAYAN3D?.setLayer(mode);
+    else window.DAYAN3D?.setLayer(mode,false);
+    for(const button of document.querySelectorAll('[data-layer]')){
+      button.classList.toggle('active',button.dataset.layer===mode);
+      button.setAttribute('aria-pressed',String(button.dataset.layer===mode));
+    }
   }
   function renderSelectors(metrics) {
     $('#resultSelectors').innerHTML=`<label>观察方案<select id="resultRunSelect" aria-label="选择运行">${state.runs.map((r,i)=>`<option value="${i}" ${i===state.selected?'selected':''}>${esc(r.label)}</option>`).join('')}</select></label><label>结果指标<select id="resultMetricSelect" aria-label="选择观测量">${metrics.map(k=>`<option value="${esc(k)}" ${k===state.metric?'selected':''}>${esc(DAYAN_ANALYSIS.label(k))} · ${esc(k)}</option>`).join('')}</select></label>`;
@@ -289,12 +305,51 @@
   }
   function savePendingJob(jobId,text) {try{sessionStorage.setItem('dayan_pending_job_v1',JSON.stringify({job_id:jobId,text}));}catch{}}
   function clearPendingJob(jobId) {try{const saved=JSON.parse(sessionStorage.getItem('dayan_pending_job_v1')||'null');if(saved?.job_id===jobId)sessionStorage.removeItem('dayan_pending_job_v1');}catch{}}
-  async function pollJob(jobId,thinking) {
-    while(true){const job=await api('/api/jobs/'+encodeURIComponent(jobId));thinking.textContent=(job.stages||[]).at(-1)||'正在执行…';setStatus(thinking.textContent,'working');
-      if(job.status==='error'){const error=new Error(job.error||'执行失败');error.terminal=true;throw error;}
-      if(job.status==='done'){if(!job.result)throw new Error('任务缺少完成结果');return job.result;}
-      await new Promise(resolve=>setTimeout(resolve,600));
+  let liveReading = null;
+  function liveStatus(job) {
+    const host = $('#liveCalculation');
+    const reading = job.preview;
+    if (host.dataset.jobId !== job.job_id) {
+      host.dataset.jobId = job.job_id;
+      host.innerHTML = '<span>实时计算</span><b></b><button class="ws-button" data-cancel-job>取消</button>';
+      host.querySelector('button').dataset.cancelJob = job.job_id;
     }
+    host.hidden = false;
+    const note = job.status === 'queued' ? '等待工作进程'
+      : reading ? `${reading.model_id} · t=${fmt(reading.frame.sim_t)} · 步 ${reading.step} / 请求 ${reading.requested_steps}${reading.entities_total ? ' · 主体 '+reading.frame.entities.length+' / '+reading.entities_total : ' · 汇总示意'}`
+        : (job.stages || []).at(-1) || '等待第一帧';
+    if (host.querySelector('b').textContent !== note) host.querySelector('b').textContent = note;
+    if (!reading || document.hidden || document.body.dataset.page !== 'overview') return;
+    if (reading.sampled_at === liveReading?.sampled_at) return;
+    state.playing = false;
+    $('#playButton').disabled = $('#timeline').disabled = $('#stepBack').disabled = $('#stepForward').disabled = true;
+    $('#sceneEmptyState').hidden = true;
+    $('#sceneProvenance').textContent = '计算过程采样 · 正在等待正式归档';
+    $('#simClock').textContent = 'sim_t='+fmt(reading.frame.sim_t);
+    window.DAYAN3D?.preview(reading, liveReading?.preview_id !== reading.preview_id);
+    liveReading = reading;
+  }
+  function endLive() {
+    $('#liveCalculation').hidden = true;
+    if (!liveReading) return;
+    liveReading = null;
+    if (state.stream) window.DAYAN3D.visualizeState(state.stream);
+    else window.DAYAN3D.clear();
+    window.DAYAN3D.renderAt(state.time);
+    paint();
+  }
+  async function pollJob(jobId,update) {
+    try {
+      while (true) {
+        const show = !document.hidden && document.body.dataset.page === 'overview';
+        const job = await api('/api/jobs/'+encodeURIComponent(jobId)+(show?'?preview=true':''));
+        update?.((job.stages||[]).at(-1)||'正在执行…');
+        if(job.status==='error'){const error=new Error(job.error||'执行失败');error.terminal=true;throw error;}
+        if(job.status==='done'){if(!job.result)throw new Error('任务缺少完成结果');return job.result;}
+        if(show)liveStatus(job);
+        await new Promise(resolve=>setTimeout(resolve,show?630:1800));
+      }
+    } finally { endLive(); }
   }
   async function presentAssistantResult(result,text) {
       for(const row of result.summary||[])message(row);
@@ -311,7 +366,7 @@
   }
   async function watchAssistantJob(jobId,text,thinking) {
     let consumed=false;
-    try{const result=await pollJob(jobId,thinking);thinking.remove();await presentAssistantResult(result,text);consumed=true;}
+    try{const result=await pollJob(jobId,note=>{thinking.textContent=note;setStatus(note,'working');});thinking.remove();await presentAssistantResult(result,text);consumed=true;}
     catch(error){thinking.remove();message('执行未完成：'+error.message);setStatus('执行未完成：'+error.message,'error');consumed=error.status===404||!!error.terminal;}
     finally{if(consumed)clearPendingJob(jobId);$('#aiSend').disabled=false;}
   }
@@ -322,7 +377,7 @@
     await watchAssistantJob(saved.job_id,saved.text,thinking);
   }
   async function send() {
-    const input=$('#aiInput'),text=input.value.trim();if(!text)return;if(window.DAYAN_NATIVE_BRIDGE){DAYAN_NATIVE_BRIDGE.draft(text);input.value='';return;}if($('#aiSend').disabled||window.DAYAN_COMMAND?.busy)return notice('当前任务仍在执行，新的草稿已保留。');input.value='';message(text,'ai-user');$('#aiSend').disabled=true;
+    const input=$('#aiInput'),text=input.value.trim();if(!text)return;if(window.DAYAN_NATIVE_BRIDGE){DAYAN_NATIVE_BRIDGE.draft(text);input.value='';return;}if($('#aiSend').disabled||window.DAYAN_COMMAND?.busy)return notice('当前任务仍在执行，新的草稿已保留。');input.value='';input.dispatchEvent(new Event('input'));message(text,'ai-user');$('#aiSend').disabled=true;
     const localAction=window.DAYAN_COMMAND?.assistantAction(text);
     if(localAction){try{const result=await localAction(),item=message(result.text);if(result.url){const link=document.createElement('a');link.href=result.url;link.download='';link.textContent=result.label;link.className='ws-button';item.appendChild(link);}window._aiMsgs=[...(window._aiMsgs||[]),{role:'user',content:text},{role:'assistant',content:result.text}];}catch(error){message('操作未完成：'+error.message);}finally{$('#aiSend').disabled=false;}return;}
     const last=window._lastRun,history=(window._aiMsgs||[]),thinking=message('正在校验需求与执行计划…');
@@ -342,6 +397,11 @@
       const contract=run?(await api(`/api/models/contract/${run.model_id}?include_fidelity=false`)).contract:null;
       const box=$('#datasetAnalysis');box.innerHTML=`<h3>${esc(d.name)} · 数据概况</h3><div class="data-quality"><div><span>完整记录数</span><b>${stats.n_rows}</b></div><div><span>字段数</span><b>${stats.fields.length}</b></div><div><span>数值字段数</span><b>${numeric.length}</b></div><div><span>存在缺失的数值字段</span><b>${numeric.filter(([,v])=>v.missing_or_non_numeric>0).length}</b></div></div><h4>数值字段质量</h4><canvas id="datasetQualityChart" class="data-chart" aria-label="各数值字段的缺失或非数值记录数"></canvas><div style="overflow-x:auto"><table class="data-stat-table"><thead><tr><th>字段</th><th>有效数</th><th>缺失/非数值</th><th>最小</th><th>最大</th><th>均值</th></tr></thead><tbody>${stats.fields.map(k=>{const v=stats.numeric[k];return v?`<tr><td>${esc(k)}</td><td>${v.n}</td><td>${v.missing_or_non_numeric}</td><td>${fmt(v.min)}</td><td>${fmt(v.max)}</td><td>${fmt(v.mean)}</td></tr>`:`<tr><td>${esc(k)}</td><td colspan="5">未识别为可统计的数值字段</td></tr>`;}).join('')}</tbody></table></div><p class="chart-caption">缺失与非数值统计以每个字段的完整记录为分母；不静默补值。</p>`;
       DAYAN_ANALYSIS.drawBars($('#datasetQualityChart'),numeric.map(([field,v])=>({label:field,count:v.missing_or_non_numeric})),'#eebb79','缺失/非数值记录数');
+      const metadata=d.metadata||{};
+      const preview=Array.isArray(d.preview)?d.preview:[];
+      box.insertAdjacentHTML('beforeend',`<details class="tool-detail data-preview" open><summary>来源、范围与样本</summary>
+        <dl class="fact-list"><dt>来源 / 许可</dt><dd>${esc(d.source)} · ${esc(d.license||'未提供')}</dd><dt>时段 / 频率</dt><dd>${esc(metadata.time_range||metadata.date||metadata.vintage||'来源未声明')} · ${esc(metadata.frequency||'来源未声明')}</dd><dt>地理覆盖</dt><dd>${esc(metadata.scope||metadata.bbox||'来源未声明')}</dd><dt>版本 / 角色</dt><dd><code>${esc(d.sha256)}</code> · ${esc(d.role)}</dd></dl>
+        <pre aria-label="原始数据样本">${esc(preview.length?JSON.stringify(preview,null,2):'当前文件结构没有可自动定位的记录样本')}</pre></details>`);
       if(run?.run_id&&run.manifest?.requested&&contract&&numeric.length){box.insertAdjacentHTML('beforeend',`<h4>将数据用于 ${esc(run.model_id)}</h4><div class="binding-controls"><label>字段<select id="bindingField">${numeric.map(([k])=>`<option>${esc(k)}</option>`).join('')}</select></label><label>汇总方式<select id="bindingAggregate">${[['last','末值'],['first','首值'],['mean','均值'],['sum','总和'],['min','最小值'],['max','最大值']].map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}</select></label><label>模型参数<select id="bindingParameter">${Object.entries(contract.params).filter(([k,v])=>['float','int'].includes(v.type)).map(([k])=>`<option>${esc(k)}</option>`).join('')}</select></label><label>换算系数<input id="bindingScale" type="number" value="1" step="any"></label><label>源单位<input id="bindingSourceUnit" value="${esc(d.metadata?.unit||'')}" placeholder="例如 %"></label><label>目标参数单位<input id="bindingTargetUnit" placeholder="例如 fraction"></label><label>源地区/主体范围<input id="bindingSourceScope" value="${esc(d.metadata?.scope||'')}" placeholder="与数据元数据一致"></label><label>目标地区/主体范围<input id="bindingTargetScope" placeholder="本次研究对象"></label><button class="ws-button ws-primary" id="runWithDataset">按映射创建新运行</button></div><p id="bindingPreview" class="data-status"></p>`);
         const preview=()=>{const field=$('#bindingField').value,aggregate=$('#bindingAggregate').value,v=stats.numeric[field],scale=Number($('#bindingScale').value);$('#bindingPreview').textContent=`${field} 的${$('#bindingAggregate option:checked').textContent} ${fmt(v[aggregate])} × ${fmt(scale)} → ${$('#bindingParameter').value} = ${fmt(v[aggregate]*scale)}${v.missing_or_non_numeric?'；含缺失/非数值，不能直接映射':''}`;$('#runWithDataset').disabled=Boolean(v.missing_or_non_numeric)||!finite(scale);};
         for(const id of ['#bindingField','#bindingAggregate','#bindingParameter','#bindingScale'])$(id).addEventListener('input',preview);preview();
@@ -366,7 +426,7 @@
     $('#datasetFetch').onclick=async()=>{const button=$('#datasetFetch');button.disabled=true;try{status('正在采集外部数据…');const d=await api('/api/datasets/collect',{url:$('#datasetUrl').value,format:$('#datasetFormat').value});await refresh();await analyzeDataset(d);}catch(error){status('采集未完成：'+error.message);}finally{button.disabled=false;}};
     await refresh();if(focusId){const d=datasets.find(d=>d.dataset_id===focusId);if(d)await analyzeDataset(d);}
   }
-  Object.assign(controller,{setPlaying,seek,clear,paint,showResult,restore,applyPolicy,loadReplay,openDataManager,select,generateReport,send,
+  Object.assign(controller,{setPlaying,seek,clear,paint,showResult,restore,applyPolicy,loadReplay,openDataManager,select,generateReport,send,pollJob,
     cancelPendingView:()=>{requestRevision++;},
     addEvent:(type,title,desc)=>{setStatus([title,desc].filter(Boolean).join(' · '));},
     tick(ts){const wasPlaying=state.playing;if(state.lastWall!==null&&state.playing){const next=state.time+(ts-state.lastWall)/1000*state.rate;if(next>=state.end){if(state.loop&&state.end>state.start)state.time=state.start+(next-state.start)%(state.end-state.start);else{state.time=state.end;setPlaying(false);}}else state.time=next;}state.lastWall=ts;if(wasPlaying&&ts-lastPaint>80){paint();lastPaint=ts;}}});
@@ -375,9 +435,8 @@
     $('#loopPlayback').onchange=e=>{state.loop=e.target.checked;};
     $('#resetCamera').onclick=()=>window.DAYAN3D?.resetCamera();
     document.querySelectorAll('[data-workspace-view]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.toggle('view-immersive',button.dataset.workspaceView==='immersive');document.querySelectorAll('[data-workspace-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));window.dispatchEvent(new Event('resize'));paint();}));
-    document.querySelectorAll('[data-layer]').forEach(button=>button.addEventListener('click',()=>window.DAYAN3D?.setLayer(button.dataset.layer)));
+    document.querySelectorAll('[data-layer]').forEach(button=>button.addEventListener('click',()=>selectLayer(button.dataset.layer)));
     document.querySelectorAll(".weather").forEach(el=>el.style.display="none");
-    for(const button of document.querySelectorAll("[data-layer]"))if(button.dataset.layer!=="flow"){button.disabled=true;button.title="此模型尚未提供对应真实图层，不显示演示热力或关系";}
     $("#configButton").addEventListener("click",e=>{e.stopImmediatePropagation();showEvidence();},true);
     $("#reportButton").onclick=()=>generateReport().catch(()=>{});
     $("#resumeButton").onclick=resumeDialog;
@@ -387,6 +446,11 @@
     api("/api/agent/planner_status").then(r=>{const badge=$("#aiDrawer .ai-head b span");if(badge)badge.textContent=["rule","unreachable"].includes(r.planner)||String(r.planner).startsWith("error")?"规则保底":"LLM规划已配置";}).catch(()=>{});
     $("#playButton").addEventListener("click",e=>{e.stopImmediatePropagation();setPlaying(!state.playing);},true);
     $("#resetButton").addEventListener("click",e=>{e.stopImmediatePropagation();setPlaying(false);seek(state.start);},true);
+    for(const [id,delta] of [['#stepBack',-1],['#stepForward',1]]) $(id).onclick=()=>{
+      const rows=state.runs[state.selected]?.observations||[];
+      const next=rows[at(rows,state.time)+delta];if(!next)return;
+      setPlaying(false);seek(next.sim_t);
+    };
     $("#timeline").addEventListener("input",e=>{e.stopImmediatePropagation();setPlaying(false);seek(Number(e.target.value));},true);
     document.querySelectorAll("[data-speed]").forEach(b=>{b.classList.toggle("selected",Number(b.dataset.speed)===state.rate);b.addEventListener("click",e=>{e.stopImmediatePropagation();state.rate=Number(b.dataset.speed);document.querySelectorAll("[data-speed]").forEach(x=>x.classList.toggle("selected",x===b));},true);});
     $("#trackAgent").addEventListener("click",e=>{e.stopImmediatePropagation();$("#entityPanel").scrollIntoView({behavior:'smooth',block:'center'});$("#entitySelect").focus({preventScroll:true});},true);

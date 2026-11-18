@@ -503,6 +503,8 @@ def run_model_full(mid: str, parameters: dict | None = None,
     from .core import simulate as _simulate
     fkind = factory[0] if isinstance(factory, tuple) else "direct"
     n_steps = int(ticks)
+    from .task_worker import frame_observer
+    live_observer = frame_observer(mid, n_steps) if capture_state else None
     initialized = False
     state_frames: list[dict] = []
     checkpoint = None
@@ -564,7 +566,10 @@ def run_model_full(mid: str, parameters: dict | None = None,
         if capture_state and (force or observation_index % state_every == 0):
             from .stateframe import state_frame_of, _aggregate_frame
             fr = state_frame_of(model, t_now) or _aggregate_frame(model, t_now)
-            state_frames.append(_jsonable(copy.deepcopy(fr)))
+            captured = _jsonable(copy.deepcopy(fr))
+            state_frames.append(captured)
+            if live_observer:
+                live_observer(captured, observation_index)
 
     def _initial_hook(t_now: float, _model=None):
         for name, meta in sig.items():

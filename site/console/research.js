@@ -64,7 +64,11 @@
         const host=$('#collectionTaskRows');if(!host)return;
         if(!append)host.innerHTML='';
         host.insertAdjacentHTML('beforeend',items.map(t=>`<article class="research-task"><strong>${esc(t.name||t.connector)}</strong><p>${esc(t.status)} · ${t.n_records}条 · ${esc(t.artifact_role||'旧批次，角色未核验')}<br><small>${esc(t.collection_id)}</small></p>${t.error?`<p class="research-error">${esc(t.error)}</p>`:''}${['partial','failed','cancelled'].includes(t.status)?`<button data-resume="${esc(t.collection_id)}">续采</button>`:''}${t.status==='done'?`<button data-bind="${esc(t.collection_id)}">用于研究</button><button data-import="${esc(t.collection_id)}">导入模型数据集</button>`:''}<output role="status"></output></article>`).join(''));
-        for(const button of host.querySelectorAll('[data-bind]'))button.onclick=()=>{currentCollection=button.dataset.bind;$('#researchCollection').value=currentCollection;$('#researchPanel').open=true;status('已选择实际批次 '+currentCollection+'，请填写原始研究问题与模型合同。');};
+        for(const button of host.querySelectorAll('[data-bind]'))button.onclick=()=>{
+          currentCollection=button.dataset.bind;
+          window.DAYAN_TOOLS.useCollection(currentCollection);
+          status('已选择实际批次 '+currentCollection+'，请填写原始研究问题与模型合同。');
+        };
         for(const button of host.querySelectorAll('[data-import]'))button.onclick=async()=>{button.disabled=true;try{const r=await tool('import_collection',{collection_id:button.dataset.import});button.parentElement.querySelector('output').textContent='实际模型输入数据集 '+r.payload.dataset_id;await window.DAYAN_RESULTS?.openDataManager(r.payload.dataset_id);}catch(e){button.parentElement.querySelector('output').textContent=e.message;}finally{button.disabled=false;}};
         for(const button of host.querySelectorAll('[data-resume]'))button.onclick=async()=>{button.disabled=true;const id=button.dataset.resume;try{const r=await tool('collection_status',{collection_id:id});const t=r.payload.task;await tool('collect_source',{connector:t.connector,params:t.params,collection_id:id,page_budget:2});await refreshTasks();}catch(e){button.parentElement.querySelector('output').textContent=e.message;button.disabled=false;}};
         for(const article of host.querySelectorAll('.research-task')) {
@@ -92,6 +96,11 @@
     <details><summary>数据绑定与模型依据</summary><pre>${esc(JSON.stringify({collection_id:s.collection_id,dataset_id:s.training_dataset.dataset_id,data_binding:s.data_binding,run_id:s.run_id,model_id:s.model_id,best_params:cal?.best_params,study_sha256:s.artifact_sha256,limitations:s.limitations},null,2))}</pre></details>
     ${s.run_id?`<button type="button" id="openStudyRun">在大屏查看实际运行</button>`:''}<div id="studyReportLinks"></div>`;
     if(s.run_id){$('#openStudyRun').onclick=()=>window.DAYAN_RESULTS?.restore(s.run_id);if(restore)await window.DAYAN_RESULTS?.restore(s.run_id);}
+    const reportLabels={academic:'学术报告',data_quality:'数据质量报告',policy:'政策适用性简报'};
+    for(const report of r.reports||[]){
+      if(!report.file){const txt=document.createElement('p');txt.textContent=report.label+' · '+report.error;$('#studyReportLinks').append(txt);continue;}
+      const a=document.createElement('a');a.href=report.file;a.download='';a.textContent='下载'+(reportLabels[report.kind]||'已生成报告');$('#studyReportLinks').append(a);
+    }
     $('#calibrateStudy').disabled=s.phase!=='prepared';for(const b of document.querySelectorAll('[data-study-report]'))b.disabled=!s.run_id;
     status(cal?`实际研究已保存 · ${cal.status}；报告将保留这个验证结论。`:'研究合同已准备；使用独立留出集执行校准。');
     return s;
@@ -101,10 +110,11 @@
     const host=$('#proConsole');if(!host)return;
     const panel=document.createElement('details');panel.id='researchPanel';panel.innerHTML=`<summary>真实数据建模与独立验证</summary><form id="studyForm"><label>原始研究问题（包含地区 指标 年份 模型）<textarea id="researchQuestionInput" required rows="3"></textarea></label><label>真实完整采集批次<input id="researchCollection" required placeholder="collection_id"></label><label>描述性模型<select id="researchFamily"><option value="linear">线性趋势</option><option value="exponential">指数趋势</option><option value="logistic">Logistic增长</option></select></label><label>参数网格 JSON<textarea id="researchGrid" required rows="2" placeholder='例如 {"slope":[-0.5,0,0.5]}'></textarea></label><label>事前RMSE阈值（原单位）<input id="researchTolerance" type="number" min="0" step="any" required></label><label>末尾留出年份数<input id="researchHoldout" type="number" min="1" value="2" required></label><button>保存研究合同</button></form><button id="calibrateStudy" disabled>执行真实校准与留出验证</button><p><button data-study-report="academic" disabled>学术报告</button> <button data-study-report="data_quality" disabled>数据质量报告</button> <button data-study-report="policy" disabled>政策适用性简报</button></p><div id="researchStatus" role="status">填写原始需求和完整真实数据，禁止用默认案例替代。</div><div id="researchEvidence"></div><details><summary>已保存研究</summary><div id="studyHistory"></div><button id="refreshStudies">刷新研究列表</button></details>`;
     host.prepend(panel);
+    $('#refreshSources').onclick=()=>loadSources(true);
     $('#studyForm').onsubmit=async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button');button.disabled=true;status('校验国家、指标、时期、单位与数据角色…');try{const r=await tool('research_create',{question:$('#researchQuestionInput').value,collection_id:$('#researchCollection').value,model_family:$('#researchFamily').value,param_grid:JSON.parse($('#researchGrid').value),tolerance:Number($('#researchTolerance').value),holdout_years:Number($('#researchHoldout').value)});await showStudy(r.payload.study_id);}catch(error){status('合同未建立：'+error.message);}finally{button.disabled=false;}};
-    $('#calibrateStudy').onclick=async()=>{const button=$('#calibrateStudy');button.disabled=true;status('使用统一仿真引擎实际评估参数网格…');try{const r=await tool('research_calibrate',{study_id:currentStudy});await showStudy(r.payload.study_id,true);}catch(e){status('校准未完成：'+e.message);button.disabled=false;}};
+    $('#calibrateStudy').onclick=async()=>{const button=$('#calibrateStudy');button.disabled=true;status('使用统一仿真引擎实际评估参数网格…');try{const r=await tool('research_calibrate',{study_id:currentStudy});await showStudy(r.payload.study_id);}catch(e){status('校准未完成：'+e.message);button.disabled=false;}};
     for(const button of panel.querySelectorAll('[data-study-report]'))button.onclick=async()=>{button.disabled=true;status('核对研究版本并生成同源报告…');try{const r=await tool('research_report',{study_id:currentStudy,kind:button.dataset.studyReport});$('#studyReportLinks').insertAdjacentHTML('beforeend',`<a href="${esc(r.payload.file)}" download>下载本研究${esc(button.textContent)}</a><a href="${esc(r.payload.bundle_url)}" download>复现包</a>`);status('报告已生成 · 验证结论 '+r.payload.validation_status);}catch(e){status('报告未生成：'+e.message);}finally{button.disabled=false;}};
-    async function history(){const r=await request('/api/research/studies');$('#studyHistory').innerHTML=r.studies.map(s=>`<button data-saved-study="${esc(s.study_id)}">${esc(s.question||s.study_id)} · ${esc(s.calibration?.status||s.phase)}</button>`).join('')||'尚无研究';for(const b of panel.querySelectorAll('[data-saved-study]'))b.onclick=()=>showStudy(b.dataset.savedStudy,true).catch(e=>status(e.message));}
+    async function history(){const r=await request('/api/research/studies');$('#studyHistory').innerHTML=r.studies.map(s=>`<button data-saved-study="${esc(s.study_id)}">${esc(s.question||s.study_id)} · ${esc(s.calibration?.status||s.phase)}</button>`).join('')||'尚无研究';for(const b of panel.querySelectorAll('[data-saved-study]'))b.onclick=()=>showStudy(b.dataset.savedStudy).catch(e=>status(e.message));}
     $('#refreshStudies').onclick=()=>history().catch(e=>status(e.message));history().catch(e=>status(e.message));
     if(currentStudy)showStudy(currentStudy).catch(e=>status(e.message));
     if(query.get('embed')==='dsh') {
@@ -123,6 +133,21 @@
     else window.DAYAN_STUDY=null;
   }
   function clearContext(){window.DAYAN_STUDY=null;$('#studyDiagnostics')?.remove();$('#studyValidationBar')?.remove();}
-  window.DAYAN_RESEARCH={paintSources,showStudy,associateRun,clearContext};
+  let sourceTask;
+  function loadSources(force=false){
+    const host=$('#dsContent');if(!host)return;
+    if(force)sourceTask=null;
+    return sourceTask ||= paintSources(host);
+  }
+  function mount(host){
+    const panel=$('#researchPanel');
+    if(!panel||!host||panel.parentElement===host)return;
+    const parent=panel.parentElement,button=document.createElement('button');
+    button.className='rail-ai-link';button.textContent='真实数据校准与验证 →';
+    button.onclick=()=>{switchPage('lab'); document.querySelector('[data-lab-tab=calibration]')?.click();};
+    parent.prepend(button);
+    host.append(panel);panel.open=true;
+  }
+  window.DAYAN_RESEARCH={loadSources,showStudy,associateRun,clearContext,mount};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

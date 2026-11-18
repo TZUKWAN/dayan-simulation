@@ -13,6 +13,31 @@ KINDS = {"academic": "学术研究报告", "data_quality": "数据采集与质�
 FILES = {"academic": "report_B_academic_v2", "data_quality": "report_A_data_quality_v2", "policy": "report_C_policy_brief_v2"}
 
 
+def report_index(study):
+    """Expose only receipts for artifacts that still match this study version."""
+    study_id = study['study_id']
+    folder = studies.directory(study_id) / 'reports'
+    root_url = f'/api/research/studies/{study_id}/files/'
+    reports = []
+    for kind, stem in FILES.items():
+        path = folder / f'{stem}.receipt.json'
+        if not path.is_file():
+            continue
+        item = {'kind': kind, 'label': KINDS[kind]}
+        try:
+            receipt = json.loads(path.read_text(encoding='utf-8'))
+            if receipt['study_sha256'] != study['artifact_sha256'] or receipt['run_id'] != study.get('run_id'):
+                raise ValueError('报告与研究版本不一致')
+            for name in (f'{stem}.docx', 'replication_pack_v2.zip'):
+                if hashlib.sha256((folder / name).read_bytes()).hexdigest() != receipt['files'][name]:
+                    raise ValueError('报告哈希核验失败')
+            item.update(file=root_url+f'{stem}.docx', bundle_url=root_url+'replication_pack_v2.zip')
+        except (OSError, ValueError, KeyError):
+            item['error'] = '已保存报告缺失或版本不匹配'
+        reports.append(item)
+    return reports
+
+
 def _plots(s, target, kind="academic"):
     import matplotlib
     matplotlib.use("Agg")

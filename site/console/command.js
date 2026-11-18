@@ -139,30 +139,19 @@
     for(const b of document.querySelectorAll('[data-rail-tab]'))b.setAttribute('aria-selected',String(b.dataset.railTab===railTab));
     $('#aiDrawer').classList.add('open');
   }
-  // ===== 数据源面板（专业模式） =====
-  function initDataSourcePanel() {
-    const host=$('#proConsole');if(!host||$('#dsPanel'))return;
-    const panel=document.createElement('details');panel.id='dsPanel';
-    panel.innerHTML=`<summary>📊 数据源与采集</summary><div id="dsContent"><p>加载中…</p></div>`;
-    host.prepend(panel);
-    loadDataSourcePanel();
-  }
-  async function loadDataSourcePanel() {
-    const el=document.getElementById('dsContent');if(!el)return;
-    if(window.DAYAN_RESEARCH)return DAYAN_RESEARCH.paintSources(el);
-    el.textContent='数据研究组件尚未加载，请刷新页面。';
-  }
   let defaultRestoreCancelled=false;
   function manualIntent() {defaultRestoreCancelled=true;window.DAYAN_RESULTS?.cancelPendingView();}
   function setMode(value,remember=true) {
-    if(remember)manualIntent();
+    if(remember){
+      manualIntent();
+      if(document.body.dataset.page!=='overview')window.switchPage?.('overview');
+    }
     mode=value==='professional'?'professional':'simple';document.body.dataset.operationMode=mode;
     document.body.classList.toggle('mode-simple',mode==='simple');document.body.classList.toggle('mode-professional',mode==='professional');
     for(const b of document.querySelectorAll('[data-operation-mode]'))b.setAttribute('aria-pressed',String(b.dataset.operationMode===mode));
     text('#modeDescription',mode==='simple'?'简易模式 · 用自然语言完成建模与分析':'专业模式 · 全参数控制 + AI协作');
     if(remember)storage('dayan_operation_mode_v1',mode);
     selectRail(mode==='professional'?'parameters':'ai');
-    if(mode==='professional')initDataSourcePanel();
     requestAnimationFrame(()=>{window.dispatchEvent(new Event('resize'));window.DAYAN_RESULTS?.paint();paint(window.DAYAN_RESULTS,true);});
   }
   function proError(message) {text('#proStatus',message);$('#proStatus').dataset.state='error';}
@@ -208,10 +197,15 @@
     try {request=proRequest();}catch(e){return proError(e.message);}
     if($('#aiSend').disabled)return proError('AI任务仍在执行，请等待实际结果。');
     manualRunning=true;$('#proRun').disabled=true;text('#proStatus','引擎实际计算并保存中…');window.DAYAN_RESULTS.setPlaying(false);
-    try {const result=await api('/api/run',request);await DAYAN_RESULTS.showResult('run',result,{intent:'专业模式参数运行',question:`专业参数运行 ${request.model_id}`});text('#proStatus','新运行已真实归档：'+result.run_id);}
+    try {
+      const {job_id}=await api('/api/run',{...request,async_job:true});
+      const result=await DAYAN_RESULTS.pollJob(job_id,note=>text('#proStatus',note));
+      await DAYAN_RESULTS.showResult('run',result,{intent:'专业模式参数运行',question:`专业参数运行 ${request.model_id}`});
+      text('#proStatus','新运行已真实归档：'+result.run_id);
+    }
     catch(e){proError('运行未完成：'+e.message);}finally{manualRunning=false;$('#proRun').disabled=!pro.contract;}
   }
-  function prefill(textValue) {if(window.DAYAN_NATIVE_BRIDGE)return DAYAN_NATIVE_BRIDGE.draft(textValue);selectRail('ai');$('#aiInput').value=textValue;$('#aiInput').focus();}
+  function prefill(textValue) {if(window.DAYAN_NATIVE_BRIDGE)return DAYAN_NATIVE_BRIDGE.draft(textValue);selectRail('ai');$('#aiInput').value=textValue;$('#aiInput').dispatchEvent(new Event('input'));$('#aiInput').focus();}
   async function chooseModel(mid) {
     setMode('professional');window.switchPage?.('overview');
     const current=DAYAN_RESULTS.runs[DAYAN_RESULTS.selected];
@@ -288,6 +282,6 @@
     recentRecords();setMode(storage('dayan_operation_mode_v1')||'simple',false);
     let resizing=false;window.addEventListener('resize',()=>{if(resizing)return;resizing=true;requestAnimationFrame(()=>{resizing=false;if(window.DAYAN_RESULTS)paint(DAYAN_RESULTS,true);});});
   }
-  window.DAYAN_COMMAND={paint,setMode,selectRail,restoreDefault,assistantAction,proRequest,loadParameters,chooseModel,get mode(){return mode;},get busy(){return manualRunning;}};
+  window.DAYAN_COMMAND={paint,setMode,selectRail,restoreDefault,assistantAction,proRequest,loadParameters,chooseModel,prefill,get mode(){return mode;},get busy(){return manualRunning;}};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

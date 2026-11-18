@@ -35,7 +35,7 @@
     container.style.overflow = 'hidden';
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(Math.max(1,container.clientWidth), Math.max(1,container.clientHeight));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -49,7 +49,7 @@
 
     camera = new THREE.PerspectiveCamera(
       50,
-      container.clientWidth / container.clientHeight,
+      Math.max(1,container.clientWidth) / Math.max(1,container.clientHeight),
       0.1,
       1000
     );
@@ -63,7 +63,15 @@
     if (window.ResizeObserver) new ResizeObserver(() => onResize()).observe(container);
     buildEnvLighting();   // PMREM IBL：金属/玻璃的真实反射来源
     initPostFX();
-    animate();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopAnimation();
+      else {clock.start();scheduleAnimation();}
+    });
+    window.addEventListener('dayan:page', event => {
+      if (event.detail === 'overview') scheduleAnimation();
+      else stopAnimation();
+    });
+    scheduleAnimation();
   }
 
   let sceneObj = null;
@@ -152,7 +160,7 @@
     dom.addEventListener('pointerdown', e => { isDown = true; prevX = downX = e.clientX; prevY = downY = e.clientY; });
     dom.addEventListener('pointerup', e => {
       const clicked=isDown&&Math.hypot(e.clientX-downX,e.clientY-downY)<5;isDown=false;
-      if(!clicked||e.button!==0||!window._vizStateStream)return;
+      if(!clicked||e.button!==0||!window._vizStateStream||window._vizStateStream.preview)return;
       const rect=dom.getBoundingClientRect(),ray=new THREE.Raycaster();ray.params.Points.threshold=1;
       ray.setFromCamera(new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1),camera);
       const group=getScene().children.find(c=>c.userData?.isStateGroup);
@@ -174,6 +182,7 @@
       camera.position.x = nx; camera.position.z = nz;
       camera.position.y = Math.max(2, camera.position.y - dy * 0.05);
       camera.lookAt(0, 0, 0);
+      if(!isRunning) renderer.render(getScene(),camera);
     });
     dom.addEventListener('wheel', e => {
       stateCameraOverview=false;
@@ -182,6 +191,7 @@
       camera.getWorldDirection(dir);
       camera.position.addScaledVector(dir, e.deltaY * 0.02);
       camera.position.y = Math.max(2, camera.position.y);
+      if(!isRunning) renderer.render(getScene(),camera);
     }, { passive: false });
   }
 
@@ -279,17 +289,18 @@
     }
   }
 
-  function setLayer(mode) {
+  function setLayer(mode, render=true) {
     layerFxMode = mode || 'flow';
+    if (render && window._vizStateStream && !window._vizStateStream.preview) {
+      DAYAN3D.renderAt(window.DAYAN_RESULTS?.time || 0);
+    }
   }
   function setGroupFilter(g) {
     window._vizGroup = (g === 'all' || g == null) ? null :
       { commute: 0, elder: 1, student: 2 }[g] ?? null;
   }
 
-  let lastFrameAt = 0;
   function frame() {
-    lastFrameAt = performance.now();
     if (!isRunning) return;   // 暂停：冻结场景动画（侧栏时钟共用 _vizNow 同步停）
     const wallDt = clock.getDelta();
     const modelClock = window.DAYAN_RESULTS?.active ? window.DAYAN_RESULTS : null;
@@ -314,14 +325,26 @@
     renderFrame();
   }
 
-  function animate() {
-    animationId = requestAnimationFrame(animate);
-    frame();
+  function scheduleAnimation() {
+    if (animationId === null && isRunning && !document.hidden && container?.clientWidth) animationId=requestAnimationFrame(animate);
   }
-  // 后台标签页 rAF 停摆 → 看门狗用定时器兜底，保证数据/ HUD 持续推进
-  setInterval(() => {
-    if (performance.now() - lastFrameAt > 400) frame();
-  }, 300);
+  function stopAnimation() {
+    if (animationId !== null) cancelAnimationFrame(animationId);
+    animationId=null;
+  }
+  let frameCounter=0, rateSince=0;
+  function animate(at) {
+    animationId=null;
+    frame();
+    if (!rateSince) rateSince=at;
+    frameCounter++;
+    if (at-rateSince>=800) {
+      const badge=document.getElementById('fps');
+      if(badge)badge.textContent=Math.round(frameCounter*1000/(at-rateSince))+' fps';
+      frameCounter=0;rateSince=at;
+    }
+    scheduleAnimation();
+  }
 
   // ---- 通用工具 ----
 
@@ -2298,8 +2321,12 @@
     switchScene(map[prefix] || 'city');
   }
 
-  function pause() { isRunning = false; }
-  function resume() { isRunning = true; }
+  function pause() {
+    isRunning = false;stopAnimation();frameCounter=0;rateSince=0;
+    const badge=document.getElementById('fps');
+    if (badge) badge.textContent='已暂停';
+  }
+  function resume() { if (!isRunning) clock.start();isRunning = true;scheduleAnimation(); }
 
   // ============================================================
   // WP7 状态同源沙盘：实体帧驱动渲染（真实模型状态，禁随机漫游）
@@ -2419,6 +2446,67 @@
     return [ ent.x || 0, 0.5, ent.y || 0 ];
   }
 
+  let stateOverlay = null;
+  function paintStateOverlay(frame) {
+    if (stateOverlay?.parent) {stateOverlay.parent.remove(stateOverlay);disposeDeep(stateOverlay);}
+    stateOverlay = null;
+    const annotated = document.getElementById('layerReadout');
+    if (annotated) annotated.hidden = true;
+    if (layerFxMode === 'flow' || window._vizStateStream?.preview) return;
+    const positioned = (frame.entities || []).filter(e=>Number.isFinite(e.x)&&Number.isFinite(e.y));
+    const positions = [], colors = [];
+    let label = '';
+    if (layerFxMode === 'heat' && positioned.length) {
+      const counts = new Map(), cell = 4;
+      for (const entity of positioned) {
+        const [x,,z]=stateWorldXY(entity,frame);
+        const key=[Math.floor(x/cell),Math.floor(z/cell)].join(',');
+        counts.set(key,(counts.get(key)||0)+1);
+      }
+      const maximum=Math.max(...counts.values());
+      for (const [key,count] of counts) {
+        const [x,z]=key.split(',').map(axis=>Number(axis)*cell), x2=x+cell*.91, z2=z+cell*.91;
+        const color = new THREE.Color().lerpColors(new THREE.Color(0x21657b),new THREE.Color(0xffbc68),Math.sqrt(count/maximum));
+        positions.push(x,.12,z,x2,.12,z,x2,.12,z2,x,.12,z,x2,.12,z2,x,.12,z2);
+        for(let i=0;i<6;i++) colors.push(color.r,color.g,color.b);
+      }
+      label = `投影网格主体数 · 冷色低 / 暖色高 · 每格最大 ${maximum} · t=${frame.sim_t}`;
+    } else if (layerFxMode === 'network') {
+      const points=new Map(positioned.map(e=>[String(e.id),stateWorldXY(e,frame)]));
+      let count=0;
+      for (const edge of frame.relations || []) {
+        const a=points.get(String(edge.source)), b=points.get(String(edge.target));
+        if (!a || !b) continue;
+        positions.push(a[0],.82,a[2],b[0],.82,b[2]);count++;
+        if (edge.directed) {
+          const angle=Math.atan2(b[2]-a[2],b[0]-a[0]);
+          for(const offset of [-.4,.4]) positions.push(b[0],.82,b[2],b[0]-.8*Math.cos(angle+offset),.82,b[2]-.8*Math.sin(angle+offset));
+        }
+      }
+      if (count) label=`模型记录的关系 ${count} 条 · 箭头指向边的目标 · t=${frame.sim_t}`;
+    } else if (layerFxMode === 'trajectory') {
+      const stream=window._vizStateStream, id=String(window.DAYAN_RESULTS?.entityId || '');
+      const last=window._vizStateIdx;
+      let previous=null, count=0;
+      for (const f of stream.frames.slice(Math.max(0,last-99),last+1)) {
+        const e=f.entities?.find(e=>String(e.id)===id&&Number.isFinite(e.x)&&Number.isFinite(e.y));
+        const point=e?stateWorldXY(e,f):null;
+        if (point && previous) {positions.push(previous[0],.86,previous[2],point[0],.86,point[2]);count++;}
+        previous=point;
+      }
+      if (count) label=`主体 ${id} · ${count} 段相邻有记录轨迹 · t≤${frame.sim_t}`;
+    }
+    if (!positions.length) return;
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    if (colors.length) {
+      geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+      stateOverlay=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.58,side:THREE.DoubleSide,depthWrite:false}));
+    } else stateOverlay=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x9cf2ec,transparent:true,opacity:.84}));
+    getScene().add(stateOverlay);
+    if (annotated) {annotated.textContent=label;annotated.hidden=!label;}
+  }
+
   function vizApplyFrame(fr) {
     const scene = getScene();
     let group = scene.children.find(c => c.userData && c.userData.isStateGroup);
@@ -2524,6 +2612,7 @@
       }
     });
     syncStateInstances(group);
+    paintStateOverlay(fr);
   }
 
   function buildStateLegend() {
@@ -2597,7 +2686,7 @@
       if (hud) {
         const f = st.frames[idx];
         const entN = (f.entities || []).length;
-        hud.textContent = (st.provenance === "entity"
+        hud.textContent = (st.preview ? '实时计算取样' : st.provenance === "entity"
           ? "◉ 状态同源 · 主体状态来自模型计算"
           : "△ 汇总数据驱动的示意动画（非主体轨迹）")
           + " · " + (st.model_id || "") + " · sim_t=" + (f.sim_t != null ? (+f.sim_t).toFixed(2) : "?")
@@ -2615,6 +2704,7 @@
 
   function visualizeState(stream) {
     clearScene();
+    stateOverlay=null;
     selectedStateEntity='';
     followingStateEntity='';
     stateCameraOverview=true;
@@ -2630,7 +2720,7 @@
     renderer.toneMappingExposure=1.05;
     window._vizDayCycle = (window._vizDayCycle !== false);   // 状态世界默认昼夜流动
     DAYCYCLE.ensure();
-    startIntroCinematic();
+    if (!stream?.preview && !matchMedia('(prefers-reduced-motion: reduce)').matches) startIntroCinematic();
     buildStateLegend();
     // 状态场景俯瞰机位：能同时读清环形/平面结构
     if (camera) {
@@ -2644,8 +2734,18 @@
 
   function clearSavedWorld() {
     clearScene();studioProfile=null;studioStage=null;selectedStateEntity='';followingStateEntity='';
+    window._vizStateStream=null;window._vizStateIdx=-1;stateOverlay=null;
+    const annotated=document.getElementById('layerReadout');if(annotated) annotated.hidden=true;
     stateCameraOverview=true;currentScene=null;getScene().background=new THREE.Color(0x101f2e);
     if(renderer&&camera)renderer.render(getScene(),camera);
+  }
+
+  function preview(reading, first) {
+    const frame=reading.frame;
+    const sample={model_id:reading.model_id,frames:[frame],provenance:frame.provenance,preview:true};
+    if (first || !window._vizStateStream?.preview) visualizeState(sample);
+    else window._vizStateStream.frames[0]=frame;
+    DAYAN3D.renderAt(frame.sim_t);
   }
 
 
@@ -3091,6 +3191,7 @@
     visualize,
     visualize2: visualize,
     visualizeState,
+    preview,
     clear:clearSavedWorld,
     renderAt(t){window._vizNow=t;window._vizStateIdx=-1;if(window._vizStateStream)vizStateUpdate(t);else if(currentScene?.update)currentScene.update(t,0);if(renderer&&sceneObj)renderer.render(sceneObj,camera);},
     selectEntity:selectStateEntity,
