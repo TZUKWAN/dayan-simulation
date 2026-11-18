@@ -17,6 +17,7 @@
     $('#closeModal').focus();
   }
   function closeModal() {
+    if (!$('#modalBackdrop').classList.contains('open')) return;
     $('#modalBackdrop').classList.remove('open');
     if (previousFocus?.isConnected) previousFocus.focus();
   }

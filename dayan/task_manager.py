@@ -25,6 +25,7 @@ TARGETS={'api_run','api_experiment','api_agent','api_ai_chat','api_report',
          'api_state_stream','api_resume','api_custom_model','api_dataset_collect','api_dataset_import',
          'api_run_preset','api_render_collection_reports','api_platform_tool','api_prepare_bundle'}
 _managers={}
+_manager_lock=threading.Lock()
 
 
 def _read(path):
@@ -124,6 +125,20 @@ class TaskManager:
             row['stages']=_read(path/'progress.json').get('stages',row['stages'])
         if row['status']=='done' and (path/'result.json').exists():row['result']=_read(path/'result.json')['value']
         return row
+
+    def snapshot(self):
+        """Bounded public view of the live queue, without task inputs or results."""
+        with self.lock:
+            jobs = []
+            for jid in (*self.active, *self.queue):
+                path = self._path(jid)
+                row = _read(path / 'status.json')
+                progress_path = path / 'progress.json'
+                stages = _read(progress_path).get('stages', []) if progress_path.exists() else []
+                jobs.append({key: row.get(key) for key in ('job_id', 'target', 'status', 'ts')}
+                            | {'stage': (stages or row.get('stages') or [''])[-1]})
+            return {'jobs': jobs, 'running': len(self.active), 'queued': len(self.queue),
+                    'concurrent_limit': self.cap.concurrent, 'queue_limit': self.cap.queued}
 
     def cancel(self,jid,reason='cancelled'):
         with self.lock:
@@ -233,10 +248,11 @@ class TaskManager:
 
 def get_manager():
     key=str(data_root())
-    manager=_managers.get(key)
-    if manager is None or manager.closed:
-        manager=_managers[key]=TaskManager()
-    return manager
+    with _manager_lock:
+        manager=_managers.get(key)
+        if manager is None or manager.closed:
+            manager=_managers[key]=TaskManager()
+        return manager
 
 
 def close_managers():

@@ -161,7 +161,6 @@
     for(const b of document.querySelectorAll('[data-operation-mode]'))b.setAttribute('aria-pressed',String(b.dataset.operationMode===mode));
     text('#modeDescription',mode==='simple'?'简易模式 · 用自然语言完成建模与分析':'专业模式 · 全参数控制 + AI协作');
     if(remember)storage('dayan_operation_mode_v1',mode);
-    if(mode==='simple'&&$('#pageOverview').style.display==='none'){window.switchPage?.('overview');for(const b of document.querySelectorAll('[data-nav]'))b.classList.toggle('active',b.dataset.nav==='overview');}
     selectRail(mode==='professional'?'parameters':'ai');
     if(mode==='professional')initDataSourcePanel();
     requestAnimationFrame(()=>{window.dispatchEvent(new Event('resize'));window.DAYAN_RESULTS?.paint();paint(window.DAYAN_RESULTS,true);});
@@ -215,11 +214,10 @@
   function prefill(textValue) {if(window.DAYAN_NATIVE_BRIDGE)return DAYAN_NATIVE_BRIDGE.draft(textValue);selectRail('ai');$('#aiInput').value=textValue;$('#aiInput').focus();}
   async function chooseModel(mid) {
     setMode('professional');window.switchPage?.('overview');
-    for(const b of document.querySelectorAll('[data-nav]'))b.classList.toggle('active',b.dataset.nav==='overview');
     const current=DAYAN_RESULTS.runs[DAYAN_RESULTS.selected];
     await loadParameters(mid,current?.model_id===mid?current:null);selectRail('parameters');
   }
-  function history() {return historyPromise||(historyPromise=api('/api/history?limit=30').catch(e=>{historyPromise=null;throw e;}));}
+  function history() {return historyPromise||(historyPromise=api('/api/history?limit=30&metadata_only=true').catch(e=>{historyPromise=null;throw e;}));}
   async function restoreDefault() {
     try {
       const h=await history(),saved=storage('dayan_last_record_v1'),complete=h.entries.filter(e=>e.complete&&e.run_id),chosen=complete.find(e=>e.run_id===saved)||complete[0];
@@ -252,8 +250,8 @@
     document.body.classList.add('command-center');
     const mast=$('.headright'),modes=document.createElement('div');modes.className='operation-modes';modes.setAttribute('aria-label','操作模式');modes.innerHTML='<button data-operation-mode="simple" aria-pressed="true">简易模式</button><button data-operation-mode="professional" aria-pressed="false">专业模式</button>';mast.prepend(modes);
     $('.brand p').textContent='社会仿真 · 态势观察与决策推演';
-    const overview=$('#pageOverview'),shell=document.createElement('div');shell.id='commandShell';const main=document.createElement('div');main.id='commandMain';overview.before(shell);shell.append(main);
-    for(const id of ['pageOverview','pageData','pageScenarios','pageModels','pageReplay'])main.append(document.getElementById(id));
+    const shell=document.createElement('div');shell.id='commandShell';const main=document.createElement('div');main.id='commandMain';$('#pageMission').before(shell);shell.append(main);
+    for(const page of document.querySelectorAll('[data-workspace-page]'))main.append(page);
     const rail=document.createElement('aside');rail.id='operationRail';rail.setAttribute('aria-label','AI与专业操作');shell.append(rail);
     rail.innerHTML=`<div class="rail-title"><span>OPERATIONS</span><b id="modeDescription"></b></div><div class="rail-tabs" role="tablist" aria-label="操作工具"><button data-rail-tab="ai" role="tab" aria-selected="true">◈ AI协作</button><button data-rail-tab="parameters" role="tab" aria-selected="false">全部参数</button></div><div id="railContext"></div><section id="aiRail"></section><section id="proConsole" hidden><div class="pro-heading"><b>模型与运行控制</b><span id="parameterCount"></span></div><form id="proForm"><div class="pro-model"><input id="proModel" type="text" list="proModelList" placeholder="选择或输入模型ID" aria-label="专业模型ID"><datalist id="proModelList"></datalist><button type="button" id="proLoad">读取</button></div><div id="proParameters"><p>载入当前模型的全部真实参数。</p></div><div class="pro-runtime"><label>步数<input id="proTicks" type="number" min="0" max="10000" step="1" value="100"></label><label>dt<input id="proDt" type="number" min="0" step="any" placeholder="模型默认"></label><label>随机种子<input id="proSeed" type="number" min="0" step="1" placeholder="引擎默认"></label></div><details class="pro-advanced"><summary>定时干预、数据映射与检查点</summary><label>interventions · 定时干预<textarea id="proInterventions" rows="4">[]</textarea></label><label>data_bindings · 数据参数映射<textarea id="proBindings" rows="4">[]</textarea></label><label>checkpoint_at · 保存检查点步数<input id="proCheckpoint" type="number" min="0" step="1" placeholder="默认末步"></label><p>沿用真实接口结构；不支持的参数/组合由引擎明确拒绝。</p></details><div class="pro-buttons"><button type="button" id="proReset">恢复模型默认</button><button type="submit" id="proRun" disabled>执行新运行 ↗</button></div><p id="proStatus" role="status">等待参数合同</p></form><button id="askAboutParameters" class="rail-ai-link">让 AI 帮我解释和调整参数 →</button></section><div class="rail-records"><span>最近归档 · 读取不重新计算</span><div id="recentRecords"></div></div>`;
     $('#aiRail').append($('#aiDrawer'));$('#aiDrawer').classList.add('open');
@@ -274,7 +272,7 @@
     for(const b of modes.querySelectorAll('button'))b.onclick=()=>setMode(b.dataset.operationMode);
     for(const b of rail.querySelectorAll('[data-rail-tab]'))b.onclick=()=>selectRail(b.dataset.railTab);
     for(const b of tools.querySelectorAll('[data-draft]'))b.onclick=()=>prefill(b.dataset.draft);
-    window.toggleAIDrawer=()=>{selectRail('ai');$('#aiInput').focus({preventScroll:true});if(innerWidth<1000)rail.scrollIntoView({behavior:'smooth',block:'start'});};
+    window.toggleAIDrawer=()=>{if(document.body.dataset.page!=='overview')window.switchPage?.('overview');selectRail('ai');$('#aiInput').focus({preventScroll:true});if(innerWidth<1000)rail.scrollIntoView({block:'start'});};
     $('#proLoad').onclick=()=>{manualIntent();return loadParameters($('#proModel').value.trim().toUpperCase()).catch(e=>proError(e.message));};
     $('#aiInput').addEventListener('input',manualIntent);
     $('#proReset').onclick=()=>pro.modelId&&loadParameters(pro.modelId);

@@ -180,7 +180,7 @@ class RunStore:
             record[name.removesuffix(".json")] = json.loads(content)
         return record
 
-    def history(self, limit=30):
+    def history(self, limit=30, *, metadata_only=False):
         if not self.directory.exists():
             return []
         cutoff_path = self.directory / "history_cutoff.json"
@@ -195,6 +195,10 @@ class RunStore:
         metas.sort(key=lambda m: m["created_at"], reverse=True)
         entries = []
         for meta in metas[:max(0, min(int(limit), 60))]:
+            if metadata_only:
+                entries.append({key: meta[key] for key in ('run_id', 'kind', 'model_id',
+                    'intent', 'source', 'created_at', 'complete', 'n_observations') if key in meta})
+                continue
             record = self.load(meta["run_id"])
             if record["kind"] == "run":
                 m = record["manifest"]

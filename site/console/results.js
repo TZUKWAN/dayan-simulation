@@ -378,7 +378,6 @@
     document.querySelectorAll('[data-layer]').forEach(button=>button.addEventListener('click',()=>window.DAYAN3D?.setLayer(button.dataset.layer)));
     document.querySelectorAll(".weather").forEach(el=>el.style.display="none");
     for(const button of document.querySelectorAll("[data-layer]"))if(button.dataset.layer!=="flow"){button.disabled=true;button.title="此模型尚未提供对应真实图层，不显示演示热力或关系";}
-    for(const button of document.querySelectorAll("[data-nav]"))button.addEventListener("click",e=>{e.stopImmediatePropagation();document.querySelectorAll("[data-nav]").forEach(b=>b.classList.toggle("active",b===button));switchPage(button.dataset.nav);if(button.dataset.nav!=="overview")$("#aiDrawer")?.classList.remove("open");if(button.dataset.nav==="scenarios"){let note=$("#scenarioEvidenceNote");if(!note){note=document.createElement("p");note.id="scenarioEvidenceNote";note.textContent="预设为机制案例；未接入真实地区数据时，不构成该地区的实证或预测。";$("#scenariosGrid")?.before(note);}}},true);
     $("#configButton").addEventListener("click",e=>{e.stopImmediatePropagation();showEvidence();},true);
     $("#reportButton").onclick=()=>generateReport().catch(()=>{});
     $("#resumeButton").onclick=resumeDialog;
@@ -398,8 +397,8 @@
     window.DAYAN_APPLY_INTERVENTION=applyPolicy;
     window.DAYAN_HIST_RESTORE=async i=>{const r=window._histEntries?.[i];if(r?.run_id)await restore(r.run_id);};
     clear();updateActions();
-    const recordId=new URLSearchParams(location.search).get("run");const restored=recordId?restore(recordId).catch(error=>{setStatus("未能读取指定研究记录："+error.message,"error");}):(new URLSearchParams(location.search).get("embed")==="dsh"?Promise.resolve():(window.DAYAN_COMMAND?.restoreDefault()||Promise.resolve()));restored.then(resumePendingJob);
+    const recordId=new URLSearchParams(location.search).get("run");const restored=recordId?restore(recordId).catch(error=>{setStatus("未能读取指定研究记录："+error.message,"error");}):Promise.resolve();restored.then(resumePendingJob);
   }
-  function navigate(name){switchPage(name);for(const b of document.querySelectorAll("[data-nav]"))b.classList.toggle("active",b.dataset.nav===name);if(name!=="overview")$("#aiDrawer")?.classList.remove("open");}
+  function navigate(name){switchPage(name);}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();

@@ -5,16 +5,45 @@
   <meta name="theme-color" content="#08131d"><meta name="description" content="大衍 DAYAN 社会仿真工作台：观察模型世界，比较方案，追溯研究证据。">
   <title>大衍 DAYAN · 社会仿真工作台</title>
   <link rel="stylesheet" href="style.css?v=research-20261113"><link rel="stylesheet" href="workspace.css?v=research-20261113"><link rel="stylesheet" href="command.css?v=command-20261113">
+  <link rel="stylesheet" href="workbench.css?v=vnext">
   <script src="vendor/three.min.js?v=0.160.0"></script>
 </head>
 <body class="command-center mode-simple" data-operation-mode="simple">
 <div class="app research-workspace">
   <header class="masthead">
-    <div class="brand"><div class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div><h1>大衍 DAYAN</h1><p>社会仿真 · 观察变化，理解结果</p></div></div>
-    <nav aria-label="主导航"><button class="nav active" data-nav="overview">研究工作台</button><button class="nav" data-nav="data">数据</button><button class="nav" data-nav="scenarios">机制案例</button><button class="nav" data-nav="models">模型库</button><button class="nav" data-nav="replay">研究记录</button></nav>
-    <div class="headright"><span id="connectionStatus" class="connection-state">连接中</span><button class="ws-button" id="assistantButton" onclick="toggleAIDrawer()">打开 AI 助手</button><button class="iconbtn" id="fullscreen" aria-label="切换全屏">⛶</button></div>
+    <div class="brand"><div class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div><h1>大衍 <small>DAYAN</small></h1><p>社会仿真研究系统</p></div></div>
+    <div class="system-path"><span>工作空间</span><b id="systemPath">系统总览</b></div>
+    <div class="headright"><span id="connectionStatus" class="connection-state">连接中</span><button class="ws-button" id="openPalette" aria-haspopup="dialog">搜索与操作 <kbd>Ctrl K</kbd></button><button class="iconbtn" id="notificationButton" aria-label="任务与通知" title="任务与通知">◇<sup id="notificationCount" hidden>0</sup></button><button class="ws-button" id="assistantButton" onclick="toggleAIDrawer()">AI 助手</button><button class="iconbtn" id="fullscreen" aria-label="切换全屏" title="切换全屏">⛶</button></div>
   </header>
-  <div id="pageOverview">
+  <nav id="systemNavigation" aria-label="主导航">
+    <div class="nav-head"><span>研究空间</span><button id="collapseNavigation" class="iconbtn" aria-label="收起导航" aria-expanded="true" title="收起导航">⇤</button></div>
+    <button class="nav active" data-nav="mission" aria-current="page" title="系统总览"><span aria-hidden="true">⌘</span><span>系统总览</span></button>
+    <button class="nav" data-nav="overview" title="仿真指挥"><span aria-hidden="true">◉</span><span>仿真指挥</span></button>
+    <button class="nav" data-nav="models" title="模型宇宙"><span aria-hidden="true">⬡</span><span>模型宇宙</span></button>
+    <button class="nav" data-nav="lab" title="研究实验室"><span aria-hidden="true">✧</span><span>研究实验室</span></button>
+    <button class="nav" data-nav="data" title="数据中心"><span aria-hidden="true">▤</span><span>数据中心</span></button>
+    <button class="nav" data-nav="analytics" title="实验分析"><span aria-hidden="true">∿</span><span>实验分析</span></button>
+    <button class="nav" data-nav="replay" title="研究成果"><span aria-hidden="true">▣</span><span>研究成果</span></button>
+    <div class="nav-foot"><i></i><span>本地研究引擎</span></div>
+  </nav>
+  <div id="pageMission" data-workspace-page>
+    <header class="space-heading"><div><p class="space-kicker">MISSION CONTROL</p><h2>系统总览</h2><p id="missionContext">读取本机研究档案与运行状态</p></div><div class="space-actions"><button class="ws-button" id="refreshMission">刷新视图</button><button class="ws-button ws-primary" data-go="lab">设计研究 <span aria-hidden="true">↗</span></button></div></header>
+    <div id="missionStats" class="mission-stats" aria-live="polite">
+      <div><span>模型入口</span><strong id="missionModels">—</strong><small id="missionModelNote">目录读取中</small></div>
+      <div><span>输入数据集</span><strong id="missionDatasets">—</strong><small id="missionDataNote">资产读取中</small></div>
+      <div><span>执行 / 排队</span><strong id="missionJobs">—</strong><small id="missionQueueNote">队列读取中</small></div>
+      <div><span>研究规约</span><strong id="missionStudies">—</strong><small id="missionStudiesNote">档案读取中</small></div>
+    </div>
+    <div class="mission-grid">
+      <section class="panel mission-library"><div class="panel-head"><h2>模型能力构成</h2><button data-go="models">进入模型宇宙 ↗</button></div><div id="missionCapability" class="mission-panel-body"></div></section>
+      <section class="panel mission-queue"><div class="panel-head"><h2>运行队列</h2><span id="missionSample" class="micro">等待采样</span></div><div id="missionQueue" class="mission-panel-body" role="region" aria-label="运行队列"></div></section>
+      <section class="panel mission-records"><div class="panel-head"><h2>最新实验与回放</h2><button data-go="replay">研究成果 ↗</button></div><div id="missionHistory" class="mission-panel-body"></div></section>
+      <section class="panel mission-resources"><div class="panel-head"><h2>本机资源</h2><span class="micro">实时采样</span></div><div id="missionResources" class="mission-panel-body"></div></section>
+      <section class="panel mission-evidence"><div class="panel-head"><h2>验证与告警</h2><button data-go="lab">研究实验室 ↗</button></div><div id="missionEvidence" class="mission-panel-body"></div></section>
+    </div>
+    <p id="missionError" class="space-status" role="status"></p>
+  </div>
+  <div id="pageOverview" data-workspace-page hidden>
     <section class="scenario-strip"><div class="scenario-name"><span class="code">RESEARCH WORKSPACE</span><strong id="scenarioTitle">从一个问题，进入一个可观察的世界</strong><span class="tag">准备就绪</span><p id="researchQuestion">描述您想研究的问题，或从机制案例和研究记录中开始。</p></div><div class="context"><span>暂无运行</span><span>模型时间 —</span><span>种子 —</span></div></section>
     <section class="workspace-toolbar" aria-label="研究与分析操作">
       <div id="resultSelectors" class="result-selectors"><label>观察方案<select id="resultRunSelect" aria-label="选择运行" disabled><option>等待运行</option></select></label><label>结果指标<select id="resultMetricSelect" aria-label="选择观测量" disabled><option>等待指标</option></select></label></div>
@@ -45,13 +74,16 @@
     <section class="details-grid"><details class="panel intervention-details"><summary>设置干预并运行配对实验<span>修改机制，观察世界如何变化</span></summary><section class="policy"></section></details><details class="panel events"><summary>过程事件<span id="eventCounter">0</span></summary><div class="event-list" id="eventList"></div></details></section>
     <div id="workspaceStatus" class="workspace-status" role="status" aria-live="polite">等待研究任务</div>
   </div>
-  <div id="pageData" class="resource-page" style="display:none"><section class="panel data-workspace"><div class="panel-head"><h2>研究数据</h2><span>来源、质量与模型映射</span></div><div id="dataWorkspace"></div></section></div>
-  <div id="pageScenarios" class="resource-page" style="display:none"><section class="panel resource-content"><div class="resource-heading"><span class="eyebrow">MECHANISM CASES</span><h2>从一个机制开始</h2><p>案例用于理解模型。真实地区研究需要核对数据、机制与假设。</p></div><div id="scenariosGrid"></div></section></div>
-  <div id="pageModels" class="resource-page" style="display:none"><section class="panel resource-content"><div class="resource-heading"><span class="eyebrow">MODEL LIBRARY</span><h2>选择适合问题的模型</h2><p>先核对实现等级与机制覆盖，再决定如何使用。</p></div><div id="modelsTable"></div></section></div>
-  <div id="pageReplay" class="resource-page" style="display:none"><section class="panel resource-content"><div class="resource-heading"><span class="eyebrow">RESEARCH RECORDS</span><h2>回到已有研究</h2><p>读取保存的实验、方案和状态，继续观察与分析。</p></div><div id="replayList"></div></section></div>
+  <div id="pageData" class="resource-page" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">DATA OBSERVATORY</p><h2>数据中心</h2><p>从来源核验到模型输入，保留每个版本的转换记录。</p></div></header><section class="panel data-workspace"><div class="panel-head"><h2>研究数据</h2><span>来源、质量与模型映射</span></div><div id="dataWorkspace"></div></section></div>
+  <div id="pageScenarios" class="resource-page" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">MECHANISM CASES</p><h2>机制案例</h2><p>案例用于理解模型。真实地区研究需要核对数据、机制与假设。</p></div><button class="ws-button" data-go="lab">返回实验室</button></header><div id="scenariosGrid"></div></div>
+  <div id="pageModels" class="resource-page" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">MODEL UNIVERSE</p><h2>模型宇宙</h2><p>按机制、证据和输入约束选择模型。</p></div></header><div id="modelsTable"></div></div>
+  <div id="pageLab" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">RESEARCH LAB</p><h2>研究实验室</h2><p>把研究问题转成可复查的实验规约。</p></div><button class="ws-button" data-go="scenarios">浏览机制案例</button></header><div id="labWorkspace"></div></div>
+  <div id="pageAnalytics" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">EXPERIMENT ANALYTICS</p><h2>实验分析</h2><p>在同一时间窗检查过程、分布、参数和方案差异。</p></div></header><div id="analyticsWorkspace"></div></div>
+  <div id="pageReplay" class="resource-page" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">RESEARCH OUTPUTS</p><h2>研究成果</h2><p>探索可回放、可引用、可复现的研究档案。</p></div></header><div id="replayList"></div></div>
   <footer><span>等待首次仿真</span><span>正在读取运行入口</span><button id="helpButton">工作台说明 ↗</button></footer>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop" id="modalBackdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-heading"><div><span class="micro">RESEARCH WORKSPACE</span><h2 id="modalTitle">研究详情</h2></div><button id="closeModal" aria-label="关闭弹窗">×</button></div><div id="modalBody"></div></section></div>
 <script src="scene-studio.js?v=studio-20261113"></script><script src="viz3d.js?v=studio-20261113"></script><script src="app.js?v=research-20261113"></script><script src="pages.js?v=command-20261113"></script><script src="analysis.js?v=research-20261113"></script><script src="command.js?v=command-20261113"></script><script src="results.js?v=command-20261113"></script>
-<script src="research.js?v=integrity-20261115"></script></body></html>
+<script src="research.js?v=integrity-20261115"></script>
+<script src="workbench.js?v=vnext"></script></body></html>

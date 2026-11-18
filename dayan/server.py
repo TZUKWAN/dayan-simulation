@@ -704,6 +704,23 @@ async def results_js():
                     headers={"Cache-Control": "no-store"})
 
 
+@app.get("/{asset}")
+async def workbench_asset(asset: str):
+    types = {
+        'workbench.css': 'text/css',
+        'workbench.js': 'application/javascript',
+        'workbench-tools.js': 'application/javascript',
+        'workbench-charts.js': 'application/javascript',
+    }
+    if asset not in types:
+        raise HTTPException(404, '工作台资源不存在')
+    path = ROOT / 'site' / 'console' / asset
+    if not path.is_file():
+        raise HTTPException(404, '工作台资源不存在')
+    return Response(path.read_text(encoding='utf-8'), media_type=types[asset],
+                    headers={'Cache-Control': 'no-store'})
+
+
 @app.get("/api/runs/{run_id}/state")
 async def api_saved_state(run_id: str, sample_every: int = 1):
     from .run_store import get_store, state_stream
@@ -760,12 +777,14 @@ def _log_history(entry: dict):
 
 
 @app.get("/api/history")
-async def api_history(limit: int = 30):
+async def api_history(limit: int = 30, metadata_only: bool = False):
     """磁盘运行历史（最新在前，含截断观测序列，供回放页恢复）。"""
     import time as _time
     from .run_store import get_store
     store = get_store()
-    entries = await asyncio.to_thread(store.history, limit)
+    entries = await asyncio.to_thread(store.history, limit, metadata_only=metadata_only)
+    if metadata_only:
+        return {"count": len(entries), "entries": entries}
     seen = {e["run_id"] for e in entries}
     if HIST_PATH.exists() and len(entries) < min(limit, 60) \
             and not (store.directory / "history_cutoff.json").exists():
@@ -1030,6 +1049,32 @@ async def api_health():
     from .access import access_token
     access_token()
     return {"ok": True, "service": "dayan", "contract_version": "research-integrity-1", "access_contract": "loopback-capability-1", "task_contract": "bounded-process-1"}
+
+
+@app.get("/api/workbench/status")
+def api_workbench_status():
+    """Current local engine telemetry. Historical values remain in their own archives."""
+    import time
+    import psutil
+    from .access import data_root
+    from .source_version import source_fingerprint
+
+    disk = psutil.disk_usage(str(data_root()))
+    memory = psutil.virtual_memory()
+    return {
+        "sampled_at": datetime.now().astimezone().isoformat(),
+        "revision": source_fingerprint(),
+        "uptime_seconds": max(0, time.time() - psutil.Process().create_time()),
+        "planner": "configured" if _state.get("llm_planner") == "configured-not-probed" else "rule",
+        "queue": get_manager().snapshot(),
+        "resources": {
+            "engine_rss_bytes": psutil.Process().memory_info().rss,
+            "host_memory_used_bytes": memory.total - memory.available,
+            "host_memory_total_bytes": memory.total,
+            "disk_free_bytes": disk.free,
+            "disk_total_bytes": disk.total,
+        },
+    }
 
 
 @app.post("/api/tools/{tool_name}")
