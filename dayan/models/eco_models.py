@@ -17,6 +17,7 @@
 """
 from __future__ import annotations
 
+import math
 import numpy as np
 
 from ..core import DayanModel
@@ -30,11 +31,22 @@ class LeontiefQuantityModel(DayanModel):
     clock_type = "fixed_step"
 
     def __init__(self, A=None, d=None, sectors=3):
-        rng = np.random.default_rng(7)
-        self.A = A if A is not None else rng.uniform(0.05, 0.25, (sectors, sectors))
-        np.fill_diagonal(self.A, 0.0)
-        self.A = self.A * 0.6 / self.A.sum(axis=0)  # 列和≈0.6<1 可解
-        self.d = d if d is not None else np.ones(sectors)
+        if not 1 <= sectors <= 100:
+            raise ValueError("部门数须在 1..100")
+        if A is None:
+            rng = np.random.default_rng(7)
+            self.A = rng.uniform(0.05, 0.25, (sectors, sectors))
+            np.fill_diagonal(self.A, 0.0)
+            column_sum = self.A.sum(axis=0)
+            self.A *= np.divide(.6, column_sum, out=np.zeros_like(column_sum), where=column_sum>0)
+        else:
+            self.A = np.array(A, dtype=float, copy=True)
+        if (self.A.shape != (sectors,sectors) or not np.isfinite(self.A).all()
+                or np.any(self.A<0) or max(abs(np.linalg.eigvals(self.A))) >= 1):
+            raise ValueError("A 须为维数匹配的非负可生产矩阵，谱半径 < 1")
+        self.d = np.asarray(d, dtype=float) if d is not None else np.ones(sectors)
+        if self.d.shape != (sectors,) or not np.isfinite(self.d).all() or np.any(self.d<0):
+            raise ValueError("d 须为同部门维数的有限非负最终需求")
         self.x = self.d.copy()
 
     def initialize(self, context, parameters, population, topology, rng):
@@ -216,22 +228,27 @@ class AKModel(DayanModel):
     clock_type = "fixed_step"
 
     def __init__(self, A=0.3, s=0.25, delta=0.05, k0=1.0):
+        if A<0 or not 0<=s<=1 or delta<0 or k0<=0:
+            raise ValueError("A 和折旧率非负、储蓄率在 0..1、初始资本为正")
         self.A, self.s, self.delta, self.k = A, s, delta, k0
+        self.k0 = k0
+        self.elapsed = 0.
 
     def initialize(self, context, parameters, population, topology, rng):
-        self.k = parameters.get("k0", 1.0)
+        self.k = self.k0
+        self.elapsed = 0.
 
     def step(self, t, dt):
-        self.k += (self.s * self.A - self.delta) * self.k * dt
+        factor = 1 + (self.s * self.A - self.delta)*dt
+        if factor <= 0:
+            raise ValueError("Euler 步长过大，资本状态不再为正")
+        self.k *= factor
+        self.elapsed = t+dt
 
     def observe(self):
         g = self.s * self.A - self.delta
         return {"k": float(self.k), "g_theory": float(g),
-                "k_proj": float(self.k0_default * np.exp(g * self.tick_cache))
-                if hasattr(self, "tick_cache") else float(self.k)}
-
-    k0_default = 1.0
-    tick_cache = 0.0
+                "k_proj": float(self.k0 * math.exp(g * self.elapsed))}
 
     def validate_state(self):
         return []
@@ -500,6 +517,114 @@ def fit_garch(returns, omega=0.05, alpha=0.1, beta=0.85, iters=200):
     for t in range(1, n):
         sigma2[t] = omega + alpha * r[t - 1] ** 2 + beta * sigma2[t - 1]
     return sigma2
+
+
+def ordered_model_values(dataset_id, fields, time_field):
+    """Read the same immutable dataset used in the run's binding manifest."""
+    from ..datasets import load
+    if not dataset_id or not isinstance(fields,(list,tuple)) or not fields or len(set(fields))!=len(fields):
+        raise ValueError("需要已保存的输入数据集与明确、不重复的数值字段")
+    record = load(dataset_id)
+    rows = record["data"]
+    if not isinstance(rows,list) or not 2<=len(rows)<=10000 or record["role"] in ("holdout","test","validation"):
+        raise ValueError("需要2..10000条、可用于估计或顺序过滤的记录")
+    try:
+        times = [r[time_field] for r in rows]
+        if any(not (b>a) for a,b in zip(times,times[1:])):
+            raise ValueError("时序字段必须按源顺序严格递增")
+        matrix = np.array([[r[key] for key in fields] for r in rows],dtype=float)
+    except (KeyError, TypeError) as exc:
+        raise ValueError("找不到声明的时间或数值字段") from exc
+    if not np.isfinite(matrix).all():
+        raise ValueError("数值字段缺失或非有限")
+    evidence = {key:record[key] for key in ("dataset_id","sha256","source","license","role")}
+    evidence.update(fields=list(fields),time_field=time_field,ordering="validated source order")
+    return matrix, evidence
+
+
+class VARModel(DayanModel):
+    """ECO038 regular series VAR(p) by multivariate OLS with recursive forward forecasts."""
+    model_id="ECO038"
+    clock_type="fixed_step"
+    requires_external=True  # Explicit locally archived input, no remote service.
+    external_dependencies=("dataset_id",)
+    time_unit="observation interval"
+    fixed_dt=1.
+    implementation_note="按显式字段和顺序拟合；每一步为一条等频观测间隔，单位随源数据。外推未通过独立留出前保持模型输出身份。"
+    declared_observables=("prediction","coefficient","intercept","spectral_radius")
+
+    def __init__(self,dataset_id="",fields=(),time_field="date",p=1):
+        if not 1<=p<=12 or len(fields)>12:
+            raise ValueError("VAR 限制为 1..12 阶、最多12个变量")
+        self.dataset_id,self.fields,self.time_field,self.p=dataset_id,fields,time_field,p
+
+    def initialize(self,context,parameters,population,topology,rng):
+        y,evidence=ordered_model_values(self.dataset_id,self.fields,self.time_field)
+        lag=self.p
+        n,k=y.shape
+        if n-lag<=k*lag+1:
+            raise ValueError("样本不足以估计VAR阶数与字段数对应的系数")
+        x=np.hstack([np.ones((n-lag,1))]+[y[lag-i-1:n-i-1] for i in range(lag)])
+        if np.linalg.matrix_rank(x)!=x.shape[1]:
+            raise ValueError("VAR滞后矩阵秩不足；请降低阶数或提供共线性更低的数据")
+        fit=fit_var(y,lag)
+        self.intercept,self.coefficient=fit["const"],fit["A"]
+        companion = np.vstack([self.coefficient,np.eye(k*lag)[:k*(lag-1)]])
+        self.radius=float(max(abs(np.linalg.eigvals(companion))))
+        self.history=y[-lag:][::-1].copy()
+        self.prediction=self.history[0]
+        self.input_datasets=[evidence | {"port":"var_training","n_rows":n}]
+
+    def step(self,t,dt):
+        self.prediction=self.intercept+self.coefficient@self.history.reshape(-1)
+        if not np.isfinite(self.prediction).all():
+            raise ValueError("VAR外推失去数值稳定性")
+        self.history=np.vstack([self.prediction,self.history[:-1]])
+
+    def observe(self):
+        return {"prediction":self.prediction.tolist(),"coefficient":self.coefficient.tolist(),
+                "intercept":self.intercept.tolist(),"spectral_radius":self.radius}
+
+    def validate_state(self):
+        return []
+
+
+class GARCHModel(DayanModel):
+    """ECO045 fixed-parameter GARCH(1,1) one-step conditional variance filter."""
+    model_id="ECO045"
+    clock_type="fixed_step"
+    requires_external=True  # Explicit locally archived input, no remote service.
+    external_dependencies=("dataset_id",)
+    time_unit="observation interval"
+    fixed_dt=1.
+    implementation_note="参数由研究者声明，未执行极大似然估计。条件方差为收益单位的平方；每个预测仅使用前序观测。"
+    declared_observables=("conditional_variance","observation_index")
+
+    def __init__(self,dataset_id="",return_field="return",time_field="date",omega=.05,alpha=.1,beta=.85):
+        if not omega>0 or min(alpha,beta)<0 or alpha+beta>=1:
+            raise ValueError("需 omega>0、alpha/beta 非负且和小于1")
+        self.dataset_id,self.return_field,self.time_field=dataset_id,return_field,time_field
+        self.omega,self.alpha,self.beta=omega,alpha,beta
+
+    def initialize(self,context,parameters,population,topology,rng):
+        matrix,evidence=ordered_model_values(self.dataset_id,[self.return_field],self.time_field)
+        self.returns=matrix[:,0]
+        self.index=0
+        self.variance=self.omega/(1-self.alpha-self.beta)
+        self.input_datasets=[evidence | {"port":"garch_observed_returns","n_rows":len(matrix)}]
+
+    def step(self,t,dt):
+        if self.index>=len(self.returns):
+            raise ValueError("过滤步数超过已声明的观测数")
+        value=float(self.returns[self.index])
+        self.variance=self.omega+self.alpha*value**2+self.beta*self.variance
+        self.index+=1
+
+    def observe(self):
+        return {"conditional_variance":float(self.variance),"observation_index":self.index}
+
+    def validate_state(self):
+        return []
 
 
 # ============ 金融 ABM ============
@@ -1010,34 +1135,32 @@ class GordonSchaeferModel(DayanModel):
     model_id = "ECO114"
     clock_type = "ode"
 
-    def __init__(self, r=0.6, K=100.0, q=0.1, p=1.0, c=2.0, B0=100.0):
+    def __init__(self, r=0.6, K=100.0, q=0.1, p=1.0, c=2.0, B0=100.0,
+                 E0=1.0, entry_rate=.05):
+        if min(r,K,q,p,c,B0,E0,entry_rate)<=0:
+            raise ValueError("生物、价格、成本、初始捕捞努力量与进入速率须为正值")
         self.r, self.K, self.q, self.p, self.c = r, K, q, p, c
-        self.E = 0.0
-        self.x = np.array([B0])
+        self.B0,self.E0,self.entry_rate=B0,E0,entry_rate
+        self.x = np.array([B0,E0],float)
 
     def initialize(self, context, parameters, population, topology, rng):
-        self.r, self.K = parameters.get("r", self.r), parameters.get("K", self.K)
-        self.q, self.p, self.c = (parameters.get("q", self.q),
-                                  parameters.get("p", self.p),
-                                  parameters.get("c", self.c))
-        self.E = 0.0
-        self.x = np.array([parameters.get("B0", self.K)])
+        self.x = np.array([self.B0,self.E0],float)
 
     def derivatives(self, t, x):
-        return np.array([0.0])  # 生物量由 E 的调整间接驱动（见 step 补充）
-
-    def step_ode_post(self):
-        pass
+        biomass, effort=x
+        return np.array([self.r*biomass*(1-biomass/self.K)-self.q*biomass*effort,
+                         self.entry_rate*effort*(self.p*self.q*biomass-self.c)])
 
     def observe(self):
-        B_bioeq = self.K * (1 - self.q * self.E / self.r) if self.E < \
-            self.r / self.q else 0.0
-        B_econ = self.c / (self.p * self.q)  # 开放进入生物经济均衡
-        return {"B": float(self.x[0]), "E": float(self.E),
-                "B_econ_eq": float(B_econ)}
+        biomass,effort=self.x
+        biomass_eq=self.c/(self.p*self.q)
+        harvest=self.q*biomass*effort
+        return {"B":float(biomass),"E":float(effort),"harvest":float(harvest),
+                "net_profit":float(self.p*harvest-self.c*effort),
+                "B_econ_eq":float(biomass_eq) if biomass_eq<self.K else None}
 
     def validate_state(self):
-        return []
+        return [] if np.isfinite(self.x).all() and np.all(self.x>=0) else ["正域失败，检查步长与参数"]
 
 
 class HotellingModel(DayanModel):

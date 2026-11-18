@@ -8,6 +8,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from urllib.error import HTTPError, URLError
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 
 
@@ -19,8 +20,8 @@ class OnlineResearch(unittest.TestCase):
         from dayan.research.study_reports import generate_report
         from dayan.run_store import get_store
         question='德国2010:2015失业率线性趋势，末尾2年留出，事前RMSE阈值1，slope=[-0.75,-0.5,0]，初值取首年真实观测'
-        task=engine.run_collection('worldbank',{'country':'DEU','indicator':'SL.UEM.TOTL.ZS',
-            'date':'2010:2015','per_page':100},page_budget=1,name='Actual public source acceptance')
+        task=engine.run_collection('worldbank_data360',{'country':'DEU','indicator':'SL.UEM.TOTL.ZS',
+            'date':'2010:2015'},page_budget=1,name='Actual public source acceptance')
         if task['status']!='done' or not task.get('n_records'):
             error=str(task.get('error') or task['status'])
             if error.startswith(('URLError:','TimeoutError:','ConnectionError:')):
@@ -38,6 +39,29 @@ class OnlineResearch(unittest.TestCase):
         self.assertTrue(any(name.endswith('.facts.json') for name in report['files']))
         self.assertEqual(report['validation_status'],fitted['calibration']['status'])
         self.assertTrue(report['bundle_url'])
+
+    def test_tigerweb_snapshots_are_used_as_model_inputs(self):
+        from dayan.collection.spatial import collect_census_scene
+        from dayan.datasets import load
+        from dayan.runtime import run_model_full
+        try:
+            scene=collect_census_scene([-80.063,40.490,-80.052,40.497],['local'])
+        except ValueError as error:
+            cause=error.__cause__
+            if isinstance(cause,(URLError,TimeoutError)) and (not isinstance(cause,HTTPError) or cause.code in (429,502,503,504)):
+                self.skipTest('真实 TIGERweb 请求不可用：'+str(error))
+            raise
+        roads,population=scene['roads'],scene['population']
+        self.assertGreater(roads['n_records'],0)
+        self.assertGreater(population['metadata']['population'],0)
+        for dataset in (roads,population):
+            for parent in dataset['metadata']['derived_from']:
+                self.assertEqual(load(parent['dataset_id'])['sha256'],parent['sha256'])
+        run=run_model_full('CPL001',{'roads_dataset_id':roads['dataset_id'],
+            'population_dataset_id':population['dataset_id'],'n':120,'bus_capacity':80},
+            ticks=4,dt=.25,seed=7,strict=True)
+        self.assertEqual(run.observations[0]['represented_population'],population['metadata']['population'])
+        self.assertEqual({item['sha256'] for item in run.manifest['data_bindings']},{roads['sha256'],population['sha256']})
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

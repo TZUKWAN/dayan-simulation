@@ -7,7 +7,7 @@ from __future__ import annotations
 
 # 地区常见别名 → 连接器参数（渐进扩充；不代表穷尽）
 REGION_MAP = {
-    "worldbank": {"中国": "CHN", "美国": "USA", "欧盟": "EUU", "印度": "IND",
+    "worldbank": {"中国": "CHN", "美国": "USA", "欧盟": "EUU", "印度": "IND", "加拿大": "CAN",
                   "日本": "JPN", "德国": "DEU", "英国": "GBR", "巴西": "BRA"},
     "unsdg": {"中国": "CHN", "美国": "USA", "印度": "IND"},
     "eurostat": {"欧盟": "EU27_2020", "德国": "DE", "法国": "FR", "意大利": "IT"},
@@ -32,6 +32,12 @@ PRESETS = [
                        "year_to": "结束年", "indicator": "指标（见 indicator_options）"},
      "region_map": "worldbank",
      "acceptance": "分页完整性由 meta.total 核验"},
+    {"preset_id": "employment_data360", "theme": "人口与就业",
+     "title": "世界银行 Data360 · WDI 年度失业率",
+     "connector": "worldbank_data360",
+     "params_template": {"indicator": "SL.UEM.TOTL.ZS","country": "{country}","date": "{year_from}:{year_to}"},
+     "placeholders": {"country": "国家 ISO3（如 CAN）","year_from": "起始年","year_to": "结束年"},
+     "region_map":"worldbank","acceptance":"同一 WDI 指标，核对返回总数、总体、年度和占劳动力百分比"},
     {"preset_id": "sdg_indicator", "theme": "SDG 可持续发展指标",
      "title": "UN SDG 指标数据（国家级，年度）",
      "connector": "unsdg",

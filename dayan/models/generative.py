@@ -18,6 +18,7 @@ class CognitiveSimulation:
     clock_type = "fixed_step"
     time_unit = "abstract model time"
     requires_external = True
+    external_dependencies = ("language_model",)
     declared_observables = ["n_agents", "n_memories", "n_reflections", "llm_calls", "actions_executed", "mean_energy", "resources", "hazard", "objective"]
     cognitive_mode = "memory-reflection-plan"
     implementation_note = "真实LLM调用与模拟环境行动闭环；简化架构适配，非原论文全量复现；非真实居民数据"

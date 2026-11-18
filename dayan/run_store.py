@@ -180,7 +180,7 @@ class RunStore:
             record[name.removesuffix(".json")] = json.loads(content)
         return record
 
-    def history(self, limit=30):
+    def history(self, limit=30, *, metadata_only=False):
         if not self.directory.exists():
             return []
         cutoff_path = self.directory / "history_cutoff.json"
@@ -195,6 +195,10 @@ class RunStore:
         metas.sort(key=lambda m: m["created_at"], reverse=True)
         entries = []
         for meta in metas[:max(0, min(int(limit), 60))]:
+            if metadata_only:
+                entries.append({key: meta[key] for key in ('run_id', 'kind', 'model_id',
+                    'intent', 'source', 'created_at', 'complete', 'n_observations') if key in meta})
+                continue
             record = self.load(meta["run_id"])
             if record["kind"] == "run":
                 m = record["manifest"]
@@ -273,8 +277,18 @@ class RunStore:
                 if total>limits().job_bytes:raise ValueError('研究包超过导出大小预算')
                 archive.write(p, "code_versions/" + p.name)
             from .datasets import load as load_dataset, dataset_dir
-            for dataset in datasets:
-                load_dataset(dataset)
+            pending = {dataset: None for dataset in datasets}
+            included = set()
+            while pending:
+                dataset, expected = pending.popitem()
+                asset = load_dataset(dataset)
+                if expected and asset["sha256"] != expected:
+                    raise ValueError('上游数据快照哈希与派生产物记录不一致')
+                if dataset in included:
+                    continue
+                included.add(dataset)
+                for parent in asset.get("metadata",{}).get("derived_from",[]):
+                    pending[parent["dataset_id"]] = parent["sha256"]
                 for path in (dataset_dir() / dataset).iterdir():
                     total+=path.stat().st_size
                     if total>limits().job_bytes:raise ValueError('研究包超过导出大小预算')

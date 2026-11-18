@@ -24,6 +24,15 @@ def analyze_data(dataset_id, path=""):
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 
 
+def collect_census_scene(bbox, road_classes=None):
+    """Collect same-vintage TIGERweb roads and POP100 blocks for CPL001 (WGS84 west/south/east/north)."""
+    try:
+        from ..collection.spatial import collect_census_scene as collect
+        return {"ok": True, "payload": collect(bbox, road_classes)}
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+
+
 # ============ 自动多源采集（学术/政策升级，2026-11-13） ============
 
 def search_sources(theme: str = "", state: str = ""):
@@ -239,12 +248,12 @@ def import_collection(collection_id, role="input"):
 
 
 def research_create(question, collection_id, model_family, param_grid, tolerance,
-                    holdout_years=1, budget=500, forecast_years=0):
+                    holdout_years=1, budget=500, forecast_years=0, validation_years=0, selection_top=3):
     """按原始问题建立不可变研究合同。显式模型族/网格/阈值，校验实测国家指标年份；返回study_id。"""
     try:
         from ..research.studies import create_study, summary
         return {"ok": True, "payload": summary(create_study(question, collection_id, model_family,
-            param_grid, tolerance, holdout_years, budget, forecast_years))}
+            param_grid, tolerance, holdout_years, budget, forecast_years, validation_years, selection_top))}
     except Exception as exc:
         return {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
 

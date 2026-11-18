@@ -154,8 +154,32 @@ def param_contract(mid: str) -> dict:
     mutable = {c["param"] for c in policies}
     for name, meta in sig.items():
         meta["mutable_at_runtime"] = name in mutable
+    from .model_index import resolve
+    _, factory = resolve(mid)
+    cls = factory[1] if isinstance(factory,tuple) else factory
     return {"model_id": mid, "params": sig, "policies": policies,
-            "n_params": len(sig)}
+            "n_params": len(sig),"fixed_dt":getattr(cls,"fixed_dt",None),
+            "dependencies":execution_dependencies(mid)}
+
+
+def execution_dependencies(mid, *, check_configuration=True):
+    """Return declared requirements and safe local readiness, without contacting providers."""
+    from .model_index import resolve
+    _, factory = resolve(mid)
+    cls = factory[1] if isinstance(factory,tuple) else factory
+    names = getattr(cls,"external_dependencies",())
+    result = []
+    for name in names:
+        if name == "language_model":
+            state = "requires_configuration"
+            if check_configuration:
+                from .llm_client import configured
+                try: state = "configured_not_probed" if configured() else "missing_configuration"
+                except (OSError, ValueError): state = "invalid_configuration"
+            result.append({"type":"language_model","name":"语言模型服务","state":state})
+        else:
+            result.append({"type":"dataset","name":name,"state":"requires_saved_dataset"})
+    return result
 
 
 def validate_params(mid: str, parameters: dict | None,
@@ -315,6 +339,9 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
     protocol, cls = resolve(mid)
     if protocol != "fixed_step":
         raise ValueError("该模型协议尚未实现检查点续算")
+    fixed_dt=getattr(cls,"fixed_dt",None)
+    if fixed_dt is not None and dt!=fixed_dt:
+        raise ValueError(f"此检查点下一步对应一个观测间隔，要求 dt={fixed_dt}")
     model = cls(**(chk.get("parameters") or {}))
     model.restore(copy.deepcopy(chk["model_snapshot"]))
     rng = getattr(model, "rng", None) or getattr(model,'rng_',None)
@@ -457,12 +484,14 @@ def run_model_full(mid: str, parameters: dict | None = None,
     protocol, factory = resolve(mid)
     if protocol is None or factory is None:
         raise KeyError(f"模型 {mid} 无运行工厂")
+    cls = factory[1] if isinstance(factory, tuple) else factory
+    fixed_dt = getattr(cls,"fixed_dt",None)
 
     sig = _init_signature(mid)
     normalized = dict(params_in)
     options = {"ticks": ticks, "dt": dt, "seed": seed}
     placement = []
-    for name, default in (("ticks", 200), ("dt", .1), ("seed", 0)):
+    for name, default in (("ticks", 200), ("dt", fixed_dt or .1), ("seed", 0)):
         if name in normalized:
             nested = normalized[name]
             if options[name] is not None and options[name] != nested:
@@ -478,6 +507,8 @@ def run_model_full(mid: str, parameters: dict | None = None,
             normalized[name] = options[name]
     ticks, dt, seed = options["ticks"], options["dt"], options["seed"]
     validate_run_arguments(ticks, dt, seed)
+    if fixed_dt is not None and dt!=fixed_dt:
+        raise ValueError(f"{mid} 每步对应一个输入观测间隔，要求 dt={fixed_dt}")
     from .limits import validate_compute, frame_stride
     validate_compute(int(ticks), parameters=params_in)
     clean, issues = validate_params(mid, normalized, strict=strict)
@@ -488,7 +519,6 @@ def run_model_full(mid: str, parameters: dict | None = None,
 
     # 构造期注入：__init__ 形参真实传参（结构参数在构造时生效）
     ctor_kwargs = {k: v for k, v in clean.items() if k in sig}
-    cls = factory[1] if isinstance(factory, tuple) else factory
     if protocol == "demo" and factory[0] == "met_demo":
         from .models.met_registry import MetDemo
         model = MetDemo(mid)
@@ -503,6 +533,8 @@ def run_model_full(mid: str, parameters: dict | None = None,
     from .core import simulate as _simulate
     fkind = factory[0] if isinstance(factory, tuple) else "direct"
     n_steps = int(ticks)
+    from .task_worker import frame_observer
+    live_observer = frame_observer(mid, n_steps) if capture_state else None
     initialized = False
     state_frames: list[dict] = []
     checkpoint = None
@@ -564,7 +596,10 @@ def run_model_full(mid: str, parameters: dict | None = None,
         if capture_state and (force or observation_index % state_every == 0):
             from .stateframe import state_frame_of, _aggregate_frame
             fr = state_frame_of(model, t_now) or _aggregate_frame(model, t_now)
-            state_frames.append(_jsonable(copy.deepcopy(fr)))
+            captured = _jsonable(copy.deepcopy(fr))
+            state_frames.append(captured)
+            if live_observer:
+                live_observer(captured, observation_index)
 
     def _initial_hook(t_now: float, _model=None):
         for name, meta in sig.items():

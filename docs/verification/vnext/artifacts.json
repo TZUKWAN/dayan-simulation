@@ -1,0 +1,182 @@
+{
+  "original_research_files": {
+    "ok": true,
+    "files_checked": 557,
+    "files_changed": 0
+  },
+  "public_files": {
+    "analytics.png": {
+      "bytes": 279860,
+      "sha256": "d76be039612040a1659e17ca487b3d2b78febd7b1b79b017f47de8253770d5de",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "browser.json": {
+      "bytes": 2642,
+      "sha256": "c252c70a1ef85c86e17992ae745b403bc0ae9f3a6baf21de66f7fa1be5846ead"
+    },
+    "canada_facts.json": {
+      "bytes": 7764,
+      "sha256": "f323a10a0eed4ba0261bd8e07d8d3eca222f6e02fce048b0db5d545f7c303be9"
+    },
+    "canada_observed_predicted.csv": {
+      "bytes": 1484,
+      "sha256": "751c41da0dc7e3e6e6bbc3645b89c006b7e74b0b565c10ecdba9e0a97b00f9de"
+    },
+    "canada_report.docx": {
+      "bytes": 219970,
+      "sha256": "a944ca671e0c096c0bf1f20710344665026f1efc79f4b7d0fe3ad54570ffd70e"
+    },
+    "command-1920.png": {
+      "bytes": 409348,
+      "sha256": "998dc2db30f93b3c24a39df1c0ee4e5ef50389cf4a65f46d6e70c8325be8440f",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "command-2560.png": {
+      "bytes": 621225,
+      "sha256": "8a9125d5fda51f2d71385e8878b7620071e4b895c93d9a86394d6913d5e450e6",
+      "size_px": [
+        2560,
+        1440
+      ]
+    },
+    "command-ai-1920.png": {
+      "bytes": 426176,
+      "sha256": "fa995e98e2bc9714ddbf6407cc0e9d169ac3db8f303c6bb73096db4519aca588",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "core_model_runs.json": {
+      "bytes": 11609,
+      "sha256": "546028d7913dd486cdd365729f0a54781e30a4ba93978632e2398e502058641b"
+    },
+    "cpl_current_core.json": {
+      "bytes": 1213,
+      "sha256": "cde961c1673f6b78dfaf5966bf919da108ef26ef991fa9e372aec4164f9dd1e9"
+    },
+    "cpl_online_receipt.json": {
+      "bytes": 35776,
+      "sha256": "99008afdd871dad4803e20952a76040ade081fddb4ea9bf0ecfd050ca8064ca6"
+    },
+    "cpl_receipt.json": {
+      "bytes": 35658,
+      "sha256": "a8b1bdacea4d0e270669fc90819127621ddd707748ce423d82005937c3e25d60"
+    },
+    "data.png": {
+      "bytes": 279074,
+      "sha256": "b3f4c0c9d498037c453954c72f8259d5717b902a2b6f92ba990dfb088a89854e",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "lab.png": {
+      "bytes": 287710,
+      "sha256": "141bee5ebd168c5c65cdeaf553a814a8075bcf650a7ec27ca89f7fb3cf1ffc23",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "layout.json": {
+      "bytes": 4762,
+      "sha256": "1b574b2910b01a3b7dd6febff160066528aff2a5f577fed9a0cffa0226359964"
+    },
+    "live_provider_receipts.json": {
+      "bytes": 5105,
+      "sha256": "5582884d71d2f311996417311ed70624278f05f43e83a037f4171e647874ede9"
+    },
+    "mission-1920.png": {
+      "bytes": 303099,
+      "sha256": "409ea02754f08481ea14edc29128634ae74a4ff0a2b0499f4c622d7e5840d933",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "model_counts.json": {
+      "bytes": 981,
+      "sha256": "4dcaac2c2ec064830d929322f4230f94fc4d78938855108cf7655e11a8239c10"
+    },
+    "model_ledger.csv": {
+      "bytes": 150405,
+      "sha256": "31a724e41e5e5c5b599a7a1374cae2489951535e0f03094194aaaee9f2d2b2e8"
+    },
+    "models.png": {
+      "bytes": 321342,
+      "sha256": "63f44473d51b06cf13663e866bda902ecb4eb3c8f2c7a5faacd0e982bdf0481d",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "native_vnext.json": {
+      "bytes": 1418,
+      "sha256": "a9b7137c27ec14840b94ed27db1eca9ebf44ea75ae3dd2bf1532871e69504312"
+    },
+    "new_data_model_receipts.json": {
+      "bytes": 1762,
+      "sha256": "6593b6b0d00ab861d4152c556548423310063da75fa975ad96e0d69c29489252"
+    },
+    "outputs.png": {
+      "bytes": 275227,
+      "sha256": "32d2bcabd35bea7b3c546ef1734922b7638e23e3deaba03c88407fe4cc87835a",
+      "size_px": [
+        1920,
+        1080
+      ]
+    },
+    "performance.json": {
+      "bytes": 4276,
+      "sha256": "a178a9a2f37e9d19c9f64fb0e4b6a37addbc844d1bc194bdc5c2040d8c29e8f9"
+    },
+    "recording.json": {
+      "bytes": 748,
+      "sha256": "1bf0ef0c377410f4386f82e7f25db4cd3330006ff9a4c7ac257d6beda3862541"
+    },
+    "test_receipts.json": {
+      "bytes": 11671,
+      "sha256": "37caa1537c788fe3290eb9e973ea4b4556c2015c1bcb65d3ee1ad650b96c22b0"
+    },
+    "tigerweb_blocks_raw.json": {
+      "bytes": 6182,
+      "sha256": "a53f2c710464664de3207ade0b38316d60904ffbeb2b3bd2bd6c5203286f9358",
+      "source_license": "U.S. Census Bureau TIGERweb 2020 public data"
+    },
+    "tigerweb_roads_raw.geojson": {
+      "bytes": 62156,
+      "sha256": "07219bfbca0f06c2d5cc0926fe25b01e6e0a37ca8a89f4040f12c599c6a6673b",
+      "source_license": "U.S. Census Bureau TIGERweb 2020 public data"
+    },
+    "wdi_can_unemployment_raw.json": {
+      "bytes": 18533,
+      "sha256": "3a1488be4901fb33379016d044e2b83ab7a856c9fb64f79994d09afa8098ab91",
+      "source_license": "World Bank WDI Data360, ILO modelled estimates, referenced source CC BY 4.0"
+    },
+    "web_ai_vnext.json": {
+      "bytes": 2571,
+      "sha256": "23b65c9b9e839908ac7c193f4e451900b872301f8d4f0b017101ac5ad30cd5eb"
+    },
+    "workbench-recording.mp4": {
+      "bytes": 1841977,
+      "sha256": "ae34db5d92eb4c314eb419c2d0e0bb58ec33fce24fc47b1865d0706b62c83208"
+    }
+  },
+  "full_local_reproduction_packages": {
+    "canada_reproduction.zip": {
+      "sha256": "2e7e9dd4622bea2fd1bd0213544fcb8684f6cd2b81a9817be350d893a9989061",
+      "bytes": 15041868
+    },
+    "cpl_online_reproduction.zip": {
+      "sha256": "eeaa91da92bcf69b314b30dc3b3fd65682b17616643c95811c7b3e9ae98aa70c",
+      "bytes": 17224359
+    }
+  }
+}

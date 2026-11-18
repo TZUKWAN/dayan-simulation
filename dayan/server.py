@@ -523,6 +523,7 @@ class SimRequest(BaseModel):
     data_bindings: list = []
     checkpoint_at: int | None = Field(default=None, ge=0, strict=True)
     interventions: list = []   # WP8 时点干预：[{"at_t": sim时刻, "label": str, "params": {...}}]
+    async_job: bool = False
 
 
 @app.post("/api/run")
@@ -641,18 +642,27 @@ async def api_saved_run(run_id: str):
 @app.post("/api/experiments")
 @managed_endpoint
 async def api_experiment(body: dict):
-    from .research.specs import ExperimentSpec
+    from .research.specs import ExperimentSpec, ResearchSpec
     from .research.experiment import run_experiment, experiment_payload
     from .run_store import get_store
     try:
+        body = dict(body)
+        research_payload = body.pop('research_spec', None)
         spec = ExperimentSpec.from_dict(body).finalize()
         problems = spec.validate()
+        if research_payload is not None:
+            research_spec = ResearchSpec.from_dict(research_payload)
+            problems += research_spec.validate()
+            if not research_spec.research_id or spec.research_id != research_spec.research_id:
+                problems.append('实验必须引用同一份研究规约')
+            if research_spec.unsupported_requirements:
+                problems.append('研究规约仍有未满足的要求')
         if problems:
             raise ValueError("；".join(problems))
         result = await asyncio.to_thread(run_experiment, spec, strict=True, persist=True)
         if not result.ok:
             raise ValueError("实验未完成: " + str(result.warnings))
-        await asyncio.to_thread(get_store().save_experiment, result)
+        await asyncio.to_thread(get_store().save_experiment, result, research_spec=research_payload)
         return {"ok": True, **experiment_payload(result)}
     except (ValueError, TypeError) as exc:
         raise HTTPException(400, str(exc))
@@ -702,6 +712,24 @@ async def results_js():
         raise HTTPException(404, "结果视图脚本不存在")
     return Response(path.read_text(encoding="utf-8"), media_type="application/javascript",
                     headers={"Cache-Control": "no-store"})
+
+
+@app.get("/{asset}")
+async def workbench_asset(asset: str):
+    types = {
+        'workbench.css': 'text/css',
+        'workbench.js': 'application/javascript',
+        'workbench-tools.js': 'application/javascript',
+        'workbench-charts.js': 'application/javascript',
+        'workbench-analytics.js': 'application/javascript',
+    }
+    if asset not in types:
+        raise HTTPException(404, '工作台资源不存在')
+    path = ROOT / 'site' / 'console' / asset
+    if not path.is_file():
+        raise HTTPException(404, '工作台资源不存在')
+    return Response(path.read_text(encoding='utf-8'), media_type=types[asset],
+                    headers={'Cache-Control': 'no-store'})
 
 
 @app.get("/api/runs/{run_id}/state")
@@ -760,12 +788,14 @@ def _log_history(entry: dict):
 
 
 @app.get("/api/history")
-async def api_history(limit: int = 30):
+async def api_history(limit: int = 30, metadata_only: bool = False):
     """磁盘运行历史（最新在前，含截断观测序列，供回放页恢复）。"""
     import time as _time
     from .run_store import get_store
     store = get_store()
-    entries = await asyncio.to_thread(store.history, limit)
+    entries = await asyncio.to_thread(store.history, limit, metadata_only=metadata_only)
+    if metadata_only:
+        return {"count": len(entries), "entries": entries}
     seen = {e["run_id"] for e in entries}
     if HIST_PATH.exists() and len(entries) < min(limit, 60) \
             and not (store.directory / "history_cutoff.json").exists():
@@ -840,9 +870,9 @@ async def api_agent(req: AgentRequest):
 
 
 @app.get("/api/jobs/{job_id}")
-async def api_job(job_id: str):
+async def api_job(job_id: str, preview: bool = False):
     try:
-        return get_manager().get(job_id)
+        return get_manager().get(job_id, preview=preview)
     except (KeyError,ValueError):
         from .agent.job_store import load_job
         try:return await asyncio.to_thread(load_job,job_id)
@@ -1032,6 +1062,32 @@ async def api_health():
     return {"ok": True, "service": "dayan", "contract_version": "research-integrity-1", "access_contract": "loopback-capability-1", "task_contract": "bounded-process-1"}
 
 
+@app.get("/api/workbench/status")
+def api_workbench_status():
+    """Current local engine telemetry. Historical values remain in their own archives."""
+    import time
+    import psutil
+    from .access import data_root
+    from .source_version import source_fingerprint
+
+    disk = psutil.disk_usage(str(data_root()))
+    memory = psutil.virtual_memory()
+    return {
+        "sampled_at": datetime.now().astimezone().isoformat(),
+        "revision": source_fingerprint(),
+        "uptime_seconds": max(0, time.time() - psutil.Process().create_time()),
+        "planner": "configured" if _state.get("llm_planner") == "configured-not-probed" else "rule",
+        "queue": get_manager().snapshot(),
+        "resources": {
+            "engine_rss_bytes": psutil.Process().memory_info().rss,
+            "host_memory_used_bytes": memory.total - memory.available,
+            "host_memory_total_bytes": memory.total,
+            "disk_free_bytes": disk.free,
+            "disk_total_bytes": disk.total,
+        },
+    }
+
+
 @app.post("/api/tools/{tool_name}")
 @managed_endpoint
 async def api_platform_tool(tool_name: str, body: dict):
@@ -1066,6 +1122,32 @@ async def api_studies():
     return {"ok": True, "studies": await asyncio.to_thread(list_studies)}
 
 
+class ResearchCompileRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    text: str = Field(min_length=1, max_length=10000)
+    model_id: str | None = None
+    metric: str | None = None
+    parameters: dict = Field(default_factory=dict)
+
+
+@app.post("/api/research/compile")
+def api_research_compile(request: ResearchCompileRequest):
+    """Rules used by Agent and the experiment editor share one requirement compiler."""
+    from .research.compiler import compile_research
+    from .limits import validate_envelope
+    try:
+        validate_envelope(request.parameters)
+        result = compile_research(request.text, model_id=request.model_id,
+                                  metric=request.metric, parameters=request.parameters)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(400, str(exc))
+    return {
+        'research_spec': result.research_spec.to_dict(),
+        'experiment_spec': result.experiment_spec.to_dict() if result.experiment_spec else None,
+        'candidates': result.candidates[:40], 'warnings': result.warnings, 'notes': result.notes,
+    }
+
+
 @app.get("/api/research/for_run/{run_id}")
 async def api_research_for_run(run_id: str):
     from .research.studies import for_run, summary
@@ -1082,7 +1164,11 @@ async def api_legacy_research():
 @app.get("/api/research/studies/{study_id}")
 async def api_study(study_id: str):
     from .research.studies import load
-    try: return {"ok": True, "study": await asyncio.to_thread(load, study_id)}
+    from .research.study_reports import report_index
+    try:
+        study = await asyncio.to_thread(load, study_id)
+        reports = await asyncio.to_thread(report_index, study)
+        return {"ok": True, "study": study, "reports": reports}
     except (ValueError, OSError) as exc: raise HTTPException(400, str(exc))
 
 
@@ -1093,7 +1179,7 @@ async def api_study_file(study_id: str, filename: str):
     import re
     try: load(study_id)
     except (ValueError, OSError) as exc: raise HTTPException(400, str(exc))
-    if not re.fullmatch(r"[A-Za-z0-9_\-]+\.(docx|md|png|csv|json|zip)", filename):
+    if not re.fullmatch(r"[A-Za-z0-9_-]+\.(?:docx|md|png|csv|json|zip|facts\.json)", filename):
         raise HTTPException(400, "非法文件名")
     path = directory(study_id) / "reports" / filename
     if not path.is_file(): raise HTTPException(404, "研究文件尚未生成")

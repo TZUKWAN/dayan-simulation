@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
+  "scope": "20 distinct reviewed model factories; one compatibility alias",
+  "reviews": [
+    {
+      "model_id": "ECO001",
+      "fidelity": "full",
+      "basis": "开放投入产出固定技术系数迭代，明确保留指定矩阵。二部门向量与可生产矩阵的闭式数值解一致。",
+      "simplifications": [
+        "固定技术系数与最终需求，无价格、稀缺约束或内生技术。"
+      ],
+      "evidence": "dayan/models/eco_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.2307/1927824"
+      ]
+    },
+    {
+      "model_id": "ECO015",
+      "fidelity": "lite",
+      "basis": "人均 Solow 特例，A=1、n=0；稳态条件和提高储蓄率的轨迹经执行核对。",
+      "simplifications": [
+        "正折旧且资本弹性低于1时使用稳态式；没有人口和技术增长。"
+      ],
+      "evidence": "dayan/models/wave2.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.2307/1884513"
+      ]
+    },
+    {
+      "model_id": "ECO017",
+      "fidelity": "full",
+      "basis": "AK 线性技术与显式 Euler 更新，解析指数参考按实际时刻从真实初态生成。",
+      "simplifications": [
+        "恒定投入系数；观测 k 与解析曲线的数值误差受步长影响。"
+      ],
+      "evidence": "dayan/models/eco_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1086/261764"
+      ]
+    },
+    {
+      "model_id": "ECO019",
+      "fidelity": "full",
+      "basis": "工资份额与就业 Goodwin 核心方程；正轨迹及政策系数响应在固定规格下通过。",
+      "simplifications": [
+        "比例经济域需按初态与系数检验，模型无现实工资与就业校准。"
+      ],
+      "evidence": "dayan/models/eco_final.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://www.icts.res.in/sites/default/files/Goodwin_growth_cycle_1967.pdf"
+      ]
+    },
+    {
+      "model_id": "NET052",
+      "fidelity": "full",
+      "basis": "固定人口的齐次混合 SIS 与地方病均衡分支，零传播指数衰减对照已运行。",
+      "simplifications": [
+        "无网络、年龄或地理，抽象时钟不能直接作为实际日历。"
+      ],
+      "evidence": "dayan/models/wave2.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1098/rspa.1932.0171"
+      ]
+    },
+    {
+      "model_id": "NET053",
+      "fidelity": "full",
+      "basis": "闭合齐次 SIR 三仓室，质量守恒和零传播输入测试通过。",
+      "simplifications": [
+        "永久移出，无潜伏期、空间、生育和死亡。"
+      ],
+      "evidence": "dayan/models/benchmarks.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1098/rspa.1927.0118"
+      ]
+    },
+    {
+      "model_id": "NET-SIR",
+      "fidelity": "full",
+      "basis": "NET053 对应的兼容入口，使用相同模型工厂。",
+      "simplifications": [
+        "兼容别名不计独立科研模型数。"
+      ],
+      "evidence": "dayan/model_index.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1098/rspa.1927.0118"
+      ]
+    },
+    {
+      "model_id": "NET055",
+      "fidelity": "full",
+      "basis": "闭合确定性 SEIR 四仓室，加入指数式等待的潜伏转移率。",
+      "simplifications": [
+        "同质接触，无数据校准；需要有效非负初值和有限步长。"
+      ],
+      "evidence": "dayan/models/benchmarks.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1137/S0036144500371907"
+      ]
+    },
+    {
+      "model_id": "NET061",
+      "fidelity": "lite",
+      "basis": "三组 SEIR 用接触率乘源组感染比例，首步、维数、符号、总量与真实关系记录通过。",
+      "simplifications": [
+        "三组等初始人数，接触矩阵和速率为规约输入；没有地区观测。"
+      ],
+      "evidence": "dayan/models/net_final16.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1017/S002217240006160X"
+      ]
+    },
+    {
+      "model_id": "NET106",
+      "fidelity": "full",
+      "basis": "单车道环形 NaSch 同步四阶段规则；持久车辆 ID 和逐帧不冲突。",
+      "simplifications": [
+        "速度格/更新，单车道周期边界，物理尺度由研究另定。"
+      ],
+      "evidence": "dayan/models/traffic.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1051/jp1:1992277"
+      ]
+    },
+    {
+      "model_id": "NET113",
+      "fidelity": "lite",
+      "basis": "有限场景社会力，期望速度、排斥、墙与出口状态相连。",
+      "simplifications": [
+        "简化域与力项，阴影和符号为视图表现，无个体实测轨迹。"
+      ],
+      "evidence": "dayan/models/pedestrian.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1103/PhysRevE.51.4282"
+      ]
+    },
+    {
+      "model_id": "BEH001",
+      "fidelity": "lite",
+      "basis": "周期网格相似度阈值与搬迁，保存跨帧身份，实际阈值变体重复。",
+      "simplifications": [
+        "周期边界、两类居民、批量调度。"
+      ],
+      "evidence": "dayan/models/beh_abm.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1080/0022250X.1971.9989794"
+      ]
+    },
+    {
+      "model_id": "BEH005",
+      "fidelity": "lite",
+      "basis": "受控抽象格点中怨愤、状态演化和随机恢复的源码机制核查。",
+      "simplifications": [
+        "局部视野、分阶段更新与抽象参量，限于机制说明。"
+      ],
+      "evidence": "dayan/models/beh_abm.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1073/pnas.092080199"
+      ]
+    },
+    {
+      "model_id": "BEH016",
+      "fidelity": "lite",
+      "basis": "固定锚权且完整混合的 Friedkin–Johnsen 更新；锚权1时意见不变。",
+      "simplifications": [
+        "权重同质，拓扑简化为等权他人平均。"
+      ],
+      "evidence": "dayan/models/opinion.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1080/0022250X.1990.9990069"
+      ]
+    },
+    {
+      "model_id": "BEH018",
+      "fidelity": "full",
+      "basis": "单次均匀取有界信任的对称意见更新；均值守恒、冻结对照与离散度经过运行比较。",
+      "simplifications": [
+        "抽到相同主体会跳过，完全混合。"
+      ],
+      "evidence": "dayan/models/opinion.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1142/S0219525900000078"
+      ]
+    },
+    {
+      "model_id": "SYS002",
+      "fidelity": "lite",
+      "basis": "有限台数 Poisson 到达和指数服务，Erlang-C 比较及队列守恒。",
+      "simplifications": [
+        "按离散边界调度，稳态解析仅适用稳定负荷。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1214/aoms/1177728975"
+      ]
+    },
+    {
+      "model_id": "SYS003",
+      "fidelity": "lite",
+      "basis": "M/M/c/c 阻塞模型与正确 Erlang-B 解析递推。",
+      "simplifications": [
+        "同一时间步批量处理会带来短窗和离散误差。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1214/aoms/1177728975"
+      ]
+    },
+    {
+      "model_id": "SYS006",
+      "fidelity": "lite",
+      "basis": "无限服务位的加权占用与 Little 定律解析对照。",
+      "simplifications": [
+        "到达与释放按固定步聚合，短窗口尚可能未达到稳态。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1287/opre.9.3.383"
+      ]
+    },
+    {
+      "model_id": "SYS007",
+      "fidelity": "full",
+      "basis": "真实连续时间到达，FIFO 确定服务，服务开始计数及等待和解析参考各自呈现。",
+      "simplifications": [
+        "基准稳定区要求到达率低于服务率，等待未完成不填为零。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://academic.oup.com/jrsssb/article/13/2/151/7026631"
+      ]
+    },
+    {
+      "model_id": "SYS024",
+      "fidelity": "prototype",
+      "basis": "有限工作池遇负荷变化调整并发，Poisson 到达、指数服务与队列守恒。",
+      "simplifications": [
+        "来源启发动态结构系统，当前仅替换工作池大小，不覆盖通用动态拓扑。"
+      ],
+      "evidence": "dayan/models/sys_extras.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1145/268403.268423"
+      ]
+    },
+    {
+      "model_id": "CPL001",
+      "fidelity": "lite",
+      "basis": "真实来源路网与人口权重、分钟尺度步行及车辆耦合、按绝对时点信息干预和公交载荷状态同步。",
+      "simplifications": [
+        "地区行为、老年比例、积水与接驳点为情景设定，物理场景完成了数据接入，未作实地验证。"
+      ],
+      "evidence": "dayan/models/evacuation_coupled.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://tigerweb.geo.census.gov/arcgis/rest/services/Census2020/tigerWMS_PhysicalFeatures/MapServer"
+      ]
+    }
+  ]
+}

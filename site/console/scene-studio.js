@@ -87,10 +87,10 @@
       geo.setAttribute('position',new THREE.Float32BufferAttribute(p,3));g.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0x83a5b3,transparent:true,opacity:.32})));
     }else{
       mesh(g,rounded(77,1.6,77,.5),material(0x20394a),0,-1.1,0);
-      mesh(g,rounded(76,.12,76,.25),material(0x2d4755,{roughness:.85}),0,-.24,0);
+      mesh(g,rounded(76,.12,76,.25),material(profile.kind==='geographic'?0x193141:0x2d4755,{roughness:.85}),0,-.24,0);
       const grid=new THREE.GridHelper(70,14,0x638595,0x638595);grid.position.y=-.16;grid.material.transparent=true;grid.material.opacity=.13;g.add(grid);
       const bounds=first.space?.bounds;
-      if(bounds){const sp=label(g,[`${bounds[2]-bounds[0]} × ${bounds[3]-bounds[1]} ${first.space.unit||''}`,'模型空间 · 坐标等比映射'],26,4);sp.position.set(0,0,41);}
+      if(bounds&&profile.kind!=='geographic'){const sp=label(g,[`${bounds[2]-bounds[0]} × ${bounds[3]-bounds[1]} ${first.space.unit||''}`,'模型空间 · 坐标等比映射'],26,4);sp.position.set(0,0,41);}
     }
     if(profile.kind==='ring-road'){
       mesh(g,new THREE.CylinderGeometry(32,32,.35,160),material(0x152733,{roughness:.92}),0,-.03,0);
@@ -168,7 +168,8 @@
     if(p.kind==='indicators')return [{color:C.teal,text:'柱高：各指标 / 自身全程绝对峰值'},{color:C.amber,text:'汇总示意 · 非主体空间'}];
     if(p.continuous)return [{color:C.teal,text:`${p.label} ${Number(p.lo.toPrecision(4))}`},{color:C.amber,text:Number(p.hi.toPrecision(4)).toString()}];
     if(!p.categories.length)return [{color:C.teal,text:'主体位置来自模型计算'}];
-    return p.categories.slice(0,8).map((v,i)=>({color:colors[i],text:`${p.label}: ${v}`}));
+    const states={evacuated:'已疏散',on_bus:'乘车中',outbound:'驶向安置点',pickup:'待接驳',preparing:'准备中',queue:'等候乘车',return:'返程',walking:'步行中'};
+    return p.categories.slice(0,8).map((v,i)=>({color:colors[i],text:p.kind==='geographic'?(states[v]||v):v}));
   }
   function indicator(group,name,index,count,stream) {
     const root=new THREE.Group(),col=colors[index%colors.length];

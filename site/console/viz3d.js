@@ -35,7 +35,7 @@
     container.style.overflow = 'hidden';
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(Math.max(1,container.clientWidth), Math.max(1,container.clientHeight));
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -49,7 +49,7 @@
 
     camera = new THREE.PerspectiveCamera(
       50,
-      container.clientWidth / container.clientHeight,
+      Math.max(1,container.clientWidth) / Math.max(1,container.clientHeight),
       0.1,
       1000
     );
@@ -63,7 +63,15 @@
     if (window.ResizeObserver) new ResizeObserver(() => onResize()).observe(container);
     buildEnvLighting();   // PMREM IBL：金属/玻璃的真实反射来源
     initPostFX();
-    animate();
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopAnimation();
+      else {clock.start();scheduleAnimation();}
+    });
+    window.addEventListener('dayan:page', event => {
+      if (event.detail === 'overview') scheduleAnimation();
+      else stopAnimation();
+    });
+    scheduleAnimation();
   }
 
   let sceneObj = null;
@@ -152,7 +160,7 @@
     dom.addEventListener('pointerdown', e => { isDown = true; prevX = downX = e.clientX; prevY = downY = e.clientY; });
     dom.addEventListener('pointerup', e => {
       const clicked=isDown&&Math.hypot(e.clientX-downX,e.clientY-downY)<5;isDown=false;
-      if(!clicked||e.button!==0||!window._vizStateStream)return;
+      if(!clicked||e.button!==0||!window._vizStateStream||window._vizStateStream.preview)return;
       const rect=dom.getBoundingClientRect(),ray=new THREE.Raycaster();ray.params.Points.threshold=1;
       ray.setFromCamera(new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1),camera);
       const group=getScene().children.find(c=>c.userData?.isStateGroup);
@@ -174,6 +182,7 @@
       camera.position.x = nx; camera.position.z = nz;
       camera.position.y = Math.max(2, camera.position.y - dy * 0.05);
       camera.lookAt(0, 0, 0);
+      if(!isRunning) renderer.render(getScene(),camera);
     });
     dom.addEventListener('wheel', e => {
       stateCameraOverview=false;
@@ -182,6 +191,7 @@
       camera.getWorldDirection(dir);
       camera.position.addScaledVector(dir, e.deltaY * 0.02);
       camera.position.y = Math.max(2, camera.position.y);
+      if(!isRunning) renderer.render(getScene(),camera);
     }, { passive: false });
   }
 
@@ -279,17 +289,18 @@
     }
   }
 
-  function setLayer(mode) {
+  function setLayer(mode, render=true) {
     layerFxMode = mode || 'flow';
+    if (render && window._vizStateStream && !window._vizStateStream.preview) {
+      DAYAN3D.renderAt(window.DAYAN_RESULTS?.time || 0);
+    }
   }
   function setGroupFilter(g) {
     window._vizGroup = (g === 'all' || g == null) ? null :
       { commute: 0, elder: 1, student: 2 }[g] ?? null;
   }
 
-  let lastFrameAt = 0;
   function frame() {
-    lastFrameAt = performance.now();
     if (!isRunning) return;   // 暂停：冻结场景动画（侧栏时钟共用 _vizNow 同步停）
     const wallDt = clock.getDelta();
     const modelClock = window.DAYAN_RESULTS?.active ? window.DAYAN_RESULTS : null;
@@ -314,14 +325,26 @@
     renderFrame();
   }
 
-  function animate() {
-    animationId = requestAnimationFrame(animate);
-    frame();
+  function scheduleAnimation() {
+    if (animationId === null && isRunning && !document.hidden && container?.clientWidth) animationId=requestAnimationFrame(animate);
   }
-  // 后台标签页 rAF 停摆 → 看门狗用定时器兜底，保证数据/ HUD 持续推进
-  setInterval(() => {
-    if (performance.now() - lastFrameAt > 400) frame();
-  }, 300);
+  function stopAnimation() {
+    if (animationId !== null) cancelAnimationFrame(animationId);
+    animationId=null;
+  }
+  let frameCounter=0, rateSince=0;
+  function animate(at) {
+    animationId=null;
+    frame();
+    if (!rateSince) rateSince=at;
+    frameCounter++;
+    if (at-rateSince>=800) {
+      const badge=document.getElementById('fps');
+      if(badge)badge.textContent=Math.round(frameCounter*1000/(at-rateSince))+' fps';
+      frameCounter=0;rateSince=at;
+    }
+    scheduleAnimation();
+  }
 
   // ---- 通用工具 ----
 
@@ -2298,8 +2321,12 @@
     switchScene(map[prefix] || 'city');
   }
 
-  function pause() { isRunning = false; }
-  function resume() { isRunning = true; }
+  function pause() {
+    isRunning = false;stopAnimation();frameCounter=0;rateSince=0;
+    const badge=document.getElementById('fps');
+    if (badge) badge.textContent='已暂停';
+  }
+  function resume() { if (!isRunning) clock.start();isRunning = true;scheduleAnimation(); }
 
   // ============================================================
   // WP7 状态同源沙盘：实体帧驱动渲染（真实模型状态，禁随机漫游）
@@ -2312,12 +2339,14 @@
   let followingStateEntity = '';
   let stateCameraOverview = true;
   let studioProfile = null, studioStage = null;
+  const overviewTarget = new THREE.Vector3();
   let stateSmoothing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function fitStateCamera() {
     if(!camera)return;
     const scale=Math.max(1,1.2/Math.max(.2,camera.aspect));
-    const target=new THREE.Vector3(0,0,6);
-    const direction=new THREE.Vector3(27,43,51).sub(target).normalize();
+    const geographic=studioProfile?.kind==='geographic';
+    const target=overviewTarget.set(0,0,geographic?2:6);
+    const direction=(geographic?new THREE.Vector3(18,67,57):new THREE.Vector3(27,43,51)).sub(target).normalize();
     const circular=['ring-road','indicators','queue','cohorts'].includes(studioProfile?.kind);
     const radius=studioStage?.userData.radius||38.3;
     const points=circular?Array.from({length:48},(_,i)=>[Math.cos(i/48*Math.PI*2)*radius,Math.sin(i/48*Math.PI*2)*radius]):[[-39,-39],[-39,39],[39,39],[39,-39]];
@@ -2362,27 +2391,40 @@
   }
 
   const displaySamples=new WeakMap();
+  let displayPriorities=new Map();
   function displayEntities(frame) {
     const entities=frame.entities||[];if(entities.length<=3000)return entities;
     if(!displaySamples.has(frame)){
-      const priority=id=>{let h=2166136261;for(const c of String(id))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;};
+      const priority=id=>{
+        let value=displayPriorities.get(id);
+        if(value===undefined){
+          let h=2166136261;for(const c of String(id))h=Math.imul(h^c.charCodeAt(0),16777619);
+          value=h>>>0;displayPriorities.set(id,value);
+        }
+        return value;
+      };
       displaySamples.set(frame,[...entities].sort((a,b)=>priority(a.id)-priority(b.id)||String(a.id).localeCompare(String(b.id))).slice(0,3000));
     }
     return displaySamples.get(frame);
   }
 
-  function syncStateInstances(group) {
+  const instanceColor=new THREE.Color();
+  function syncStateInstances(group,includeColors=true) {
     const batch=group?.userData.carBatch;if(!batch)return;
-    const ids=[];
-    group.userData.meshMap.forEach(m=>{
-      if(!m.userData.instancedCar||!m.visible)return;
-      m.updateMatrix();batch.setMatrixAt(ids.length,m.matrix);
-      batch.setColorAt(ids.length,new THREE.Color(String(m.userData.entityId)===selectedStateEntity?0x51decc:m.userData.stateColor));
-      ids.push(m.userData.entityId);
+    const map=group.userData.meshMap;
+    if(includeColors){
+      const ids=[];
+      map.forEach(m=>{
+        if(!m.userData.instancedCar||!m.visible)return;
+        instanceColor.setHex(String(m.userData.entityId)===selectedStateEntity?0x51decc:m.userData.stateColor);
+        batch.setColorAt(ids.length,instanceColor);ids.push(m.userData.entityId);
+      });
+      batch.count=ids.length;batch.userData.instanceIds=ids;batch.instanceColor.needsUpdate=true;
+    }
+    batch.userData.instanceIds.forEach((id,i)=>{
+      const mesh=map.get(id);mesh.updateMatrix();batch.setMatrixAt(i,mesh.matrix);
     });
-    batch.count=ids.length;batch.userData.instanceIds=ids;
-    batch.instanceMatrix.needsUpdate=true;if(batch.instanceColor)batch.instanceColor.needsUpdate=true;
-    batch.computeBoundingSphere();
+    batch.instanceMatrix.needsUpdate=true;
   }
 
   function stateWorldXY(ent, fr) {
@@ -2419,6 +2461,67 @@
     return [ ent.x || 0, 0.5, ent.y || 0 ];
   }
 
+  let stateOverlay = null;
+  function paintStateOverlay(frame) {
+    if (stateOverlay?.parent) {stateOverlay.parent.remove(stateOverlay);disposeDeep(stateOverlay);}
+    stateOverlay = null;
+    const annotated = document.getElementById('layerReadout');
+    if (annotated) annotated.hidden = true;
+    if (layerFxMode === 'flow' || window._vizStateStream?.preview) return;
+    const positioned = (frame.entities || []).filter(e=>Number.isFinite(e.x)&&Number.isFinite(e.y));
+    const positions = [], colors = [];
+    let label = '';
+    if (layerFxMode === 'heat' && positioned.length) {
+      const counts = new Map(), cell = 4;
+      for (const entity of positioned) {
+        const [x,,z]=stateWorldXY(entity,frame);
+        const key=[Math.floor(x/cell),Math.floor(z/cell)].join(',');
+        counts.set(key,(counts.get(key)||0)+1);
+      }
+      const maximum=Math.max(...counts.values());
+      for (const [key,count] of counts) {
+        const [x,z]=key.split(',').map(axis=>Number(axis)*cell), x2=x+cell*.91, z2=z+cell*.91;
+        const color = new THREE.Color().lerpColors(new THREE.Color(0x21657b),new THREE.Color(0xffbc68),Math.sqrt(count/maximum));
+        positions.push(x,.12,z,x2,.12,z,x2,.12,z2,x,.12,z,x2,.12,z2,x,.12,z2);
+        for(let i=0;i<6;i++) colors.push(color.r,color.g,color.b);
+      }
+      label = `投影网格主体数 · 冷色低 / 暖色高 · 每格最大 ${maximum} · t=${frame.sim_t}`;
+    } else if (layerFxMode === 'network') {
+      const points=new Map(positioned.map(e=>[String(e.id),stateWorldXY(e,frame)]));
+      let count=0;
+      for (const edge of frame.relations || []) {
+        const a=points.get(String(edge.source)), b=points.get(String(edge.target));
+        if (!a || !b) continue;
+        positions.push(a[0],.82,a[2],b[0],.82,b[2]);count++;
+        if (edge.directed) {
+          const angle=Math.atan2(b[2]-a[2],b[0]-a[0]);
+          for(const offset of [-.4,.4]) positions.push(b[0],.82,b[2],b[0]-.8*Math.cos(angle+offset),.82,b[2]-.8*Math.sin(angle+offset));
+        }
+      }
+      if (count) label=`模型记录的关系 ${count} 条 · 箭头指向边的目标 · t=${frame.sim_t}`;
+    } else if (layerFxMode === 'trajectory') {
+      const stream=window._vizStateStream, id=String(window.DAYAN_RESULTS?.entityId || '');
+      const last=window._vizStateIdx;
+      let previous=null, count=0;
+      for (const f of stream.frames.slice(Math.max(0,last-99),last+1)) {
+        const e=f.entities?.find(e=>String(e.id)===id&&Number.isFinite(e.x)&&Number.isFinite(e.y));
+        const point=e?stateWorldXY(e,f):null;
+        if (point && previous) {positions.push(previous[0],.86,previous[2],point[0],.86,point[2]);count++;}
+        previous=point;
+      }
+      if (count) label=`主体 ${id} · ${count} 段相邻有记录轨迹 · t≤${frame.sim_t}`;
+    }
+    if (!positions.length) return;
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    if (colors.length) {
+      geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+      stateOverlay=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.58,side:THREE.DoubleSide,depthWrite:false}));
+    } else stateOverlay=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x9cf2ec,transparent:true,opacity:.84}));
+    getScene().add(stateOverlay);
+    if (annotated) {annotated.textContent=label;annotated.hidden=!label;}
+  }
+
   function vizApplyFrame(fr) {
     const scene = getScene();
     let group = scene.children.find(c => c.userData && c.userData.isStateGroup);
@@ -2442,6 +2545,8 @@
             template.geometry.dispose();
             const batch=new THREE.InstancedMesh(new THREE.BoxGeometry(1.55,.42,.85),template.material,3000);
             batch.castShadow=true;batch.receiveShadow=true;batch.frustumCulled=false;
+            // Vehicles stay within the same world-space ring at every step.
+            batch.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,.65,0),32);
             batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
             group.userData.carBatch=batch;group.add(batch);
           }
@@ -2501,7 +2606,9 @@
           const positions=[];
           for(const segment of f.segments||[])for(const point of segment){const [x,y,z]=stateWorldXY({x:point[0],y:point[1]},fr);positions.push(x,.08,z);}
           const geometry=new THREE.BufferGeometry();geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
-          fm=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x4cc7c3,transparent:true,opacity:.7}));
+          fm=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x9ce9e8,transparent:true,opacity:.82,toneMapped:false}));
+        } else if(f.type === "assumed_pickup") {
+          fm=new THREE.Mesh(new THREE.BoxGeometry(2.5,.5,2.5),new THREE.MeshStandardMaterial({color:0x7dbee7,emissive:0x1b4a77}));
         } else if(f.type === "assumed_shelter") {
           fm=new THREE.Mesh(new THREE.ConeGeometry(1.3,3,8),new THREE.MeshStandardMaterial({color:0xf5bd57}));
         } else if (f.type === "exit") {
@@ -2512,7 +2619,7 @@
             new THREE.MeshStandardMaterial({ color: 0x2a3a4a }));
         }
         if (fm) {
-          if (f.type === "exit" || f.type === "assumed_shelter") {
+          if (f.type === "exit" || f.type === "assumed_shelter" || f.type === "assumed_pickup") {
             const [fx, , fz] = stateWorldXY({ ...f, type: "pedestrian" }, fr);
             fm.position.set(fx, 0.1, fz);
           } else if(f.type!=="road_network") {
@@ -2523,7 +2630,7 @@
         }
       }
     });
-    syncStateInstances(group);
+    paintStateOverlay(fr);
   }
 
   function buildStateLegend() {
@@ -2531,24 +2638,33 @@
     if(!box){box=document.createElement('div');box.id='sceneLegend';container.appendChild(box);}
     box.replaceChildren();
     const heading=document.createElement('strong');heading.textContent=studioProfile.title;box.appendChild(heading);
+    if(studioProfile.kind==='geographic'){
+      const bounds=window._vizStateStream?.frames?.[0]?.space?.bounds;
+      if(bounds){
+        const extent=document.createElement('span');extent.className='scene-extent';
+        extent.textContent=`${Math.round(bounds[2]-bounds[0])} × ${Math.round(bounds[3]-bounds[1])} m`;
+        heading.appendChild(extent);
+      }
+    }
     const items=document.createElement('div');items.className='scene-legend-items';
     DAYAN_SCENE_STUDIO.legend(studioProfile).forEach(item=>{const line=document.createElement('span'),dot=document.createElement('i');dot.style.background='#'+item.color.toString(16).padStart(6,'0');line.appendChild(dot);line.appendChild(document.createTextNode(item.text));items.appendChild(line);});box.appendChild(items);
     if(!['indicators','cohorts'].includes(studioProfile.kind)){
       const label=document.createElement('label');label.className='scene-smoothing';
       const input=document.createElement('input');input.type='checkbox';input.id='sceneSmoothing';input.checked=stateSmoothing;input.addEventListener('change',()=>DAYAN3D.setSmoothing(input.checked));
-      label.append(input,document.createTextNode('平滑回放'));label.title='仅在相邻归档位置间做视觉插值；统计、主体详情与导出仍为原始帧。关闭可查看精确状态。';box.appendChild(label);
-      const note=document.createElement('small');note.textContent='平滑仅为帧间视觉插值';box.appendChild(note);
+      label.append(input,document.createTextNode('帧间插值'));label.title='仅在相邻归档位置间做视觉插值；统计、主体详情与导出仍为原始帧。关闭可查看精确状态。';box.appendChild(label);
     }
   }
 
+  let smoothNext=null, smoothPositions=null;
   function interpolateState(t,idx) {
     const frames=window._vizStateStream?.frames,fr=frames?.[idx],next=frames?.[idx+1];
-    if(!stateSmoothing||!next||['indicators','cohorts'].includes(studioProfile.kind))return;
+    if(!stateSmoothing||!next||['indicators','cohorts'].includes(studioProfile.kind))return false;
     const span=next.sim_t-fr.sim_t,alpha=span>0?THREE.MathUtils.clamp((t-fr.sim_t)/span,0,1):0;
-    if(!alpha)return;
-    const nextMap=new Map((next.entities||[]).map(e=>[e.id,e]));
+    if(!alpha)return false;
+    if(smoothNext!==next){smoothNext=next;smoothPositions=new Map((next.entities||[]).map(e=>[e.id,e]));}
+    const meshes=getScene().children.find(c=>c.userData?.isStateGroup)?.userData.meshMap;
     for(const e of displayEntities(fr)){
-      const m=stateEntityMesh(e.id),n=nextMap.get(e.id);if(!m||!n||n.type!==e.type||!m.visible)continue;
+      const m=meshes?.get(e.id),n=smoothPositions.get(e.id);if(!m||!n||n.type!==e.type||!m.visible)continue;
       if(studioProfile.kind==='ring-road'&&e.type==='car'){
         const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100,delta=((n.x-e.x)%length+length)%length;
         if(delta>length/2)continue; // Ambiguous large jumps are left at the saved position.
@@ -2561,6 +2677,7 @@
         if(m.userData.glyph==='vehicle'&&Math.hypot(b[0]-a[0],b[2]-a[2])>1e-6)m.rotation.y=Math.atan2(-(b[2]-a[2]),b[0]-a[0]);
       }
     }
+    return true;
   }
 
   function stateHud() {
@@ -2588,7 +2705,8 @@
       let lo=0,hi=n;while(lo<hi){const m=(lo+hi)>>>1;if((st.frames[m].sim_t??0)<=t+1e-9)lo=m+1;else hi=m;}idx=Math.max(0,lo-1);
     }else{const DUR=Math.max(12,Math.min(30,n*1.4));idx=Math.min(n-1,Math.floor((t%DUR)/DUR*n));}
     const previous=followingStateEntity?stateEntityMesh(followingStateEntity)?.position.clone():null;
-    if (idx !== window._vizStateIdx) {
+    const changed=idx!==window._vizStateIdx;
+    if (changed) {
       const prevFr = st.frames[window._vizStateIdx];
       window._vizStateIdx = idx;
       vizApplyFrame(st.frames[idx]);
@@ -2597,7 +2715,7 @@
       if (hud) {
         const f = st.frames[idx];
         const entN = (f.entities || []).length;
-        hud.textContent = (st.provenance === "entity"
+        hud.textContent = (st.preview ? '实时计算取样' : st.provenance === "entity"
           ? "◉ 状态同源 · 主体状态来自模型计算"
           : "△ 汇总数据驱动的示意动画（非主体轨迹）")
           + " · " + (st.model_id || "") + " · sim_t=" + (f.sim_t != null ? (+f.sim_t).toFixed(2) : "?")
@@ -2608,13 +2726,15 @@
           ? "rgba(0,255,163,.45)" : "rgba(255,183,77,.45)";
       }
     }
-    interpolateState(t,idx);
-    syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup));
+    const interpolated=interpolateState(t,idx);
+    if(changed||interpolated)syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup),changed);
     if(previous&&followingStateEntity){const mesh=stateEntityMesh(followingStateEntity);if(mesh?.visible){camera.position.add(mesh.position.clone().sub(previous));camera.lookAt(mesh.position);}else followStateEntity('',false);}
   }
 
   function visualizeState(stream) {
     clearScene();
+    stateOverlay=null;
+    displayPriorities=new Map();smoothNext=null;smoothPositions=null;
     selectedStateEntity='';
     followingStateEntity='';
     stateCameraOverview=true;
@@ -2628,13 +2748,13 @@
     studioProfile=DAYAN_SCENE_STUDIO.resolve(stream);
     studioStage=DAYAN_SCENE_STUDIO.stage(scene,studioProfile,stream?.frames?.[0]||{});
     renderer.toneMappingExposure=1.05;
-    window._vizDayCycle = (window._vizDayCycle !== false);   // 状态世界默认昼夜流动
-    DAYCYCLE.ensure();
-    startIntroCinematic();
+    window._vizDarkness=0;
+    INTRO.active=false;
     buildStateLegend();
     // 状态场景俯瞰机位：能同时读清环形/平面结构
     if (camera) {
       fitStateCamera();
+      if(!stream?.preview)startIntroCinematic();
     }
     currentScene = { type: "state_" + ((stream && stream.provenance) || "aggregate"),
                      update: vizStateUpdate };
@@ -2644,15 +2764,26 @@
 
   function clearSavedWorld() {
     clearScene();studioProfile=null;studioStage=null;selectedStateEntity='';followingStateEntity='';
+    displayPriorities=new Map();smoothNext=null;smoothPositions=null;
+    window._vizStateStream=null;window._vizStateIdx=-1;stateOverlay=null;
+    const annotated=document.getElementById('layerReadout');if(annotated) annotated.hidden=true;
     stateCameraOverview=true;currentScene=null;getScene().background=new THREE.Color(0x101f2e);
     if(renderer&&camera)renderer.render(getScene(),camera);
+  }
+
+  function preview(reading, first) {
+    const frame=reading.frame;
+    const sample={model_id:reading.model_id,frames:[frame],provenance:frame.provenance,preview:true};
+    if (first || !window._vizStateStream?.preview) visualizeState(sample);
+    else window._vizStateStream.frames[0]=frame;
+    DAYAN3D.renderAt(frame.sim_t);
   }
 
 
   // ============================================================
   // 视觉增强层（2026-11-13）：
   //   A. 轻量泛光后处理（自研，无新依赖；失败自动降级直渲）
-  //   B. 昼夜连续循环 + 车灯/环道灯随黑暗渐亮（状态世界默认开启）
+  //   B. 旧展示场景的昼夜循环
   //   C. 数据驱动特效：感染脉冲光环 / 疏散拖尾 / 干预冲击波
   //   D. 开场推近镜头（可交互打断）
   // 特效层只做视觉表现，不产生任何模型数据；provenance 标注不变。
@@ -2814,7 +2945,7 @@
   };
 
   function dayCycleTick(dt) {
-    if (!window._vizDayCycle || !sceneObj) return;
+    if (!window._vizDayCycle || !sceneObj || currentScene?.type?.startsWith('state_')) return;
     DAYCYCLE.ensure();
     DAYCYCLE.h = (DAYCYCLE.h + dt * (24 / 160)) % 24;   // 160 秒一昼夜
     applyDayPhase(DAYCYCLE.h);
@@ -3061,12 +3192,11 @@
   }
 
   // ---------- D. 开场推近镜头 ----------
-  const INTRO = { active: false, t0: 0, dur: 3200, from: null, to: null };
+  const INTRO = { active: false, t0: 0, dur: 620, from: null, to: null };
   function startIntroCinematic() {
     if (!camera || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     INTRO.to = camera.position.clone();
-    INTRO.from = INTRO.to.clone().multiplyScalar(2.4).add(
-      new THREE.Vector3(0, INTRO.to.y * 0.9, 0));
+    INTRO.from = INTRO.to.clone().lerp(overviewTarget,-.16);
     INTRO.t0 = performance.now();
     INTRO.active = true;
   }
@@ -3075,7 +3205,7 @@
     const a = Math.min(1, (performance.now() - INTRO.t0) / INTRO.dur);
     const e = 1 - Math.pow(1 - a, 3);   // easeOutCubic
     camera.position.lerpVectors(INTRO.from, INTRO.to, e);
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(overviewTarget);
     if (a >= 1) INTRO.active = false;
   }
   window.addEventListener('pointerdown', () => { INTRO.active = false; }, { once: false });
@@ -3091,6 +3221,7 @@
     visualize,
     visualize2: visualize,
     visualizeState,
+    preview,
     clear:clearSavedWorld,
     renderAt(t){window._vizNow=t;window._vizStateIdx=-1;if(window._vizStateStream)vizStateUpdate(t);else if(currentScene?.update)currentScene.update(t,0);if(renderer&&sceneObj)renderer.render(sceneObj,camera);},
     selectEntity:selectStateEntity,

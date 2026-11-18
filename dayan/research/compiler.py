@@ -30,6 +30,7 @@ def compile_research(text: str, purpose=None, ticks=None, dt=None, seeds=None,
                      interventions=None, metric=None, last_run=None) -> CompileResult:
     request=extract_request(text,last_run)
     options=request['options']
+    dt_explicit = dt is not None or 'dt' in options
     ticks=options.get('ticks',200 if ticks is None else ticks)
     dt=options.get('dt',.1 if dt is None else dt)
     seeds=options.get('seeds',[options['seed']] if 'seed' in options else seeds)
@@ -70,8 +71,18 @@ def compile_research(text: str, purpose=None, ticks=None, dt=None, seeds=None,
     effective={**request,'parameters':baseline}
     issues.extend(coverage_issues(effective,mid))
     if len(ids)>1:issues.append('多模型实验必须明确每个模型的规约和映射，不能只运行第一个')
-    from ..model_index import ALL_INDEX
+    from ..model_index import ALL_INDEX, resolve
     if mid and mid not in ALL_INDEX:issues.append(f'{mid} 无运行工厂')
+    if mid in ALL_INDEX:
+        _,factory = resolve(mid)
+        cls = factory[1] if isinstance(factory,tuple) else factory
+        fixed_dt = getattr(cls,'fixed_dt',None)
+        if fixed_dt is not None and dt_explicit and dt!=fixed_dt:
+            issues.append(f'{mid} 每步对应一个观测间隔，dt须为{fixed_dt}')
+        elif fixed_dt is not None and not dt_explicit:
+            research.assumptions['suggested']=[s for s in research.assumptions['suggested'] if not s.startswith('执行默认dt=')]
+            research.assumptions['suggested'].append(f'dt={fixed_dt} 来自模型的观测间隔合同')
+            dt = fixed_dt
     if mid in ALL_INDEX and not any(c['model_id']==mid for c in ranked):
         from ..output_contract import output_contract
         ranked.insert(0,{'model_id':mid,'runnable':True,'mechanism':sorted(model_mechanisms(mid)),

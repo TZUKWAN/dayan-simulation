@@ -2,20 +2,32 @@
 "use strict";
 
 /* ---- 页面切换 ---- */
-const pageIds = ["pageOverview", "pageData", "pageScenarios", "pageModels", "pageReplay"];
+const pageIds = Object.fromEntries([...document.querySelectorAll("[data-workspace-page]")].map(page => [page.id.slice(4).toLowerCase(), page]));
 
-function switchPage(name) {
-  pageIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = id === "page" + name.charAt(0).toUpperCase() + name.slice(1) ? "" : "none";
-  });
-  // scenario-strip 只在 overview 显示
-  const strip = document.querySelector(".scenario-strip");
-  if (strip) strip.style.display = name === "overview" ? "" : "none";
-  const kpi = document.querySelector(".kpi-row");
-  if (kpi) kpi.style.display = name === "overview" ? "" : "none";
-  // 切页即加载内容（任何路径都能触发）
-  if (typeof loadPageContent === "function") loadPageContent(name);
+function switchPage(name, remember = true) {
+  if (!Object.hasOwn(pageIds, name)) return;
+  const previous = document.body.dataset.page;
+  document.body.dataset.page = name;
+  for (const [key, page] of Object.entries(pageIds)) page.hidden = key !== name;
+  for (const button of document.querySelectorAll("[data-nav]")) {
+    const active = button.dataset.nav === (name === "scenarios" ? "lab" : name);
+    button.classList.toggle("active", active);
+    if (active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  }
+  document.getElementById("systemPath").textContent =
+    document.querySelector("[data-nav][aria-current]")?.title || "研究工作台";
+  if (remember && new URLSearchParams(location.search).get("embed") !== "dsh") {
+    try { sessionStorage.setItem("dayan_space_vnext", name); } catch {}
+  }
+  if (previous !== name) {
+    if (previous === "overview") window.DAYAN_RESULTS?.setPlaying(false);
+    if (previous) window.scrollTo(0, 0);
+    window.dispatchEvent(new CustomEvent("dayan:page", {detail: name}));
+    if (name === "overview") requestAnimationFrame(() => {window.dispatchEvent(new Event("resize"));window.DAYAN_RESULTS?.paint();});
+  }
+  const task = window.DAYAN_WORKBENCH?.load(name) || loadPageContent(name);
+  return Promise.resolve(task).catch(error => window.DAYAN_NOTICE?.(error.message));
 }
 
 /* ---- AI 助手抽屉 ---- */
@@ -84,48 +96,6 @@ async function aiSend() {
 // 页面脚本在 app.js 之后加载，DOMContentLoaded 已触发 → 直接执行
   createAIDrawer();
 
-  // 劫持 nav 按钮：切换页面而非打开 modal
-  document.querySelectorAll("[data-nav]").forEach(btn => {
-    // 移除 app.js 里绑定的 modal handler
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-    newBtn.addEventListener("click", () => {
-      document.querySelectorAll("[data-nav]").forEach(x =>
-        x.classList.toggle("active", x === newBtn)
-      );
-      switchPage(newBtn.dataset.nav);
-      loadPageContent(newBtn.dataset.nav);
-    });
-  });
-
-  // configButton 也切页
-  const cfg = document.getElementById("configButton");
-  if (cfg) {
-    const newCfg = cfg.cloneNode(true);
-    cfg.parentNode.replaceChild(newCfg, cfg);
-    newCfg.addEventListener("click", () => {
-      document.querySelectorAll("[data-nav]").forEach(x =>
-        x.classList.toggle("active", x.dataset.nav === "scenarios")
-      );
-      switchPage("scenarios");
-      loadPageContent("scenarios");
-    });
-  }
-
-  // modelButton 也切页
-  const mb = document.getElementById("modelButton");
-  if (mb) {
-    const newMb = mb.cloneNode(true);
-    mb.parentNode.replaceChild(newMb, mb);
-    newMb.addEventListener("click", () => {
-      document.querySelectorAll("[data-nav]").forEach(x =>
-        x.classList.toggle("active", x.dataset.nav === "models")
-      );
-      switchPage("models");
-      loadPageContent("models");
-    });
-  }
-
   // AI 悬浮按钮
   const fab = document.createElement("button");
   fab.className = "ai-fab";
@@ -143,7 +113,10 @@ async function loadPageContent(page) {
   } else if (page === "replay") {
     loadReplayPage();
   } else if (page === "data") {
-    await window.DAYAN_RESULTS?.openDataManager(window.DAYAN_RESULTS?.datasetFocus);
+    await Promise.all([
+      window.DAYAN_RESULTS?.openDataManager(window.DAYAN_RESULTS?.datasetFocus),
+      window.DAYAN_RESEARCH?.loadSources(),
+    ]);
   }
 }
 

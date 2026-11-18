@@ -25,6 +25,7 @@ TARGETS={'api_run','api_experiment','api_agent','api_ai_chat','api_report',
          'api_state_stream','api_resume','api_custom_model','api_dataset_collect','api_dataset_import',
          'api_run_preset','api_render_collection_reports','api_platform_tool','api_prepare_bundle'}
 _managers={}
+_manager_lock=threading.Lock()
 
 
 def _read(path):
@@ -96,7 +97,7 @@ class TaskManager:
             self._disk_at=time.monotonic()
         return self._disk_bytes
 
-    def submit(self,target,arguments):
+    def submit(self,target,arguments,*,preview=False):
         if target not in TARGETS:raise ValueError('未知受管操作')
         validate_envelope(arguments)
         if len(json.dumps(arguments,ensure_ascii=False).encode())>self.cap.body_bytes:
@@ -110,20 +111,40 @@ class TaskManager:
             self._ensure_owner()
             jid=uuid.uuid4().hex;path=self._path(jid);path.mkdir()
             from .source_version import source_fingerprint
-            atomic_json(path/'request.json',{'target':target,'arguments':arguments,'source_fingerprint':source_fingerprint()})
+            atomic_json(path/'request.json',{'target':target,'arguments':arguments,
+                        'source_fingerprint':source_fingerprint(),'preview':preview})
             atomic_json(path/'status.json',{'job_id':jid,'status':'queued','stages':['已入队，等待有界工作进程'],
                 'result':None,'ts':time.time(),'target':target,'limits':vars(self.cap)})
             self.queue.append(jid)
         return jid
 
-    def get(self,jid):
+    def get(self,jid,*,preview=False):
         path=self._path(jid)
         if not (path/'status.json').exists():raise KeyError('任务不存在')
         row=_read(path/'status.json')
         if row['status'] in ('running','queued') and (path/'progress.json').exists():
             row['stages']=_read(path/'progress.json').get('stages',row['stages'])
+        if preview and row['status'] == 'running':
+            try:
+                row['preview'] = _read(path/'preview.json')
+            except FileNotFoundError:
+                pass
         if row['status']=='done' and (path/'result.json').exists():row['result']=_read(path/'result.json')['value']
         return row
+
+    def snapshot(self):
+        """Bounded public view of the live queue, without task inputs or results."""
+        with self.lock:
+            jobs = []
+            for jid in (*self.active, *self.queue):
+                path = self._path(jid)
+                row = _read(path / 'status.json')
+                progress_path = path / 'progress.json'
+                stages = _read(progress_path).get('stages', []) if progress_path.exists() else []
+                jobs.append({key: row.get(key) for key in ('job_id', 'target', 'status', 'ts')}
+                            | {'stage': (stages or row.get('stages') or [''])[-1]})
+            return {'jobs': jobs, 'running': len(self.active), 'queued': len(self.queue),
+                    'concurrent_limit': self.cap.concurrent, 'queue_limit': self.cap.queued}
 
     def cancel(self,jid,reason='cancelled'):
         with self.lock:
@@ -233,10 +254,11 @@ class TaskManager:
 
 def get_manager():
     key=str(data_root())
-    manager=_managers.get(key)
-    if manager is None or manager.closed:
-        manager=_managers[key]=TaskManager()
-    return manager
+    with _manager_lock:
+        manager=_managers.get(key)
+        if manager is None or manager.closed:
+            manager=_managers[key]=TaskManager()
+        return manager
 
 
 def close_managers():
@@ -251,10 +273,14 @@ def managed_endpoint(fn):
         from fastapi import HTTPException
         bound=signature.bind(*args,**kwargs);bound.apply_defaults()
         values={k:v.model_dump() if hasattr(v,'model_dump') else v for k,v in bound.arguments.items()}
-        asynchronous=fn.__name__=='api_agent' and bool(values.get('req',{}).get('async_job',True))
-        if asynchronous:values['req']['async_job']=False
+        asynchronous=False
+        if fn.__name__ in ('api_agent','api_run'):
+            asynchronous=values['req'].get('async_job',False) is True
+            values['req']['async_job']=False
+        if fn.__name__=='api_experiment':
+            asynchronous=values['body'].pop('async_job',False) is True
         try:
-            if asynchronous:return {'job_id':get_manager().submit(fn.__name__,values)}
+            if asynchronous:return {'job_id':get_manager().submit(fn.__name__,values,preview=True)}
             return await get_manager().execute(fn.__name__,values)
         except QueueFull as exc:raise HTTPException(429,str(exc))
         except ValueError as exc:raise HTTPException(413,str(exc))

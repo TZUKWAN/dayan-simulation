@@ -111,7 +111,7 @@ def generate_capabilities(ticks=20, seed=0, progress=None):
         err = None
         try:
             if getattr(cls, "requires_external", False):
-                raise RuntimeError("目录探针不自动调用真实LLM；请显式运行并核验调用记录")
+                raise RuntimeError("目录探针需要显式服务或数据输入")
             observations = run_model(mid, ticks=ticks, seed=seed)
             obs_fields = _numeric_fields(observations)
             list_fields = _list_fields(observations)
@@ -162,6 +162,7 @@ def load_capabilities(refresh=False):
         protocol, factory = resolve(mid)
         cls = factory[1] if isinstance(factory, tuple) else factory
         schema = output_contract(mid, reference_results=reference)
+        contract = param_contract(mid)
         cap = dict(by_id.get(mid, {}))
         cap.update(model_id=mid, protocol=protocol,
                    name=(inspect.getdoc(cls) or catalog_names.get(mid) or mid).splitlines()[0][:160],
@@ -170,7 +171,8 @@ def load_capabilities(refresh=False):
                    implementation_name=getattr(cls,'__name__',''),
                    description=(inspect.getdoc(cls) or '')[:800],
                    aliases=[getattr(cls,'model_id',mid)],
-                   parameters=[{"name": key, **meta} for key, meta in param_contract(mid)["params"].items()],
+                   parameters=[{"name": key, **meta} for key, meta in contract["params"].items()],
+                   dependencies=contract["dependencies"], fixed_dt=contract["fixed_dt"],
                    requires_external=bool(getattr(cls, "requires_external", False)),
                    runnable=True)
         cap["observables"] = list(schema["fields"])

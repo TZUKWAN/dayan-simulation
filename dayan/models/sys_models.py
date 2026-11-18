@@ -16,8 +16,10 @@ GBM 期望、HMM Viterbi 路径恢复等）。
 from __future__ import annotations
 
 from collections import deque
+import heapq
 
 import numpy as np
+import math
 from math import factorial
 
 from scipy.special import gammaln
@@ -234,6 +236,62 @@ class MCLRQueueModel(DayanModel):
         return []
 
 
+class AbandonmentQueueModel(DayanModel):
+    """SYS005 M/M/c+M: FIFO waiting, independent exponential patience."""
+    model_id="SYS005"
+    clock_type="fixed_step"
+
+    def __init__(self, c=2, lam=3., mu=1., patience_rate=.5):
+        if not 1<=c<=128 or not all(np.isfinite(rate) and 0<rate<=10000 for rate in (lam,mu,patience_rate)):
+            raise ValueError("系统需要有限的正到达率、服务率、耐心衰减率和服务台数")
+        self.c,self.lam,self.mu,self.patience_rate=c,lam,mu,patience_rate
+
+    def initialize(self, context, parameters, population, topology, rng):
+        self.rng=rng
+        self.future=[(float(rng.exponential(1/self.lam)),2,0)]
+        self.waiting={}
+        self.total=self.started=self.served=self.reneged=self.busy=0
+
+    def _start(self,t,customer):
+        self.busy+=1
+        self.started+=1
+        heapq.heappush(self.future,(t+float(self.rng.exponential(1/self.mu)),0,customer))
+
+    def step(self,t,dt):
+        stop=t+dt
+        processed=0
+        while self.future and self.future[0][0]<=stop+1e-10:
+            event,kind,customer=heapq.heappop(self.future)
+            processed+=1
+            if processed>100000:
+                raise ValueError("单观察步内排队事件超出计算上限")
+            if kind==0:
+                self.busy-=1
+                self.served+=1
+                if self.waiting:
+                    first=next(iter(self.waiting))
+                    self.waiting.pop(first)
+                    self._start(event,first)
+            elif kind==1:
+                if self.waiting.pop(customer,None) is not None:
+                    self.reneged+=1
+            else:
+                self.total+=1
+                if self.busy<self.c:
+                    self._start(event,self.total)
+                else:
+                    self.waiting[self.total]=event
+                    heapq.heappush(self.future,(event+float(self.rng.exponential(1/self.patience_rate)),1,self.total))
+                heapq.heappush(self.future,(event+float(self.rng.exponential(1/self.lam)),2,0))
+
+    def observe(self):
+        return {"arrived":self.total,"started":self.started,"served":self.served,
+                "reneged":self.reneged,"waiting":len(self.waiting),"in_service":self.busy}
+
+    def validate_state(self):
+        return [] if self.total==self.served+self.reneged+len(self.waiting)+self.busy else ["顾客数不守恒"]
+
+
 class MMInfQueueModel(DayanModel):
     """SYS006 无限服务器 M/M/∞：L = λW = λ/μ（Little 律，解析）。"""
 
@@ -277,36 +335,40 @@ class MD1QueueModel(DayanModel):
     clock_type = "fixed_step"
 
     def __init__(self, lam=0.6, mu=1.0):
+        if not 0 <= lam < mu:
+            raise ValueError("M/D/1 稳态对照要求 0≤λ<μ")
         self.lam, self.mu = lam, mu
 
     def initialize(self, context, parameters, population, topology, rng):
         self.rng_ = rng
-        self.q = deque()
-        self.busy_until = -1.0
-        self.clock = 0.0
+        self.pending_starts = deque()
+        self.busy_until = 0.
+        self.clock = 0.
+        self.next_arrival = float(rng.exponential(1/self.lam)) if self.lam else None
         self.wait_sum = 0.0
-        self.n = 0
+        self.n_arrived=self.n_service_starts=0
 
     def step(self, t, dt):
-        for _ in range(self.rng_.poisson(self.lam * dt)):
-            if self.clock >= self.busy_until:
-                self.wait_sum += 0.0
-                self.busy_until = self.clock + 1 / self.mu
-            else:
-                self.q.append(self.clock)
-            self.n += 1
-        while self.q and self.clock >= self.busy_until:
-            w = self.clock - self.q.popleft()
-            self.wait_sum += w
-            self.n += 1
-            self.busy_until = self.clock + 1 / self.mu
-        self.clock += dt
+        stop=self.clock+dt
+        while self.next_arrival is not None and self.next_arrival <= stop+1e-10:
+            arrival=self.next_arrival
+            start=max(arrival,self.busy_until)
+            self.busy_until=start+1/self.mu
+            self.pending_starts.append((start,start-arrival))
+            self.n_arrived+=1
+            self.next_arrival+=float(self.rng_.exponential(1/self.lam))
+        while self.pending_starts and self.pending_starts[0][0]<=stop+1e-10:
+            _,wait=self.pending_starts.popleft()
+            self.wait_sum+=wait
+            self.n_service_starts+=1
+        self.clock=stop
 
     def observe(self):
         rho = self.lam / self.mu
         wq_analytic = rho / (2 * (1 - rho)) / self.mu
-        wq_sim = self.wait_sum / max(self.n, 1)
-        return {"Wq_sim": float(wq_sim), "Wq_md1": float(wq_analytic)}
+        wq_sim = self.wait_sum/self.n_service_starts if self.n_service_starts else None
+        return {"Wq_sim": wq_sim, "Wq_md1": float(wq_analytic), "n_arrived":self.n_arrived,
+                "n_service_starts":self.n_service_starts,"n_waiting":len(self.pending_starts)}
 
     def validate_state(self):
         return [] if self.lam < self.mu else ["ρ≥1"]
@@ -424,6 +486,18 @@ class PriorityQModel(DayanModel):
 
     def validate_state(self):
         return []
+
+
+class NonpreemptivePriorityModel(PriorityQModel):
+    """SYS014: fixed-step nonpreemptive priority, FIFO within each class."""
+    model_id = "SYS014"
+
+    def __init__(self, lam=(.4,.4), mu=1.2):
+        if len(lam)!=2 or any(not np.isfinite(v) or v<0 for v in lam) or not np.isfinite(mu) or mu<=0:
+            raise ValueError("优先队列需要两类非负到达率、正服务率")
+        super().__init__(preempt=False,lam=lam,mu=mu)
+
+    output_units = {"W_high":"model time","W_low":"model time"}
 
 
 # ============ Petri 网 ============
@@ -642,6 +716,49 @@ class CellDEVModel(DayanModel):
 
 
 # ============ 随机过程 ============
+class SwitchingGrowthPDMPModel(DayanModel):
+    """SYS026 scalar deterministic growth with two Markov switching regimes."""
+    model_id="SYS026"
+    clock_type="fixed_step"
+
+    def __init__(self,x0=1.,growth=(.2,-.15),rates=(1.,.8),regime0=0):
+        if (x0<=0 or len(growth)!=2 or len(rates)!=2 or regime0 not in (0,1)
+                or any(not np.isfinite(r) or r<0 for r in rates) or not np.isfinite(growth).all()):
+            raise ValueError("正初始存量、两组有限增长率与非负切换率")
+        self.x0,self.growth,self.rates,self.regime0=x0,growth,rates,regime0
+
+    def initialize(self, context, parameters, population, topology, rng):
+        self.rng=rng
+        self.x,self.regime,self.jumps=self.x0,self.regime0,0
+        self.next_jump=self._next_jump(0.)
+
+    def _next_jump(self, start):
+        rate=self.rates[self.regime]
+        return start+float(self.rng.exponential(1/rate)) if rate else None
+
+    def step(self,t,dt):
+        end=t+dt
+        processed=0
+        while self.next_jump is not None and self.next_jump<=end:
+            self.x*=math.exp(self.growth[self.regime]*(self.next_jump-t))
+            t=self.next_jump
+            self.regime=1-self.regime
+            self.jumps+=1
+            processed+=1
+            if processed>100000:
+                raise ValueError("观察步内跳跃事件超出计算上限")
+            self.next_jump=self._next_jump(t)
+        self.x*=math.exp(self.growth[self.regime]*(end-t))
+        if not np.isfinite(self.x) or self.x<=0:
+            raise ValueError("增长状态超出有限正域")
+
+    def observe(self):
+        return {"stock":float(self.x),"regime":self.regime,"jumps":self.jumps}
+
+    def validate_state(self):
+        return [] if np.isfinite(self.x) and self.x>0 else ["状态必须为有限正数"]
+
+
 class CTMCModel(DayanModel):
     """SYS028 连续时间 Markov 链（jump）：Gillespie；稳态分布对照解析。"""
 
@@ -776,12 +893,14 @@ class PoissonProcessModel(DayanModel):
 
 
 class NHPPModel(DayanModel):
-    """SYS032 非齐次泊松（Lewis–Shedler 稀疏化）：λ(t)=λ0·e^{αt}。"""
+    """SYS032 exponential intensity on [0,t_max], exact Poisson increments."""
 
     model_id = "SYS032"
     clock_type = "fixed_step"
 
     def __init__(self, lam0=1.0, alpha=0.5, t_max=4.0):
+        if lam0<0 or t_max<=0 or abs(alpha)*t_max>40:
+            raise ValueError("须给出非负初始率、正终点和有界指数强度")
         self.lam0, self.alpha, self.t_max = lam0, alpha, t_max
         self.count = 0
 
@@ -790,20 +909,28 @@ class NHPPModel(DayanModel):
         self.count = 0
         self.clock = 0.0
         self.t_max = parameters.get("t_max", self.t_max)
+        self.next_mass = float(rng.exponential())
 
     def step(self, t, dt):
-        lam_t = self.lam0 * np.exp(self.alpha * min(self.clock, self.t_max))
-        lam_max = self.lam0 * np.exp(self.alpha * self.t_max)
-        n = self.rng_.poisson(lam_max * dt)          # 上界提案
-        acc = sum(1 for _ in range(n)
-                  if self.rng_.random() * lam_max < lam_t)   # Lewis–Shedler 稀疏化
-        self.count += acc
-        self.clock += dt
+        start=self.clock
+        stop=min(start+dt,self.t_max)
+        mass=self._cumulative(stop)
+        # One homogeneous Poisson process on cumulative intensity, shared by
+        # all observation grids for a given seed.
+        events=0
+        while self.next_mass<=mass:
+            events+=1
+            if events>100000:
+                raise ValueError("单步实际事件数超过范围")
+            self.next_mass+=float(self.rng_.exponential())
+        self.count+=events
+        self.clock=stop
+
+    def _cumulative(self,t):
+        return self.lam0*t if self.alpha==0 else self.lam0*math.expm1(self.alpha*t)/self.alpha
 
     def observe(self):
-        T = min(self.clock, self.t_max)
-        E = (self.lam0 / self.alpha) * (np.exp(self.alpha * T) - 1)
-        return {"count": self.count, "E_integral": float(E)}
+        return {"count": self.count, "E_integral": float(self._cumulative(self.clock))}
 
     def validate_state(self):
         return []
@@ -994,12 +1121,14 @@ class CompoundPoissonModel(DayanModel):
 # ============ 因果与状态空间 ============
 class LinearSCMModel(DayanModel):
     """SYS040 结构因果模型（线性高斯）：X→Y→Z 链；do(X) 切断入边。
-    基准：观测 E[Z|do(X=+2)] = 2·b_xy·b_yz vs 条件期望不同（混淆时）。"""
+    独立噪声生成的三变量例题。条件球内样本均值和解析干预期望分别报告。"""
 
     model_id = "SYS040"
     clock_type = "fixed_step"
 
     def __init__(self, b_xy=1.2, b_yz=0.8, u_var=0.5):
+        if u_var<0:
+            raise ValueError("u_var 为兼容参数名，表示正态噪声标准差，须非负")
         self.b_xy, self.b_yz, self.u_var = b_xy, b_yz, u_var
         self.result = {}
 
@@ -1015,8 +1144,10 @@ class LinearSCMModel(DayanModel):
         Xd = np.full(n, 2.0)
         Yd = self.b_xy * Xd + Uy
         Zd = self.b_yz * Yd + Uz
+        mask=np.abs(X-2)<.3
         self.result = {
-            "E_Z_given_X2": float(Z[np.abs(X - 2) < 0.3].mean()),
+            "E_Z_given_X2": float(Z[mask].mean()) if mask.any() else None,
+            "n_conditioned": int(mask.sum()),
             "E_Z_do_X2": float(Zd.mean()),
             "do_effect": float(self.b_xy * self.b_yz * 2)}
 

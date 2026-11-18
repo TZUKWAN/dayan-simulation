@@ -320,7 +320,7 @@ from .data_tools import (search_sources, list_presets, run_preset,
                           collection_status, build_data_requirement,
                           build_collection_plan, execute_plan,
                           check_data_quality, calibrate_model, collect_source, cancel_collection, import_collection,
-                          research_create, research_calibrate, research_report, research_status)
+                          research_create, research_calibrate, research_report, research_status, collect_census_scene)
 TOOL_IMPL.update(search_sources=search_sources, list_presets=list_presets,
                   run_preset=run_preset, collection_status=collection_status,
                   build_data_requirement=build_data_requirement,
@@ -329,7 +329,8 @@ TOOL_IMPL.update(search_sources=search_sources, list_presets=list_presets,
                   check_data_quality=check_data_quality,
                   calibrate_model=calibrate_model, collect_source=collect_source, cancel_collection=cancel_collection,
                   import_collection=import_collection, research_create=research_create, research_calibrate=research_calibrate,
-                  research_report=research_report, research_status=research_status)
+                  research_report=research_report, research_status=research_status,
+                  collect_census_scene=collect_census_scene)
 
 
 
