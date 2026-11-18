@@ -74,7 +74,7 @@
 | `python tests/run_all.py --output .claude/ci` | 本机 85 组、517 项通过、3 项按离线配置跳过、0 套失败。原 83 组继续执行。覆盖鉴权、队列、归档、模型、研究、前端静态资源及 Node 插件。 |
 | `python tests/run_all.py --only test_online_sources --online` | 世界银行和 TIGERweb 两项真实公开数据验收通过。保留初次网络超时与抽样权重错误的记录，最终用合法的场景复测。 |
 | `python tests/run_all.py --only test_live_llm --llm` | 已配置真实模型的 5 个入口全部发出实际调用并应用动作。保持提供方窗口，归档请求／响应哈希。 [调用记录](verification/vnext/live_provider_receipts.json) |
-| `python tests/browser_acceptance.py --base-url http://127.0.0.1:8918 --browser chromium --output .claude/browser-ci` | Ubuntu 默认 CI 的浏览器入口。同一脚本在本机 Firefox 实测 32 项通过。 [事件与断言](verification/vnext/browser.json) |
+| `python tests/browser_acceptance.py --base-url http://127.0.0.1:8918 --browser chromium --output .claude/browser-ci` | GitHub 的 `ubuntu-latest` 已转向 26.04。首次浏览器作业在安装阶段遇到 Playwright 1.58 缺少该版依赖映射，改用 24.04。相同脚本在本机 Firefox 实测 32 项通过。 [事件与断言](verification/vnext/browser.json) · [Playwright 依赖表](https://github.com/microsoft/playwright/blob/v1.58.0/packages/playwright-core/src/server/registry/nativeDeps.ts) |
 
 内置目录 561 项、509 个运行工厂和 52 项软件引用。501 个直接离线探针通过，5 个入口需要语言模型，3 个需要项目输入。20 个不同工厂完成当前源码级机制审查，另有一个兼容注册标识。其余模型逐项记录实际证据与条件。模型适用性仍须由具体研究的数据与验证确定。加拿大和原德国的留出失败属于研究结果。CPL001 的地理和人口输入已经实测，现实疏散行为尚未做地方独立校准。 [逐项台账](verification/vnext/model_ledger.csv) · [统计凭证](verification/vnext/model_counts.json)
 
