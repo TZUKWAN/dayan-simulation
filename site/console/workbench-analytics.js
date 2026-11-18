@@ -2,12 +2,17 @@
 (() => {
   'use strict';
   const $ = selector=>document.querySelector(selector);
-  const {api,esc,empty,write} = window.DAYAN_WORKBENCH;
+  const {api,esc,empty,write,preference} = window.DAYAN_WORKBENCH;
   const {plot,colors,distribution,correlationMatrix,csv,download,nfmt,quantile,mean,range} = window.DAYAN_CHARTS;
   const finite=Number.isFinite;
   const source = new Map();
   let initialized=false, userSelection=false, loading=null, mainChart=null, activeRows=[], activeMetric='', activeUnit='', cursor=null;
   let pair=null, observationTimes=[];
+  const plotNames={analyticsTrend:'时间序列与不确定性',analyticsDistribution:'时间窗内分布',analyticsDensity:'核密度',analyticsBox:'方案分布比较',analyticsMatrix:'观测联动矩阵',analyticsScatter:'指标联合分布',analyticsEffect:'同种子效应',analyticsSensitivity:'参数扫描',analyticsMulti:'多变量轮廓'};
+  const layoutPlots={single:['analyticsTrend'],dual:['analyticsTrend','analyticsEffect'],four:['analyticsTrend','analyticsDistribution','analyticsEffect','analyticsBox']};
+  const workspaceKey='dayan_analytics_workspace_future';
+  let savedWorkspace;
+  try {savedWorkspace=JSON.parse(preference(workspaceKey));} catch {}
   function observationRuns(record) {
     if(record.kind==='run')return [{...record,label:record.model_id}];
     if(record.kind==='experiment'){
@@ -32,30 +37,38 @@
     write('#analyticsStatus','');
   }
   function headings() {
-    const section=(id,name,note)=>`<section class="panel analytic-panel" data-plot-panel="${id}"><div class="panel-head"><h2>${name}</h2><span class="micro">${note}</span></div><div class="chart-host" id="${id}"></div></section>`;
+    const section=(id,note)=>`<section class="panel analytic-panel" data-plot-panel="${id}"><div class="panel-head"><h2>${plotNames[id]}</h2><span class="micro">${note}</span></div><div class="chart-host" id="${id}"></div></section>`;
     $('#analyticsWorkspace').innerHTML=`<div class="tool-bar analytics-controls">
       <label class="search-control">归档<select id="analyticsPick"><option value="">正在读取...</option></select></label>
       <button class="ws-button" id="analyticsAdd">加入</button><button class="ws-button" id="analyticsCurrent">使用当前实验</button>
       <label>模型 / 时间尺度<select id="analyticsCohort"></select></label><label>指标<select id="analyticsMetric"></select></label>
       <label>起点<input type="number" step="any" id="analyticsFrom"></label><label>终点<input type="number" step="any" id="analyticsTo"></label>
-      <button class="ws-button" id="analyticsExport">导出筛选 CSV</button><button class="ws-button" id="analyticsSvg">导出主图 SVG</button>
+      <button class="ws-button" id="analyticsExport">导出筛选 CSV</button><button class="ws-button" id="analyticsSvg">导出主图 SVG</button><button class="ws-button" id="analyticsDetails">观测明细</button>
       </div><div class="analytics-sources" id="analyticsSources"></div><p class="space-status" id="analyticsStatus" role="status"></p>
       <div class="analytics-stats" id="analyticsFacts"></div>
-      <div class="analytics-layout">
-        <section class="panel analytic-panel analytic-main"><div class="panel-head"><h2>时间序列与不确定性</h2><span id="analyticsRange"></span></div>
+      <div class="analytics-board-header"><h3>证据工作板</h3><div class="space-actions"><label class="layout-control">布局<select id="analyticsLayout"><option value="single">单图</option><option value="dual">双图</option><option value="four">四图</option><option value="multi" selected>专业多图</option></select></label><details id="analyticsCustomize"><summary>选择图表</summary><div>${Object.entries(plotNames).map(([id,name])=>`<label><input type="checkbox" data-analytic-plot="${id}" checked ${id==='analyticsTrend'?'disabled':''}>${name}</label>`).join('')}</div></details><button class="ws-button" id="analyticsSave">保存工作区</button></div></div>
+      <div class="analytics-layout" data-layout="multi">
+        <section class="panel analytic-panel analytic-main" data-plot-panel="analyticsTrend"><div class="panel-head"><h2>时间序列与不确定性</h2><span id="analyticsRange"></span></div>
         <div class="chart-host" id="analyticsTrend"></div>
-        <div class="analytics-cursor"><label>联动时点 <output id="cursorAt"></output><input id="analyticsCursor" aria-label="实验联动观察时点" type="range" step="any"></label><button id="analyticsJump" class="ws-button">在仿真中查看 ↗</button></div>
+        <div class="analytics-cursor"><label>联动时点 <output id="cursorAt"></output><input id="analyticsCursor" aria-label="实验联动观察时点" type="range" step="any"></label><button id="analyticsResetWindow" class="ws-button">还原时间窗</button><button id="analyticsJump" class="ws-button">在仿真中查看 ↗</button></div>
         <div id="analyticsAt" class="analytic-inline" aria-label="当前时刻各组观测"></div></section>
-        ${section('analyticsDistribution','时间窗内分布','观测频数')}
-        ${section('analyticsDensity','核密度','高斯核')}
-        ${section('analyticsBox','方案分布比较','中位数 / 四分位')}
-        ${section('analyticsMatrix','观测联动矩阵','选择一对指标')}
-        ${section('analyticsScatter','指标联合分布','同一时刻配对')}
-        ${section('analyticsEffect','同种子效应','干预组减基线')}
-        ${section('analyticsSensitivity','参数扫描','窗口内均值')}
-        ${section('analyticsMulti','多变量轮廓','各轴用实际单位')}
+        ${section('analyticsDistribution','观测频数')}
+        ${section('analyticsDensity','高斯核')}
+        ${section('analyticsBox','中位数 / 四分位')}
+        ${section('analyticsMatrix','选择一对指标')}
+        ${section('analyticsScatter','同一时刻配对')}
+        ${section('analyticsEffect','干预组减基线')}
+        ${section('analyticsSensitivity','窗口内均值')}
+        ${section('analyticsMulti','各轴用实际单位')}
       </div>
       <section class="panel tool-detail"><div class="panel-head"><h2>运行与证据索引</h2></div><div class="tool-body table-scroll" id="analyticsProvenance"></div></section>`;
+  }
+  function applyLayout() {
+    const mode=$('#analyticsLayout').value, board=$('.analytics-layout');
+    board.dataset.layout=mode;
+    $('#analyticsCustomize').hidden=mode!=='multi';
+    const visible=layoutPlots[mode] || [...board.parentElement.querySelectorAll('[data-analytic-plot]:checked')].map(input=>input.dataset.analyticPlot);
+    for(const panel of board.querySelectorAll('[data-plot-panel]'))panel.hidden=!visible.includes(panel.dataset.plotPanel);
   }
   const available = rows=>[...new Set(rows.flatMap(r=>r.observations.flatMap(o=>Object.entries(o).filter(([k,v])=>k!=='sim_t'&&finite(v)).map(([k])=>k))))].sort();
   function metricUnit(run, key) {
@@ -145,7 +158,8 @@
       const o=r.window.find(o=>Math.abs(o.sim_t-value)<1e-8);
       return `<span><b>${esc(r.label)}</b> ${esc(nfmt(o?.[activeMetric]))} ${esc(activeUnit)}</span>`;
     });
-    $('#analyticsAt').innerHTML=observed.slice(0,16).join('');
+    const markup=observed.slice(0,16).join('');
+    if($('#analyticsAt').innerHTML!==markup)$('#analyticsAt').innerHTML=markup;
   }
   function panelsEmpty() {
     for (const id of ['Trend','Distribution','Density','Box','Matrix','Scatter','Effect','Sensitivity','Multi'])
@@ -158,7 +172,7 @@
     const metric=$('#analyticsMetric').value, rows=selectedRows(), start=Number($('#analyticsFrom').value), end=Number($('#analyticsTo').value);
     $('#analyticsSources').innerHTML=[...source.values()].map(({record})=>`<button data-remove-archive="${esc(record.run_id)}" title="移出当前分析">${esc(record.model_id||'研究')} · ${esc(record.run_id)} <span aria-hidden="true">×</span></button>`).join('');
     for(const b of $('#analyticsSources').querySelectorAll('button'))b.onclick=()=>{userSelection=true;source.delete(b.dataset.removeArchive);initializeFilters();};
-    const controls=$('#analyticsWorkspace').querySelectorAll('#analyticsExport,#analyticsJump,#analyticsSvg,#analyticsCursor');
+    const controls=$('#analyticsWorkspace').querySelectorAll('#analyticsExport,#analyticsJump,#analyticsSvg,#analyticsCursor,#analyticsDetails,#analyticsResetWindow');
     for(const c of controls)c.disabled=true;
     write('#analyticsRange','');
     if (!metric||!rows.length) {activeRows=[];panelsEmpty();return;}
@@ -177,9 +191,11 @@
     write('#analyticsRange',`${label} · ${nfmt(start)}–${nfmt(end)} ${timeUnit}`);
     const events=windowed.flatMap(r=>(r.manifest?.interventions||[]).filter(e=>e.applied).map(e=>({x:e.actual_t,label:e.label||'干预'})));
     const bands=armTraces(windowed,metric);
-    mainChart=plot($('#analyticsTrend'),{title:label+'同模型对照',xUnit:timeUnit,yUnit:unit,series:bands,events,
-      note:'同臂多种子显示均值曲线与同一时点种子最小–最大带。琥珀虚线为模型归档中的干预。',
-      cursor:Math.min(end,Math.max(start,cursor??end)),onHover:t=>updateCursor(t)});
+    mainChart=plot($('#analyticsTrend'),{title:label+'同模型对照',xUnit:timeUnit,yUnit:unit,series:bands,events,height:335,
+      note:'拖动可选择时间窗。同臂的色带覆盖同一时点的种子最小–最大值，琥珀虚线为归档中已实施的干预。',
+      cursor:Math.min(end,Math.max(start,cursor??end)),onHover:t=>updateCursor(t),onWindow:(from,to)=>{
+        $('#analyticsFrom').value=String(from);$('#analyticsTo').value=String(to);paint();$('#analyticsTrend svg')?.focus({preventScroll:true});
+      }});
     const first=windowed.find(r=>r.window.some(o=>finite(o[metric])));
     const d=distribution(first.window.map(o=>o[metric]));
     plot($('#analyticsDistribution'),{title:label+'频数分布',xUnit:unit,yUnit:'观测数',zero:true,height:180,xRange:d.domain,xTicks:d.ticks,
@@ -273,6 +289,20 @@
   function init() {
     if(initialized)return;
     headings();
+    if (savedWorkspace?.layout && [...$('#analyticsLayout').options].some(o=>o.value===savedWorkspace.layout)) $('#analyticsLayout').value=savedWorkspace.layout;
+    for(const input of document.querySelectorAll('[data-analytic-plot]:not(:disabled)')){
+      if(Array.isArray(savedWorkspace?.plots)) input.checked=savedWorkspace.plots.includes(input.dataset.analyticPlot);
+      input.onchange=applyLayout;
+    }
+    $('#analyticsLayout').onchange=()=>{applyLayout();paint();};
+    $('#analyticsSave').onclick=()=>{
+      preference(workspaceKey,JSON.stringify({layout:$('#analyticsLayout').value,
+        plots:[...document.querySelectorAll('[data-analytic-plot]:checked')].map(input=>input.dataset.analyticPlot),
+        archives:[...source.keys()],cohort:$('#analyticsCohort').value,metric:$('#analyticsMetric').value,
+        window:[$('#analyticsFrom').value,$('#analyticsTo').value]}));
+      window.DAYAN_NOTICE('已将分析工作区保存到此浏览器。');
+    };
+    applyLayout();
     initialized=true;
     $('#analyticsAdd').onclick=()=>{
       userSelection=true;
@@ -284,6 +314,7 @@
       userSelection=true;addArchive(id).then(initializeFilters).catch(error);
     };
     $('#analyticsCohort').oninput=()=>selectDetails(true);
+    $('#analyticsResetWindow').onclick=()=>selectDetails();
     for(const id of ['#analyticsMetric','#analyticsFrom','#analyticsTo']) $(id).onchange=paint;
     $('#analyticsCursor').oninput=()=>updateCursor(Number($('#analyticsCursor').value),true);
     $('#analyticsJump').onclick=async()=>{
@@ -297,11 +328,32 @@
         finite(o[activeMetric])?o[activeMetric]:null,finite(o[activeMetric])?0:1,r.seed??r.manifest?.rng?.seed,r.arm,r.manifest?.code_version||r.manifest?.source_fingerprint]))]);
     };
     $('#analyticsSvg').onclick=()=>{if(mainChart)download('DAYAN-'+activeMetric+'.svg',mainChart.svg.outerHTML,'image/svg+xml');};
+    $('#analyticsDetails').onclick=()=>{
+      const records=activeRows.map(r=>{
+        const point=r.window.find(o=>Math.abs(o.sim_t-cursor)<1e-8);
+        return `<tr><td>${esc(r.label)}</td><td><code>${esc(r.run_id)}</code></td><td>${esc(nfmt(point?.[activeMetric]))}</td><td>${point&&finite(point[activeMetric])?'存在':'缺失'}</td></tr>`;
+      });
+      window.DAYAN_MODAL('联动时点的观测明细',`<p class="space-note">${esc(nfmt(cursor)+' '+period(activeRows[0])+' · '+activeMetric+' · '+activeUnit)}</p><div class="table-scroll"><table class="workbench-table"><thead><tr><th>运行</th><th>归档 ID</th><th>观测值</th><th>记录状态</th></tr></thead><tbody>${records.join('')}</tbody></table></div>`);
+    };
   }
   async function load() {
     init();
     if(loading)return loading;
     loading=recent().then(async rows=>{
+      if(savedWorkspace && !userSelection && !source.size && Array.isArray(savedWorkspace.archives) && savedWorkspace.archives.length){
+        const saved=savedWorkspace;
+        savedWorkspace=null;
+        const restored=await Promise.allSettled(saved.archives.slice(0,8).map(id=>addArchive(id,true)));
+        if(!userSelection && source.size){
+          initializeFilters();
+          if([...$('#analyticsCohort').options].some(o=>o.value===saved.cohort)) {$('#analyticsCohort').value=saved.cohort;selectDetails();}
+          if([...$('#analyticsMetric').options].some(o=>o.value===saved.metric)) $('#analyticsMetric').value=saved.metric;
+          if(saved.window?.length===2){[$('#analyticsFrom').value,$('#analyticsTo').value]=saved.window;}
+          paint();
+          if(restored.some(r=>r.status==='rejected')) write('#analyticsStatus','部分保存的档案暂时不可读取。');
+          return;
+        }
+      }
       if(!source.size&&!userSelection) await addArchive(currentId()||rows.find(r=>r.kind==='experiment')?.run_id||rows[0]?.run_id,true);
       if(!activeRows.length)initializeFilters();
     }).catch(error).finally(()=>{loading=null;});

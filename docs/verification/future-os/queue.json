@@ -1,0 +1,10 @@
+{
+  "job_id": "f6fda25f997f48afbf6a35d4666c6201",
+  "run_id": "R20261118T093300-1e3e33f5804147eaba8158c334c73654",
+  "status": "done",
+  "matched_stages": [
+    "执行 run NET106 …",
+    "run 完成（13 obs）"
+  ],
+  "observation_count": 13
+}

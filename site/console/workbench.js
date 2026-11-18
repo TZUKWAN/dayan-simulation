@@ -15,6 +15,7 @@
     api_prepare_bundle:'复现包', api_resume:'检查点续算',
   };
   const validations = {pass:'独立留出通过', failed_holdout:'独立留出未通过', prepared:'规约已建立', calibrated:'已校准'};
+  const verificationDataset = item => item.metadata?.verification_fixture === true || item.source === 'explicit browser security fixture; not empirical';
   const embedded = new URLSearchParams(location.search).get('embed') === 'dsh';
   const telemetry = [];
   let status, catalogTask, assets, assetsPromise, pollTimer;
@@ -101,6 +102,25 @@
     try { await refreshStatus(); } catch {}
     if (!document.hidden) pollTimer = setTimeout(poll, document.body.dataset.page === 'mission' ? 3100 : 7400);
   }
+  function paintEvidenceChain(study, datasets, history) {
+    const host = $('#missionGraph');
+    const run = study?.run_id ? {run_id:study.run_id,model_id:study.model_id} : history?.find(row => row.kind === 'run');
+    if (!run) {
+      host.innerHTML = `<div class="mission-graph-empty">${empty('有模型运行或完成验证的研究后，这里将显示关联证据。')}<button class="ws-button" data-go="models">选择模型 ↗</button></div>`;
+      return;
+    }
+    const source = study?.source_evidence;
+    const dataset = datasets?.find(item => item.dataset_id === source?.dataset_id);
+    const validation = study?.calibration;
+    const nodes = [];
+    if (source?.dataset_id) nodes.push(['source','训练数据',dataset?.name || source.dataset_id, source.dataset_id,'data-open-dataset',source.dataset_id]);
+    nodes.push(['model','模型机制',run.model_id,'参数与输入合同','data-graph-model',run.model_id]);
+    nodes.push(['run','实际运行',study ? '已核对运行归档' : '已保存运行归档',run.run_id,'data-open-run',run.run_id]);
+    if (validation) nodes.push([validation.status,'独立验证',validations[validation.status] || validation.status,study.study_id,'data-study',study.study_id]);
+    host.innerHTML = `<p class="mission-subject">${esc(study?.question || run.intent || run.model_id)}</p>
+      <div class="mission-chain" style="--nodes:${nodes.length}">${nodes.map(([state,label,name,info,action,id])=>`<button ${action}="${esc(id)}" class="mission-node" data-state="${esc(state)}"><span>${esc(label)}</span><b>${esc(name)}</b><code title="${esc(info)}">${esc(info)}</code><span class="mission-node-link" aria-hidden="true">↗</span></button>`).join('')}</div>
+      <div class="mission-origin">${source?.collection_id ? `<span>采集批次 <code>${esc(source.collection_id)}</code></span>` : ''}<span>归档于 <time>${esc(date(study?.created_at || run.created_at))}</time></span></div>`;
+  }
   function showAssets(results) {
     const [modelData, datasetData, collectionData, studyData, historyData] = results.map(item => item.value);
     if (modelData) {
@@ -113,8 +133,9 @@
         </div><p class="space-note">当前源码探针通过 ${number(c.probe_passed)} · 待探针 ${number(c.probe_not_run)} · 模型服务 ${number(c.provider_entries)} · 须绑定数据 ${number(c.dataset_required_entries)} · 软件引用 ${number(c.registered_no_factory)}</p>`;
     }
     if (datasetData && collectionData) {
-      write('#missionDatasets', number(datasetData.datasets.length));
-      write('#missionDataNote', `${number(datasetData.datasets.filter(d=>d.role==='source_snapshot').length)} 个原始快照 · ${number(collectionData.n_tasks)} 个采集任务`);
+      const datasets = datasetData.datasets.filter(d => !verificationDataset(d));
+      write('#missionDatasets', number(datasets.length));
+      write('#missionDataNote', `${number(datasets.filter(d=>d.role==='source_snapshot').length)} 个原始快照 · ${number(collectionData.n_tasks)} 个采集任务`);
     }
     if (studyData) {
       const completed = studyData.studies.filter(s => Boolean(s.calibration));
@@ -133,6 +154,7 @@
         </div>` : empty('还没有研究档案。运行后的模型、状态和结果会出现在这里。');
       write('#missionContext', rows.length ? `最近研究 · ${rows[0].intent || rows[0].model_id}` : '本地研究工作区 · 尚无完整运行');
     }
+    paintEvidenceChain(studyData?.studies.find(s => s.run_id && s.calibration), datasetData?.datasets, historyData?.entries);
     write('#missionError', results.some(r => r.status === 'rejected') ? '部分档案读取失败，可刷新重试。' : '');
   }
   async function mission(force = false) {
@@ -249,7 +271,23 @@
     const count = status?.queue.jobs.length || 0;
     window.DAYAN_MODAL('任务与通知', `<div class="notification-body">${status ? jobTable(status.queue.jobs) : empty('当前未取得引擎状态。')}<p class="space-note">${count ? '此列表为打开时的队列快照。' : ''}</p><button class="ws-button" data-go="mission">前往运行队列</button></div>`);
   }
+  function navigationIcons() {
+    const paths = {
+      mission:'M4 15h4l2-7 3 10 2-5h5 M3 4h18v16H3z',
+      overview:'M4 10V5h5 M15 5h5v5 M20 14v5h-5 M9 19H4v-5 M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
+      models:'M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9',
+      lab:'M8 3h8 M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3 M8 14h8',
+      data:'M4 5c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5 M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
+      analytics:'M4 4v16h16 M7 15l4-5 4 2 5-7',
+      replay:'M7 3h10l3 3v15H4V3h3 M14 3v5h6 M8 12h8 M8 16h6',
+    };
+    for(const button of document.querySelectorAll('#systemNavigation [data-nav]')){
+      const icon=button.querySelector('[aria-hidden]');
+      icon.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[button.dataset.nav]}"/></svg>`;
+    }
+  }
   function boot() {
+    navigationIcons();
     resizeRail();
     collapseNavigation(preference('dayan_nav_vnext') === 'collapsed' || (embedded && !preference('dayan_nav_vnext')));
     $('#collapseNavigation').onclick = () => {
@@ -263,13 +301,15 @@
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {e.preventDefault(); palette();}
     });
     document.addEventListener('click', async e => {
-      const button = e.target.closest('[data-nav],[data-go],[data-open-run],[data-study],[data-cancel-job]');
+      const button = e.target.closest('[data-nav],[data-go],[data-open-run],[data-study],[data-cancel-job],[data-graph-model],[data-open-dataset]');
       if (!button) return;
-      const {nav,go,openRun,study,cancelJob} = button.dataset;
+      const {nav,go,openRun,study,cancelJob,graphModel,openDataset} = button.dataset;
       try {
         if (nav || go) { window.DAYAN_CLOSE_MODAL(); switchPage(nav || go); }
         if (openRun) await window.DAYAN_RESULTS.restore(openRun);
         if (study) await window.DAYAN_TOOLS.openStudy(study);
+        if (graphModel) {switchPage('models'); await window.DAYAN_TOOLS.openModel(graphModel);}
+        if (openDataset) {window.DAYAN_RESULTS.datasetFocus=openDataset;await switchPage('data');}
         if (cancelJob) {
           button.disabled = true;
           await api('/api/jobs/'+encodeURIComponent(cancelJob), undefined, 'DELETE');
@@ -293,7 +333,7 @@
     }
     poll();
   }
-  window.DAYAN_WORKBENCH = {api, catalog, esc, date, number, empty, write, preference, validations, refreshStatus,
+  window.DAYAN_WORKBENCH = {api, catalog, esc, date, number, empty, write, preference, validations, refreshStatus, verificationDataset,
     load(name) {
       if (name === 'mission') return mission();
       return window.DAYAN_TOOLS?.load(name);

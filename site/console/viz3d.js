@@ -157,24 +157,53 @@
   function setupControls() {
     let isDown = false, prevX = 0, prevY = 0, downX = 0, downY = 0;
     const dom = renderer.domElement;
-    dom.addEventListener('pointerdown', e => { isDown = true; prevX = downX = e.clientX; prevY = downY = e.clientY; });
+    const pointer=new THREE.Vector2(),ray=new THREE.Raycaster();
+    let lastHover=0;
+    const pick=e=>{
+      const st=window._vizStateStream;
+      if(!st||st.preview||!sceneLayers.entities)return null;
+      const rect=dom.getBoundingClientRect();
+      if(!rect.width||!rect.height)return null;
+      pointer.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);
+      ray.setFromCamera(pointer,camera);
+      const group=getScene().children.find(c=>c.userData?.isStateGroup);
+      const hit=ray.intersectObjects(group?.children.filter(m=>m.visible&&(m.userData.instanceIds||m.isMesh&&m.userData.entityId!==undefined))||[],true)[0];
+      if(hit?.instanceId!==undefined&&hit.object.userData.instanceIds)return hit.object.userData.instanceIds[hit.instanceId];
+      for(let object=hit?.object;object;object=object.parent)if(object.userData.entityId!==undefined)return object.userData.entityId;
+      return null;
+    };
+    dom.addEventListener('pointerdown', e => {
+      stopCameraMotion();
+      paintHover(null);
+      isDown = true; prevX = downX = e.clientX; prevY = downY = e.clientY;
+      dom.setPointerCapture(e.pointerId);
+    });
     dom.addEventListener('pointerup', e => {
       const clicked=isDown&&Math.hypot(e.clientX-downX,e.clientY-downY)<5;isDown=false;
-      if(!clicked||e.button!==0||!window._vizStateStream||window._vizStateStream.preview)return;
-      const rect=dom.getBoundingClientRect(),ray=new THREE.Raycaster();ray.params.Points.threshold=1;
-      ray.setFromCamera(new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1),camera);
-      const group=getScene().children.find(c=>c.userData?.isStateGroup);
-      const hit=ray.intersectObjects(group?.children.filter(m=>m.userData.entityId!==undefined||m.userData.instanceIds)||[],true)[0];
-      if(hit?.instanceId!==undefined&&hit.object.userData.instanceIds){selectStateEntity(String(hit.object.userData.instanceIds[hit.instanceId]),true);}
-      else if(hit){let object=hit.object;while(object&&object.userData.entityId===undefined)object=object.parent;if(object)selectStateEntity(String(object.userData.entityId),true);}
+      if(!clicked||e.button!==0)return;
+      const entity=pick(e);if(entity!==null)selectStateEntity(String(entity),true);
     });
-    dom.addEventListener('pointerleave',()=>{isDown=false;});
+    dom.addEventListener('pointercancel',()=>{isDown=false;paintHover(null);});
+    dom.addEventListener('lostpointercapture',()=>{isDown=false;});
+    dom.addEventListener('pointerleave',()=>{paintHover(null);});
     dom.addEventListener('pointermove', e => {
-      if (!isDown) return;
+      if (!isDown) {
+        if(e.pointerType==='mouse'&&performance.now()-lastHover>85){lastHover=performance.now();paintHover(pick(e),e);}
+        return;
+      }
       const dx = e.clientX - prevX, dy = e.clientY - prevY;
-      if(Math.hypot(e.clientX-downX,e.clientY-downY)>5)stateCameraOverview=false;
+      if(Math.hypot(e.clientX-downX,e.clientY-downY)>5&&stateCameraOverview){stateCameraOverview=false;reportPose();}
       if(followingStateEntity&&Math.hypot(e.clientX-downX,e.clientY-downY)>5){followingStateEntity='';document.dispatchEvent(new CustomEvent('dayan:camera-mode',{detail:{following:false}}));}
       prevX = e.clientX; prevY = e.clientY;
+      if(window._vizStateStream){
+        const orbit=new THREE.Spherical().setFromVector3(camera.position.clone().sub(viewTarget));
+        orbit.theta-=dx*.006;
+        orbit.phi=THREE.MathUtils.clamp(orbit.phi-dy*.006,.06,1.4);
+        camera.position.setFromSpherical(orbit).add(viewTarget);
+        camera.lookAt(viewTarget);
+        if(!isRunning)renderer.render(getScene(),camera);
+        return;
+      }
       const angle = 0.005;
       const x = camera.position.x - 0, z = camera.position.z;
       const cos = Math.cos(angle * dx), sin = Math.sin(angle * dx);
@@ -185,8 +214,17 @@
       if(!isRunning) renderer.render(getScene(),camera);
     });
     dom.addEventListener('wheel', e => {
-      stateCameraOverview=false;
+      stateCameraOverview=false;reportPose();
       e.preventDefault();
+      if(window._vizStateStream){
+        stopCameraMotion();
+        const delta=camera.position.clone().sub(viewTarget);
+        const distance=THREE.MathUtils.clamp(delta.length()*Math.exp(e.deltaY*.0015),4,viewFitRadius*10);
+        camera.position.copy(viewTarget).add(delta.setLength(distance));
+        camera.lookAt(viewTarget);
+        if(!isRunning)renderer.render(getScene(),camera);
+        return;
+      }
       const dir = new THREE.Vector3();
       camera.getWorldDirection(dir);
       camera.position.addScaledVector(dir, e.deltaY * 0.02);
@@ -349,6 +387,7 @@
   // ---- 通用工具 ----
 
   function disposeDeep(obj) {
+    obj.shadow?.dispose?.();
     if (obj.isLight && obj.shadow) obj.shadow.dispose();
     if (obj.isInstancedMesh) obj.dispose();   // 释放 instanceMatrix/Color GPU 缓冲
     if (obj.geometry) obj.geometry.dispose();
@@ -375,12 +414,15 @@
     document.getElementById('vizStateHud')?.remove();
     blinkers = [];
     clouds = [];
+    FXREG.halos.length=FXREG.trails.length=FXREG.waves.length=0;
+    DAYCYCLE.lamps.length=DAYCYCLE.lights.length=0;
     if (weatherGroup) { weatherGroup = null; }   // 场景重建后由 visualize/setMood 重挂
     while (scene.children.length > 0) {
       const child = scene.children[0];
       scene.remove(child);
       disposeDeep(child);   // 递归：Group 嵌套的资源也必须释放（否则每次 visualize 泄漏~30 GPU 缓冲）
     }
+    renderer?.renderLists.dispose();
   }
 
   function addLights(scene) {
@@ -2338,30 +2380,159 @@
   let selectedStateEntity = '';
   let followingStateEntity = '';
   let stateCameraOverview = true;
+  const sceneLayers = {base:true,entities:true,roads:true,facilities:true,labels:true,events:true};
   let studioProfile = null, studioStage = null;
   const overviewTarget = new THREE.Vector3();
+  const viewTarget = new THREE.Vector3();
+  let cameraPreset='fit',viewHull=[],viewFitRadius=50,cameraMotion=0;
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   let stateSmoothing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function fitStateCamera() {
-    if(!camera)return;
-    const scale=Math.max(1,1.2/Math.max(.2,camera.aspect));
-    const geographic=studioProfile?.kind==='geographic';
-    const target=overviewTarget.set(0,0,geographic?2:6);
-    const direction=(geographic?new THREE.Vector3(18,67,57):new THREE.Vector3(27,43,51)).sub(target).normalize();
-    const circular=['ring-road','indicators','queue','cohorts'].includes(studioProfile?.kind);
-    const radius=studioStage?.userData.radius||38.3;
-    const points=circular?Array.from({length:48},(_,i)=>[Math.cos(i/48*Math.PI*2)*radius,Math.sin(i/48*Math.PI*2)*radius]):[[-39,-39],[-39,39],[39,39],[39,-39]];
-    let near=35,far=400*scale;
-    for(let pass=0;pass<18;pass++){
-      const distance=(near+far)/2;camera.position.copy(direction).multiplyScalar(distance).add(target);camera.lookAt(target);camera.updateMatrixWorld();
-      let extent=0;
-      points.forEach(([x,z])=>{const p=new THREE.Vector3(x,-1,z).project(camera);extent=Math.max(extent,Math.abs(p.x)/.91,Math.abs(p.y)/.86);});
-      if(extent>1)near=distance;else far=distance;
+  reduced.addEventListener('change',e=>{window.DAYAN3D.setSmoothing(!e.matches);if(e.matches)stopCameraMotion();});
+  function measureWorld(stream) {
+    const kind=studioProfile.kind, frames=stream.frames||[], first=frames[0]||{};
+    if(['ring-road','indicators','queue','cohorts'].includes(kind)){
+      const radius=kind==='ring-road'?34:studioStage.userData.radius||24;
+      return Array.from({length:48},(_,i)=>{
+        const angle=i/48*Math.PI*2;
+        return new THREE.Vector3(Math.cos(angle)*radius,0,Math.sin(angle)*radius);
+      });
     }
-    camera.position.copy(direction).multiplyScalar(far).add(target);camera.lookAt(target);camera.updateMatrixWorld();
+    const points=[];
+    const add=(x,y,frame)=>{
+      if(Number.isFinite(x)&&Number.isFinite(y))points.push(stateWorldXY({x,y},frame));
+    };
+    for(const f of first.facilities||[]){
+      if(f.type==='road_network'){
+        for(const segment of f.segments||[])for(const [x,y] of segment)add(x,y,first);
+      }else if(Number.isFinite(f.width)&&Number.isFinite(f.depth)){
+        for(const dx of [-.5,.5])for(const dy of [-.5,.5])add(f.x+f.width*dx,f.y+f.depth*dy,first);
+      }else add(f.x,f.y,first);
+    }
+    const stride=Math.max(1,Math.ceil(frames.length/20));
+    for(let i=0;i<frames.length;i++){
+      if(i%stride&&i!==frames.length-1)continue;
+      const frame=frames[i];
+      for(const e of frame.entities||[])if(Number.isFinite(e.x)&&Number.isFinite(e.y))points.push(stateWorldXY(e,frame));
+    }
+    if(!points.length)return [new THREE.Vector3(-16,0,-11),new THREE.Vector3(16,0,11)];
+    // Directional extremes bound the observed footprint without retaining every point.
+    const boundary=[];
+    for(let i=0;i<96;i++){
+      const angle=i/96*Math.PI*2, x=Math.cos(angle), z=Math.sin(angle);
+      let far=-Infinity,point=points[0];
+      for(const p of points){
+        const projection=x*p[0]+z*p[2];
+        if(projection>far){far=projection;point=p;}
+      }
+      boundary.push(new THREE.Vector3(point[0],0,point[2]));
+    }
+    return boundary;
+  }
+  function fitPose() {
+    const box=new THREE.Box3().setFromPoints(viewHull);
+    const target=box.getCenter(new THREE.Vector3());
+    const size=box.getSize(new THREE.Vector3());
+    viewFitRadius=Math.max(10,size.length());
+    const vertical=Math.tan(camera.fov*Math.PI/360), horizontal=vertical*Math.max(.18,camera.aspect);
+    const geographic=studioProfile.kind==='geographic';
+    const presets=cameraPreset==='plan'?[[0,1.562]]:cameraPreset==='low'?[[.62,.47]]:
+      geographic?Array.from({length:12},(_,i)=>[i*Math.PI/6,.89]):[[.39,.96]];
+    let best, quality=-Infinity;
+    for(const [yaw,pitch] of presets){
+      const direction=new THREE.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
+      const right=new THREE.Vector3(0,1,0).cross(direction).normalize();
+      const up=direction.clone().cross(right);
+      const coords=viewHull.map(point=>{
+        const delta=point.clone().sub(target);
+        return [delta.dot(right),delta.dot(up),delta.dot(direction)];
+      });
+      const distance=Math.max(10,...coords.map(([x,y,z])=>z+Math.max(Math.abs(x)/(horizontal*.91),Math.abs(y)/(vertical*.84))))+1;
+      const projected=coords.map(([x,y,z])=>[x/((distance-z)*horizontal),y/((distance-z)*vertical)]);
+      const extent=axis=>Math.max(...projected.map(p=>p[axis]))-Math.min(...projected.map(p=>p[axis]));
+      const area=extent(0)*extent(1);
+      if(area>quality){quality=area;best={target,position:target.clone().addScaledVector(direction,distance)};}
+    }
+    return best;
+  }
+  function stopCameraMotion() {
+    if(cameraMotion)cancelAnimationFrame(cameraMotion);
+    cameraMotion=0;INTRO.active=false;
+  }
+  function moveCamera(position,target,smooth=false) {
+    stopCameraMotion();
+    if(!smooth||reduced.matches){
+      viewTarget.copy(target);camera.position.copy(position);camera.lookAt(viewTarget);
+      renderer.render(getScene(),camera);
+      return;
+    }
+    const from=camera.position.clone(),startTarget=viewTarget.clone(),started=performance.now();
+    const tick=now=>{
+      const elapsed=Math.min(1,(now-started)/330),ease=1-(1-elapsed)**3;
+      viewTarget.lerpVectors(startTarget,target,ease);
+      camera.position.lerpVectors(from,position,ease);
+      camera.lookAt(viewTarget);
+      if(!isRunning)renderer.render(getScene(),camera);
+      cameraMotion=elapsed<1&&!document.hidden?requestAnimationFrame(tick):0;
+    };
+    cameraMotion=requestAnimationFrame(tick);
+  }
+  function fitStateCamera(smooth=false) {
+    if(!camera||!viewHull.length)return;
+    const {position,target}=fitPose();
+    overviewTarget.copy(target);
+    moveCamera(position,target,smooth);
   }
   function stateEntityMesh(id) {
     const group=getScene().children.find(c=>c.userData?.isStateGroup),map=group?.userData.meshMap;
-    return map?.get(id)||[...(map?.entries()||[])].find(([key])=>String(key)===String(id))?.[1];
+    if(!map)return;
+    const numeric=Number(id);
+    const direct=map.get(id)||((String(numeric)===id)&&map.get(numeric));
+    if(direct)return direct;
+    for(const [key,mesh] of map)if(String(key)===String(id))return mesh;
+  }
+  function reportPose() {
+    document.dispatchEvent(new CustomEvent('dayan:camera-pose',{detail:stateCameraOverview?cameraPreset:'custom'}));
+  }
+  let hoveredEntity=null;
+  function paintHover(id,e,render=true) {
+    const host=document.getElementById('sceneHover');
+    if(!host)return;
+    const fr=window._vizStateStream?.frames[window._vizStateIdx];
+    const group=getScene().children.find(c=>c.userData?.isStateGroup);
+    const mesh=id===null?null:stateEntityMesh(id);
+    const entity=mesh?.visible&&fr?.entities?.find(item=>String(item.id)===String(id));
+    if(!entity){
+      host.hidden=true;hoveredEntity=null;
+      if(group?.userData.hoverRing?.visible){group.userData.hoverRing.visible=false;if(render&&!isRunning)renderer.render(getScene(),camera);}
+      return;
+    }
+    hoveredEntity=id;
+    if(!group.userData.hoverRing){
+      const ring=new THREE.Mesh(new THREE.RingGeometry(.95,1.08,32),new THREE.MeshBasicMaterial({color:0xe8faff,side:THREE.DoubleSide,depthWrite:false}));
+      ring.rotation.x=-Math.PI/2;group.add(ring);group.userData.hoverRing=ring;
+    }
+    const ring=group.userData.hoverRing;ring.visible=true;ring.position.set(mesh.position.x,.49,mesh.position.z);
+    if(e){
+      const rect=renderer.domElement.getBoundingClientRect();
+      host.style.left=Math.max(8,Math.min(rect.width-202,e.clientX-rect.left+14))+'px';
+      host.style.top=Math.max(8,Math.min(rect.height-78,e.clientY-rect.top+14))+'px';
+    }
+    const text=[String(entity.id),[entity.type,entity.state].filter(v=>v!==undefined).map(v=>DAYAN_ANALYSIS.label(String(v))).join(' · ')];
+    if(Number.isFinite(entity.x)&&Number.isFinite(entity.y))text.push(`(${DAYAN_ANALYSIS.fmt(entity.x)}, ${DAYAN_ANALYSIS.fmt(entity.y)}) ${fr.space?.unit||''}`);
+    host.textContent=text.join('\n');host.hidden=false;
+    if(render&&!isRunning)renderer.render(getScene(),camera);
+  }
+  function applySceneLayer(object) {
+    const layer=object.userData.sceneLayer;
+    if(layer)object.visible=sceneLayers[layer];
+  }
+  function setSceneLayer(layer,value) {
+    if(!Object.hasOwn(sceneLayers,layer))return;
+    sceneLayers[layer]=Boolean(value);
+    getScene().traverse(applySceneLayer);
+    if(!sceneLayers.entities)paintHover(null,null,false);
+    // Reapply the current frame to restore per-entity visibility and update instance counts.
+    window.DAYAN3D.renderAt(window.DAYAN_RESULTS?.time||0);
   }
   function selectStateEntity(id,notify=false) {
     if(followingStateEntity){followingStateEntity='';document.dispatchEvent(new CustomEvent('dayan:camera-mode',{detail:{following:false}}));}
@@ -2372,17 +2543,20 @@
     if(notify&&id)document.dispatchEvent(new CustomEvent('dayan:entity-selected',{detail:{id:selectedStateEntity}}));
     if(renderer&&sceneObj)renderer.render(sceneObj,camera);
   }
-  function focusStateEntity(id) {
+  function focusStateEntity(id,smooth=true) {
     const mesh=stateEntityMesh(id);if(!mesh||!camera)return false;
-    stateCameraOverview=false;
-    selectStateEntity(id);camera.position.copy(mesh.position).add(new THREE.Vector3(9,12,12));camera.lookAt(mesh.position);renderer.render(getScene(),camera);return true;
+    stateCameraOverview=false;reportPose();
+    selectStateEntity(id);
+    const target=mesh.position.clone(),offset=camera.position.clone().sub(viewTarget).normalize().multiplyScalar(Math.max(10,viewFitRadius*.29));
+    moveCamera(target.clone().add(offset),target,smooth);
+    return true;
   }
   function resetStateCamera() {
     followingStateEntity='';document.dispatchEvent(new CustomEvent('dayan:camera-mode',{detail:{following:false}}));
-    stateCameraOverview=true;if(!camera)return;fitStateCamera();renderer.render(getScene(),camera);
+    stateCameraOverview=true;cameraPreset='fit';reportPose();if(!camera)return;fitStateCamera(true);
   }
   function followStateEntity(id,enabled=true) {
-    if(enabled&&focusStateEntity(id)){followingStateEntity=String(id);document.dispatchEvent(new CustomEvent('dayan:camera-mode',{detail:{following:true}}));return true;}
+    if(enabled&&focusStateEntity(id,false)){followingStateEntity=String(id);document.dispatchEvent(new CustomEvent('dayan:camera-mode',{detail:{following:true}}));return true;}
     followingStateEntity='';document.dispatchEvent(new CustomEvent('dayan:camera-mode',{detail:{following:false}}));return false;
   }
 
@@ -2462,6 +2636,28 @@
   }
 
   let stateOverlay = null;
+  let eventMarker = null;
+  function eventPosition(event,frame) {
+    if(Number.isFinite(event.x)&&Number.isFinite(event.y))return event;
+    const key=event.entity_id??(event.bus_id===undefined?null:'bus-'+event.bus_id);
+    const entity=key===null?null:frame.entities?.find(e=>String(e.id)===String(key));
+    return Number.isFinite(entity?.x)&&Number.isFinite(entity?.y)?entity:null;
+  }
+  function focusEvent(event) {
+    const frame=window._vizStateStream?.frames[window._vizStateIdx];
+    const point=frame&&eventPosition(event,frame);
+    if(!point||!sceneLayers.events||event.applied===false)return false;
+    if(!eventMarker){
+      eventMarker=new THREE.Mesh(new THREE.RingGeometry(1.45,1.8,40),new THREE.MeshBasicMaterial({color:0xffd486,side:THREE.DoubleSide}));
+      eventMarker.rotation.x=-Math.PI/2;eventMarker.userData.sceneLayer='events';getScene().add(eventMarker);
+    }
+    const [x,,z]=stateWorldXY(point,frame), target=new THREE.Vector3(x,.58,z);
+    eventMarker.position.copy(target);eventMarker.visible=true;eventMarker.userData.eventTime=event.sim_t;
+    if(followingStateEntity)followStateEntity('',false);
+    stateCameraOverview=false;reportPose();
+    const offset=camera.position.clone().sub(viewTarget).normalize().multiplyScalar(Math.max(11,viewFitRadius*.42));
+    moveCamera(target.clone().add(offset),target,true);return true;
+  }
   function paintStateOverlay(frame) {
     if (stateOverlay?.parent) {stateOverlay.parent.remove(stateOverlay);disposeDeep(stateOverlay);}
     stateOverlay = null;
@@ -2471,6 +2667,16 @@
     const positioned = (frame.entities || []).filter(e=>Number.isFinite(e.x)&&Number.isFinite(e.y));
     const positions = [], colors = [];
     let label = '';
+    if(layerFxMode==='roadFlow'&&studioProfile.kind==='ring-road'&&Number.isFinite(frame.aggregates?.flux)){
+      let low=Infinity,high=-Infinity;
+      for(const row of window._vizStateStream.observations||[])if(Number.isFinite(row.flux)){low=Math.min(low,row.flux);high=Math.max(high,row.flux);}
+      const value=frame.aggregates.flux, fraction=high>low?THREE.MathUtils.clamp((value-low)/(high-low),0,1):.5;
+      const color=new THREE.Color(0x4e9acc).lerp(new THREE.Color(0xf6b75b),fraction);
+      stateOverlay=new THREE.Mesh(new THREE.RingGeometry(28.8,31.2,160),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.66,side:THREE.DoubleSide,depthWrite:false}));
+      stateOverlay.rotation.x=-Math.PI/2;stateOverlay.position.y=.215;getScene().add(stateOverlay);
+      if(annotated){annotated.textContent=`整条环路归档通量 ${DAYAN_ANALYSIS.fmt(value)} · 冷色低 / 暖色高 · t=${frame.sim_t}`;annotated.hidden=false;}
+      return;
+    }
     if (layerFxMode === 'heat' && positioned.length) {
       const counts = new Map(), cell = 4;
       for (const entity of positioned) {
@@ -2548,13 +2754,14 @@
             // Vehicles stay within the same world-space ring at every step.
             batch.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,.65,0),32);
             batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+            batch.userData.sceneLayer='entities';applySceneLayer(batch);
             group.userData.carBatch=batch;group.add(batch);
           }
           m=new THREE.Object3D();m.userData.instancedCar=true;m.userData.glyph='vehicle';
         }else m = stateMeshFor(ent);
         m.userData.entityId=ent.id;
         meshMap.set(ent.id, m);
-        group.add(m);
+        group.add(m);m.traverse(applySceneLayer);
       }
       const [x, y, z] = stateWorldXY(ent, fr);
       if (m.userData.pinBottom) {
@@ -2562,7 +2769,7 @@
       } else {
         m.position.set(x, y, z);
       }
-      m.visible = String(ent.state) !== "exited" || ent.type !== "pedestrian";
+      m.visible = sceneLayers.entities&&(String(ent.state) !== "exited" || ent.type !== "pedestrian");
       if(m.userData.cohort){const h=.35+Math.max(0,ent.I||0)/Math.max(1,studioProfile.hi)*12;m.scale.y=h;m.position.y=h/2;const sp=m.userData.cohortLabel;sp.scale.set(9,2.8/h,1);sp.position.y=.5+2.2/h;sp.userData.redraw([String(ent.id),'I = '+Number((ent.I||0).toPrecision(5))]);}
       const stateColor=DAYAN_SCENE_STUDIO.color(ent,studioProfile);
       if(m.userData.instancedCar)m.userData.stateColor=stateColor;
@@ -2583,7 +2790,7 @@
       const metrics=Object.entries(fr.aggregates||{}).filter(([k,v])=>k!=="sim_t"&&typeof v==="number"&&Number.isFinite(v)).slice(0,8);
       metrics.forEach(([name,value],i)=>{
         const id="metric_"+name;seen.add(id);let m=meshMap.get(id);
-        if(!m){m=DAYAN_SCENE_STUDIO.indicator(group,name,i,metrics.length,window._vizStateStream);meshMap.set(id,m);}
+        if(!m){m=DAYAN_SCENE_STUDIO.indicator(group,name,i,metrics.length,window._vizStateStream);meshMap.set(id,m);m.traverse(applySceneLayer);}
         DAYAN_SCENE_STUDIO.updateIndicator(m,value);
       });
     }
@@ -2597,7 +2804,7 @@
       const fid = "fac_" + f.id;
       if(f.type==='model_facility'){
         let fm=meshMap.get(fid);
-        if(!fm){fm=DAYAN_SCENE_STUDIO.facility(f);group.add(fm);meshMap.set(fid,fm);}
+        if(!fm){fm=DAYAN_SCENE_STUDIO.facility(f);fm.userData.sceneLayer=f.kind==='road'?'roads':'facilities';fm.traverse(applySceneLayer);group.add(fm);meshMap.set(fid,fm);}
         DAYAN_SCENE_STUDIO.updateFacility(fm,f,fr,stateWorldXY);return;
       }
       if (!meshMap.has(fid)) {
@@ -2625,7 +2832,7 @@
           } else if(f.type!=="road_network") {
             fm.position.set(0, 0.1, -4);
           }
-          group.add(fm);
+          fm.userData.sceneLayer=f.type==='road_network'?'roads':'facilities';applySceneLayer(fm);group.add(fm);
           meshMap.set(fid, fm);
         }
       }
@@ -2690,7 +2897,6 @@
       hud.id = "vizStateHud";
       hud.style.cssText = "position:absolute;left:10px;top:8px;z-index:5;font:10px monospace;" +
         "padding:4px 9px;border-radius:4px;background:rgba(4,7,15,.72);border:1px solid rgba(0,229,255,.35);color:#d8e2f2;pointer-events:none";
-      host.style.position = host.style.position || "relative";
       host.appendChild(hud);
     }
     return hud;
@@ -2699,6 +2905,7 @@
   function vizStateUpdate(t) {
     const st = window._vizStateStream;
     if (!st || !st.frames || !st.frames.length) return;
+    if(eventMarker)eventMarker.visible=sceneLayers.events&&Math.abs(eventMarker.userData.eventTime-t)<1e-8;
     const n = st.frames.length;
     let idx;
     if(window.DAYAN_RESULTS?.active){
@@ -2715,12 +2922,12 @@
       if (hud) {
         const f = st.frames[idx];
         const entN = (f.entities || []).length;
-        hud.textContent = (st.preview ? '实时计算取样' : st.provenance === "entity"
+        hud.textContent = (st.preview ? '实时计算取样' : st.partial ? '已核验档案预览' : st.provenance === "entity"
           ? "◉ 状态同源 · 主体状态来自模型计算"
           : "△ 汇总数据驱动的示意动画（非主体轨迹）")
           + " · " + (st.model_id || "") + " · sim_t=" + (f.sim_t != null ? (+f.sim_t).toFixed(2) : "?")
           + (st.provenance === "entity" ? " · 实体 " + entN : "");
-        if(st.provenance==="entity"&&entN>3000)hud.textContent+=" · 视图采样3000；全量状态可导出";
+        if(st.provenance==="entity"&&entN>3000)hud.textContent+=st.partial?' · 视图采样3000':' · 视图采样3000；全量状态可导出';
         if(st.provenance!=="entity")hud.textContent+=" · 几何体仅为指标概念节点";
         hud.style.borderColor = st.provenance === "entity"
           ? "rgba(0,255,163,.45)" : "rgba(255,183,77,.45)";
@@ -2728,16 +2935,21 @@
     }
     const interpolated=interpolateState(t,idx);
     if(changed||interpolated)syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup),changed);
-    if(previous&&followingStateEntity){const mesh=stateEntityMesh(followingStateEntity);if(mesh?.visible){camera.position.add(mesh.position.clone().sub(previous));camera.lookAt(mesh.position);}else followStateEntity('',false);}
+    if(changed&&hoveredEntity!==null)paintHover(hoveredEntity,null,false);
+    if(previous&&followingStateEntity){const mesh=stateEntityMesh(followingStateEntity);if(mesh?.visible){camera.position.add(mesh.position.clone().sub(previous));viewTarget.copy(mesh.position);camera.lookAt(viewTarget);}else followStateEntity('',false);}
   }
 
-  function visualizeState(stream) {
+  function visualizeState(stream,profile=null) {
+    stopCameraMotion();
+    paintHover(null,null,false);
     clearScene();
-    stateOverlay=null;
+    stateOverlay=null;eventMarker=null;
     displayPriorities=new Map();smoothNext=null;smoothPositions=null;
     selectedStateEntity='';
     followingStateEntity='';
     stateCameraOverview=true;
+    cameraPreset='fit';
+    reportPose();
     window._vizStateStream = stream || null;
     window._vizStateIdx = -1;
     const firstEntities=stream?.frames?.[0]?.entities||[];
@@ -2745,8 +2957,10 @@
     const queuePositions=(stream?.frames||[]).flatMap(f=>(f.entities||[]).filter(e=>['server','customer'].includes(e.type)).map(e=>e.x));
     if(queuePositions.length){let lo=Infinity,hi=-Infinity;for(const x of queuePositions){lo=Math.min(lo,x);hi=Math.max(hi,x);}window._vizStateBounds.queue={center:(lo+hi)/2,scale:28/Math.max(10,hi-lo)};}
     const scene = getScene();
-    studioProfile=DAYAN_SCENE_STUDIO.resolve(stream);
+    studioProfile=profile||DAYAN_SCENE_STUDIO.resolve(stream);
     studioStage=DAYAN_SCENE_STUDIO.stage(scene,studioProfile,stream?.frames?.[0]||{});
+    scene.traverse(applySceneLayer);
+    viewHull=measureWorld(stream);
     renderer.toneMappingExposure=1.05;
     window._vizDarkness=0;
     INTRO.active=false;
@@ -2762,10 +2976,30 @@
     return currentScene.type;
   }
 
+  function completeArchive(stream) {
+    const profile=DAYAN_SCENE_STUDIO.resolve(stream);
+    if(window._vizStateStream?.run_id!==stream.run_id){visualizeState(stream,profile);return;}
+    const id=selectedStateEntity,following=followingStateEntity,preset=cameraPreset,overview=stateCameraOverview;
+    if(profile.kind!==studioProfile.kind||profile.rich!==studioProfile.rich||['queue','indicators'].includes(profile.kind)){
+      const position=camera.position.clone(), target=viewTarget.clone();
+      visualizeState(stream,profile);INTRO.active=false;
+      stateCameraOverview=overview;cameraPreset=preset;
+      if(overview)fitStateCamera();else moveCamera(position,target);
+    }else{
+      studioProfile=profile;window._vizStateStream=stream;window._vizStateIdx=-1;
+      smoothNext=null;smoothPositions=null;
+      viewHull=measureWorld(stream);buildStateLegend();
+      if(overview&&profile.kind!=='ring-road')fitStateCamera();
+    }
+    selectedStateEntity=id;followingStateEntity=following;reportPose();
+  }
+
   function clearSavedWorld() {
+    stopCameraMotion();viewHull=[];
+    paintHover(null,null,false);
     clearScene();studioProfile=null;studioStage=null;selectedStateEntity='';followingStateEntity='';
     displayPriorities=new Map();smoothNext=null;smoothPositions=null;
-    window._vizStateStream=null;window._vizStateIdx=-1;stateOverlay=null;
+    window._vizStateStream=null;window._vizStateIdx=-1;stateOverlay=null;eventMarker=null;
     const annotated=document.getElementById('layerReadout');if(annotated) annotated.hidden=true;
     stateCameraOverview=true;currentScene=null;getScene().background=new THREE.Color(0x101f2e);
     if(renderer&&camera)renderer.render(getScene(),camera);
@@ -3042,9 +3276,6 @@
   }
 
   function updateEntityFX(group, fr) {
-    if (window._vizDayCycle && studioProfile?.kind === 'ring-road') {
-      ensureNightLights(getScene());
-    }
     const dark = window._vizDarkness || 0;
     let haloN = 0, trailN = 0;
     displayEntities(fr).forEach(ent => {
@@ -3143,25 +3374,27 @@
   }
 
   function spawnEventWaves(st, prevFr, fr) {
-    if (!st.events || !st.events.length) return;
+    if (!sceneLayers.events||!st.events || !st.events.length || reduced.matches) return;
     const t0 = prevFr ? (prevFr.sim_t ?? -1e9) : -1e9;
     const t1 = fr.sim_t ?? 1e9;
     st.events.forEach(ev => {
-      if(ev.etype!=='intervention'||ev.applied===false)return;
+      if(ev.applied===false)return;
       const et = ev.sim_t ?? ev.t;
       if (typeof et !== 'number' || et <= t0 || et > t1) return;
+      const coords=eventPosition(ev,fr);
+      if(!coords)return;
       if (FXREG.waves.length >= 2) return;
       const ring = new THREE.Mesh(
         new THREE.RingGeometry(0.8, 1.15, 48),
         new THREE.MeshBasicMaterial({ color: 0xffc85a, transparent: true,
           opacity: 0.75, side: THREE.DoubleSide, depthWrite: false }));
       ring.rotation.x = -Math.PI / 2;
-      ring.position.set(0, 0.25, 0);
+      const [x,,z]=stateWorldXY(coords,fr);
+      ring.position.set(x,.28,z);
       ring.userData.isFxWave = { born: performance.now() };
+      ring.userData.sceneLayer='events';
       getScene().add(ring);
       FXREG.waves.push(ring);
-      if (window.DAYAN_EVENT) DAYAN_EVENT('',
-        '干预生效 · 冲击波标记', (ev.label || '') + ' sim_t=' + (+et).toFixed(2));
     });
   }
 
@@ -3221,12 +3454,28 @@
     visualize,
     visualize2: visualize,
     visualizeState,
+    completeArchive,
     preview,
     clear:clearSavedWorld,
     renderAt(t){window._vizNow=t;window._vizStateIdx=-1;if(window._vizStateStream)vizStateUpdate(t);else if(currentScene?.update)currentScene.update(t,0);if(renderer&&sceneObj)renderer.render(sceneObj,camera);},
     selectEntity:selectStateEntity,
     focusEntity:focusStateEntity,
+    focusEvent,
     resetCamera:resetStateCamera,
+    setCameraPreset(name){
+      if(!['fit','plan','low'].includes(name)||!viewHull.length)return false;
+      if(followingStateEntity)followStateEntity('',false);
+      cameraPreset=name;stateCameraOverview=true;reportPose();fitStateCamera(true);return true;
+    },
+    setSceneLayer,
+    get diagnostics(){
+      if(!renderer)return null;
+      const {render,memory}=renderer.info;
+      const group=getScene().children.find(c=>c.userData?.isStateGroup);
+      let visibleEntities=0;
+      for(const mesh of group?.userData.meshMap?.values()||[])if(mesh.userData.entityId!==undefined&&mesh.visible)visibleEntities++;
+      return {drawCalls:render.calls,triangles:render.triangles,geometries:memory.geometries,textures:memory.textures,visibleEntities};
+    },
     followEntity:followStateEntity,
     get cameraState(){return {position:camera?.position.toArray(),quaternion:camera?.quaternion.toArray(),aspect:camera?.aspect,fov:camera?.fov,following:followingStateEntity||null};},
     get presentation(){return studioProfile?{...studioProfile,smoothing:stateSmoothing}:null;},

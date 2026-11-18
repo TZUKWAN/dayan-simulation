@@ -24,27 +24,68 @@
   }
   const options = (rows, placeholder) => `<option value="">${esc(placeholder)}</option>` +
     rows.map(([id,name])=>`<option value="${esc(id)}">${esc(name)}</option>`).join('');
+  const networkTone = {ECO:'#91bdf5',NET:'#70e0df',SYS:'#eabb80',BEH:'#b6a5ff',CPL:'#76d3ad',MET:'#b7cae0',APP:'#e3a0c6',USR:'#9bb3ff'};
   function linkMap(row) {
     const mechanisms=new Set(row.mechanisms || []);
     const names=modelRows.filter(m=>m.model_id!==row.model_id && m.has_factory).map(m=>({row:m,parts:(m.mechanisms||[]).filter(x=>mechanisms.has(x))}))
       .filter(m=>m.parts.length).sort((a,b)=>b.parts.length-a.parts.length||Number(b.row.reviewed)-Number(a.row.reviewed)||a.row.model_id.localeCompare(b.row.model_id)).slice(0,6);
-    const colors=window.DAYAN_CHARTS.colors;
-    const entries=names.length?names.map(({row:m,parts})=>({id:m.model_id,text:m.name,parts,model:true})):
+    const entries=names.length?names.map(({row:m,parts})=>({id:m.model_id,text:m.name,parts,category:family(m.model_id)})):
       [...mechanisms].map(x=>({id:x,text:x,parts:['声明覆盖的机制']})).concat(
         Object.entries(row.output_contract?.fields||{}).filter(([k,f])=>k!=='sim_t'&&f.type==='number').slice(0,4).map(([k,f])=>({id:k,text:k,parts:['观测输出',f.unit||'模型原单位']})));
     if(!entries.length)return empty('此条目暂无机制关系或可核对的输出字段。');
     const nodes=entries.slice(0,7).map((node,i,list)=>{
       const angle=(i/list.length)*2*Math.PI - Math.PI/2;
-      return {...node,x:Math.round(345+233*Math.cos(angle)),y:Math.round(140+91*Math.sin(angle)),color:colors[i%colors.length]};
+      return {...node,x:Math.round(480+324*Math.cos(angle)),y:Math.round(215+151*Math.sin(angle)),color:networkTone[node.category]||'#91bdf5'};
     });
-    return `<div class="model-network"><svg viewBox="0 0 690 280" role="group" aria-label="共享机制的模型关系">
-      <defs><pattern id="modelDots" width="20" height="20" patternUnits="userSpaceOnUse"><circle r="1" cx="2" cy="2" fill="#30435a"/></pattern></defs>
-      <rect width="690" height="280" fill="url(#modelDots)"/>
-      ${nodes.map(node=>`<path d="M345 140 Q${node.x} 140 ${node.x} ${node.y}" stroke="${node.color}" stroke-opacity=".55" stroke-width="${1+node.parts.length*.6}" fill="none"><title>${esc(node.parts.join('、'))}</title></path>`).join('')}
-      <rect x="288" y="112" width="114" height="56" rx="4" fill="#13434e" stroke="#6ee0dd"/>
-      <text x="345" y="146" fill="#ecffff" text-anchor="middle" font-family="monospace" font-size="16">${esc(row.model_id)}</text>
-      ${nodes.map(node=>`<g ${node.model?`tabindex="0" role="button" data-model-open="${esc(node.id)}" aria-label="${esc(node.id+' '+node.text+' · 共享 '+node.parts.join('、'))}"`:''}><title>${esc(node.text+' · '+node.parts.join('、'))}</title><rect x="${node.x-55}" y="${node.y-17}" width="110" height="34" rx="3" fill="#132338" stroke="${node.color}"/><text x="${node.x}" y="${node.y+4}" fill="#dceaf7" text-anchor="middle" font-size="13" font-family="monospace">${esc(node.id.length>12?node.id.slice(0,11)+'…':node.id)}</text></g>`).join('')}
-      </svg><p class="space-note">${names.length?'边表示目录中已登记的共同机制。悬停核对机制，选择邻居查看合同。':'连接指向该模型明确声明的机制和观测字段，悬停查看含义。'}</p></div>`;
+    const categories=[...new Set(nodes.map(n=>n.category).filter(Boolean))];
+    return `<div class="model-network"><svg viewBox="0 0 960 430" role="group" aria-label="模型机制关系图" tabindex="0">
+      <g data-network-world>
+      ${nodes.map((node,i)=>`<path data-network-edge="${i}" d="M480 215 L${node.x} ${node.y}" stroke="${node.color}" stroke-width="${1.2+node.parts.length*.5}" fill="none"><title>${esc(node.parts.join('、'))}</title></path>`).join('')}
+      <circle cx="480" cy="215" r="68" fill="#0b24367a" stroke="#437689" stroke-dasharray="2 6"/>
+      <path d="M480 168l63 24v46l-63 24-63-24v-46z" fill="#14394b" stroke="#7adfe0" stroke-width="2"/>
+      <text x="480" y="222" fill="#ecffff" text-anchor="middle" font-family="monospace" font-size="19">${esc(row.model_id)}</text>
+      ${nodes.map((node,i)=>`<g data-network-node="${i}" data-description="${esc(node.text+' · '+node.parts.join('、'))}" tabindex="0" ${node.category?`role="button" data-model-open="${esc(node.id)}"`:'role="img"'} aria-label="${esc(node.id+' '+node.text+' · '+node.parts.join('、'))}"><rect x="${node.x-66}" y="${node.y-23}" width="132" height="46" rx="8" fill="#14283e" stroke="${node.color}"/><text x="${node.x}" y="${node.y+5}" fill="#e2eff9" text-anchor="middle" font-size="15" font-family="monospace">${esc(node.id.length>10?node.id.slice(0,9)+'…':node.id)}</text></g>`).join('')}
+      </g></svg><div class="network-toolbar"><div class="network-legend">${categories.map(k=>`<span><i style="background:${networkTone[k]||'#91bdf5'}"></i>${esc(classNames[k]||k)}</span>`).join('')}</div><button class="ws-button" data-network-reset>复位关系图</button></div>
+      <output class="network-reading">${names.length?'拖动探索，滚轮缩放，选择相关模型。线宽随共享机制数变化。':'图中连接声明的机制及观测字段。'}</output></div>`;
+  }
+  function activateNetwork() {
+    const host=$('#modelDetail .model-network');
+    if(!host)return;
+    const svg=host.querySelector('svg'), world=svg.querySelector('[data-network-world]'), reading=host.querySelector('output');
+    const initial=reading.textContent;
+    let left=0, top=0, scale=1, drag;
+    const paint=()=>world.setAttribute('transform',`translate(${left} ${top}) scale(${scale})`);
+    const reset=()=>{left=top=0;scale=1;paint();};
+    const point=e=>new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    const zoom=(delta,p={x:480,y:215})=>{
+      const next=Math.max(.6,Math.min(3,scale*delta));
+      left=p.x-(p.x-left)*next/scale;top=p.y-(p.y-top)*next/scale;scale=next;paint();
+    };
+    host.querySelector('[data-network-reset]').onclick=reset;
+    svg.addEventListener('wheel',e=>{e.preventDefault();zoom(Math.exp(-e.deltaY*.0015),point(e));},{passive:false});
+    svg.addEventListener('pointerdown',e=>{
+      if(e.button!==0||e.target.closest('[data-network-node]'))return;
+      drag=point(e);svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');
+    });
+    svg.addEventListener('pointermove',e=>{
+      if(!drag)return;
+      const p=point(e);left+=p.x-drag.x;top+=p.y-drag.y;drag=p;paint();
+    });
+    svg.onlostpointercapture=()=>{drag=null;svg.classList.remove('dragging');};
+    svg.addEventListener('keydown',e=>{
+      const shifts={ArrowLeft:[30,0],ArrowRight:[-30,0],ArrowUp:[0,30],ArrowDown:[0,-30]};
+      if(e.key==='Home') reset();
+      else if(e.key==='+'||e.key==='-') zoom(e.key==='+'?1.2:1/1.2);
+      else if(shifts[e.key]) {left+=shifts[e.key][0];top+=shifts[e.key][1];paint();}
+      else return;
+      e.preventDefault();
+    });
+    for(const node of svg.querySelectorAll('[data-network-node]')){
+      const edge=svg.querySelector(`[data-network-edge="${node.dataset.networkNode}"]`);
+      const highlight=active=>{edge.classList.toggle('highlighted',active);reading.textContent=active?node.dataset.description:initial;};
+      node.onpointerenter=node.onfocus=()=>highlight(true);
+      node.onpointerleave=node.onblur=()=>highlight(false);
+    }
   }
   function parametersTable(params) {
     const items=Object.entries(params||{});
@@ -69,6 +110,7 @@
     $('#runModelDetail').onclick=()=>window.DAYAN_COMMAND.chooseModel(row.model_id);
     $('#pinModel').textContent=pinned.includes(row.model_id)?'从比较移除':'加入比较';
     $('#pinModel').onclick=()=>pin(row.model_id);
+    activateNetwork();
     for(const node of $('#modelDetail').querySelectorAll('[data-model-open]')) {
       node.onclick=()=>openModel(node.dataset.modelOpen);
       node.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();node.onclick();}};
@@ -140,13 +182,26 @@
     if(autoSelect) await openModel(modelRows.find(m=>m.reviewed&&m.mechanisms.length)?.model_id || modelRows[0]?.model_id);
   }
 
-  let prepared=null, labBusy=false;
+  let prepared=null, labBusy=false, labStage='contract', labStudy=null;
+  function paintLabFlow() {
+    const host=$('#labFlow');if(!host)return;
+    const s=labStage==='calibration'?labStudy:null, spec=prepared?.experiment_spec, cal=s?.calibration;
+    const flow=[['contract','研究问题',s?.question||($('#labQuestion').value.trim()?'问题草稿已填写':'填写研究问题'),'question'],
+      ['contract','模型选择',s?.model_id||spec?.model_id||'匹配机制','model'],
+      ['experiment','实验设计',s?.study_id||spec?.experiment_id||'核对参数与对照','design'],
+      ['calibration','数据校准',cal?`实际执行 ${cal.n_evaluated} 组`:s?.training_dataset?.dataset_id||'选择数据与阈值','train'],
+      ['calibration','独立验证',cal?(cjkStatus[cal.status]||cal.status):'检查独立留出','test'],
+      ['calibration','结果解释',s?.run_id?'查看误差与研究报告':'待生成证据','explain']];
+    host.innerHTML=flow.map(([tab,label,value,key])=>`<button data-lab-flow="${tab}" data-phase="${key}" ${key==='test'&&cal?`data-state="${esc(cal.status)}"`:''}><b>${label}</b><span title="${esc(value)}">${esc(value)}</span></button>`).join('');
+  }
   function labTab(tab) {
+    labStage=tab;
     for(const [id] of stages) {
       $("[data-lab-view="+id+"]").hidden=id!==tab;
       $("[data-lab-tab="+id+"]").setAttribute('aria-selected',String(id===tab));
     }
     preference('dayan_lab_tab_vnext',tab,true);
+    paintLabFlow();
   }
   const readJson = (id,label) => {try{return JSON.parse($(id).value);}catch{throw new Error(label+'需要合法 JSON');}};
   function experimentFields(spec) {
@@ -169,6 +224,7 @@
       const spec=result.research_spec, exp=result.experiment_spec;
       if(original!==$('#labQuestion').value.trim()||result.research_spec.original_request!==original) return;
       prepared=exp?result:null;
+      paintLabFlow();
       $('#labMatch').innerHTML=`<div class="lab-facts"><span>研究 ${esc(spec.research_id)}</span><span>用途 ${esc(spec.purpose)}</span><span>证据 ${esc(spec.evidence_requirement)}</span></div>
         <p class="space-note">必需机制 ${esc(spec.mechanisms_required.join('、')||'待明确')}</p>
         ${result.warnings.length?`<ul class="form-issues">${result.warnings.map(esc).map(value=>'<li>'+value+'</li>').join('')}</ul>`:''}
@@ -188,7 +244,7 @@
     const el=$('#labWorkspace');
     if(el.dataset.ready)return Promise.resolve();
     el.dataset.ready='true';
-    el.innerHTML=`<div class="lab-tabs" role="tablist" aria-label="研究步骤">${stages.map(([id,label])=>`<button data-lab-tab="${id}" role="tab" aria-selected="false">${label}</button>`).join('')}</div>
+    el.innerHTML=`<div id="labFlow" class="lab-flow" aria-label="研究证据流程"></div><div class="lab-tabs" role="tablist" aria-label="研究步骤">${stages.map(([id,label])=>`<button data-lab-tab="${id}" role="tab" aria-selected="false">${label}</button>`).join('')}</div>
       <section data-lab-view="contract" class="lab-layout">
         ${panel('从研究问题出发',`<form id="labCompileForm" class="tool-form"><label>原始研究问题<textarea id="labQuestion" rows="6" required placeholder="描述模型、主体、地区、时间、对照组与主要观测指标"></textarea></label>
           <label>主要观测字段<input id="labRequestedMetric" placeholder="沿用问题或模型合同"></label>
@@ -210,10 +266,13 @@
     const last=preference('dayan_lab_tab_vnext',undefined,true);
     labTab(stages.some(([id])=>id===last)?last:'contract');
     $('#labQuestion').value=preference('dayan_lab_question_vnext',undefined,true)||'';
+    paintLabFlow();
+    $('#labFlow').onclick=e=>{const b=e.target.closest('[data-lab-flow]');if(b)labTab(b.dataset.labFlow);};
+    window.addEventListener('dayan:study',e=>{labStudy=e.detail;paintLabFlow();});
     $('#labQuestion').oninput=()=>{
-      preference('dayan_lab_question_vnext',$('#labQuestion').value,true); prepared=null;$('#labExecute').disabled=$('#labNext').disabled=true;
+      preference('dayan_lab_question_vnext',$('#labQuestion').value,true); prepared=null;$('#labExecute').disabled=$('#labNext').disabled=true;paintLabFlow();
     };
-    for(const id of ['#labRequestedMetric','#labInputs'])$(id).oninput=()=>{prepared=null;$('#labExecute').disabled=$('#labNext').disabled=true;};
+    for(const id of ['#labRequestedMetric','#labInputs'])$(id).oninput=()=>{prepared=null;$('#labExecute').disabled=$('#labNext').disabled=true;paintLabFlow();};
     $('#labAssistant').onclick=()=>{
       const value=$('#labQuestion').value.trim();
       if(!value)return window.DAYAN_NOTICE('先写下要讨论的研究问题。');
@@ -288,53 +347,80 @@
     if(!host.dataset.ready) {
       host.dataset.ready='true';
       host.innerHTML=`<div class="tool-bar"><label class="search-control">搜索归档<input id="outputSearch" type="search" placeholder="研究问题、模型或运行 ID"></label><label>档案类型<select id="outputKind">${options([['run','运行'],['experiment','配对实验'],['analysis','扫描与组合'],['study','研究验证']],'全部类型')}</select></label><button class="ws-button" id="refreshOutputs">刷新档案</button><button class="ws-button" id="legacyOutputs">旧观测与标记</button></div>
-      <div class="output-layout">${panel('研究档案索引','<div id="outputRows"></div>')}${panel('来源与可复现性','<div id="outputDetail"></div>')}</div>`;
+      <div class="output-layout">${panel('归档目录','<div id="outputRows"></div>','archive-library')}${panel('档案与证据预览','<div id="outputDetail"></div>','archive-reader')}</div>`;
       $('#outputSearch').oninput=()=>paintOutputs();
       $('#outputKind').onchange=()=>paintOutputs();
       $('#refreshOutputs').onclick=()=>outputs().catch(e=>window.DAYAN_NOTICE(e.message));
       $('#legacyOutputs').onclick=async()=>{
-        host.dataset.ready='';
+        host.dataset.ready='';outputSelection=null;
         await window.DAYAN_RESULTS.loadReplay();
         const b=document.createElement('button');b.className='ws-button';b.textContent='返回研究档案索引';b.onclick=outputs;host.prepend(b);
       };
     }
     const [h,s]=await Promise.all([api('/api/history?metadata_only=true&limit=60'),api('/api/research/studies')]);
-    outputRows=[...s.studies.map(v=>({kind:'study',run_id:v.study_id,created_at:v.created_at,model_id:v.model_id,intent:v.question,status:v.calibration?.status||v.phase})),
+    outputRows=[...s.studies.map(v=>({kind:'study',run_id:v.study_id,created_at:v.created_at,model_id:v.model_id,intent:v.question,status:v.calibration?.status||v.phase,parent:v.parent_study_id})),
       ...h.entries].sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
     paintOutputs();
+    if(!outputSelection&&document.body.dataset.page==='replay'){
+      const latest=outputRows.find(r=>r.kind==='study'&&r.status!=='prepared')||outputRows[0];
+      if(latest)await outputDetail(latest);
+    }
   }
-  let outputRows=[],outputRevision=0;
+  let outputRows=[],outputRevision=0,outputSelection=null;
+  const archiveTypes={run:'单次运行',experiment:'配对实验',analysis:'分析归档',study:'验证研究'};
   function paintOutputs() {
     if(!$('#outputRows'))return;
     const q=$('#outputSearch').value.toLowerCase().trim(),kind=$('#outputKind').value;
     const rows=outputRows.filter(r=>(!kind||r.kind===kind)&&`${r.run_id} ${r.intent} ${r.model_id}`.toLowerCase().includes(q));
-    $('#outputRows').innerHTML=rows.length?`<div class="system-rows output-rows">${rows.map(r=>`<button class="system-row row-action" data-output="${esc(r.run_id)}"><div><b>${esc(r.intent||r.model_id||r.run_id)}</b><small>${esc(r.model_id||'研究')} · ${esc(r.run_id)}</small></div><time>${esc(date(r.created_at))}</time><span class="state-pill" data-state="${esc(r.status==='pass'?'passed':r.status)}">${esc(cjkStatus[r.status]||{run:'运行',experiment:'实验',analysis:'分析',study:'研究'}[r.kind])}</span></button>`).join('')}</div>`:empty('没有匹配档案。');
+    $('#outputRows').innerHTML=rows.length?`<div class="output-rows">${rows.map(r=>`<button class="archive-row" data-output="${esc(r.run_id)}" data-kind="${esc(r.kind)}" aria-pressed="${r.run_id===outputSelection}"><span><b>${esc(archiveTypes[r.kind])}</b><time>${esc(date(r.created_at))}</time></span><strong>${esc(r.intent||r.model_id||r.run_id)}</strong><small title="${esc(r.run_id)}">${esc(r.model_id||'研究')} · ${esc(r.run_id)}</small>${r.status?`<span class="state-pill" data-state="${esc(r.status==='pass'?'passed':r.status)}">${esc(cjkStatus[r.status]||r.status)}</span>`:''}</button>`).join('')}</div>`:empty('没有匹配档案。');
     for(const b of $('#outputRows').querySelectorAll('[data-output]'))b.onclick=()=>outputDetail(rows.find(r=>r.run_id===b.dataset.output)).catch(e=>showError('#outputDetail',e));
     if(!$('#outputDetail').innerHTML)$('#outputDetail').innerHTML=empty('选择档案查看版本、数据与下载。');
   }
   async function outputDetail(row) {
     const revision=++outputRevision;
+    outputSelection=row.run_id;
+    for(const b of $('#outputRows').querySelectorAll('[data-output]'))b.setAttribute('aria-pressed',String(b.dataset.output===outputSelection));
     const host=$('#outputDetail');host.innerHTML=empty('读取并核验档案…');
     const id=slug(row.run_id), isStudy=row.kind==='study';
     if(isStudy) {
       const {study,reports}=await api('/api/research/studies/'+id);
       if(revision!==outputRevision)return;
-      const status=study.calibration?.status;
-      host.innerHTML=`<h3>${esc(study.question)}</h3><dl class="fact-list"><dt>研究 ID</dt><dd><code>${esc(study.study_id)}</code></dd><dt>验证状态</dt><dd>${esc(cjkStatus[status]||study.phase)}</dd>
+      const status=study.calibration?.status||study.phase;
+      const nextVersions=outputRows.filter(r=>r.parent===study.study_id);
+      host.innerHTML=`<header class="archive-title"><span>验证研究 · ${esc(study.model_id)}</span><h3>${esc(study.question)}</h3><span class="state-pill" data-state="${esc(status==='pass'?'passed':status||study.phase)}">${esc(cjkStatus[status]||study.phase)}</span></header>
+        <div class="archive-evidence-chain"><button data-open-dataset="${esc(study.training_dataset.dataset_id)}">校准输入 <b>数据版本 ↗</b></button><button data-graph-model="${esc(study.model_id)}">模型 <b>${esc(study.model_id)} ↗</b></button>${study.run_id?`<button data-open-run="${esc(study.run_id)}">模型运行 <b>同源回放 ↗</b></button>`:''}</div>
+        ${study.predictions?.length?'<div id="outputPreview" class="chart-host"></div>':''}
+        <dl class="fact-list"><dt>研究 ID</dt><dd><code>${esc(study.study_id)}</code></dd><dt>版本关系</dt><dd class="tag-row">${study.parent_study_id?`<button data-output-version="${esc(study.parent_study_id)}">上游规约 ↗</button>`:'原始规约'}${nextVersions.map(v=>`<button data-output-version="${esc(v.run_id)}">后续研究 ${esc(v.run_id)} ↗</button>`).join('')}</dd>
         <dt>采集 / 训练快照</dt><dd><code>${esc(study.collection_id)} / ${esc(study.training_dataset.dataset_id)}</code></dd><dt>研究哈希</dt><dd><code>${esc(study.artifact_sha256)}</code></dd><dt>训练数据哈希</dt><dd><code>${esc(study.training_dataset.sha256)}</code></dd></dl>
         <div class="tag-row">${(study.source_pages||[]).map(p=>ref(p.url,'原始来源')).join('')}</div><div class="space-actions"><button class="ws-button" data-study="${esc(study.study_id)}">打开研究</button>${study.run_id?`<button class="ws-button" data-open-run="${esc(study.run_id)}">回放对应模型</button>`:''}</div>
         <div class="tag-row">${(reports||[]).map(r=>r.error?`<span>${esc(r.label+' · '+r.error)}</span>`:ref(r.file,r.label)+' '+ref(r.bundle_url,'复现包')).join('')}</div>`;
+      if($('#outputPreview')){
+        const stride=Math.max(1,Math.ceil((study.records.length-1)/6));
+        const xTicks=study.records.filter((_,i)=>i%stride===0||i===study.records.length-1).map(({date})=>[date,String(date)]);
+        const rmse=study.calibration?.holdout?.rmse;
+        window.DAYAN_CHARTS.plot($('#outputPreview'),{title:'归档研究 · 观测与模型',xUnit:'年度',yUnit:study.unit,xTicks,
+          events:study.holdout?.length?[{x:study.holdout[0].date,label:'独立留出开始'}]:[],series:[{label:'实际观测',points:study.records.map(r=>[r.date,r.value])},{label:'模型预测',dashed:true,points:study.predictions.map(r=>[r.date,r.predicted])}],
+          note:Number.isFinite(rmse)?`留出 RMSE ${rmse.toPrecision(6)} · 事前阈值 ${study.tolerance} ${study.unit}`:''});
+      }
+      for(const b of host.querySelectorAll('[data-output-version]'))b.onclick=()=>{
+        const version=b.dataset.outputVersion;
+        outputDetail(outputRows.find(r=>r.run_id===version)||{run_id:version,kind:'study'}).catch(e=>showError('#outputDetail',e));
+      };
       return;
     }
     const r=await api('/api/runs/'+id);
     if(revision!==outputRevision)return;
     const m=r.manifest||r.runs?.[0]?.manifest;
     const source=m?.code_version||m?.source_fingerprint;
-    host.innerHTML=`<h3>${esc(row.intent||row.model_id)}</h3><dl class="fact-list"><dt>归档 ID</dt><dd><code>${esc(row.run_id)}</code></dd><dt>模型</dt><dd>${esc(row.model_id)}</dd>
-      <dt>源码版本</dt><dd><code>${esc(source||'在子运行清单中')}</code></dd><dt>已绑定数据</dt><dd>${esc((m?.data_bindings||[]).map(b=>b.dataset_id+' '+(b.sha256||'')).join('；')||'本档案未声明外部输入')}</dd>
+    const observations=Array.isArray(r.observations)?r.observations:r.observations?.['基线']?.[0]||(r.analysis?.runs||r.analysis?.stages)?.[0]?.observations||[];
+    const metric=[m?.output_contract?.primary_metric,r.experiment_spec?.primary_metric,r.analysis?.metric,...Object.keys(observations[0]||{})].find(k=>k&&k!=='sim_t'&&observations.some(o=>Number.isFinite(o[k])));
+    host.innerHTML=`<header class="archive-title"><span>${esc(archiveTypes[row.kind])} · ${esc(row.model_id)}</span><h3>${esc(r.request_text||row.intent||row.model_id)}</h3></header>${metric?'<div id="outputPreview" class="chart-host"></div>':''}<dl class="fact-list"><dt>归档 ID</dt><dd><code>${esc(row.run_id)}</code></dd><dt>模型</dt><dd>${esc(row.model_id)}</dd>
+      <dt>源码版本</dt><dd><code>${esc(source||'在子运行清单中')}</code></dd><dt>已绑定数据</dt><dd class="tag-row">${(m?.data_bindings||[]).map(b=>`<button data-open-dataset="${esc(b.dataset_id)}" title="${esc(b.sha256)}">${esc(b.dataset_id)} ↗</button>`).join('')||'本档案未声明外部输入'}</dd>
       <dt>归档文件</dt><dd>${Object.entries(r.files||{}).map(([key,digest])=>`<code class="hash-line" title="${esc(digest)}">${esc(key)} · ${esc(digest.slice(0,12))}</code>`).join('')}</dd></dl>
       <div class="space-actions"><button class="ws-button" data-open-run="${esc(row.run_id)}">回放</button><button class="ws-button" id="analyzeOutput">分析</button><a class="ws-button" href="/api/runs/${id}/bundle.zip" download>下载研究包</a>${row.kind==='run'?`<a class="ws-button" href="/api/runs/${id}/observations.csv" download>观测 CSV</a>`:''}</div>`;
     $('#analyzeOutput').onclick=()=>window.DAYAN_ANALYTICS.open(row.run_id);
+    if(metric)window.DAYAN_CHARTS.plot($('#outputPreview'),{title:'归档观测预览',xUnit:m?.model_definition?.time_unit||'模型时间',yUnit:m?.output_contract?.fields?.[metric]?.unit||metric,
+      series:[{label:row.kind==='run'?window.DAYAN_ANALYSIS.label(metric):'首个归档运行 · '+window.DAYAN_ANALYSIS.label(metric),points:observations.map(o=>[o.sim_t,o[metric]])}]});
   }
   const modules={models:()=>models(),lab:()=>lab(),replay:()=>outputs(),analytics:()=>window.DAYAN_ANALYTICS.load()};
   window.DAYAN_TOOLS={load(name){return modules[name]?.();},openModel,openStudy,useCollection};
