@@ -19,7 +19,7 @@ PRIMARY_METRICS = {"NET052": "I", "NET053": "I", "NET055": "I",
                    "NET106": "flux", "NET113": "evacuated",
                    "BEH001": "segregation", "BEH018": "mean",
                    "ECO019": "employment", "SYS002": "Wq_sim",
-                   "CPL001": "evacuated"}
+                   "CPL001": "evacuated","ECO038":"spectral_radius","ECO045":"conditional_variance"}
 
 
 def _type(node, names):

@@ -18,6 +18,7 @@ class RoadEvacuationModel:
     clock_type = "fixed_step"
     time_unit = "minute"
     requires_external = True  # Do not run catalog probes without explicit dataset IDs.
+    external_dependencies = ("roads_dataset_id", "population_dataset_id")
     declared_observables = ["n_agents", "represented_population", "evacuated", "remaining", "elderly_remaining", "bus_queue", "on_bus", "rumor_mean", "exposure", "evacuated_fraction",
                             "people_evacuated", "people_waiting", "people_on_bus"]
     output_units = {"n_agents":"model agent","represented_population":"person","evacuated":"model agent",

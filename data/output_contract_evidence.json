@@ -1,6 +1,6 @@
 {
  "version": 1,
- "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4",
+ "source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
  "python": "3.13.2",
  "probe_ticks": 5,
  "seed": 0,
@@ -11,17 +11,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "policy_lever": [
-     "string"
-    ],
     "vaccine_final": [
      "object"
+    ],
+    "policy_lever": [
+     "string"
     ],
     "baseline_final": [
      "object"
     ]
    },
-   "duration_s": 1.781,
+   "duration_s": 1.447,
    "observables": []
   },
   "APP002": {
@@ -43,7 +43,7 @@
      "number"
     ]
    },
-   "duration_s": 0.623,
+   "duration_s": 0.462,
    "observables": [
     "free_flow_flux",
     "congested_flux",
@@ -61,7 +61,7 @@
      "number"
     ]
    },
-   "duration_s": 0.145,
+   "duration_s": 0.117,
    "observables": [
     "final_opinion_mean"
    ]
@@ -76,7 +76,7 @@
      "object"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.117,
    "observables": []
   },
   "APP005": {
@@ -95,7 +95,7 @@
      "number"
     ]
    },
-   "duration_s": 0.14,
+   "duration_s": 0.113,
    "observables": [
     "march_explore",
     "garbage_solved",
@@ -115,7 +115,7 @@
      "object"
     ]
    },
-   "duration_s": 0.452,
+   "duration_s": 0.294,
    "observables": []
   },
   "APP007": {
@@ -134,7 +134,7 @@
      "number"
     ]
    },
-   "duration_s": 0.239,
+   "duration_s": 0.102,
    "observables": [
     "bkt_mastery",
     "rasch_corr",
@@ -147,14 +147,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cohort_final": [
+    "queue_final": [
      "object"
     ],
-    "queue_final": [
+    "cohort_final": [
      "object"
     ]
    },
-   "duration_s": 0.756,
+   "duration_s": 0.374,
    "observables": []
   },
   "APP009": {
@@ -163,17 +163,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "fiscal_Y": [
-     "number"
+    "tax_mtr": [
+     "array"
     ],
     "conserv": [
      "number"
     ],
-    "tax_mtr": [
-     "array"
+    "fiscal_Y": [
+     "number"
     ]
    },
-   "duration_s": 0.961,
+   "duration_s": 0.394,
    "observables": [
     "fiscal_Y",
     "conserv"
@@ -185,17 +185,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "lm_kurtosis": [
+     "number"
+    ],
     "sfm_final": [
      "object"
     ],
     "zi_efficiency": [
      "number"
-    ],
-    "lm_kurtosis": [
-     "number"
     ]
    },
-   "duration_s": 1.802,
+   "duration_s": 0.586,
    "observables": [
     "lm_kurtosis",
     "zi_efficiency"
@@ -207,14 +207,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "city_final": [
-     "object"
-    ],
     "schelling_note": [
      "string"
+    ],
+    "city_final": [
+     "object"
     ]
    },
-   "duration_s": 1.995,
+   "duration_s": 1.366,
    "observables": []
   },
   "APP012": {
@@ -223,17 +223,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "lambda1": [
+     "number"
+    ],
     "leecarter_fit": [
      "number"
     ],
     "population_total": [
      "number"
-    ],
-    "lambda1": [
-     "number"
     ]
    },
-   "duration_s": 0.476,
+   "duration_s": 0.312,
    "observables": [
     "population_total",
     "lambda1",
@@ -253,7 +253,7 @@
      "object"
     ]
    },
-   "duration_s": 0.161,
+   "duration_s": 0.173,
    "observables": []
   },
   "APP014": {
@@ -262,17 +262,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "hotelling_price": [
-     "number"
-    ],
     "dice_final": [
      "object"
+    ],
+    "hotelling_price": [
+     "number"
     ],
     "world3_resources": [
      "number"
     ]
    },
-   "duration_s": 0.656,
+   "duration_s": 0.517,
    "observables": [
     "world3_resources",
     "hotelling_price"
@@ -291,7 +291,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.189,
+   "duration_s": 0.133,
    "observables": []
   },
   "APP016": {
@@ -300,17 +300,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rounds": [
+    "human_score": [
      "number"
     ],
-    "human_score": [
+    "rounds": [
      "number"
     ],
     "human_in_loop_hook": [
      "boolean"
     ]
    },
-   "duration_s": 0.163,
+   "duration_s": 0.115,
    "observables": [
     "human_score",
     "rounds"
@@ -322,14 +322,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "zi_efficiency": [
+    "mincer_rho_hat": [
      "number"
     ],
-    "mincer_rho_hat": [
+    "zi_efficiency": [
      "number"
     ]
    },
-   "duration_s": 0.588,
+   "duration_s": 0.393,
    "observables": [
     "zi_efficiency",
     "mincer_rho_hat"
@@ -341,17 +341,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "sync_loop": [
-     "boolean"
-    ],
     "final_drift": [
      "number"
     ],
     "drift_detected": [
      "boolean"
+    ],
+    "sync_loop": [
+     "boolean"
     ]
    },
-   "duration_s": 0.222,
+   "duration_s": 0.141,
    "observables": [
     "final_drift"
    ]
@@ -362,17 +362,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "grad_fd": [
+     "number"
+    ],
     "grad_exact": [
      "number"
     ],
     "gradient_ok": [
      "boolean"
-    ],
-    "grad_fd": [
-     "number"
     ]
    },
-   "duration_s": 0.228,
+   "duration_s": 0.144,
    "observables": [
     "grad_fd",
     "grad_exact"
@@ -384,20 +384,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rule_respected": [
-     "boolean"
-    ],
     "scores": [
      "array"
     ],
-    "scenario_binding": [
-     "string"
+    "rule_respected": [
+     "boolean"
     ],
     "chosen": [
      "string"
+    ],
+    "scenario_binding": [
+     "string"
     ]
    },
-   "duration_s": 0.206,
+   "duration_s": 0.132,
    "observables": []
   },
   "APP021": {
@@ -406,7 +406,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "counterfactual_flux": [
+    "baseline_flux": [
      "number"
     ],
     "counterfactual_gap": [
@@ -415,11 +415,11 @@
     "history_diverged": [
      "boolean"
     ],
-    "baseline_flux": [
+    "counterfactual_flux": [
      "number"
     ]
    },
-   "duration_s": 1.575,
+   "duration_s": 1.313,
    "observables": [
     "baseline_flux",
     "counterfactual_flux",
@@ -435,17 +435,17 @@
     "n_components_before": [
      "number"
     ],
-    "constraint_min": [
-     "number"
-    ],
     "structural_hole_broker": [
      "boolean"
+    ],
+    "constraint_min": [
+     "number"
     ],
     "n_components_after_rewire": [
      "number"
     ]
    },
-   "duration_s": 0.525,
+   "duration_s": 0.513,
    "observables": [
     "constraint_min",
     "n_components_before",
@@ -458,14 +458,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "segregation": [
+    "unhappy_frac": [
      "number"
     ],
-    "unhappy_frac": [
+    "segregation": [
      "number"
     ]
    },
-   "duration_s": 0.14,
+   "duration_s": 0.116,
    "observables": [
     "segregation",
     "unhappy_frac"
@@ -477,14 +477,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "segregation": [
-     "number"
-    ],
     "tipped": [
      "boolean"
+    ],
+    "segregation": [
+     "number"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.101,
    "observables": [
     "segregation"
    ]
@@ -505,7 +505,7 @@
      "number"
     ]
    },
-   "duration_s": 0.127,
+   "duration_s": 0.102,
    "observables": [
     "alive",
     "gini"
@@ -517,13 +517,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_trades": [
-     "number"
-    ],
     "gini": [
-     "number"
-    ],
-    "alive": [
      "number"
     ],
     "inequality_emerged": [
@@ -532,9 +526,15 @@
     "trade_price_mean": [
      "null",
      "number"
+    ],
+    "n_trades": [
+     "number"
+    ],
+    "alive": [
+     "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.098,
    "observables": [
     "alive",
     "gini",
@@ -548,12 +548,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "violence_frac": [
-     "number"
-    ],
-    "episodic": [
-     "boolean"
-    ],
     "active_frac": [
      "number"
     ],
@@ -565,9 +559,15 @@
     ],
     "jailed_count": [
      "number"
+    ],
+    "episodic": [
+     "boolean"
+    ],
+    "violence_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.102,
    "observables": [
     "violence_frac",
     "active_frac",
@@ -589,7 +589,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.103,
    "observables": [
     "attack_frac"
    ]
@@ -612,7 +612,7 @@
      "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.103,
    "observables": [
     "mean_attendance",
     "n_samples"
@@ -628,15 +628,15 @@
      "boolean",
      "null"
     ],
-    "n_samples": [
-     "number"
-    ],
     "mean_ones_share": [
      "null",
      "number"
+    ],
+    "n_samples": [
+     "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.118,
    "observables": [
     "mean_ones_share",
     "n_samples"
@@ -648,14 +648,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "hierarchy_emerged": [
-     "boolean"
-    ],
     "power_std": [
      "number"
+    ],
+    "hierarchy_emerged": [
+     "boolean"
     ]
    },
-   "duration_s": 1.091,
+   "duration_s": 0.974,
    "observables": [
     "power_std"
    ]
@@ -676,7 +676,7 @@
      "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.089,
    "observables": [
     "mean_explore",
     "knowledge_mean"
@@ -688,14 +688,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "flight_prob": [
-     "boolean"
-    ],
     "solved_frac": [
      "number"
+    ],
+    "flight_prob": [
+     "boolean"
     ]
    },
-   "duration_s": 0.137,
+   "duration_s": 0.089,
    "observables": [
     "solved_frac"
    ]
@@ -706,14 +706,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "fitness": [
+    "genome_std": [
      "number"
     ],
-    "genome_std": [
+    "fitness": [
      "number"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.104,
    "observables": [
     "fitness",
     "genome_std"
@@ -732,7 +732,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.106,
    "observables": [
     "mean_fit"
    ]
@@ -743,14 +743,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "participation": [
-     "number"
-    ],
     "cascade": [
      "boolean"
+    ],
+    "participation": [
+     "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.105,
    "observables": [
     "participation"
    ]
@@ -761,14 +761,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
     "opinions": [
      "array"
+    ],
+    "spread": [
+     "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.108,
    "observables": [
     "spread"
    ]
@@ -782,17 +782,17 @@
     "mean": [
      "number"
     ],
-    "spread": [
-     "number"
-    ],
     "opinions": [
      "array"
+    ],
+    "spread": [
+     "number"
     ],
     "clusters": [
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.113,
    "observables": [
     "mean",
     "spread",
@@ -805,17 +805,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_clusters": [
-     "number"
-    ],
     "max_spread": [
      "number"
     ],
     "opinions": [
      "array"
+    ],
+    "n_clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.113,
    "observables": [
     "n_clusters",
     "max_spread"
@@ -830,17 +830,17 @@
     "mean": [
      "number"
     ],
-    "spread": [
-     "number"
-    ],
     "opinions": [
      "array"
+    ],
+    "spread": [
+     "number"
     ],
     "clusters": [
      "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.115,
    "observables": [
     "mean",
     "spread",
@@ -853,20 +853,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
      "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 1.024,
+   "duration_s": 1.022,
    "observables": [
     "mean",
     "spread",
@@ -882,14 +882,14 @@
     "consensus_value": [
      "null"
     ],
-    "frac1": [
-     "number"
-    ],
     "consensus": [
      "null"
+    ],
+    "frac1": [
+     "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.097,
    "observables": [
     "frac1"
    ]
@@ -900,20 +900,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
      "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.098,
    "observables": [
     "mean",
     "spread",
@@ -926,20 +926,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
      "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.098,
    "observables": [
     "mean",
     "spread",
@@ -952,16 +952,16 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
+     "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
      "number"
     ]
    },
@@ -978,20 +978,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
      "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.101,
    "observables": [
     "mean",
     "spread",
@@ -1004,20 +1004,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
      "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.098,
    "observables": [
     "mean",
     "spread",
@@ -1030,20 +1030,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
      "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.081,
    "observables": [
     "mean",
     "spread",
@@ -1056,23 +1056,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "clusters": [
      "number"
     ],
-    "action_share": [
+    "spread": [
      "number"
     ],
     "opinions": [
      "array"
+    ],
+    "action_share": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.088,
    "observables": [
     "mean",
     "spread",
@@ -1086,20 +1086,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spread": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "opinions": [
      "array"
     ],
     "clusters": [
      "number"
+    ],
+    "spread": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.1,
    "observables": [
     "mean",
     "spread",
@@ -1112,20 +1112,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
+    ],
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 1.459,
+   "duration_s": 1.039,
    "observables": [
     "mean",
     "spread",
@@ -1138,20 +1138,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
+    ],
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.143,
+   "duration_s": 0.094,
    "observables": [
     "mean",
     "spread",
@@ -1164,20 +1164,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
+    ],
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.149,
+   "duration_s": 0.098,
    "observables": [
     "mean",
     "spread",
@@ -1190,20 +1190,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
+    ],
+    "clusters": [
+     "number"
+    ],
+    "mean": [
+     "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.1,
    "observables": [
     "mean",
     "spread",
@@ -1226,7 +1226,7 @@
      "number"
     ]
    },
-   "duration_s": 0.158,
+   "duration_s": 0.115,
    "observables": [
     "regions",
     "n_agents"
@@ -1245,7 +1245,7 @@
      "number"
     ]
    },
-   "duration_s": 0.161,
+   "duration_s": 0.149,
    "observables": [
     "n_regions",
     "largest"
@@ -1261,7 +1261,7 @@
      "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.101,
    "observables": [
     "adopted_frac"
    ]
@@ -1276,7 +1276,7 @@
      "number"
     ]
    },
-   "duration_s": 0.136,
+   "duration_s": 0.108,
    "observables": [
     "frac1"
    ]
@@ -1294,7 +1294,7 @@
      "number"
     ]
    },
-   "duration_s": 0.136,
+   "duration_s": 0.131,
    "observables": [
     "mean_payoff",
     "behavior_frac"
@@ -1310,7 +1310,7 @@
      "number"
     ]
    },
-   "duration_s": 0.149,
+   "duration_s": 0.107,
    "observables": [
     "elite_behavior_frac"
    ]
@@ -1325,7 +1325,7 @@
      "number"
     ]
    },
-   "duration_s": 1.2,
+   "duration_s": 1.045,
    "observables": [
     "learner_frac"
    ]
@@ -1340,7 +1340,7 @@
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.09,
    "observables": [
     "skill"
    ]
@@ -1351,17 +1351,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "between_group_var": [
-     "number"
+    "norm_survives": [
+     "boolean"
     ],
     "mean_norm": [
      "number"
     ],
-    "norm_survives": [
-     "boolean"
+    "between_group_var": [
+     "number"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.114,
    "observables": [
     "mean_norm",
     "between_group_var"
@@ -1376,14 +1376,14 @@
     "gene": [
      "number"
     ],
-    "coevolved": [
-     "boolean"
-    ],
     "culture": [
      "number"
+    ],
+    "coevolved": [
+     "boolean"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.113,
    "observables": [
     "culture",
     "gene"
@@ -1395,14 +1395,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dominant": [
-     "boolean"
-    ],
     "ethnocentrism_share": [
      "number"
+    ],
+    "dominant": [
+     "boolean"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.098,
    "observables": [
     "ethnocentrism_share"
    ]
@@ -1413,17 +1413,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "converged": [
+     "boolean"
+    ],
     "institution": [
      "number"
     ],
     "culture": [
      "number"
-    ],
-    "converged": [
-     "boolean"
     ]
    },
-   "duration_s": 0.147,
+   "duration_s": 0.106,
    "observables": [
     "institution",
     "culture"
@@ -1435,17 +1435,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "aligned_agents": [
+    "success_rate": [
      "number"
     ],
-    "success_rate": [
+    "aligned_agents": [
      "number"
     ],
     "distinct_words": [
      "number"
     ]
    },
-   "duration_s": 0.14,
+   "duration_s": 0.107,
    "observables": [
     "distinct_words",
     "aligned_agents",
@@ -1465,7 +1465,7 @@
      "number"
     ]
    },
-   "duration_s": 0.141,
+   "duration_s": 0.101,
    "observables": [
     "X_frac",
     "Y_frac"
@@ -1477,14 +1477,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "bilingual_stationary": [
-     "boolean"
-    ],
     "share_a": [
      "number"
+    ],
+    "bilingual_stationary": [
+     "boolean"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.093,
    "observables": [
     "share_a"
    ]
@@ -1502,7 +1502,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.1,
    "observables": [
     "compositional"
    ]
@@ -1523,7 +1523,7 @@
      "array"
     ]
    },
-   "duration_s": 1.056,
+   "duration_s": 1.04,
    "observables": [
     "entropy"
    ]
@@ -1544,7 +1544,7 @@
      "array"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.102,
    "observables": [
     "entropy"
    ]
@@ -1565,7 +1565,7 @@
      "array"
     ]
    },
-   "duration_s": 0.14,
+   "duration_s": 0.095,
    "observables": [
     "entropy"
    ]
@@ -1586,7 +1586,7 @@
      "array"
     ]
    },
-   "duration_s": 0.146,
+   "duration_s": 0.109,
    "observables": [
     "entropy"
    ]
@@ -1607,7 +1607,7 @@
      "array"
     ]
    },
-   "duration_s": 0.136,
+   "duration_s": 0.12,
    "observables": [
     "entropy"
    ]
@@ -1628,7 +1628,7 @@
      "array"
     ]
    },
-   "duration_s": 0.137,
+   "duration_s": 0.107,
    "observables": [
     "entropy"
    ]
@@ -1649,7 +1649,7 @@
      "array"
     ]
    },
-   "duration_s": 0.142,
+   "duration_s": 0.113,
    "observables": [
     "entropy"
    ]
@@ -1670,7 +1670,7 @@
      "array"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.099,
    "observables": [
     "entropy"
    ]
@@ -1691,7 +1691,7 @@
      "array"
     ]
    },
-   "duration_s": 0.185,
+   "duration_s": 0.097,
    "observables": [
     "entropy"
    ]
@@ -1712,7 +1712,7 @@
      "array"
     ]
    },
-   "duration_s": 0.153,
+   "duration_s": 0.087,
    "observables": [
     "entropy"
    ]
@@ -1723,17 +1723,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "entropy": [
-     "number"
-    ],
     "freq": [
      "array"
+    ],
+    "entropy": [
+     "number"
     ],
     "freq_hist_shape": [
      "array"
     ]
    },
-   "duration_s": 1.167,
+   "duration_s": 1.031,
    "observables": [
     "entropy"
    ]
@@ -1744,17 +1744,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "entropy": [
-     "number"
-    ],
     "freq": [
      "array"
+    ],
+    "entropy": [
+     "number"
     ],
     "freq_hist_shape": [
      "array"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.083,
    "observables": [
     "entropy"
    ]
@@ -1765,17 +1765,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "entropy": [
-     "number"
-    ],
     "freq": [
      "array"
+    ],
+    "entropy": [
+     "number"
     ],
     "freq_hist_shape": [
      "array"
     ]
    },
-   "duration_s": 0.138,
+   "duration_s": 0.088,
    "observables": [
     "entropy"
    ]
@@ -1786,17 +1786,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "entropy": [
-     "number"
-    ],
     "freq": [
      "array"
+    ],
+    "entropy": [
+     "number"
     ],
     "freq_hist_shape": [
      "array"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.092,
    "observables": [
     "entropy"
    ]
@@ -1807,17 +1807,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "entropy": [
-     "number"
-    ],
     "freq": [
      "array"
+    ],
+    "entropy": [
+     "number"
     ],
     "freq_hist_shape": [
      "array"
     ]
    },
-   "duration_s": 0.135,
+   "duration_s": 0.097,
    "observables": [
     "entropy"
    ]
@@ -1835,7 +1835,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.127,
+   "duration_s": 0.105,
    "observables": []
   },
   "BEH065": {
@@ -1857,7 +1857,7 @@
      "null"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.094,
    "observables": [
     "estate"
    ]
@@ -1868,20 +1868,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "utility_mixed": [
-     "number"
-    ],
     "same_type_optimal": [
      "boolean"
     ],
-    "partition_sizes": [
-     "object"
-    ],
     "utility_same_type_grouping": [
      "number"
+    ],
+    "utility_mixed": [
+     "number"
+    ],
+    "partition_sizes": [
+     "object"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.101,
    "observables": [
     "utility_same_type_grouping",
     "utility_mixed"
@@ -1893,17 +1893,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "symmetric": [
-     "null"
+    "product": [
+     "number"
     ],
     "solution": [
      "array"
     ],
-    "product": [
-     "number"
+    "symmetric": [
+     "null"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.099,
    "observables": [
     "product"
    ]
@@ -1924,7 +1924,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.081,
    "observables": [
     "limit_share1",
     "finite_offer"
@@ -1936,18 +1936,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "score_vs_alld": [
-     "number"
-    ],
     "coop_rate": [
      "null",
      "number"
     ],
     "n_rounds": [
      "number"
+    ],
+    "score_vs_alld": [
+     "number"
     ]
    },
-   "duration_s": 1.103,
+   "duration_s": 1.053,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -1960,18 +1960,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "score_vs_alld": [
-     "number"
-    ],
     "coop_rate": [
      "null",
      "number"
     ],
     "n_rounds": [
      "number"
+    ],
+    "score_vs_alld": [
+     "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.096,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -1984,18 +1984,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "score_vs_alld": [
-     "number"
-    ],
     "coop_rate": [
      "null",
      "number"
     ],
     "n_rounds": [
      "number"
+    ],
+    "score_vs_alld": [
+     "number"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.093,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -2008,18 +2008,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "score_vs_alld": [
-     "number"
-    ],
     "coop_rate": [
      "null",
      "number"
     ],
     "n_rounds": [
      "number"
+    ],
+    "score_vs_alld": [
+     "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.105,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -2032,22 +2032,50 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "score_vs_alld": [
-     "number"
-    ],
     "coop_rate": [
      "null",
      "number"
     ],
     "n_rounds": [
      "number"
+    ],
+    "score_vs_alld": [
+     "number"
     ]
    },
-   "duration_s": 0.156,
+   "duration_s": 0.096,
    "observables": [
     "score_vs_alld",
     "coop_rate",
     "n_rounds"
+   ]
+  },
+  "BEH074": {
+   "model_id": "BEH074",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "coop_image_frac": [
+     "number"
+    ],
+    "cooperation_rate": [
+     "null",
+     "number"
+    ],
+    "mean_image": [
+     "number"
+    ],
+    "encounters": [
+     "number"
+    ]
+   },
+   "duration_s": 0.105,
+   "observables": [
+    "mean_image",
+    "coop_image_frac",
+    "cooperation_rate",
+    "encounters"
    ]
   },
   "BEH075": {
@@ -2063,7 +2091,7 @@
      "number"
     ]
    },
-   "duration_s": 0.146,
+   "duration_s": 0.111,
    "observables": [
     "coop_rate",
     "rep_pos_share"
@@ -2082,7 +2110,7 @@
      "number"
     ]
    },
-   "duration_s": 0.153,
+   "duration_s": 0.095,
    "observables": [
     "coop_rate",
     "rep_pos_share"
@@ -2101,7 +2129,7 @@
      "number"
     ]
    },
-   "duration_s": 0.152,
+   "duration_s": 0.119,
    "observables": [
     "coop_rate",
     "rep_pos_share"
@@ -2113,19 +2141,19 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "norm_evolved": [
+     "boolean",
+     "null"
+    ],
     "mean_vengeance": [
      "null",
      "number"
     ],
     "n_samples": [
      "number"
-    ],
-    "norm_evolved": [
-     "boolean",
-     "null"
     ]
    },
-   "duration_s": 0.142,
+   "duration_s": 0.097,
    "observables": [
     "mean_vengeance",
     "n_samples"
@@ -2137,19 +2165,19 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mean_vengeance": [
-     "null",
-     "number"
-    ],
     "meta_norm_stronger": [
      "boolean",
      "null"
+    ],
+    "mean_vengeance": [
+     "null",
+     "number"
     ],
     "n_samples": [
      "number"
     ]
    },
-   "duration_s": 0.14,
+   "duration_s": 0.984,
    "observables": [
     "mean_vengeance",
     "n_samples"
@@ -2165,9 +2193,33 @@
      "number"
     ]
    },
-   "duration_s": 1.087,
+   "duration_s": 0.09,
    "observables": [
     "frac1"
+   ]
+  },
+  "BEH081": {
+   "model_id": "BEH081",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "rounds": [
+     "number"
+    ],
+    "coordination_rate": [
+     "null",
+     "number"
+    ],
+    "convention_1_share": [
+     "number"
+    ]
+   },
+   "duration_s": 0.086,
+   "observables": [
+    "convention_1_share",
+    "coordination_rate",
+    "rounds"
    ]
   },
   "BEH082": {
@@ -2176,14 +2228,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq": [
-     "array"
-    ],
     "err_vs_star": [
      "number"
+    ],
+    "freq": [
+     "array"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.1,
    "observables": [
     "err_vs_star"
    ]
@@ -2204,7 +2256,7 @@
      "array"
     ]
    },
-   "duration_s": 0.137,
+   "duration_s": 0.096,
    "observables": [
     "entropy"
    ]
@@ -2225,7 +2277,7 @@
      "array"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.098,
    "observables": [
     "entropy"
    ]
@@ -2246,7 +2298,7 @@
      "array"
     ]
    },
-   "duration_s": 0.175,
+   "duration_s": 0.1,
    "observables": [
     "entropy"
    ]
@@ -2267,7 +2319,7 @@
      "array"
     ]
    },
-   "duration_s": 0.151,
+   "duration_s": 0.096,
    "observables": [
     "entropy"
    ]
@@ -2288,7 +2340,7 @@
      "array"
     ]
    },
-   "duration_s": 0.135,
+   "duration_s": 0.093,
    "observables": [
     "entropy"
    ]
@@ -2309,7 +2361,7 @@
      "array"
     ]
    },
-   "duration_s": 0.144,
+   "duration_s": 0.092,
    "observables": [
     "entropy"
    ]
@@ -2327,7 +2379,7 @@
      "array"
     ]
    },
-   "duration_s": 0.165,
+   "duration_s": 1.047,
    "observables": [
     "best_arm_share"
    ]
@@ -2345,7 +2397,7 @@
      "array"
     ]
    },
-   "duration_s": 0.168,
+   "duration_s": 0.09,
    "observables": [
     "best_arm_share"
    ]
@@ -2363,7 +2415,7 @@
      "array"
     ]
    },
-   "duration_s": 1.178,
+   "duration_s": 0.102,
    "observables": [
     "best_arm_share"
    ]
@@ -2374,20 +2426,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "br_share": [
+    "best_arm_share": [
      "number"
     ],
     "posterior_opp0": [
      "number"
     ],
-    "best_arm_share": [
+    "br_share": [
      "number"
     ],
     "choice_shares": [
      "array"
     ]
    },
-   "duration_s": 0.155,
+   "duration_s": 0.115,
    "observables": [
     "best_arm_share",
     "posterior_opp0",
@@ -2407,7 +2459,7 @@
      "array"
     ]
    },
-   "duration_s": 0.211,
+   "duration_s": 0.122,
    "observables": [
     "best_arm_share"
    ]
@@ -2425,7 +2477,7 @@
      "object"
     ]
    },
-   "duration_s": 0.152,
+   "duration_s": 0.093,
    "observables": []
   },
   "BEH095": {
@@ -2442,7 +2494,7 @@
      "object"
     ]
    },
-   "duration_s": 0.166,
+   "duration_s": 0.092,
    "observables": []
   },
   "BEH096": {
@@ -2454,14 +2506,14 @@
     "impasse_count": [
      "number"
     ],
-    "state": [
-     "string"
-    ],
     "solved": [
      "boolean"
+    ],
+    "state": [
+     "string"
     ]
    },
-   "duration_s": 0.176,
+   "duration_s": 0.09,
    "observables": [
     "impasse_count"
    ]
@@ -2472,17 +2524,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "implicit_Q": [
-     "array"
-    ],
     "explicit_rules": [
      "array"
     ],
     "rule_extracted": [
      "boolean"
+    ],
+    "implicit_Q": [
+     "array"
     ]
    },
-   "duration_s": 0.183,
+   "duration_s": 0.089,
    "observables": []
   },
   "BEH098": {
@@ -2498,7 +2550,7 @@
      "array"
     ]
    },
-   "duration_s": 0.203,
+   "duration_s": 0.089,
    "observables": []
   },
   "BEH099": {
@@ -2514,7 +2566,7 @@
      "number"
     ]
    },
-   "duration_s": 0.206,
+   "duration_s": 1.023,
    "observables": [
     "n_emotions"
    ]
@@ -2525,15 +2577,15 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "needs": [
-     "object"
-    ],
     "behavior": [
      "null",
      "string"
+    ],
+    "needs": [
+     "object"
     ]
    },
-   "duration_s": 0.178,
+   "duration_s": 0.09,
    "observables": []
   },
   "BEH101": {
@@ -2542,15 +2594,15 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "need": [
-     "number"
-    ],
     "strategy": [
      "null",
      "string"
+    ],
+    "need": [
+     "number"
     ]
    },
-   "duration_s": 1.19,
+   "duration_s": 0.088,
    "observables": [
     "need"
    ]
@@ -2561,17 +2613,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "speed_accuracy_tradeoff": [
-     "boolean"
-    ],
     "mean_rt": [
      "number"
+    ],
+    "speed_accuracy_tradeoff": [
+     "boolean"
     ],
     "accuracy": [
      "number"
     ]
    },
-   "duration_s": 0.183,
+   "duration_s": 0.134,
    "observables": [
     "mean_rt",
     "accuracy"
@@ -2590,7 +2642,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.109,
    "observables": [
     "behavior_rate"
    ]
@@ -2601,8 +2653,8 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "large_p_underweight": [
-     "boolean"
+    "loss_aversion": [
+     "number"
     ],
     "values": [
      "array"
@@ -2610,14 +2662,14 @@
     "reflection_ok": [
      "boolean"
     ],
-    "loss_aversion": [
-     "number"
+    "large_p_underweight": [
+     "boolean"
     ],
     "small_p_overweight": [
      "boolean"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.102,
    "observables": [
     "loss_aversion"
    ]
@@ -2638,7 +2690,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.094,
    "observables": []
   },
   "BEH106": {
@@ -2647,20 +2699,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "u_equal": [
-     "number"
-    ],
-    "u_advantageous": [
-     "number"
-    ],
     "inequality_averse": [
      "boolean"
     ],
     "u_disadvantageous": [
      "number"
+    ],
+    "u_equal": [
+     "number"
+    ],
+    "u_advantageous": [
+     "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.09,
    "observables": [
     "u_equal",
     "u_advantageous",
@@ -2680,7 +2732,7 @@
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.093,
    "observables": [
     "conflict",
     "claim_actual_gap"
@@ -2699,7 +2751,7 @@
      "array"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.093,
    "observables": []
   },
   "BEH109": {
@@ -2715,7 +2767,7 @@
      "object"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.976,
    "observables": [
     "winner"
    ]
@@ -2726,17 +2778,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "distribution_head": [
+     "array"
+    ],
     "winning_number": [
      "number"
     ],
     "below_50": [
      "boolean"
-    ],
-    "distribution_head": [
-     "array"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.094,
    "observables": [
     "winning_number"
    ]
@@ -2747,17 +2799,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "q_col": [
+    "q_row": [
      "array"
     ],
     "mixed_tendency": [
      "boolean"
     ],
-    "q_row": [
+    "q_col": [
      "array"
     ]
    },
-   "duration_s": 1.097,
+   "duration_s": 0.081,
    "observables": []
   },
   "BEH112": {
@@ -2766,17 +2818,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "learned_right": [
-     "boolean"
+    "greedy_actions": [
+     "array"
     ],
     "last_reward": [
      "number"
     ],
-    "greedy_actions": [
-     "array"
+    "learned_right": [
+     "boolean"
     ]
    },
-   "duration_s": 0.137,
+   "duration_s": 0.085,
    "observables": [
     "last_reward"
    ]
@@ -2787,17 +2839,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "learned_right": [
-     "boolean"
+    "greedy_actions": [
+     "array"
     ],
     "last_reward": [
      "number"
     ],
-    "greedy_actions": [
-     "array"
+    "learned_right": [
+     "boolean"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.092,
    "observables": [
     "last_reward"
    ]
@@ -2808,17 +2860,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "greedy_actions": [
+     "array"
+    ],
     "learned_right": [
      "boolean"
     ],
     "recent_reward": [
      "number"
-    ],
-    "greedy_actions": [
-     "array"
     ]
    },
-   "duration_s": 0.744,
+   "duration_s": 0.62,
    "observables": [
     "recent_reward"
    ]
@@ -2829,17 +2881,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "greedy_actions": [
+     "array"
+    ],
     "learned_right": [
      "boolean"
     ],
     "recent_reward": [
      "number"
-    ],
-    "greedy_actions": [
-     "array"
     ]
    },
-   "duration_s": 0.688,
+   "duration_s": 0.57,
    "observables": [
     "recent_reward"
    ]
@@ -2850,17 +2902,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "greedy_actions": [
+     "array"
+    ],
     "learned_right": [
      "boolean"
     ],
     "recent_reward": [
      "number"
-    ],
-    "greedy_actions": [
-     "array"
     ]
    },
-   "duration_s": 0.183,
+   "duration_s": 0.102,
    "observables": [
     "recent_reward"
    ]
@@ -2871,17 +2923,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "greedy_actions": [
+     "array"
+    ],
     "learned_right": [
      "boolean"
     ],
     "recent_reward": [
      "number"
-    ],
-    "greedy_actions": [
-     "array"
     ]
    },
-   "duration_s": 0.19,
+   "duration_s": 0.092,
    "observables": [
     "recent_reward"
    ]
@@ -2892,17 +2944,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "greedy_actions": [
+     "array"
+    ],
     "learned_right": [
      "boolean"
     ],
     "recent_reward": [
      "number"
-    ],
-    "greedy_actions": [
-     "array"
     ]
    },
-   "duration_s": 0.149,
+   "duration_s": 0.095,
    "observables": [
     "recent_reward"
    ]
@@ -2923,7 +2975,7 @@
      "array"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.953,
    "observables": [
     "recent_reward"
    ]
@@ -2944,7 +2996,7 @@
      "array"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.091,
    "observables": [
     "recent_reward"
    ]
@@ -2955,14 +3007,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "converged_to_target": [
-     "boolean"
-    ],
     "mu": [
      "number"
+    ],
+    "converged_to_target": [
+     "boolean"
     ]
    },
-   "duration_s": 1.059,
+   "duration_s": 0.106,
    "observables": [
     "mu"
    ]
@@ -2973,14 +3025,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "converged_to_target": [
-     "boolean"
-    ],
     "mu": [
      "number"
+    ],
+    "converged_to_target": [
+     "boolean"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.094,
    "observables": [
     "mu"
    ]
@@ -2991,14 +3043,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "converged_to_target": [
-     "boolean"
-    ],
     "mu": [
      "number"
+    ],
+    "converged_to_target": [
+     "boolean"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.093,
    "observables": [
     "mu"
    ]
@@ -3016,7 +3068,7 @@
      "number"
     ]
    },
-   "duration_s": 0.127,
+   "duration_s": 0.086,
    "observables": [
     "coop_rate"
    ]
@@ -3034,7 +3086,7 @@
      "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.094,
    "observables": [
     "coop_rate"
    ]
@@ -3052,7 +3104,7 @@
      "number"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.103,
    "observables": [
     "coop_rate"
    ]
@@ -3070,7 +3122,7 @@
      "number"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.108,
    "observables": [
     "coop_rate"
    ]
@@ -3088,7 +3140,7 @@
      "number"
     ]
    },
-   "duration_s": 0.135,
+   "duration_s": 0.096,
    "observables": [
     "coop_rate"
    ]
@@ -3099,7 +3151,10 @@
    "ok": false,
    "skipped": true,
    "requires_external": true,
-   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "dependencies": [
+    "language_model"
+   ],
+   "error": "需要真实语言模型调用",
    "observables": [
     "n_agents",
     "n_memories",
@@ -3118,7 +3173,10 @@
    "ok": false,
    "skipped": true,
    "requires_external": true,
-   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "dependencies": [
+    "language_model"
+   ],
+   "error": "需要真实语言模型调用",
    "observables": [
     "n_agents",
     "n_memories",
@@ -3137,7 +3195,10 @@
    "ok": false,
    "skipped": true,
    "requires_external": true,
-   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "dependencies": [
+    "language_model"
+   ],
+   "error": "需要真实语言模型调用",
    "observables": [
     "n_agents",
     "n_memories",
@@ -3156,7 +3217,10 @@
    "ok": false,
    "skipped": true,
    "requires_external": true,
-   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "dependencies": [
+    "language_model"
+   ],
+   "error": "需要真实语言模型调用",
    "observables": [
     "n_agents",
     "n_memories",
@@ -3175,7 +3239,10 @@
    "ok": false,
    "skipped": true,
    "requires_external": true,
-   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "dependencies": [
+    "language_model"
+   ],
+   "error": "需要真实语言模型调用",
    "observables": [
     "n_agents",
     "n_memories",
@@ -3194,17 +3261,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "evidence": [
+     "array"
+    ],
     "retrieval_2hop": [
      "boolean"
     ],
     "query": [
      "string"
-    ],
-    "evidence": [
-     "array"
     ]
    },
-   "duration_s": 0.258,
+   "duration_s": 0.159,
    "observables": []
   },
   "BEH135": {
@@ -3213,17 +3280,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rule_respected": [
-     "boolean"
-    ],
     "scores": [
      "array"
+    ],
+    "rule_respected": [
+     "boolean"
     ],
     "chosen": [
      "string"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.099,
    "observables": []
   },
   "BEH136": {
@@ -3242,7 +3309,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.15,
+   "duration_s": 0.086,
    "observables": [
     "gap"
    ]
@@ -3260,7 +3327,7 @@
      "number"
     ]
    },
-   "duration_s": 0.143,
+   "duration_s": 0.089,
    "observables": [
     "mean_within_var"
    ]
@@ -3278,7 +3345,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.086,
    "observables": []
   },
   "CPL001": {
@@ -3287,7 +3354,11 @@
    "ok": false,
    "skipped": true,
    "requires_external": true,
-   "error": "需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+   "dependencies": [
+    "roads_dataset_id",
+    "population_dataset_id"
+   ],
+   "error": "需指定真实数据集，目录探针不替换输入",
    "observables": [
     "n_agents",
     "represented_population",
@@ -3298,7 +3369,10 @@
     "on_bus",
     "rumor_mean",
     "exposure",
-    "evacuated_fraction"
+    "evacuated_fraction",
+    "people_evacuated",
+    "people_waiting",
+    "people_on_bus"
    ]
   },
   "ECO001": {
@@ -3314,7 +3388,7 @@
      "number"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.145,
    "observables": [
     "total"
    ]
@@ -3332,7 +3406,7 @@
      "array"
     ]
    },
-   "duration_s": 1.098,
+   "duration_s": 0.08,
    "observables": [
     "p_min"
    ]
@@ -3350,7 +3424,7 @@
      "array"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.079,
    "observables": [
     "err"
    ]
@@ -3361,14 +3435,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "total": [
-     "number"
-    ],
     "x": [
      "array"
+    ],
+    "total": [
+     "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.08,
    "observables": [
     "total"
    ]
@@ -3379,17 +3453,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "total": [
+    "tick": [
      "number"
     ],
     "x": [
      "array"
     ],
-    "tick": [
+    "total": [
      "number"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.079,
    "observables": [
     "total",
     "tick"
@@ -3408,7 +3482,7 @@
      "array"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.085,
    "observables": [
     "err"
    ]
@@ -3419,20 +3493,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "poll_intensity": [
+     "number"
+    ],
     "err": [
      "number"
     ],
     "x": [
      "array"
     ],
-    "poll_intensity": [
-     "number"
-    ],
     "pollution": [
      "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.091,
    "observables": [
     "pollution",
     "err",
@@ -3445,14 +3519,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "y": [
-     "array"
-    ],
     "err": [
      "number"
+    ],
+    "y": [
+     "array"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.093,
    "observables": [
     "err"
    ]
@@ -3463,20 +3537,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "converged": [
-     "boolean"
-    ],
     "walras": [
      "number"
     ],
-    "p": [
-     "array"
-    ],
     "cheap_expands": [
      "boolean"
+    ],
+    "converged": [
+     "boolean"
+    ],
+    "p": [
+     "array"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.094,
    "observables": [
     "walras"
    ]
@@ -3487,17 +3561,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "substitution": [
-     "boolean"
+    "energy_tax": [
+     "number"
     ],
     "Y": [
      "array"
     ],
-    "energy_tax": [
-     "number"
+    "substitution": [
+     "boolean"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.936,
    "observables": [
     "energy_tax"
    ]
@@ -3508,17 +3582,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "walras_excess": [
-     "number"
-    ],
     "converged": [
      "boolean"
+    ],
+    "walras_excess": [
+     "number"
     ],
     "p": [
      "array"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.084,
    "observables": [
     "walras_excess"
    ]
@@ -3539,7 +3613,7 @@
      "number"
     ]
    },
-   "duration_s": 1.106,
+   "duration_s": 0.08,
    "observables": [
     "K",
     "K_star"
@@ -3558,7 +3632,7 @@
      "array"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.079,
    "observables": []
   },
   "ECO014": {
@@ -3567,14 +3641,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "convergence": [
-     "boolean"
-    ],
     "Y_regions": [
      "array"
+    ],
+    "convergence": [
+     "boolean"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.088,
    "observables": []
   },
   "ECO015": {
@@ -3583,14 +3657,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "k": [
+    "k_star": [
      "number"
     ],
-    "k_star": [
+    "k": [
      "number"
     ]
    },
-   "duration_s": 0.136,
+   "duration_s": 0.088,
    "observables": [
     "k",
     "k_star"
@@ -3602,17 +3676,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "c": [
+    "k_star": [
      "number"
     ],
     "k": [
      "number"
     ],
-    "k_star": [
+    "c": [
      "number"
     ]
    },
-   "duration_s": 0.161,
+   "duration_s": 0.099,
    "observables": [
     "k",
     "c",
@@ -3625,17 +3699,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "g_theory": [
-     "number"
-    ],
     "k_proj": [
      "number"
     ],
     "k": [
      "number"
+    ],
+    "g_theory": [
+     "number"
     ]
    },
-   "duration_s": 0.164,
+   "duration_s": 0.098,
    "observables": [
     "k",
     "g_theory",
@@ -3652,7 +3726,7 @@
      "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.09,
    "observables": [
     "A"
    ]
@@ -3663,29 +3737,29 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "wage_share_max": [
+    "employment_max": [
      "number"
     ],
     "employment_min": [
      "number"
     ],
-    "wage_share": [
+    "wage_share_min": [
      "number"
     ],
     "cycle_active": [
      "boolean"
     ],
-    "wage_share_min": [
+    "wage_share_max": [
      "number"
     ],
-    "employment_max": [
+    "wage_share": [
      "number"
     ],
     "employment": [
      "number"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.086,
    "observables": [
     "wage_share",
     "employment",
@@ -3701,17 +3775,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "K": [
+    "Y": [
      "number"
     ],
     "gap": [
      "number"
     ],
-    "Y": [
+    "K": [
      "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.874,
    "observables": [
     "Y",
     "K",
@@ -3724,17 +3798,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "Y": [
+     "number"
+    ],
     "Y_std": [
      "number"
     ],
     "osc": [
      "boolean"
-    ],
-    "Y": [
-     "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.081,
    "observables": [
     "Y",
     "Y_std"
@@ -3756,7 +3830,7 @@
      "array"
     ]
    },
-   "duration_s": 1.018,
+   "duration_s": 0.081,
    "observables": [
     "Y_peak"
    ]
@@ -3780,7 +3854,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.08,
    "observables": [
     "pi",
     "x",
@@ -3793,20 +3867,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "monetary_contraction": [
-     "boolean"
-    ],
     "irf_output": [
-     "array"
-    ],
-    "irf_inflation": [
      "array"
     ],
     "calibrated_not_estimated": [
      "boolean"
+    ],
+    "monetary_contraction": [
+     "boolean"
+    ],
+    "irf_inflation": [
+     "array"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.079,
    "observables": []
   },
   "ECO025": {
@@ -3815,17 +3889,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "c_ric": [
-     "number"
-    ],
     "c_rot": [
      "number"
     ],
     "rot_more_volatile": [
      "boolean"
+    ],
+    "c_ric": [
+     "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.077,
    "observables": [
     "c_ric",
     "c_rot"
@@ -3837,17 +3911,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "hand_to_mouth_friction": [
-     "boolean"
-    ],
     "mean_illiquid": [
      "number"
+    ],
+    "hand_to_mouth_friction": [
+     "boolean"
     ],
     "mean_liquid": [
      "number"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.077,
    "observables": [
     "mean_liquid",
     "mean_illiquid"
@@ -3859,20 +3933,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mean_saving_rate": [
+    "vf_last_delta": [
      "number"
     ],
     "monotone_consumption": [
      "boolean"
     ],
-    "vf_last_delta": [
+    "mean_saving_rate": [
      "number"
     ],
     "vf_converged": [
      "boolean"
     ]
    },
-   "duration_s": 0.662,
+   "duration_s": 0.584,
    "observables": [
     "mean_saving_rate",
     "vf_last_delta"
@@ -3884,23 +3958,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "vf_converged": [
-     "boolean"
+    "r_market": [
+     "number"
     ],
     "vf_last_delta": [
      "number"
     ],
-    "mean_saving_rate": [
-     "number"
+    "vf_converged": [
+     "boolean"
     ],
-    "r_market": [
+    "mean_saving_rate": [
      "number"
     ],
     "monotone_consumption": [
      "boolean"
     ]
    },
-   "duration_s": 5.047,
+   "duration_s": 5.159,
    "observables": [
     "mean_saving_rate",
     "vf_last_delta",
@@ -3913,16 +3987,16 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "vf_converged": [
-     "boolean"
-    ],
     "r_equilibrium": [
      "number"
     ],
-    "K_equilibrium": [
+    "vf_last_delta": [
      "number"
     ],
-    "vf_last_delta": [
+    "vf_converged": [
+     "boolean"
+    ],
+    "K_equilibrium": [
      "number"
     ],
     "mean_saving_rate": [
@@ -3932,7 +4006,7 @@
      "boolean"
     ]
    },
-   "duration_s": 3.606,
+   "duration_s": 3.586,
    "observables": [
     "mean_saving_rate",
     "vf_last_delta",
@@ -3946,17 +4020,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "dynamically_inefficient": [
+     "boolean"
+    ],
     "consumption_loan": [
      "boolean"
     ],
     "savings": [
      "number"
-    ],
-    "dynamically_inefficient": [
-     "boolean"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.942,
    "observables": [
     "savings"
    ]
@@ -3967,17 +4041,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "k": [
+     "number"
+    ],
     "r": [
      "number"
     ],
     "k_next": [
      "number"
-    ],
-    "k": [
-     "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.093,
    "observables": [
     "k",
     "k_next",
@@ -3990,17 +4064,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "c_theory": [
-     "number"
-    ],
     "c": [
      "number"
     ],
     "W": [
      "number"
+    ],
+    "c_theory": [
+     "number"
     ]
    },
-   "duration_s": 1.035,
+   "duration_s": 0.084,
    "observables": [
     "W",
     "c",
@@ -4013,20 +4087,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "savings": [
-     "number"
-    ],
-    "peak_age": [
-     "number"
-    ],
     "end_zero": [
      "boolean"
     ],
     "age": [
      "number"
+    ],
+    "peak_age": [
+     "number"
+    ],
+    "savings": [
+     "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.08,
    "observables": [
     "age",
     "savings",
@@ -4046,7 +4120,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.083,
    "observables": [
     "buffer_target"
    ]
@@ -4060,10 +4134,10 @@
     "conserv": [
      "number"
     ],
-    "Y": [
+    "H_h": [
      "number"
     ],
-    "H_h": [
+    "Y": [
      "number"
     ],
     "Y_star": [
@@ -4073,7 +4147,7 @@
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.08,
    "observables": [
     "Y",
     "Y_star",
@@ -4091,20 +4165,20 @@
     "conserv": [
      "number"
     ],
-    "Y": [
-     "number"
-    ],
-    "G": [
-     "number"
-    ],
     "H_h": [
+     "number"
+    ],
+    "Y": [
      "number"
     ],
     "H_g": [
      "number"
+    ],
+    "G": [
+     "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.085,
    "observables": [
     "Y",
     "G",
@@ -4119,25 +4193,42 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "bills": [
+    "Y": [
      "number"
     ],
     "r": [
      "number"
     ],
-    "money": [
+    "bills": [
      "number"
     ],
-    "Y": [
+    "money": [
      "number"
     ]
    },
-   "duration_s": 0.149,
+   "duration_s": 0.115,
    "observables": [
     "Y",
     "bills",
     "money",
     "r"
+   ]
+  },
+  "ECO038": {
+   "model_id": "ECO038",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "dependencies": [
+    "dataset_id"
+   ],
+   "error": "需指定真实数据集，目录探针不替换输入",
+   "observables": [
+    "prediction",
+    "coefficient",
+    "intercept",
+    "spectral_radius"
    ]
   },
   "ECO039": {
@@ -4149,14 +4240,14 @@
     "irf_first": [
      "array"
     ],
-    "A_hat": [
-     "array"
-    ],
     "irf_err": [
      "number"
+    ],
+    "A_hat": [
+     "array"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.102,
    "observables": [
     "irf_err"
    ]
@@ -4167,20 +4258,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cointegration_detected": [
-     "boolean"
+    "adf_cointegrated": [
+     "number"
     ],
     "theta_hat": [
      "number"
     ],
-    "adf_stationary_check": [
-     "number"
+    "cointegration_detected": [
+     "boolean"
     ],
-    "adf_cointegrated": [
+    "adf_stationary_check": [
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 1.077,
    "observables": [
     "adf_cointegrated",
     "adf_stationary_check",
@@ -4200,7 +4291,7 @@
      "number"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.124,
    "observables": [
     "state_acc",
     "p_expansion"
@@ -4222,7 +4313,7 @@
      "number"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.091,
    "observables": [
     "smoothed_last",
     "slope_est"
@@ -4241,7 +4332,7 @@
      "number"
     ]
    },
-   "duration_s": 1.306,
+   "duration_s": 0.093,
    "observables": [
     "factor_corr",
     "explained"
@@ -4253,16 +4344,31 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "clustering_ratio": [
-     "number"
-    ],
     "arch_detected": [
      "boolean"
+    ],
+    "clustering_ratio": [
+     "number"
     ]
    },
-   "duration_s": 0.164,
+   "duration_s": 0.087,
    "observables": [
     "clustering_ratio"
+   ]
+  },
+  "ECO045": {
+   "model_id": "ECO045",
+   "protocol": "fixed_step",
+   "ok": false,
+   "skipped": true,
+   "requires_external": true,
+   "dependencies": [
+    "dataset_id"
+   ],
+   "error": "需指定真实数据集，目录探针不替换输入",
+   "observables": [
+    "conditional_variance",
+    "observation_index"
    ]
   },
   "ECO046": {
@@ -4271,14 +4377,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_returns": [
-     "number"
-    ],
     "price": [
      "number"
     ],
-    "vol_ratio": [
-     "null",
+    "n_returns": [
      "number"
     ],
     "fundamental": [
@@ -4286,9 +4388,13 @@
     ],
     "converge_err": [
      "number"
+    ],
+    "vol_ratio": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 0.15,
+   "duration_s": 0.086,
    "observables": [
     "price",
     "fundamental",
@@ -4303,20 +4409,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "w_trend": [
-     "number"
-    ],
-    "belief_switching": [
-     "boolean"
-    ],
     "deviation_std": [
      "number"
     ],
     "price": [
      "number"
+    ],
+    "belief_switching": [
+     "boolean"
+    ],
+    "w_trend": [
+     "number"
     ]
    },
-   "duration_s": 0.141,
+   "duration_s": 0.087,
    "observables": [
     "price",
     "w_trend",
@@ -4329,6 +4435,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "price": [
+     "number"
+    ],
     "n_returns": [
      "number"
     ],
@@ -4339,12 +4448,9 @@
     "excess_kurtosis": [
      "null",
      "number"
-    ],
-    "price": [
-     "number"
     ]
    },
-   "duration_s": 0.146,
+   "duration_s": 0.092,
    "observables": [
     "price",
     "excess_kurtosis",
@@ -4357,10 +4463,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "share_std": [
-     "null",
-     "number"
-    ],
     "n_samples": [
      "number"
     ],
@@ -4370,9 +4472,13 @@
     ],
     "theory_mean": [
      "number"
+    ],
+    "share_std": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 0.146,
+   "duration_s": 0.087,
    "observables": [
     "mean_share",
     "share_std",
@@ -4396,7 +4502,7 @@
      "number"
     ]
    },
-   "duration_s": 0.153,
+   "duration_s": 1.009,
    "observables": [
     "mean_net_worth",
     "defaults_recent"
@@ -4408,23 +4514,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "bankruptcies": [
-     "number"
-    ],
-    "bank_capital": [
-     "number"
-    ],
-    "n_firms": [
-     "number"
-    ],
     "right_skew": [
      "boolean"
     ],
     "size_skew": [
      "number"
+    ],
+    "n_firms": [
+     "number"
+    ],
+    "bankruptcies": [
+     "number"
+    ],
+    "bank_capital": [
+     "number"
     ]
    },
-   "duration_s": 0.143,
+   "duration_s": 0.09,
    "observables": [
     "n_firms",
     "bankruptcies",
@@ -4448,7 +4554,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.137,
+   "duration_s": 0.1,
    "observables": [
     "frontier",
     "productivity_std"
@@ -4460,17 +4566,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "north_output": [
+     "number"
+    ],
     "credit_allocated": [
      "boolean"
     ],
     "south_output": [
      "number"
-    ],
-    "north_output": [
-     "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.092,
    "observables": [
     "north_output",
     "south_output"
@@ -4485,17 +4591,17 @@
     "alloc_efficiency": [
      "number"
     ],
+    "mean_price": [
+     "number"
+    ],
     "in_equilibrium_frac": [
      "number"
     ],
     "n_trades": [
      "number"
-    ],
-    "mean_price": [
-     "number"
     ]
    },
-   "duration_s": 1.081,
+   "duration_s": 0.1,
    "observables": [
     "n_trades",
     "in_equilibrium_frac",
@@ -4516,7 +4622,7 @@
      "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.094,
    "observables": [
     "n_trades",
     "alloc_efficiency"
@@ -4532,14 +4638,14 @@
      "null",
      "number"
     ],
-    "book_bids": [
+    "book_asks": [
      "number"
     ],
-    "book_asks": [
+    "book_bids": [
      "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.095,
    "observables": [
     "book_bids",
     "book_asks",
@@ -4552,17 +4658,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dist": [
-     "array"
-    ],
     "lambda1": [
      "number"
     ],
     "total": [
      "number"
+    ],
+    "dist": [
+     "array"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.098,
    "observables": [
     "total",
     "lambda1"
@@ -4574,17 +4680,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n": [
-     "array"
-    ],
     "lambda1": [
      "number"
+    ],
+    "n": [
+     "array"
     ],
     "total": [
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.108,
    "observables": [
     "total",
     "lambda1"
@@ -4596,14 +4702,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "total": [
+    "sex_ratio": [
      "number"
     ],
-    "sex_ratio": [
+    "total": [
      "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.099,
    "observables": [
     "total",
     "sex_ratio"
@@ -4615,14 +4721,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "pop": [
-     "array"
-    ],
     "total": [
      "number"
+    ],
+    "pop": [
+     "array"
     ]
    },
-   "duration_s": 0.14,
+   "duration_s": 0.93,
    "observables": [
     "total"
    ]
@@ -4633,14 +4739,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "resid_ratio": [
-     "number"
-    ],
     "good_fit": [
      "boolean"
+    ],
+    "resid_ratio": [
+     "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.085,
    "observables": [
     "resid_ratio"
    ]
@@ -4658,7 +4764,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.162,
+   "duration_s": 0.083,
    "observables": [
     "resid_ratio"
    ]
@@ -4669,17 +4775,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "beta": [
+    "fit_r2": [
      "number"
     ],
-    "fit_r2": [
+    "beta": [
      "number"
     ],
     "alpha": [
      "number"
     ]
    },
-   "duration_s": 0.147,
+   "duration_s": 0.088,
    "observables": [
     "alpha",
     "beta",
@@ -4692,17 +4798,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "b": [
+    "err": [
      "number"
     ],
-    "err": [
+    "b": [
      "number"
     ],
     "b_hat": [
      "number"
     ]
    },
-   "duration_s": 0.982,
+   "duration_s": 0.091,
    "observables": [
     "b",
     "b_hat",
@@ -4725,7 +4831,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.088,
    "observables": [
     "mean_age",
     "std_age"
@@ -4744,9 +4850,33 @@
      "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.081,
    "observables": [
     "peak_age"
+   ]
+  },
+  "ECO067": {
+   "model_id": "ECO067",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "inflow": [
+     "array"
+    ],
+    "od_flows": [
+     "array"
+    ],
+    "total_flow": [
+     "number"
+    ],
+    "outflow": [
+     "array"
+    ]
+   },
+   "duration_s": 0.082,
+   "observables": [
+    "total_flow"
    ]
   },
   "ECO068": {
@@ -4755,14 +4885,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "converged": [
-     "boolean"
-    ],
     "row_err": [
      "number"
+    ],
+    "converged": [
+     "boolean"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.082,
    "observables": [
     "row_err"
    ]
@@ -4773,17 +4903,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "col_err": [
-     "number"
-    ],
     "row_err": [
      "number"
     ],
     "converged": [
      "boolean"
+    ],
+    "col_err": [
+     "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.086,
    "observables": [
     "row_err",
     "col_err"
@@ -4795,17 +4925,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "corr_dist_flow": [
+     "number"
+    ],
     "total_flow": [
      "number"
     ],
     "decay": [
      "boolean"
-    ],
-    "corr_dist_flow": [
-     "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.907,
    "observables": [
     "corr_dist_flow",
     "total_flow"
@@ -4817,20 +4947,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "expected_u": [
-     "number"
-    ],
     "gap": [
      "number"
     ],
-    "w_r": [
+    "expected_u": [
      "number"
     ],
     "unemp_rate": [
      "number"
+    ],
+    "w_r": [
+     "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.087,
    "observables": [
     "expected_u",
     "w_r",
@@ -4844,14 +4974,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "migration_prob": [
-     "number"
-    ],
     "pull_dominates": [
      "boolean"
+    ],
+    "migration_prob": [
+     "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.083,
    "observables": [
     "migration_prob"
    ]
@@ -4869,7 +4999,7 @@
      "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.09,
    "observables": [
     "gain"
    ]
@@ -4880,14 +5010,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "blocking_pairs": [
-     "number"
-    ],
     "stable": [
      "boolean"
+    ],
+    "blocking_pairs": [
+     "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.087,
    "observables": [
     "blocking_pairs"
    ]
@@ -4898,17 +5028,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "births": [
+    "kin_links_alive": [
      "number"
     ],
-    "kin_links_alive": [
+    "births": [
      "number"
     ],
     "population": [
      "number"
     ]
    },
-   "duration_s": 1.024,
+   "duration_s": 0.086,
    "observables": [
     "population",
     "births",
@@ -4921,20 +5051,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "y": [
+    "gen_elast": [
      "number"
     ],
     "mean_revert": [
      "boolean"
     ],
-    "log_autocorr": [
+    "y": [
      "number"
     ],
-    "gen_elast": [
+    "log_autocorr": [
      "number"
     ]
    },
-   "duration_s": 0.169,
+   "duration_s": 0.092,
    "observables": [
     "y",
     "gen_elast",
@@ -4947,20 +5077,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dist": [
-     "array"
-    ],
     "stationary_err": [
      "number"
     ],
     "converged": [
      "boolean"
     ],
+    "dist": [
+     "array"
+    ],
     "spectral_gap": [
      "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.089,
    "observables": [
     "spectral_gap",
     "stationary_err"
@@ -4972,18 +5102,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "res_wage": [
-     "number"
-    ],
     "accepted": [
      "null",
      "number"
     ],
     "mean_wage": [
      "number"
+    ],
+    "res_wage": [
+     "number"
     ]
    },
-   "duration_s": 0.142,
+   "duration_s": 0.083,
    "observables": [
     "res_wage",
     "accepted",
@@ -4996,17 +5126,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "vacancies": [
-     "number"
-    ],
     "beveridge": [
      "array"
+    ],
+    "vacancies": [
+     "number"
     ],
     "unemployment": [
      "number"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.086,
    "observables": [
     "unemployment",
     "vacancies"
@@ -5018,17 +5148,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "non_degenerate": [
+     "boolean"
+    ],
     "wage_grid": [
      "array"
     ],
     "cdf": [
      "array"
-    ],
-    "non_degenerate": [
-     "boolean"
     ]
    },
-   "duration_s": 0.127,
+   "duration_s": 0.884,
    "observables": []
   },
   "ECO081": {
@@ -5037,17 +5167,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "hunter_skill_mean": [
+    "farmer_skill_mean": [
      "number"
     ],
     "positive_selection": [
      "boolean"
     ],
-    "farmer_skill_mean": [
+    "hunter_skill_mean": [
      "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.086,
    "observables": [
     "hunter_skill_mean",
     "farmer_skill_mean"
@@ -5059,20 +5189,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "h": [
+    "invest_late": [
      "number"
     ],
     "invest_early": [
      "number"
     ],
-    "invest_late": [
-     "number"
-    ],
     "decreasing": [
      "boolean"
+    ],
+    "h": [
+     "number"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.081,
    "observables": [
     "h",
     "invest_early",
@@ -5088,14 +5218,14 @@
     "rho": [
      "number"
     ],
-    "err": [
+    "rho_hat": [
      "number"
     ],
-    "rho_hat": [
+    "err": [
      "number"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.081,
    "observables": [
     "rho",
     "rho_hat",
@@ -5115,7 +5245,7 @@
      "array"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.084,
    "observables": []
   },
   "ECO085": {
@@ -5131,7 +5261,7 @@
      "number"
     ]
    },
-   "duration_s": 1.057,
+   "duration_s": 0.102,
    "observables": [
     "exit_rate"
    ]
@@ -5142,14 +5272,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cutoff_selection": [
-     "boolean"
-    ],
     "exporter_share": [
      "number"
+    ],
+    "cutoff_selection": [
+     "boolean"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.09,
    "observables": [
     "exporter_share"
    ]
@@ -5160,9 +5290,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "size_cv": [
-     "number"
-    ],
     "log_skew": [
      "number"
     ],
@@ -5171,9 +5298,12 @@
     ],
     "mean": [
      "number"
+    ],
+    "size_cv": [
+     "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.086,
    "observables": [
     "mean",
     "log_skew",
@@ -5191,7 +5321,7 @@
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.093,
    "observables": [
     "item_b_corr"
    ]
@@ -5209,7 +5339,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.089,
    "observables": [
     "mean_a"
    ]
@@ -5220,17 +5350,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "low_theta_acc": [
+     "number"
+    ],
     "c_mean": [
      "number"
     ],
     "guess_visible": [
      "boolean"
-    ],
-    "low_theta_acc": [
-     "number"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.963,
    "observables": [
     "c_mean",
     "low_theta_acc"
@@ -5242,17 +5372,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "p_now": [
+     "number"
+    ],
     "p_rising": [
      "boolean"
     ],
     "n_correct": [
      "number"
-    ],
-    "p_now": [
-     "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.087,
    "observables": [
     "p_now",
     "n_correct"
@@ -5264,17 +5394,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "better_than_chance": [
-     "boolean"
-    ],
     "sequence_model": [
      "boolean"
     ],
     "pred_accuracy": [
      "number"
+    ],
+    "better_than_chance": [
+     "boolean"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.09,
    "observables": [
     "pred_accuracy"
    ]
@@ -5292,7 +5422,7 @@
      "number"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.085,
    "observables": [
     "stepwise_accuracy"
    ]
@@ -5303,17 +5433,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "ordered_thresholds": [
+    "sums_to_one": [
      "boolean"
     ],
     "category_curves_sum": [
      "number"
     ],
-    "sums_to_one": [
+    "ordered_thresholds": [
      "boolean"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.082,
    "observables": [
     "category_curves_sum"
    ]
@@ -5324,17 +5454,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "partial_credit_peak_theta": [
+    "prob_sum": [
      "number"
     ],
-    "prob_sum": [
+    "partial_credit_peak_theta": [
      "number"
     ],
     "between_thresholds": [
      "boolean"
     ]
    },
-   "duration_s": 1.007,
+   "duration_s": 0.087,
    "observables": [
     "partial_credit_peak_theta",
     "prob_sum"
@@ -5346,8 +5476,8 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mean_tax": [
-     "number"
+    "net_monotone": [
+     "boolean"
     ],
     "mtr_path": [
      "array"
@@ -5355,11 +5485,11 @@
     "mtr_nondecreasing": [
      "boolean"
     ],
-    "net_monotone": [
-     "boolean"
+    "mean_tax": [
+     "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.097,
    "observables": [
     "mean_tax"
    ]
@@ -5370,17 +5500,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "interior_max": [
-     "boolean"
+    "hours_basket": [
+     "array"
     ],
     "choice_prob": [
      "array"
     ],
-    "hours_basket": [
-     "array"
+    "interior_max": [
+     "boolean"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.085,
    "observables": []
   },
   "ECO098": {
@@ -5389,17 +5519,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "lifetime_earnings_mean": [
-     "number"
+    "retiree_income_replaced": [
+     "boolean"
     ],
     "pension_mean": [
      "number"
     ],
-    "retiree_income_replaced": [
-     "boolean"
+    "lifetime_earnings_mean": [
+     "number"
     ]
    },
-   "duration_s": 0.142,
+   "duration_s": 0.105,
    "observables": [
     "lifetime_earnings_mean",
     "pension_mean"
@@ -5411,20 +5541,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dead": [
+    "total_qaly": [
      "number"
     ],
-    "ICER_finite": [
-     "boolean"
+    "dead": [
+     "number"
     ],
     "total_cost": [
      "number"
     ],
-    "total_qaly": [
-     "number"
+    "ICER_finite": [
+     "boolean"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.084,
    "observables": [
     "dead",
     "total_cost",
@@ -5437,17 +5567,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "life_years": [
+     "number"
+    ],
     "partitioned_valid": [
      "boolean"
     ],
     "QALY": [
      "number"
-    ],
-    "life_years": [
-     "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.9,
    "observables": [
     "life_years",
     "QALY"
@@ -5459,17 +5589,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "microsim_vs_cohort": [
-     "boolean"
-    ],
     "n_dead": [
      "number"
     ],
     "total_cost": [
      "number"
+    ],
+    "microsim_vs_cohort": [
+     "boolean"
     ]
    },
-   "duration_s": 0.162,
+   "duration_s": 0.122,
    "observables": [
     "n_dead",
     "total_cost"
@@ -5481,13 +5611,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "population": [
+    "pollution": [
      "number"
     ],
     "resources": [
-     "number"
-    ],
-    "pollution": [
      "number"
     ],
     "overshoot": [
@@ -5495,9 +5622,12 @@
     ],
     "capital": [
      "number"
+    ],
+    "population": [
+     "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.084,
    "observables": [
     "population",
     "capital",
@@ -5511,6 +5641,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "housing": [
+     "number"
+    ],
     "population": [
      "number"
     ],
@@ -5519,12 +5652,9 @@
     ],
     "firms": [
      "number"
-    ],
-    "housing": [
-     "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.085,
    "observables": [
     "population",
     "firms",
@@ -5541,17 +5671,17 @@
     "order_var": [
      "array"
     ],
-    "orders": [
-     "array"
-    ],
     "bullwhip": [
      "number"
+    ],
+    "orders": [
+     "array"
     ],
     "var_up_gt_down": [
      "boolean"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.086,
    "observables": [
     "bullwhip"
    ]
@@ -5569,7 +5699,7 @@
      "array"
     ]
    },
-   "duration_s": 0.986,
+   "duration_s": 0.086,
    "observables": []
   },
   "ECO106": {
@@ -5578,17 +5708,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "M": [
+     "number"
+    ],
     "forcing": [
      "number"
     ],
     "T": [
      "number"
-    ],
-    "M": [
-     "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.083,
    "observables": [
     "M",
     "T",
@@ -5604,17 +5734,17 @@
     "K_north": [
      "number"
     ],
-    "T": [
+    "K_south": [
      "number"
     ],
-    "K_south": [
+    "T": [
      "number"
     ],
     "M": [
      "number"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.083,
    "observables": [
     "K_north",
     "K_south",
@@ -5628,20 +5758,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "non_monotone_ag": [
-     "boolean"
-    ],
-    "total": [
-     "number"
+    "sector_losses": [
+     "object"
     ],
     "T": [
      "number"
     ],
-    "sector_losses": [
-     "object"
+    "total": [
+     "number"
+    ],
+    "non_monotone_ag": [
+     "boolean"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.081,
    "observables": [
     "T",
     "total"
@@ -5653,23 +5783,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "T_p95": [
-     "number"
-    ],
-    "T_mean": [
-     "number"
-    ],
     "dmg_mean_pct": [
+     "number"
+    ],
+    "dmg_p95_pct": [
      "number"
     ],
     "fat_tail": [
      "boolean"
     ],
-    "dmg_p95_pct": [
+    "T_mean": [
+     "number"
+    ],
+    "T_p95": [
      "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.089,
    "observables": [
     "T_mean",
     "T_p95",
@@ -5689,17 +5819,17 @@
     "stable": [
      "boolean"
     ],
-    "eq_x1": [
+    "x1": [
      "number"
     ],
-    "x1": [
+    "eq_x1": [
      "number"
     ],
     "x2": [
      "number"
     ]
    },
-   "duration_s": 0.172,
+   "duration_s": 0.927,
    "observables": [
     "x1",
     "x2",
@@ -5713,7 +5843,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "N1": [
+    "inv0": [
      "number"
     ],
     "invariant": [
@@ -5722,11 +5852,11 @@
     "N2": [
      "number"
     ],
-    "inv0": [
+    "N1": [
      "number"
     ]
    },
-   "duration_s": 0.178,
+   "duration_s": 0.085,
    "observables": [
     "N1",
     "N2",
@@ -5740,20 +5870,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "N1": [
-     "number"
-    ],
-    "lin0": [
+    "lin_invariant": [
      "number"
     ],
     "N2": [
      "number"
     ],
-    "lin_invariant": [
+    "N1": [
+     "number"
+    ],
+    "lin0": [
      "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.092,
    "observables": [
     "N1",
     "N2",
@@ -5767,25 +5897,56 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "B_eq": [
-     "number"
-    ],
-    "B_at_MSY": [
+    "MSY": [
      "number"
     ],
     "B": [
      "number"
     ],
-    "MSY": [
+    "B_eq": [
+     "number"
+    ],
+    "B_at_MSY": [
      "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.084,
    "observables": [
     "B",
     "MSY",
     "B_at_MSY",
     "B_eq"
+   ]
+  },
+  "ECO114": {
+   "model_id": "ECO114",
+   "protocol": "simulate",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "harvest": [
+     "number"
+    ],
+    "E": [
+     "number"
+    ],
+    "B_econ_eq": [
+     "number"
+    ],
+    "B": [
+     "number"
+    ],
+    "net_profit": [
+     "number"
+    ]
+   },
+   "duration_s": 0.099,
+   "observables": [
+    "B",
+    "E",
+    "harvest",
+    "net_profit",
+    "B_econ_eq"
    ]
   },
   "ECO115": {
@@ -5794,20 +5955,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "hotelling_delta": [
-     "number"
-    ],
-    "price_growth": [
+    "price": [
      "number"
     ],
     "stock": [
      "number"
     ],
-    "price": [
+    "hotelling_delta": [
+     "number"
+    ],
+    "price_growth": [
      "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.083,
    "observables": [
     "price",
     "stock",
@@ -5828,7 +5989,7 @@
      "number"
     ]
    },
-   "duration_s": 1.261,
+   "duration_s": 0.082,
    "observables": [
     "frac_state1",
     "state"
@@ -5847,7 +6008,7 @@
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.081,
    "observables": [
     "queue",
     "served"
@@ -5859,17 +6020,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "exact": [
+    "est": [
      "number"
     ],
     "err": [
      "number"
     ],
-    "est": [
+    "exact": [
      "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.075,
    "observables": [
     "est",
     "exact",
@@ -5882,17 +6043,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "exact": [
+    "est": [
      "number"
     ],
     "err": [
      "number"
     ],
-    "est": [
+    "exact": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.088,
    "observables": [
     "est",
     "exact",
@@ -5912,7 +6073,7 @@
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 1.019,
    "observables": [
     "est",
     "exact"
@@ -5931,7 +6092,7 @@
      "number"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.095,
    "observables": [
     "est",
     "exact"
@@ -5950,7 +6111,7 @@
      "number"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.092,
    "observables": [
     "est",
     "exact"
@@ -5969,7 +6130,7 @@
      "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.083,
    "observables": [
     "est"
    ]
@@ -5990,7 +6151,7 @@
      "number"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.098,
    "observables": [
     "est",
     "exact",
@@ -6010,7 +6171,7 @@
      "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.101,
    "observables": [
     "strong_err"
    ]
@@ -6025,7 +6186,7 @@
      "number"
     ]
    },
-   "duration_s": 0.989,
+   "duration_s": 0.086,
    "observables": [
     "n"
    ]
@@ -6040,7 +6201,7 @@
      "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.096,
    "observables": [
     "n"
    ]
@@ -6055,7 +6216,7 @@
      "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.087,
    "observables": [
     "n"
    ]
@@ -6073,7 +6234,7 @@
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.09,
    "observables": [
     "events",
     "E"
@@ -6085,20 +6246,20 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "est": [
+    "exact": [
      "number"
     ],
     "err": [
      "number"
     ],
-    "se": [
+    "est": [
      "number"
     ],
-    "exact": [
+    "se": [
      "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.926,
    "observables": [
     "est",
     "se",
@@ -6112,17 +6273,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "est": [
+    "exact": [
      "number"
     ],
     "err": [
      "number"
     ],
-    "exact": [
+    "est": [
      "number"
     ]
    },
-   "duration_s": 0.149,
+   "duration_s": 0.107,
    "observables": [
     "est",
     "exact",
@@ -6135,17 +6296,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "est": [
+    "exact": [
      "number"
     ],
     "err": [
      "number"
     ],
-    "exact": [
+    "est": [
      "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.084,
    "observables": [
     "est",
     "exact",
@@ -6158,14 +6319,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "est": [
+    "exact": [
      "number"
     ],
-    "exact": [
+    "est": [
      "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.08,
    "observables": [
     "est",
     "exact"
@@ -6177,14 +6338,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "est": [
+    "exact": [
      "number"
     ],
-    "exact": [
+    "est": [
      "number"
     ]
    },
-   "duration_s": 0.129,
+   "duration_s": 0.092,
    "observables": [
     "est",
     "exact"
@@ -6196,14 +6357,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "est": [
+    "exact": [
      "number"
     ],
-    "exact": [
+    "est": [
      "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.082,
    "observables": [
     "est",
     "exact"
@@ -6215,14 +6376,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "paired_diff": [
+    "naive_diff": [
      "number"
     ],
-    "naive_diff": [
+    "paired_diff": [
      "number"
     ]
    },
-   "duration_s": 1.018,
+   "duration_s": 0.089,
    "observables": [
     "paired_diff",
     "naive_diff"
@@ -6241,7 +6402,7 @@
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.08,
    "observables": [
     "est",
     "exact"
@@ -6253,17 +6414,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "mean_val": [
+     "number"
+    ],
     "dim": [
      "number"
     ],
     "n_points": [
      "number"
-    ],
-    "mean_val": [
-     "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.086,
    "observables": [
     "n_points",
     "dim",
@@ -6276,17 +6437,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "mean_val": [
+     "number"
+    ],
     "dim": [
      "number"
     ],
     "n_points": [
      "number"
-    ],
-    "mean_val": [
-     "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.088,
    "observables": [
     "n_points",
     "dim",
@@ -6299,17 +6460,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "mean_val": [
+     "number"
+    ],
     "dim": [
      "number"
     ],
     "n_points": [
      "number"
-    ],
-    "mean_val": [
-     "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.941,
    "observables": [
     "n_points",
     "dim",
@@ -6322,17 +6483,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "mean_val": [
+     "number"
+    ],
     "dim": [
      "number"
     ],
     "n_points": [
      "number"
-    ],
-    "mean_val": [
-     "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.096,
    "observables": [
     "n_points",
     "dim",
@@ -6348,14 +6509,14 @@
     "mean": [
      "number"
     ],
-    "var": [
+    "err": [
      "number"
     ],
-    "err": [
+    "var": [
      "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.099,
    "observables": [
     "mean",
     "var",
@@ -6375,7 +6536,7 @@
      "number"
     ]
    },
-   "duration_s": 0.144,
+   "duration_s": 0.089,
    "observables": [
     "mean",
     "std"
@@ -6394,7 +6555,7 @@
      "number"
     ]
    },
-   "duration_s": 0.232,
+   "duration_s": 0.211,
    "observables": [
     "mean",
     "var"
@@ -6413,7 +6574,7 @@
      "number"
     ]
    },
-   "duration_s": 0.296,
+   "duration_s": 0.258,
    "observables": [
     "mean",
     "var"
@@ -6425,14 +6586,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "trials": [
+    "posterior_mean": [
      "number"
     ],
-    "posterior_mean": [
+    "trials": [
      "number"
     ]
    },
-   "duration_s": 1.01,
+   "duration_s": 0.083,
    "observables": [
     "posterior_mean",
     "trials"
@@ -6448,7 +6609,7 @@
      "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.08,
    "observables": [
     "posterior_mean"
    ]
@@ -6466,7 +6627,7 @@
      "number"
     ]
    },
-   "duration_s": 0.209,
+   "duration_s": 0.157,
    "observables": [
     "posterior_mean",
     "posterior_sd"
@@ -6488,7 +6649,7 @@
      "number"
     ]
    },
-   "duration_s": 0.248,
+   "duration_s": 0.209,
    "observables": [
     "posterior_mean",
     "posterior_sd",
@@ -6501,14 +6662,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "posterior_mean": [
+    "posterior_sd": [
      "number"
     ],
-    "posterior_sd": [
+    "posterior_mean": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.87,
    "observables": [
     "posterior_mean",
     "posterior_sd"
@@ -6520,17 +6681,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "classifier_acc_proxy": [
-     "number"
-    ],
     "favors_theta1": [
      "boolean"
+    ],
+    "classifier_acc_proxy": [
+     "number"
     ],
     "log_likelihood_ratio": [
      "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.084,
    "observables": [
     "log_likelihood_ratio",
     "classifier_acc_proxy"
@@ -6542,14 +6703,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "posterior_mean": [
+    "posterior_sd": [
      "number"
     ],
-    "posterior_sd": [
+    "posterior_mean": [
      "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.082,
    "observables": [
     "posterior_mean",
     "posterior_sd"
@@ -6561,14 +6722,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "theta": [
+    "dist": [
      "number"
     ],
-    "dist": [
+    "theta": [
      "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.084,
    "observables": [
     "theta",
     "dist"
@@ -6580,17 +6741,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "aux_dist": [
-     "number"
-    ],
     "theta_hat": [
      "number"
     ],
     "target_coef": [
      "number"
+    ],
+    "aux_dist": [
+     "number"
     ]
    },
-   "duration_s": 0.161,
+   "duration_s": 0.116,
    "observables": [
     "theta_hat",
     "aux_dist",
@@ -6603,17 +6764,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "theta_sd": [
+     "number"
+    ],
     "theta_mean": [
      "number"
     ],
     "err": [
      "number"
-    ],
-    "theta_sd": [
-     "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.088,
    "observables": [
     "theta_mean",
     "theta_sd",
@@ -6633,7 +6794,7 @@
      "number"
     ]
    },
-   "duration_s": 1.035,
+   "duration_s": 0.098,
    "observables": [
     "x",
     "target"
@@ -6652,7 +6813,7 @@
      "number"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.104,
    "observables": [
     "x",
     "target"
@@ -6671,7 +6832,7 @@
      "number"
     ]
    },
-   "duration_s": 0.331,
+   "duration_s": 0.322,
    "observables": [
     "x",
     "target"
@@ -6687,7 +6848,7 @@
      "number"
     ]
    },
-   "duration_s": 0.158,
+   "duration_s": 0.138,
    "observables": [
     "front_size"
    ]
@@ -6708,7 +6869,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 1.031,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6730,7 +6891,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.106,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6755,7 +6916,7 @@
      "string"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.094,
    "observables": [
     "rmse_obs"
    ]
@@ -6776,7 +6937,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.097,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6798,7 +6959,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.104,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6820,7 +6981,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.139,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6832,14 +6993,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "theta_std": [
+    "theta_mean": [
      "number"
     ],
-    "theta_mean": [
+    "theta_std": [
      "number"
     ]
    },
-   "duration_s": 4.142,
+   "duration_s": 3.712,
    "observables": [
     "theta_mean",
     "theta_std"
@@ -6851,14 +7012,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "est": [
+    "true_end": [
      "number"
     ],
-    "true_end": [
+    "est": [
      "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.109,
    "observables": [
     "est",
     "true_end"
@@ -6874,7 +7035,7 @@
      "array"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.112,
    "observables": []
   },
   "MET052": {
@@ -6890,7 +7051,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.102,
    "observables": []
   },
   "MET053": {
@@ -6899,14 +7060,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "S1": [
+    "ST": [
      "array"
     ],
-    "ST": [
+    "S1": [
      "array"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.914,
    "observables": []
   },
   "MET054": {
@@ -6919,7 +7080,7 @@
      "array"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.08,
    "observables": []
   },
   "MET055": {
@@ -6932,7 +7093,7 @@
      "array"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.08,
    "observables": []
   },
   "MET056": {
@@ -6945,7 +7106,7 @@
      "array"
     ]
    },
-   "duration_s": 0.127,
+   "duration_s": 0.076,
    "observables": []
   },
   "MET057": {
@@ -6954,17 +7115,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "hi": [
-     "number"
-    ],
     "lo": [
      "number"
     ],
     "sample_mean": [
      "number"
+    ],
+    "hi": [
+     "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.092,
    "observables": [
     "lo",
     "hi",
@@ -6980,14 +7141,14 @@
     "p_value": [
      "number"
     ],
-    "obs_stat": [
-     "number"
-    ],
     "inside_95": [
      "boolean"
+    ],
+    "obs_stat": [
+     "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.079,
    "observables": [
     "p_value",
     "obs_stat"
@@ -6999,17 +7160,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "ok": [
-     "boolean"
+    "param_err": [
+     "number"
     ],
     "output_mse": [
      "number"
     ],
-    "param_err": [
-     "number"
+    "ok": [
+     "boolean"
     ]
    },
-   "duration_s": 1.045,
+   "duration_s": 0.08,
    "observables": [
     "param_err",
     "output_mse"
@@ -7021,14 +7182,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "col_err": [
+    "row_err": [
      "number"
     ],
-    "row_err": [
+    "col_err": [
      "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.086,
    "observables": [
     "row_err",
     "col_err"
@@ -7044,7 +7205,7 @@
      "array"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.099,
    "observables": []
   },
   "MET062": {
@@ -7060,7 +7221,7 @@
      "number"
     ]
    },
-   "duration_s": 0.141,
+   "duration_s": 0.102,
    "observables": [
     "n"
    ]
@@ -7071,14 +7232,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "picked": [
-     "array"
-    ],
     "unique": [
      "number"
+    ],
+    "picked": [
+     "array"
     ]
    },
-   "duration_s": 0.136,
+   "duration_s": 0.91,
    "observables": [
     "unique"
    ]
@@ -7096,7 +7257,7 @@
      "array"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.083,
    "observables": [
     "cost"
    ]
@@ -7107,23 +7268,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "I": [
-     "number"
-    ],
     "infected_peak_passed": [
      "boolean"
     ],
-    "R": [
+    "total": [
      "number"
     ],
-    "total": [
+    "I": [
+     "number"
+    ],
+    "R": [
      "number"
     ],
     "S": [
      "number"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.078,
    "observables": [
     "S",
     "I",
@@ -7137,23 +7298,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "last_symmetry": [
-     "number"
-    ],
-    "rule": [
+    "n_patterns": [
      "number"
     ],
     "density": [
      "number"
     ],
-    "n_steps": [
+    "rule": [
      "number"
     ],
-    "n_patterns": [
+    "last_symmetry": [
+     "number"
+    ],
+    "n_steps": [
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.093,
    "observables": [
     "rule",
     "density",
@@ -7168,23 +7329,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "last_symmetry": [
-     "number"
-    ],
-    "rule": [
+    "n_patterns": [
      "number"
     ],
     "density": [
      "number"
     ],
-    "n_steps": [
+    "rule": [
      "number"
     ],
-    "n_patterns": [
+    "last_symmetry": [
+     "number"
+    ],
+    "n_steps": [
      "number"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.097,
    "observables": [
     "rule",
     "density",
@@ -7199,23 +7360,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "last_symmetry": [
-     "number"
-    ],
-    "rule": [
+    "n_patterns": [
      "number"
     ],
     "density": [
      "number"
     ],
-    "n_steps": [
+    "rule": [
      "number"
     ],
-    "n_patterns": [
+    "last_symmetry": [
+     "number"
+    ],
+    "n_steps": [
      "number"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.087,
    "observables": [
     "rule",
     "density",
@@ -7230,20 +7391,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cars": [
+    "cars_conserved": [
+     "boolean"
+    ],
+    "density": [
      "number"
     ],
     "rule": [
      "number"
     ],
-    "density": [
+    "cars": [
      "number"
-    ],
-    "cars_conserved": [
-     "boolean"
     ]
    },
-   "duration_s": 0.989,
+   "duration_s": 0.085,
    "observables": [
     "rule",
     "cars",
@@ -7263,7 +7424,7 @@
      "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.089,
    "observables": [
     "alive",
     "tick"
@@ -7275,17 +7436,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "excited": [
-     "number"
-    ],
     "wave_active": [
      "boolean"
     ],
     "resting": [
      "number"
+    ],
+    "excited": [
+     "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.095,
    "observables": [
     "excited",
     "resting"
@@ -7304,7 +7465,7 @@
      "array"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.085,
    "observables": [
     "diversity"
    ]
@@ -7318,14 +7479,14 @@
     "trees_frac": [
      "number"
     ],
-    "lightning_fires": [
+    "trees": [
      "number"
     ],
-    "trees": [
+    "lightning_fires": [
      "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.968,
    "observables": [
     "trees",
     "trees_frac",
@@ -7338,20 +7499,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "city_frac": [
-     "number"
+    "urban_growth": [
+     "boolean"
     ],
     "forest_frac": [
      "number"
     ],
-    "farm_frac": [
+    "city_frac": [
      "number"
     ],
-    "urban_growth": [
-     "boolean"
+    "farm_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.078,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7364,20 +7525,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "city_frac": [
-     "number"
+    "diffusion_growth": [
+     "boolean"
     ],
     "forest_frac": [
      "number"
     ],
-    "farm_frac": [
+    "city_frac": [
      "number"
     ],
-    "diffusion_growth": [
-     "boolean"
+    "farm_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.128,
+   "duration_s": 0.082,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7390,20 +7551,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "city_frac": [
-     "number"
-    ],
     "forest_frac": [
      "number"
     ],
-    "farm_frac": [
+    "city_frac": [
      "number"
     ],
     "demand_met": [
      "boolean"
+    ],
+    "farm_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.144,
+   "duration_s": 0.091,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7416,23 +7577,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dynamic_demand": [
-     "boolean"
-    ],
-    "farm_frac": [
+    "forest_frac": [
      "number"
     ],
     "demand_met": [
      "boolean"
     ],
+    "farm_frac": [
+     "number"
+    ],
     "city_frac": [
      "number"
     ],
-    "forest_frac": [
-     "number"
+    "dynamic_demand": [
+     "boolean"
     ]
    },
-   "duration_s": 0.143,
+   "duration_s": 0.084,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7445,10 +7606,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "city_frac": [
+    "forest_frac": [
      "number"
     ],
-    "forest_frac": [
+    "city_frac": [
      "number"
     ],
     "farm_frac": [
@@ -7458,7 +7619,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.083,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7471,20 +7632,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "farm_frac": [
-     "number"
-    ],
     "forest_frac": [
      "number"
     ],
     "city_frac": [
      "number"
     ],
+    "farm_frac": [
+     "number"
+    ],
     "patch_generation": [
      "boolean"
     ]
    },
-   "duration_s": 0.987,
+   "duration_s": 0.083,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7497,9 +7658,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "farm_frac": [
-     "number"
-    ],
     "forest_frac": [
      "number"
     ],
@@ -7508,9 +7666,12 @@
     ],
     "markov_ca_coupled": [
      "boolean"
+    ],
+    "farm_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.096,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7523,17 +7684,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "total": [
+    "occupied_frac": [
      "number"
     ],
-    "occupied_frac": [
+    "total": [
      "number"
     ],
     "spreading": [
      "boolean"
     ]
    },
-   "duration_s": 0.137,
+   "duration_s": 0.093,
    "observables": [
     "occupied_frac",
     "total"
@@ -7552,7 +7713,7 @@
      "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.086,
    "observables": [
     "mean_degree",
     "n_edges"
@@ -7564,17 +7725,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
+    "n": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "n": [
+    "m": [
      "number"
     ]
    },
-   "duration_s": 0.635,
+   "duration_s": 1.321,
    "observables": [
     "n",
     "m",
@@ -7587,20 +7748,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
+    "n_components": [
      "number"
     ],
-    "n_components": [
+    "n": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "n": [
+    "m": [
      "number"
     ]
    },
-   "duration_s": 0.145,
+   "duration_s": 0.12,
    "observables": [
     "n",
     "m",
@@ -7614,17 +7775,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
-     "number"
-    ],
     "directed": [
      "boolean"
     ],
     "n": [
      "number"
+    ],
+    "m": [
+     "number"
     ]
    },
-   "duration_s": 0.145,
+   "duration_s": 0.105,
    "observables": [
     "n",
     "m"
@@ -7636,20 +7797,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
+    "n_components": [
      "number"
     ],
-    "n_components": [
+    "n": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "n": [
+    "m": [
      "number"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.113,
    "observables": [
     "n",
     "m",
@@ -7663,20 +7824,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
+    "n_components": [
      "number"
     ],
-    "n_components": [
+    "n": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "n": [
+    "m": [
      "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.131,
    "observables": [
     "n",
     "m",
@@ -7697,7 +7858,7 @@
      "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.1,
    "observables": [
     "n_edges",
     "clustering"
@@ -7709,9 +7870,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
-     "number"
-    ],
     "n_components": [
      "number"
     ],
@@ -7720,9 +7878,12 @@
     ],
     "mean_degree": [
      "number"
+    ],
+    "m": [
+     "number"
     ]
    },
-   "duration_s": 1.472,
+   "duration_s": 0.086,
    "observables": [
     "n",
     "m",
@@ -7739,14 +7900,14 @@
     "n_edges": [
      "number"
     ],
-    "mean_degree": [
+    "tail_slope": [
      "number"
     ],
-    "tail_slope": [
+    "mean_degree": [
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.105,
    "observables": [
     "n_edges",
     "mean_degree",
@@ -7759,9 +7920,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
-     "number"
-    ],
     "n_components": [
      "number"
     ],
@@ -7770,9 +7928,12 @@
     ],
     "mean_degree": [
      "number"
+    ],
+    "m": [
+     "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.095,
    "observables": [
     "n",
     "m",
@@ -7796,7 +7957,7 @@
      "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.115,
    "observables": [
     "n",
     "mean_degree"
@@ -7808,20 +7969,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
+    "mean_degree": [
      "number"
     ],
-    "n_components": [
+    "m": [
      "number"
     ],
     "n": [
      "number"
     ],
-    "mean_degree": [
+    "n_components": [
      "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 1.447,
    "observables": [
     "n",
     "m",
@@ -7845,7 +8006,7 @@
      "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.105,
    "observables": [
     "n",
     "edges"
@@ -7867,7 +8028,7 @@
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.118,
    "observables": [
     "n",
     "edges"
@@ -7879,20 +8040,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
+    "mean_degree": [
      "number"
     ],
-    "n_components": [
+    "m": [
      "number"
     ],
     "n": [
      "number"
     ],
-    "mean_degree": [
+    "n_components": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.103,
    "observables": [
     "n",
     "m",
@@ -7906,20 +8067,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
+    "mean_degree": [
      "number"
     ],
-    "n_components": [
+    "m": [
      "number"
     ],
     "n": [
      "number"
     ],
-    "mean_degree": [
+    "n_components": [
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.105,
    "observables": [
     "n",
     "m",
@@ -7943,7 +8104,7 @@
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.093,
    "observables": [
     "n",
     "edges"
@@ -7955,17 +8116,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "edges": [
+    "n": [
      "number"
     ],
-    "n": [
+    "edges": [
      "number"
     ],
     "mixed_membership": [
      "boolean"
     ]
    },
-   "duration_s": 0.975,
+   "duration_s": 0.092,
    "observables": [
     "n",
     "edges"
@@ -7980,17 +8141,17 @@
     "generator_fallback": [
      "string"
     ],
-    "n_communities_detected": [
-     "number"
-    ],
     "n": [
      "number"
     ],
     "benchmark_valid": [
      "boolean"
+    ],
+    "n_communities_detected": [
+     "number"
     ]
    },
-   "duration_s": 0.462,
+   "duration_s": 0.087,
    "observables": [
     "n",
     "n_communities_detected"
@@ -8002,20 +8163,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_components": [
-     "number"
-    ],
-    "n": [
+    "mean_degree": [
      "number"
     ],
     "m": [
      "number"
     ],
-    "mean_degree": [
+    "n": [
+     "number"
+    ],
+    "n_components": [
      "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.112,
    "observables": [
     "n",
     "m",
@@ -8029,17 +8190,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "edges": [
+    "n": [
      "number"
     ],
-    "n": [
+    "edges": [
      "number"
     ],
     "latent_distance": [
      "boolean"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.091,
    "observables": [
     "n",
     "edges"
@@ -8051,17 +8212,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "edges": [
-     "number"
+    "cluster_recovery": [
+     "boolean"
     ],
     "n": [
      "number"
     ],
-    "cluster_recovery": [
-     "boolean"
+    "edges": [
+     "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.933,
    "observables": [
     "n",
     "edges"
@@ -8073,20 +8234,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "sampler_mixed": [
-     "boolean"
-    ],
-    "edges": [
-     "number"
-    ],
     "n_nodes": [
      "number"
     ],
+    "sampler_mixed": [
+     "boolean"
+    ],
     "triangles": [
+     "number"
+    ],
+    "edges": [
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.088,
    "observables": [
     "edges",
     "triangles",
@@ -8099,17 +8260,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "temporal_dependence": [
+     "boolean"
+    ],
     "reciprocity": [
      "number"
     ],
     "stability": [
      "number"
-    ],
-    "temporal_dependence": [
-     "boolean"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.082,
    "observables": [
     "stability",
     "reciprocity"
@@ -8121,17 +8282,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dissolutions": [
-     "number"
-    ],
     "edges": [
      "number"
     ],
     "formations": [
      "number"
+    ],
+    "dissolutions": [
+     "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.079,
    "observables": [
     "formations",
     "dissolutions",
@@ -8151,7 +8312,7 @@
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.079,
    "observables": [
     "density",
     "reciprocity"
@@ -8163,17 +8324,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "behavior_consensus": [
+     "number"
+    ],
     "reciprocity": [
      "number"
     ],
     "density": [
      "number"
-    ],
-    "behavior_consensus": [
-     "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.085,
    "observables": [
     "density",
     "reciprocity",
@@ -8189,14 +8350,14 @@
     "n_events": [
      "number"
     ],
-    "recip_rate": [
-     "number"
-    ],
     "beta_detected": [
      "boolean"
+    ],
+    "recip_rate": [
+     "number"
     ]
    },
-   "duration_s": 0.985,
+   "duration_s": 0.113,
    "observables": [
     "n_events",
     "recip_rate"
@@ -8215,7 +8376,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.079,
    "observables": []
   },
   "NET046": {
@@ -8224,14 +8385,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_edges_aggregated": [
+    "n_active_mean": [
      "number"
     ],
-    "n_active_mean": [
+    "n_edges_aggregated": [
      "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.084,
    "observables": [
     "n_edges_aggregated",
     "n_active_mean"
@@ -8250,7 +8411,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.084,
    "observables": [
     "simplices"
    ]
@@ -8261,10 +8422,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mean_degree": [
+    "m": [
      "number"
     ],
-    "m": [
+    "mean_degree": [
      "number"
     ],
     "n_components": [
@@ -8274,7 +8435,7 @@
      "number"
     ]
    },
-   "duration_s": 0.453,
+   "duration_s": 1.292,
    "observables": [
     "n",
     "m",
@@ -8288,17 +8449,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_nodes": [
+    "n_edges": [
      "number"
     ],
-    "n_edges": [
+    "n_nodes": [
      "number"
     ],
     "intersection_defined": [
      "boolean"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.083,
    "observables": [
     "n_nodes",
     "n_edges"
@@ -8320,7 +8481,7 @@
      "number"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.084,
    "observables": [
     "top_nodes",
     "bottom_nodes",
@@ -8340,7 +8501,7 @@
      "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.09,
    "observables": [
     "S",
     "I"
@@ -8352,17 +8513,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "I": [
+     "number"
+    ],
     "I_frac": [
      "number"
     ],
     "I_star": [
      "number"
-    ],
-    "I": [
-     "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.104,
    "observables": [
     "I",
     "I_frac",
@@ -8375,23 +8536,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "total": [
-     "number"
-    ],
-    "R": [
+    "S": [
      "number"
     ],
     "I": [
      "number"
     ],
-    "S": [
+    "total": [
      "number"
     ],
     "infected_peak_passed": [
      "boolean"
+    ],
+    "R": [
+     "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.119,
    "observables": [
     "S",
     "I",
@@ -8408,14 +8569,14 @@
     "S": [
      "number"
     ],
-    "I": [
+    "R": [
      "number"
     ],
-    "R": [
+    "I": [
      "number"
     ]
    },
-   "duration_s": 0.987,
+   "duration_s": 0.12,
    "observables": [
     "S",
     "I",
@@ -8428,7 +8589,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "R": [
+    "S": [
      "number"
     ],
     "I": [
@@ -8440,11 +8601,11 @@
     "E": [
      "number"
     ],
-    "S": [
+    "R": [
      "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.122,
    "observables": [
     "S",
     "E",
@@ -8462,17 +8623,17 @@
     "S": [
      "number"
     ],
-    "R": [
+    "E": [
      "number"
     ],
-    "E": [
+    "R": [
      "number"
     ],
     "I": [
      "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.104,
    "observables": [
     "S",
     "E",
@@ -8486,23 +8647,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "R": [
+    "S": [
      "number"
     ],
     "I": [
      "number"
     ],
+    "D": [
+     "number"
+    ],
     "E": [
      "number"
     ],
-    "S": [
-     "number"
-    ],
-    "D": [
+    "R": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.115,
    "observables": [
     "S",
     "E",
@@ -8517,23 +8678,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "R": [
+    "S": [
      "number"
     ],
     "I": [
      "number"
     ],
-    "A": [
-     "number"
-    ],
     "E": [
      "number"
     ],
-    "S": [
+    "R": [
+     "number"
+    ],
+    "A": [
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 1.104,
    "observables": [
     "S",
     "E",
@@ -8558,7 +8719,7 @@
      "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.091,
    "observables": [
     "S",
     "I",
@@ -8574,17 +8735,17 @@
     "S": [
      "number"
     ],
-    "V": [
+    "I": [
      "number"
     ],
-    "I": [
+    "V": [
      "number"
     ],
     "R": [
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.085,
    "observables": [
     "S",
     "V",
@@ -8598,32 +8759,32 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "E_total": [
-     "number"
+    "S": [
+     "array"
     ],
-    "R": [
+    "I": [
      "array"
     ],
     "S_total": [
      "number"
     ],
-    "I": [
+    "R": [
      "array"
     ],
     "R_total": [
      "number"
     ],
-    "S": [
-     "array"
-    ],
-    "age_matrix": [
-     "boolean"
+    "E_total": [
+     "number"
     ],
     "I_total": [
      "number"
+    ],
+    "age_matrix": [
+     "boolean"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.084,
    "observables": [
     "S_total",
     "E_total",
@@ -8637,7 +8798,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "city0_I": [
+    "city2_I": [
      "number"
     ],
     "city3_I": [
@@ -8646,11 +8807,11 @@
     "city1_I": [
      "number"
     ],
-    "city2_I": [
+    "city0_I": [
      "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.084,
    "observables": [
     "city0_I",
     "city1_I",
@@ -8674,7 +8835,7 @@
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.092,
    "observables": [
     "S",
     "I",
@@ -8693,14 +8854,14 @@
     "I": [
      "number"
     ],
-    "R": [
+    "conserv": [
      "number"
     ],
-    "conserv": [
+    "R": [
      "number"
     ]
    },
-   "duration_s": 0.966,
+   "duration_s": 0.089,
    "observables": [
     "S",
     "I",
@@ -8724,7 +8885,7 @@
      "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.085,
    "observables": [
     "S",
     "I",
@@ -8737,17 +8898,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "gen_curve": [
-     "array"
-    ],
     "susceptible": [
      "number"
     ],
     "infected_gen": [
      "number"
+    ],
+    "gen_curve": [
+     "array"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.086,
    "observables": [
     "infected_gen",
     "susceptible"
@@ -8759,20 +8920,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "I_total": [
-     "number"
+    "stages": [
+     "array"
     ],
     "S": [
      "number"
     ],
-    "stages": [
-     "array"
+    "I_total": [
+     "number"
     ],
     "R": [
      "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.082,
    "observables": [
     "S",
     "I_total",
@@ -8785,14 +8946,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "renewal_eq": [
-     "boolean"
-    ],
     "incidence_recent": [
      "array"
+    ],
+    "renewal_eq": [
+     "boolean"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.914,
    "observables": []
   },
   "NET068": {
@@ -8801,23 +8962,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "Iv": [
+     "number"
+    ],
     "prev_v": [
-     "number"
-    ],
-    "prev_h": [
-     "number"
-    ],
-    "Ih": [
      "number"
     ],
     "endemic": [
      "boolean"
     ],
-    "Iv": [
+    "Ih": [
+     "number"
+    ],
+    "prev_h": [
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.085,
    "observables": [
     "Ih",
     "Iv",
@@ -8831,20 +8992,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "pair_approximation": [
-     "boolean"
-    ],
     "S": [
      "number"
     ],
     "I": [
      "number"
     ],
+    "pair_approximation": [
+     "boolean"
+    ],
     "R": [
      "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.086,
    "observables": [
     "S",
     "I",
@@ -8864,7 +9025,7 @@
      "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.088,
    "observables": [
     "final_size_frac"
    ]
@@ -8882,7 +9043,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.092,
    "observables": [
     "infected_cells"
    ]
@@ -8896,14 +9057,14 @@
     "adaptive_coevolution": [
      "boolean"
     ],
-    "rewires": [
+    "infected_frac": [
      "number"
     ],
-    "infected_frac": [
+    "rewires": [
      "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.094,
    "observables": [
     "infected_frac",
     "rewires"
@@ -8915,14 +9076,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "alive": [
-     "number"
-    ],
     "extinct": [
      "boolean"
+    ],
+    "alive": [
+     "number"
     ]
    },
-   "duration_s": 0.936,
+   "duration_s": 0.091,
    "observables": [
     "alive"
    ]
@@ -8933,14 +9094,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "adopted": [
+    "frac": [
      "number"
     ],
-    "frac": [
+    "adopted": [
      "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.087,
    "observables": [
     "adopted",
     "frac"
@@ -8959,7 +9120,7 @@
      "number"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.082,
    "observables": [
     "adopted_frac",
     "F_theory"
@@ -8975,7 +9136,7 @@
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.088,
    "observables": [
     "n"
    ]
@@ -8990,7 +9151,7 @@
      "number"
     ]
    },
-   "duration_s": 0.138,
+   "duration_s": 1.006,
    "observables": [
     "n"
    ]
@@ -9008,7 +9169,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.093,
    "observables": [
     "cascade_frac"
    ]
@@ -9019,14 +9180,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "infected_frac": [
-     "number"
-    ],
     "dose_model_active": [
      "boolean"
+    ],
+    "infected_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.086,
    "observables": [
     "infected_frac"
    ]
@@ -9040,17 +9201,17 @@
     "rumor_dies": [
      "boolean"
     ],
+    "ignorants": [
+     "number"
+    ],
     "spreaders": [
      "number"
     ],
     "stiflers": [
      "number"
-    ],
-    "ignorants": [
-     "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.088,
    "observables": [
     "ignorants",
     "spreaders",
@@ -9066,17 +9227,17 @@
     "rumor_dies": [
      "boolean"
     ],
+    "ignorants": [
+     "number"
+    ],
     "spreaders": [
      "number"
     ],
     "stiflers": [
      "number"
-    ],
-    "ignorants": [
-     "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.081,
    "observables": [
     "ignorants",
     "spreaders",
@@ -9089,17 +9250,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_triangles": [
-     "number"
+    "higher_order_effect": [
+     "boolean"
     ],
     "infected": [
      "number"
     ],
-    "higher_order_effect": [
-     "boolean"
+    "n_triangles": [
+     "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.109,
    "observables": [
     "infected",
     "n_triangles"
@@ -9118,7 +9279,7 @@
      "number"
     ]
    },
-   "duration_s": 1.09,
+   "duration_s": 0.095,
    "observables": [
     "overall"
    ]
@@ -9129,14 +9290,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "overall": [
+    "cross_community_exposure": [
      "number"
     ],
-    "cross_community_exposure": [
+    "overall": [
      "number"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.088,
    "observables": [
     "overall",
     "cross_community_exposure"
@@ -9148,7 +9309,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "p=0.25": [
+    "p=0.35": [
      "object"
     ],
     "p_critical": [
@@ -9157,11 +9318,11 @@
     "p=0.15": [
      "object"
     ],
-    "p=0.35": [
+    "p=0.25": [
      "object"
     ]
    },
-   "duration_s": 0.477,
+   "duration_s": 0.437,
    "observables": [
     "p_critical"
    ]
@@ -9172,20 +9333,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "p=0.4": [
-     "number"
-    ],
-    "p=0.5": [
-     "number"
-    ],
     "p_critical_approx": [
      "number"
     ],
     "p=0.3": [
      "number"
+    ],
+    "p=0.5": [
+     "number"
+    ],
+    "p=0.4": [
+     "number"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.094,
    "observables": [
     "p=0.3",
     "p=0.4",
@@ -9199,17 +9360,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "core_dist": [
-     "object"
-    ],
     "max_core": [
      "number"
+    ],
+    "core_dist": [
+     "object"
     ],
     "hub_has_high_core": [
      "boolean"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 1.284,
    "observables": [
     "max_core"
    ]
@@ -9220,14 +9381,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "active_frac": [
-     "number"
-    ],
     "full_activation": [
      "boolean"
+    ],
+    "active_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.093,
    "observables": [
     "active_frac"
    ]
@@ -9238,17 +9399,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "cascade_happened": [
+     "boolean"
+    ],
     "largest_component_frac": [
      "number"
     ],
     "failed_edges": [
      "number"
-    ],
-    "cascade_happened": [
-     "boolean"
     ]
    },
-   "duration_s": 0.13,
+   "duration_s": 0.108,
    "observables": [
     "failed_edges",
     "largest_component_frac"
@@ -9263,17 +9424,17 @@
     "alive_a": [
      "number"
     ],
-    "failed_a": [
+    "failed_b": [
      "number"
     ],
-    "failed_b": [
+    "failed_a": [
      "number"
     ],
     "catastrophic": [
      "boolean"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.1,
    "observables": [
     "alive_a",
     "failed_a",
@@ -9289,17 +9450,17 @@
     "clearing_payments": [
      "array"
     ],
-    "total_debt": [
-     "number"
-    ],
     "clearing_feasible": [
      "boolean"
     ],
     "total_paid": [
      "number"
+    ],
+    "total_debt": [
+     "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.106,
    "observables": [
     "total_debt",
     "total_paid"
@@ -9311,17 +9472,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_defaults": [
-     "number"
+    "payments": [
+     "array"
     ],
     "loss_amplified": [
      "boolean"
     ],
-    "payments": [
-     "array"
+    "n_defaults": [
+     "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.108,
    "observables": [
     "n_defaults"
    ]
@@ -9332,17 +9493,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "debt_rank_pct": [
-     "number"
-    ],
     "contagion": [
      "boolean"
     ],
     "h_vector": [
      "array"
+    ],
+    "debt_rank_pct": [
+     "number"
     ]
    },
-   "duration_s": 1.054,
+   "duration_s": 0.144,
    "observables": [
     "debt_rank_pct"
    ]
@@ -9353,17 +9514,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "price": [
+     "number"
+    ],
     "fire_sale_spiral": [
      "boolean"
     ],
     "n_defaults": [
      "number"
-    ],
-    "price": [
-     "number"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.123,
    "observables": [
     "price",
     "n_defaults"
@@ -9375,17 +9536,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "k_mean": [
+    "flux": [
      "number"
     ],
     "total": [
      "number"
     ],
-    "flux": [
+    "k_mean": [
      "number"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.127,
    "observables": [
     "total",
     "k_mean",
@@ -9398,17 +9559,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "k_mean": [
+    "queue": [
      "number"
     ],
     "total": [
      "number"
     ],
-    "queue": [
+    "k_mean": [
      "number"
     ]
    },
-   "duration_s": 0.127,
+   "duration_s": 0.098,
    "observables": [
     "total",
     "k_mean",
@@ -9421,17 +9582,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "v_std": [
+    "k_mean": [
      "number"
     ],
-    "k_mean": [
+    "v_std": [
      "number"
     ],
     "v_mean": [
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.987,
    "observables": [
     "k_mean",
     "v_std",
@@ -9444,17 +9605,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "v_mean": [
+     "number"
+    ],
     "v_std": [
      "number"
     ],
     "min_gap": [
      "number"
-    ],
-    "v_mean": [
-     "number"
     ]
    },
-   "duration_s": 0.135,
+   "duration_s": 0.105,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9467,17 +9628,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "v_mean": [
+     "number"
+    ],
     "v_std": [
      "number"
     ],
     "min_gap": [
      "number"
-    ],
-    "v_mean": [
-     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.087,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9490,17 +9651,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "v_mean": [
+     "number"
+    ],
     "v_std": [
      "number"
     ],
     "min_gap": [
      "number"
-    ],
-    "v_mean": [
-     "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.094,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9513,17 +9674,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "v_mean": [
+     "number"
+    ],
     "v_std": [
      "number"
     ],
     "min_gap": [
      "number"
-    ],
-    "v_mean": [
-     "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.101,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9536,17 +9697,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "v_mean": [
+     "number"
+    ],
     "v_std": [
      "number"
     ],
     "min_gap": [
      "number"
-    ],
-    "v_mean": [
-     "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.094,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9569,7 +9730,7 @@
      "number"
     ]
    },
-   "duration_s": 0.989,
+   "duration_s": 0.089,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9592,7 +9753,7 @@
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.1,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9615,7 +9776,7 @@
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.092,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9628,17 +9789,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "flux": [
+    "density": [
      "number"
     ],
-    "density": [
+    "flux": [
      "number"
     ],
     "n_cars": [
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.092,
    "observables": [
     "n_cars",
     "density",
@@ -9651,23 +9812,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mobility": [
+    "empty": [
      "number"
     ],
     "n_east": [
      "number"
     ],
-    "n_north": [
-     "number"
-    ],
-    "empty": [
-     "number"
-    ],
     "cars": [
+     "number"
+    ],
+    "mobility": [
+     "number"
+    ],
+    "n_north": [
      "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.969,
    "observables": [
     "n_east",
     "n_north",
@@ -9689,7 +9850,7 @@
      "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.101,
    "observables": [
     "n_cars",
     "flux"
@@ -9701,17 +9862,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "delay": [
+     "number"
+    ],
     "queue": [
      "number"
     ],
     "served": [
      "number"
-    ],
-    "delay": [
-     "number"
     ]
    },
-   "duration_s": 0.11,
+   "duration_s": 0.088,
    "observables": [
     "queue",
     "served",
@@ -9724,10 +9885,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "f1": [
+    "cost1": [
      "number"
     ],
-    "cost1": [
+    "f1": [
      "number"
     ],
     "cost2": [
@@ -9740,7 +9901,7 @@
      "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.09,
    "observables": [
     "f1",
     "cost1",
@@ -9755,10 +9916,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "f1": [
+    "cost1": [
      "number"
     ],
-    "cost1": [
+    "f1": [
      "number"
     ],
     "cost2": [
@@ -9771,7 +9932,7 @@
      "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.093,
    "observables": [
     "f1",
     "cost1",
@@ -9792,14 +9953,14 @@
     "changes": [
      "number"
     ],
-    "v_mean": [
+    "min_gap": [
      "number"
     ],
-    "min_gap": [
+    "v_mean": [
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.089,
    "observables": [
     "min_gap",
     "v_std",
@@ -9819,14 +9980,14 @@
     "in_bounds": [
      "boolean"
     ],
-    "evacuated": [
+    "alive": [
      "number"
     ],
-    "alive": [
+    "evacuated": [
      "number"
     ]
    },
-   "duration_s": 0.996,
+   "duration_s": 0.1,
    "observables": [
     "evacuated",
     "alive",
@@ -9845,14 +10006,14 @@
     "in_bounds": [
      "boolean"
     ],
-    "evacuated": [
+    "alive": [
      "number"
     ],
-    "alive": [
+    "evacuated": [
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.09,
    "observables": [
     "evacuated",
     "alive",
@@ -9871,14 +10032,14 @@
     "in_bounds": [
      "boolean"
     ],
-    "evacuated": [
+    "alive": [
      "number"
     ],
-    "alive": [
+    "evacuated": [
      "number"
     ]
    },
-   "duration_s": 0.142,
+   "duration_s": 0.089,
    "observables": [
     "evacuated",
     "alive",
@@ -9894,14 +10055,14 @@
     "arrived": [
      "number"
     ],
-    "alive": [
+    "collisions": [
      "number"
     ],
-    "collisions": [
+    "alive": [
      "number"
     ]
    },
-   "duration_s": 0.137,
+   "duration_s": 0.093,
    "observables": [
     "arrived",
     "alive",
@@ -9914,17 +10075,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "arrived": [
-     "number"
-    ],
     "alive": [
      "number"
     ],
     "collisions": [
      "number"
+    ],
+    "arrived": [
+     "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 1.132,
    "observables": [
     "arrived",
     "alive",
@@ -9937,17 +10098,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "arrived": [
-     "number"
-    ],
     "alive": [
      "number"
     ],
     "collisions": [
      "number"
+    ],
+    "arrived": [
+     "number"
     ]
    },
-   "duration_s": 0.121,
+   "duration_s": 0.092,
    "observables": [
     "arrived",
     "alive",
@@ -9960,20 +10121,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "steps": [
+    "at_exit": [
      "number"
     ],
     "total": [
      "number"
     ],
-    "max_remaining": [
+    "steps": [
      "number"
     ],
-    "at_exit": [
+    "max_remaining": [
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.09,
    "observables": [
     "at_exit",
     "total",
@@ -9987,14 +10148,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "arrived": [
+    "total": [
      "number"
     ],
-    "total": [
+    "arrived": [
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.108,
    "observables": [
     "arrived",
     "total"
@@ -10013,7 +10174,7 @@
      "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.103,
    "observables": [
     "queue",
     "served"
@@ -10028,20 +10189,20 @@
     "n_arrived": [
      "number"
     ],
-    "Wq_sim": [
+    "n_served": [
      "number"
     ],
     "Wq_erlangc": [
      "number"
     ],
-    "n_service_starts": [
+    "Wq_sim": [
      "number"
     ],
-    "n_served": [
+    "n_service_starts": [
      "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.094,
    "observables": [
     "Wq_sim",
     "Wq_erlangc",
@@ -10056,20 +10217,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "blocked": [
+    "total": [
      "number"
     ],
-    "total": [
+    "B_sim": [
      "number"
     ],
     "B_formula": [
      "number"
     ],
-    "B_sim": [
+    "blocked": [
      "number"
     ]
    },
-   "duration_s": 0.896,
+   "duration_s": 0.095,
    "observables": [
     "B_formula",
     "B_sim",
@@ -10083,21 +10244,56 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "drop_frac": [
+    "total": [
      "number"
     ],
-    "total": [
+    "drop_frac": [
      "number"
     ],
     "reneged": [
      "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.103,
    "observables": [
     "reneged",
     "total",
     "drop_frac"
+   ]
+  },
+  "SYS005": {
+   "model_id": "SYS005",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "in_service": [
+     "number"
+    ],
+    "arrived": [
+     "number"
+    ],
+    "started": [
+     "number"
+    ],
+    "reneged": [
+     "number"
+    ],
+    "waiting": [
+     "number"
+    ],
+    "served": [
+     "number"
+    ]
+   },
+   "duration_s": 0.101,
+   "observables": [
+    "arrived",
+    "started",
+    "served",
+    "reneged",
+    "waiting",
+    "in_service"
    ]
   },
   "SYS006": {
@@ -10106,14 +10302,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "L": [
+    "L_little": [
      "number"
     ],
-    "L_little": [
+    "L": [
      "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.117,
    "observables": [
     "L",
     "L_little"
@@ -10125,17 +10321,30 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "Wq_md1": [
+    "Wq_sim": [
+     "null",
      "number"
     ],
-    "Wq_sim": [
+    "n_service_starts": [
+     "number"
+    ],
+    "n_arrived": [
+     "number"
+    ],
+    "n_waiting": [
+     "number"
+    ],
+    "Wq_md1": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.968,
    "observables": [
     "Wq_sim",
-    "Wq_md1"
+    "Wq_md1",
+    "n_arrived",
+    "n_service_starts",
+    "n_waiting"
    ]
   },
   "SYS008": {
@@ -10144,17 +10353,30 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "Wq_md1": [
+    "Wq_sim": [
+     "null",
      "number"
     ],
-    "Wq_sim": [
+    "n_service_starts": [
+     "number"
+    ],
+    "n_arrived": [
+     "number"
+    ],
+    "n_waiting": [
+     "number"
+    ],
+    "Wq_md1": [
      "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.089,
    "observables": [
     "Wq_sim",
-    "Wq_md1"
+    "Wq_md1",
+    "n_arrived",
+    "n_service_starts",
+    "n_waiting"
    ]
   },
   "SYS009": {
@@ -10170,7 +10392,7 @@
      "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.085,
    "observables": [
     "Wq_sim",
     "Wq_kingman"
@@ -10192,7 +10414,7 @@
      "array"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.089,
    "observables": []
   },
   "SYS011": {
@@ -10201,17 +10423,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "X_sim": [
+     "number"
+    ],
     "n": [
      "array"
     ],
     "X_mva": [
      "number"
-    ],
-    "X_sim": [
-     "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.082,
    "observables": [
     "X_mva",
     "X_sim"
@@ -10233,7 +10455,7 @@
      "array"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.092,
    "observables": [
     "rho"
    ]
@@ -10244,18 +10466,40 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "W_low": [
-     "null"
-    ],
     "W_high": [
      "null"
     ],
     "priority_holds": [
      "boolean"
+    ],
+    "W_low": [
+     "null"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.085,
    "observables": []
+  },
+  "SYS014": {
+   "model_id": "SYS014",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "W_high": [
+     "null",
+     "number"
+    ],
+    "priority_holds": [
+     "boolean"
+    ],
+    "W_low": [
+     "null"
+    ]
+   },
+   "duration_s": 0.094,
+   "observables": [
+    "W_high"
+   ]
   },
   "SYS015": {
    "model_id": "SYS015",
@@ -10263,20 +10507,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "fired": [
-     "number"
-    ],
     "enabled": [
      "number"
     ],
     "marking": [
      "array"
     ],
+    "fired": [
+     "number"
+    ],
     "total_tokens": [
      "number"
     ]
    },
-   "duration_s": 0.921,
+   "duration_s": 0.094,
    "observables": [
     "fired",
     "total_tokens",
@@ -10289,17 +10533,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "fired": [
-     "number"
-    ],
     "per_color": [
      "object"
     ],
     "marking": [
      "object"
+    ],
+    "fired": [
+     "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.088,
    "observables": [
     "fired"
    ]
@@ -10313,17 +10557,17 @@
     "fired": [
      "number"
     ],
-    "enabled": [
-     "number"
-    ],
     "marking": [
      "array"
     ],
     "total_tokens": [
      "number"
+    ],
+    "enabled": [
+     "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.96,
    "observables": [
     "fired",
     "total_tokens",
@@ -10343,7 +10587,7 @@
      "array"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.092,
    "observables": [
     "fired"
    ]
@@ -10361,7 +10605,7 @@
      "array"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.094,
    "observables": [
     "fired"
    ]
@@ -10375,17 +10619,17 @@
     "fired": [
      "number"
     ],
-    "enabled": [
-     "number"
-    ],
     "marking": [
      "array"
     ],
     "total_tokens": [
      "number"
+    ],
+    "enabled": [
+     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.098,
    "observables": [
     "fired",
     "total_tokens",
@@ -10398,17 +10642,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "events": [
+    "expected": [
      "number"
     ],
-    "expected": [
+    "events": [
      "number"
     ],
     "clock": [
      "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.092,
    "observables": [
     "events",
     "clock",
@@ -10424,17 +10668,17 @@
     "queued": [
      "number"
     ],
-    "conserv": [
+    "generated": [
      "number"
     ],
-    "generated": [
+    "conserv": [
      "number"
     ],
     "processed": [
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.085,
    "observables": [
     "generated",
     "processed",
@@ -10448,17 +10692,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "expected_total": [
+     "number"
+    ],
     "events_per_atom": [
      "array"
     ],
     "total": [
      "number"
-    ],
-    "expected_total": [
-     "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.089,
    "observables": [
     "total",
     "expected_total"
@@ -10470,23 +10714,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "arrived": [
+    "completed": [
      "number"
     ],
     "queued": [
      "number"
     ],
-    "completed": [
+    "workers": [
+     "number"
+    ],
+    "arrived": [
      "number"
     ],
     "conserv": [
      "number"
-    ],
-    "workers": [
-     "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.094,
    "observables": [
     "workers",
     "arrived",
@@ -10508,10 +10752,33 @@
      "number"
     ]
    },
-   "duration_s": 0.954,
+   "duration_s": 0.101,
    "observables": [
     "total",
     "max"
+   ]
+  },
+  "SYS026": {
+   "model_id": "SYS026",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "jumps": [
+     "number"
+    ],
+    "regime": [
+     "number"
+    ],
+    "stock": [
+     "number"
+    ]
+   },
+   "duration_s": 0.087,
+   "observables": [
+    "stock",
+    "regime",
+    "jumps"
    ]
   },
   "SYS027": {
@@ -10520,14 +10787,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "pi_analytic": [
+    "visit_freq": [
      "array"
     ],
-    "visit_freq": [
+    "pi_analytic": [
      "array"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 1.097,
    "observables": []
   },
   "SYS028": {
@@ -10546,7 +10813,7 @@
      "number"
     ]
    },
-   "duration_s": 0.126,
+   "duration_s": 0.108,
    "observables": [
     "state"
    ]
@@ -10557,14 +10824,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "transitions": [
+    "state": [
      "number"
     ],
-    "state": [
+    "transitions": [
      "number"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.118,
    "observables": [
     "state",
     "transitions"
@@ -10576,14 +10843,14 @@
    "ok": true,
    "n_obs": 9,
    "output_types": {
-    "n": [
+    "E_analytic": [
      "number"
     ],
-    "E_analytic": [
+    "n": [
      "number"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.103,
    "observables": [
     "n",
     "E_analytic"
@@ -10595,21 +10862,40 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "count": [
+     "number"
+    ],
     "E": [
      "number"
     ],
     "var_theory": [
+     "number"
+    ]
+   },
+   "duration_s": 0.109,
+   "observables": [
+    "count",
+    "E",
+    "var_theory"
+   ]
+  },
+  "SYS032": {
+   "model_id": "SYS032",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "E_integral": [
      "number"
     ],
     "count": [
      "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.108,
    "observables": [
     "count",
-    "E",
-    "var_theory"
+    "E_integral"
    ]
   },
   "SYS033": {
@@ -10628,7 +10914,7 @@
      "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.103,
    "observables": [
     "alive",
     "E_analytic"
@@ -10647,7 +10933,7 @@
      "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.116,
    "observables": [
     "S",
     "E_S"
@@ -10659,14 +10945,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "x": [
+    "stationary_var": [
      "number"
     ],
-    "stationary_var": [
+    "x": [
      "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.132,
    "observables": [
     "x",
     "stationary_var"
@@ -10681,14 +10967,14 @@
     "feller_ok": [
      "boolean"
     ],
-    "x": [
+    "theta": [
      "number"
     ],
-    "theta": [
+    "x": [
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.135,
    "observables": [
     "x",
     "theta"
@@ -10700,17 +10986,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
+    "theta": [
      "number"
     ],
     "v": [
      "number"
     ],
-    "theta": [
+    "S": [
      "number"
     ]
    },
-   "duration_s": 1.005,
+   "duration_s": 0.973,
    "observables": [
     "S",
     "v",
@@ -10723,14 +11009,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "var_theory": [
+    "x": [
      "number"
     ],
-    "x": [
+    "var_theory": [
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.091,
    "observables": [
     "x",
     "var_theory"
@@ -10742,21 +11028,70 @@
    "ok": true,
    "n_obs": 4,
    "output_types": {
+    "n": [
+     "number"
+    ],
     "E_S": [
      "number"
     ],
     "S": [
      "number"
-    ],
-    "n": [
-     "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.083,
    "observables": [
     "S",
     "n",
     "E_S"
+   ]
+  },
+  "SYS040": {
+   "model_id": "SYS040",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "E_Z_do_X2": [
+     "number"
+    ],
+    "do_effect": [
+     "number"
+    ],
+    "E_Z_given_X2": [
+     "null"
+    ],
+    "n_conditioned": [
+     "number"
+    ]
+   },
+   "duration_s": 0.091,
+   "observables": [
+    "n_conditioned",
+    "E_Z_do_X2",
+    "do_effect"
+   ]
+  },
+  "SYS041": {
+   "model_id": "SYS041",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "diff_from_factual": [
+     "number"
+    ],
+    "Y_cf_expect": [
+     "number"
+    ],
+    "Z_counterfactual": [
+     "number"
+    ]
+   },
+   "duration_s": 0.089,
+   "observables": [
+    "Z_counterfactual",
+    "Y_cf_expect",
+    "diff_from_factual"
    ]
   },
   "SYS042": {
@@ -10765,14 +11100,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "viterbi_acc": [
+    "loglik": [
      "number"
     ],
-    "loglik": [
+    "viterbi_acc": [
      "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.094,
    "observables": [
     "loglik",
     "viterbi_acc"
@@ -10788,7 +11123,7 @@
      "number"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.1,
    "observables": [
     "filter_acc"
    ]
@@ -10799,17 +11134,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rmse_prior": [
+    "rmse_post": [
      "number"
     ],
-    "rmse_post": [
+    "rmse_prior": [
      "number"
     ],
     "P_final": [
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.097,
    "observables": [
     "rmse_prior",
     "rmse_post",
@@ -10832,7 +11167,7 @@
      "number"
     ]
    },
-   "duration_s": 0.125,
+   "duration_s": 0.095,
    "observables": [
     "mean_filter_err",
     "filter_acc",

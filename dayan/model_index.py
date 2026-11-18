@@ -72,6 +72,7 @@ for mid, cls in {
     "ECO020": ECO_A.KaldorModel, "ECO021": ECO_A.KaleckiModel,
     "ECO031": ECO_A.DiamondOLGModel, "ECO032": ECO_A.BlanchardYOUTHModel,
     "ECO033": ECO_A.LifeCycleModel, "ECO035": ECO_A.GodleyLavoieSIMModel,
+    "ECO038": ECO_A.VARModel, "ECO045": ECO_A.GARCHModel,
     "ECO054": ECO_A.GodeSunderZIModel, "ECO078": ECO_A.McCallModel,
     "ECO082": ECO_A.BenPorathModel, "ECO083": ECO_A.MincerModel,
     "ECO087": ECO_A.GibratModel, "ECO088": ECO_A.RaschModel,
@@ -79,6 +80,7 @@ for mid, cls in {
     "ECO096": ECO_A.StaticTaxBenefitModel,
     "ECO110": ECO_A.RichardsonArmsModel, "ECO111": ECO_A.LanchesterSquareModel,
     "ECO112": ECO_A.LanchesterLinearModel, "ECO113": ECO_A.SchaeferFisheryModel,
+    "ECO114": ECO_A.GordonSchaeferModel,
     "ECO115": ECO_A.HotellingModel, "ECO104": ECO_A.BeerGameModel,
     "ECO106": ECO_A.DICELiteModel, "ECO018": ECO_A.RomerModel,
 }.items():
@@ -92,7 +94,7 @@ for mid, cls in {
     "ECO058": ECO_B.LefkovitchModel, "ECO060": ECO_B.RogersMultiregionalModel,
     "ECO061": ECO_B.LeeCarterModel, "ECO063": ECO_B.BrassLogitModel,
     "ECO064": ECO_B.GompertzMakehamModel, "ECO065": ECO_B.CoaleMcNeilModel,
-    "ECO066": ECO_B.HadwigerModel, "ECO069": ECO_B.WilsonGravityModel,
+    "ECO066": ECO_B.HadwigerModel, "ECO067": ECO_B.UnconstrainedGravityModel, "ECO069": ECO_B.WilsonGravityModel,
     "ECO070": ECO_B.RadiationModel, "ECO071": ECO_B.HarrisTodaroModel,
     "ECO073": ECO_B.BeckerMarriageModel, "ECO074": ECO_B.GaleShapleyModel,
     "ECO076": ECO_B.BeckerTomesModel,
@@ -115,12 +117,15 @@ for name, cls in vars(ECO_C).items():
 # ---- SYS ----
 for mid, cls in {
     "SYS002": SYS.MMCQueueModel, "SYS003": SYS.ErlangBModel,
+    "SYS005": SYS.AbandonmentQueueModel, "SYS026": SYS.SwitchingGrowthPDMPModel,
     "SYS006": SYS.MMInfQueueModel, "SYS007": SYS.MD1QueueModel,
     "SYS010": SYS.JacksonNetworkModel, "SYS013": SYS.PriorityQModel,
+    "SYS014": SYS.NonpreemptivePriorityModel,
     "SYS015": SYS.PetriNetModel, "SYS017": SYS.TimedPetriModel,
     "SYS021": SYS.AtomicDEVModel, "SYS022": SYS.CoupledDEVModel,
     "SYS025": SYS.CellDEVModel, "SYS029": SYS.SemiMarkovModel,
-    "SYS031": SYS.PoissonProcessModel, "SYS042": SYS.HMMModel,
+    "SYS031": SYS.PoissonProcessModel, "SYS032": SYS.NHPPModel, "SYS042": SYS.HMMModel,
+    "SYS040": SYS.LinearSCMModel, "SYS041": SYS.CounterfactualModel,
     "SYS044": SYS.LinearGaussianSSMModel, "SYS045": SYS.DBNModel,
     "SYS004": SYSX.Sys004FiniteCapacityModel,
     "SYS008": SYSX.Sys008DeterministicModel,
@@ -132,8 +137,6 @@ for mid, cls in {
     "SYS043": SYSX.HSMMModel,
 }.items():
     _FIXED_STEP[mid] = cls
-_ODE["SYS026"] = None  # PDMP 暂缺实现（登记态）
-_ODE.pop("SYS026")
 for mid, cls in {"SYS028": SYS.CTMCModel, "SYS030": SYS.BirthDeathModel,
                  "SYS039": SYS.CompoundPoissonModel,
                  "SYS019": SYSX.Sys018StochasticPetriModel}.items():
@@ -148,6 +151,9 @@ for mid, cls in {"SYS034": SYS.GBMModel, "SYS035": SYS.OUModel,
 
 # ---- BEH / NET / MET ----
 _FIXED_STEP.update(ALL_BEH_MODELS)
+from .models.game_lib import ImageScoringIndirectReciprocity
+from .models.game_catalog import YoungConventionModel
+_FIXED_STEP.update({"BEH074":ImageScoringIndirectReciprocity, "BEH081":YoungConventionModel})
 for mid, cls in ALL_NET_MODELS.items():
     if getattr(cls, "clock_type", "fixed_step") == "jump":
         _DEMO[mid] = ("jump_sim", cls)

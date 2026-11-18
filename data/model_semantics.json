@@ -23,6 +23,8 @@
     "ECO015": {"mechanisms": ["经济增长"], "match": "Solow|索洛", "description": "Solow资本积累", "primary_metric": "k", "clock": "model_time", "outputs": {"k": {"unit": "capital/worker", "scope": "representative_worker"}}},
     "ECO017": {"mechanisms": ["经济增长"], "match": "AK|内生增长", "description": "AK线性内生增长", "clock": "model_time", "inputs": {"k0": {"unit": "capital/worker", "scope": "representative_worker"}}},
     "ECO019": {"mechanisms": ["就业劳动"], "match": "Goodwin|古德温|工资份额|就业周期", "description": "Goodwin工资份额-就业率动力学；不裁剪，不改变记录时钟", "primary_metric": "employment", "clock": "model_time"},
+    "ECO038": {"mechanisms": ["多变量时序"], "match": "向量自回归|VAR\\(p\\)|VAR模型", "description": "指定数据字段的VAR递归预测", "primary_metric": "spectral_radius", "clock": "observation_interval", "required_data": ["dataset_id"]},
+    "ECO045": {"mechanisms": ["条件方差"], "match": "GARCH|条件异方差", "description": "指定收益序列与系数的GARCH(1,1)条件方差过滤", "primary_metric": "conditional_variance", "clock": "observation_interval", "required_data": ["dataset_id"]},
     "ECO071": {"mechanisms": ["就业劳动", "城乡迁移"], "match": "Todaro|城乡迁移|预期工资", "description": "Harris-Todaro预期工资迁移", "primary_metric": "unemp_rate", "clock": "model_time"},
     "SYS002": {"mechanisms": ["排队资源"], "match": "M/M/c|多服务|多窗口|服务台|排队", "description": "离散步近似M/M/c与Erlang-C参考值", "primary_metric": "Wq_sim", "clock": "user_defined"},
     "SYS006": {"mechanisms": ["排队资源"], "match": "M/M/∞|无限服务", "description": "M/M/无限服务台", "clock": "user_defined"},

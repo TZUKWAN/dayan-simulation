@@ -83,8 +83,10 @@ def _probe_worker(mid: str, ticks: int = 5) -> dict:
         out["protocol"] = protocol
         cls = factory[1] if isinstance(factory, tuple) else factory
         if getattr(cls, "requires_external", False):
+            needs = getattr(cls,"external_dependencies",())
             out.update(ok=False, skipped=True, requires_external=True,
-                       error="需要显式真实LLM/外部数据调用；目录探针不自动消耗云服务",
+                       dependencies=list(needs),
+                       error="需要真实语言模型调用" if "language_model" in needs else "需指定真实数据集，目录探针不替换输入",
                        observables=list(getattr(cls, "declared_observables", [])))
             return out
         obs = run_model(mid, parameters=None, ticks=ticks, seed=0)
@@ -253,6 +255,7 @@ def build_catalog(force: bool = False) -> dict:
     probes=_existing_probes(fp);models=[]
     refs=_all_test_refs()
     from .research.semantics import registry as semantics_registry
+    from .runtime import execution_dependencies
     semantics = semantics_registry()
     for mid in sorted(set(mids)|set(declared)):
         registered=declared.get(mid,{})
@@ -260,6 +263,8 @@ def build_catalog(force: bool = False) -> dict:
         cls=factory[1] if isinstance(factory,tuple) else factory
         has_factory=factory is not None
         external=bool(getattr(cls,'requires_external',False))
+        dependencies=execution_dependencies(mid,check_configuration=False) if external else []
+        requires_provider=any(d['type']=='language_model' for d in dependencies)
         pr=probes.get(mid)
         probe_status=('skipped_external' if external else 'not_run') if not pr else ('passed' if pr.get('ok') else 'skipped_external' if pr.get('skipped') else 'failed')
         rv=reviews.get(mid,{})
@@ -272,18 +277,21 @@ def build_catalog(force: bool = False) -> dict:
             'description':description or '', 'registered':mid in declared,
             'protocol':protocol,'has_factory':has_factory,'runnable':has_factory,
             'entry_kind':'software_reference' if registered.get('layer')=='软件层' else 'compatibility_or_benchmark' if mid not in declared else 'application' if registered.get('layer')=='应用层' else 'model',
-            'requires_external':external,'output_contract':schema,'mechanisms':sorted(model_mechanisms(mid)),
-            'required_data':semantics.get(mid,{}).get('required_data',[]),
+            'requires_external':external,'dependencies':dependencies,'output_contract':schema,'mechanisms':sorted(model_mechanisms(mid)),
+            'required_data':semantics.get(mid,{}).get('required_data',[]) or [d['name'] for d in dependencies if d['type']=='dataset'],
             'probe':{'status':probe_status,**(pr or {'ok':None,'error':'没有当前源码对应的实际探针证据'})},
             'fidelity':level,'fidelity_zh':FIDELITY_ZH[level],
             'basis':'目录声明但无实现入口' if not has_factory else rv.get('basis','无当前源码审查；运行入口不代表科学有效'),
             'simplifications':rv.get('simplifications',[]),'evidence':rv.get('evidence',''),
             'review_source':rv.get('review_source'),'reviewed':bool(rv.get('reviewed')),
+            'review_sources':[{'url':u} for u in rv.get('references',[]) if isinstance(u,str)] if rv.get('reviewed') else [],
             'review_status':rv.get('review_status','unreviewed'),'historical_review':rv.get('historical_review'),
             'test_refs':refs.get(mid,[]),'numerical_benchmark':{'state':'see_test_receipts','scope':'测试引用本身不证明断言已经通过'},
             'data_calibration':{'state':'per_study','scope':'不能把一个场景的校准升级为全模型有效'},
             'independent_holdout':{'state':'per_study'},
-            'entry_status':'仅登记' if not has_factory else '需要真实外部服务' if external else '有运行入口；'+{'passed':'探针通过','failed':'探针失败','not_run':'未探针','skipped_external':'外部服务未探针'}[probe_status]}
+            'entry_status':('软件引用' if registered.get('layer')=='软件层' else '仅登记') if not has_factory else
+                '需要真实语言模型服务' if requires_provider else '需要指定真实数据集' if external else
+                '有运行入口；'+{'passed':'探针通过','failed':'探针失败','not_run':'未探针','skipped_external':'外部服务未探针'}[probe_status]}
         entry['status']=entry['entry_status'];models.append(entry)
     levels={level:sum(m['fidelity']==level for m in models) for level in FIDELITY_LEVELS}
     counts={'total':len(models),'static_registered':len(declared),'factory_entries':sum(m['has_factory'] for m in models),
@@ -295,6 +303,8 @@ def build_catalog(force: bool = False) -> dict:
             'factory_outside_static':[m['model_id'] for m in models if m['has_factory'] and not m['registered']],
             'probe_passed':sum(m['probe']['status']=='passed' for m in models),'probe_failed':sum(m['probe']['status']=='failed' for m in models),
             'probe_skipped_external':sum(m['probe']['status']=='skipped_external' for m in models),
+            'provider_entries':sum(any(d['type']=='language_model' for d in m['dependencies']) for m in models),
+            'dataset_required_entries':sum(any(d['type']=='dataset' for d in m['dependencies']) for m in models),
             'probe_not_run':sum(m['has_factory'] and m['probe']['status']=='not_run' for m in models),
             'fidelity':levels,'reviewed':sum(m['reviewed'] for m in models),
             'historical_reviews_stale':sum(m['review_status']=='stale_or_unanchored' for m in models)}

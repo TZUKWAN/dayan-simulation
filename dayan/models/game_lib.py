@@ -179,36 +179,39 @@ def zero_determinant_rule(my_last, opp_last, p, r, s=1.0):
 
 
 class ImageScoringIndirectReciprocity:
-    """BEH074 形象评分间接互惠：声誉 g_i ∈ {−1,+1}，捐给高声誉者。"""
+    """BEH074 bounded first-order image scores and score-based donations."""
 
     model_id = "BEH074"
 
     def __init__(self, n=100, err=0.01, seed=0):
+        if not 2<=n<=5000 or not 0<=err<=1:
+            raise ValueError("至少两名主体，错误概率在0..1")
         self.n, self.err, self.seed = n, err, seed
         self.rng = np.random.default_rng(seed)
-        self.image = np.ones(n)
-        self.donor_pool = np.random.default_rng(1)
+        self.image = np.zeros(n,dtype=int)
 
     def initialize(self, context, parameters, population, topology, rng):
-        self.image = np.ones(self.n)
+        self.rng = rng
+        self.image = np.zeros(self.n,dtype=int)
+        self.cooperations=0
+        self.encounters=0
 
     def step(self, t, dt):
         d = int(self.rng.integers(self.n))
-        r = int(self.rng.integers(self.n))
-        while r == d:
-            r = int(self.rng.integers(self.n))
-        cooperate = self.image[r] > 0
+        r = int(self.rng.integers(self.n-1))
+        if r>=d:r+=1
+        cooperate = self.image[r] >= 0
         if self.rng.random() < self.err:
             cooperate = not cooperate
-        if cooperate:
-            self.image[d] = 1.0
-            self.image[r] -= 1.0  # 捐赠成本→声誉小幅受损（简化的二阶评价）
-        else:
-            self.image[d] = -1.0
+        self.image[d]=int(np.clip(self.image[d]+(1 if cooperate else -1),-5,5))
+        self.cooperations+=int(cooperate)
+        self.encounters+=1
 
     def observe(self):
         return {"mean_image": float(self.image.mean()),
-                "coop_image_frac": float((self.image > 0).mean())}
+                "coop_image_frac": float((self.image >= 0).mean()),
+                "cooperation_rate": self.cooperations/self.encounters if self.encounters else None,
+                "encounters": self.encounters}
 
     def validate_state(self):
         return []

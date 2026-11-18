@@ -1,6 +1,7 @@
 """NET 剩余 16 个最终补齐（NET018-072）。"""
 from __future__ import annotations
 
+import math
 import numpy as np
 
 from ..core import DayanModel
@@ -268,8 +269,12 @@ class AgeContactSEIRModel(_Base16):
     model_id = "NET061"
     clock_type = "fixed_step"
 
-    def __init__(self, N_per=400):
+    def __init__(self, N_per=400, beta=.15, sigma=.2, gamma=.1, contact_matrix=None):
+        if N_per<10 or any(not math.isfinite(v) or v<0 for v in (beta,sigma,gamma)):
+            raise ValueError("每组初始人口至少10，三项速率须为有限非负数")
         self.N_per = N_per
+        self.beta,self.sigma,self.gamma=beta,sigma,gamma
+        self.contact_matrix=contact_matrix
 
     def initialize(self, context, parameters, population, topology, rng):
         g = 3
@@ -279,12 +284,15 @@ class AgeContactSEIRModel(_Base16):
         self.R = np.zeros(g)
         self.I[0] = 10
         self.S[0] -= 10
-        self.C = np.array([[8, 4, 1], [4, 6, 2], [1, 2, 3]], float) / self.N_per
-        self.beta, self.sigma, self.gamma = 0.15, 0.2, 0.1
+        self.C = np.array(self.contact_matrix if self.contact_matrix is not None else
+                          [[8,4,1],[4,6,2],[1,2,3]], dtype=float)
+        if self.C.shape != (3,3) or not np.isfinite(self.C).all() or np.any(self.C<0):
+            raise ValueError("接触矩阵须为3×3有限非负的每人接触率")
 
     def step(self, t, dt):
-        lam = self.beta * (self.C @ self.I) / \
-            np.maximum(self.S + self.E + self.I + self.R, 1e-9)
+        lam = self.beta * (self.C @ (self.I / (self.S+self.E+self.I+self.R)))
+        if max(float(lam.max()),self.sigma,self.gamma)*dt > 1:
+            raise ValueError("时间步过大，单步转移人数将超过存量")
         new_e = lam * self.S * dt
         new_i = self.sigma * self.E * dt
         new_r = self.gamma * self.I * dt
@@ -310,7 +318,10 @@ class AgeContactSEIRModel(_Base16):
                      "I": float(self.I[k]), "R": float(self.R[k]),
                      "state": f"I={float(self.I[k]):.0f}"}
                     for k in range(len(self.S))]
-        return {"entities": entities, "relations": [],
+        relations = [{"source":f"age_{j}","target":f"age_{i}","kind":"contact_rate",
+                      "weight":float(self.C[i,j]),"unit":"contacts / person / model time","directed":True}
+                     for i in range(3) for j in range(3) if self.C[i,j]>0]
+        return {"entities": entities, "relations": relations,
                 "facilities": [{"id": "contact_matrix", "type": "network"}],
                 "aggregates": self.observe()}
 

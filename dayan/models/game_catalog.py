@@ -764,7 +764,7 @@ class _NormSimBase(DayanModel):
 
 
 class SimpleNormModel(_NormSimBase):
-    """BEH075 简单立场规范（image scoring：合作取决于接受者声誉）。"""
+    """BEH075 简单立场规范，评价取决于接受者状态。"""
 
     model_id = "BEH075"
     _norm_name = "simple_standing"
@@ -796,6 +796,48 @@ class ShunningModel(_NormSimBase):
         coop = self._decide(donor, self.rep[recip])
         self._update_reputation(donor, coop, recip_rep=self.rep[recip])
         self.coop_hist.append(1.0 if coop else 0.0)
+
+
+class YoungConventionModel(DayanModel):
+    """BEH081 two-role coordination with limited history and mutations."""
+    model_id="BEH081"
+    clock_type="fixed_step"
+
+    def __init__(self, memory=20, sample=5, epsilon=.02, reward_0=1., reward_1=.9):
+        if not 1<=sample<=memory<=2000 or not 0<=epsilon<=1 or min(reward_0,reward_1)<=0:
+            raise ValueError("样本/记忆大小或协调收益、突变概率非法")
+        self.memory,self.sample,self.epsilon=memory,sample,epsilon
+        self.reward_0,self.reward_1=reward_0,reward_1
+
+    def initialize(self, context, parameters, population, topology, rng):
+        self.rng=rng
+        self.history=rng.integers(0,2,(self.memory,2))
+        self.index=0
+        self.rounds=0
+        self.coordinated=0
+
+    def step(self, t, dt):
+        pair=[]
+        for role in range(2):
+            sample=self.rng.choice(self.memory,self.sample,replace=False)
+            frac=float(np.mean(self.history[sample,1-role]))
+            v0,v1=self.reward_0*(1-frac),self.reward_1*frac
+            if self.rng.random()<self.epsilon or v0==v1:
+                pair.append(int(self.rng.integers(2)))
+            else:
+                pair.append(int(v1>v0))
+        self.history[self.index]=pair
+        self.index=(self.index+1)%self.memory
+        self.rounds+=1
+        self.coordinated+=int(pair[0]==pair[1])
+
+    def observe(self):
+        return {"convention_1_share":float(np.mean(self.history)),
+                "coordination_rate":self.coordinated/self.rounds if self.rounds else None,
+                "rounds":self.rounds}
+
+    def validate_state(self):
+        return []
 
 
 class AxelrodNormCatalogModel(DayanModel):
