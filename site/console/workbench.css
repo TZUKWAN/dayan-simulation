@@ -333,11 +333,24 @@ body:not([data-page=overview]) :is(#operationRail,#operationResize) { display: n
 #labCalibration button:is(:hover,:focus-visible),#dsContent button:is(:hover,:focus-visible) { color: var(--wb-cyan); border-color: var(--wb-cyan); }
 #studyHistory { display: flex; flex-wrap: wrap; }
 #labCalibration #researchStatus,#labCalibration #researchEvidence { font-size: 13px; line-height: 1.65; padding: 8px 0; }
+.research-time-roles { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.research-time-roles span { padding: 4px 9px; background: #183445; border-left: 2px solid var(--wb-cyan); }
+.research-time-roles span:nth-child(2) { border-color: var(--wb-violet); }
+.research-time-roles span:last-child { border-color: var(--wb-amber); }
+.study-caption { display: flex; justify-content: space-between; gap: 11px; padding: 11px 0; color: var(--wb-muted); font-size: 12px; }
+.study-caption b { color: var(--wb-text); }
+.study-chart-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(330px,100%),1fr)); gap: 10px; }
 .data-layout { display: grid; grid-template-columns: minmax(0,1.45fr) minmax(315px,1fr); gap: 13px; align-items: start; }
 #dsContent > details { border-top: 1px solid var(--wb-rule); }
 #dsContent .research-scroll { max-height: 44vh; }
 #dsContent .research-note,#dsContent .research-task p,#dsContent .research-scroll table { font-size: 12px; line-height: 1.55; color: var(--wb-muted); }
 #dsContent .preset-form { padding-left: 8px; border-left: 1px solid var(--wb-rule); }
+#spatialSource { padding-bottom: 0; }
+#spatialSource details { margin-top: 0; }
+#censusSceneForm fieldset { display:flex; flex-wrap:wrap; gap: 6px 13px; border: 1px solid var(--wb-rule); padding: 7px; }
+#censusSceneForm legend { font-size: 12px; color: var(--wb-muted); }
+#censusSceneForm fieldset label { display: flex; align-items: center; gap: 5px; }
+#censusSceneForm input[type=checkbox] { min-height: auto; width: auto; accent-color: var(--wb-cyan); }
 .data-preview { margin-top: 10px; }
 .data-preview pre { max-height: 210px; overflow: auto; }
 .analytics-controls .search-control { flex: 2 1 252px; }

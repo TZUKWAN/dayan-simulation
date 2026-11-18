@@ -2590,6 +2590,8 @@
           for(const segment of f.segments||[])for(const point of segment){const [x,y,z]=stateWorldXY({x:point[0],y:point[1]},fr);positions.push(x,.08,z);}
           const geometry=new THREE.BufferGeometry();geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
           fm=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x4cc7c3,transparent:true,opacity:.7}));
+        } else if(f.type === "assumed_pickup") {
+          fm=new THREE.Mesh(new THREE.BoxGeometry(2.5,.5,2.5),new THREE.MeshStandardMaterial({color:0x7dbee7,emissive:0x1b4a77}));
         } else if(f.type === "assumed_shelter") {
           fm=new THREE.Mesh(new THREE.ConeGeometry(1.3,3,8),new THREE.MeshStandardMaterial({color:0xf5bd57}));
         } else if (f.type === "exit") {
@@ -2600,7 +2602,7 @@
             new THREE.MeshStandardMaterial({ color: 0x2a3a4a }));
         }
         if (fm) {
-          if (f.type === "exit" || f.type === "assumed_shelter") {
+          if (f.type === "exit" || f.type === "assumed_shelter" || f.type === "assumed_pickup") {
             const [fx, , fz] = stateWorldXY({ ...f, type: "pedestrian" }, fr);
             fm.position.set(fx, 0.1, fz);
           } else if(f.type!=="road_network") {

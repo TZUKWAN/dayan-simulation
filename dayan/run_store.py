@@ -277,8 +277,18 @@ class RunStore:
                 if total>limits().job_bytes:raise ValueError('研究包超过导出大小预算')
                 archive.write(p, "code_versions/" + p.name)
             from .datasets import load as load_dataset, dataset_dir
-            for dataset in datasets:
-                load_dataset(dataset)
+            pending = {dataset: None for dataset in datasets}
+            included = set()
+            while pending:
+                dataset, expected = pending.popitem()
+                asset = load_dataset(dataset)
+                if expected and asset["sha256"] != expected:
+                    raise ValueError('上游数据快照哈希与派生产物记录不一致')
+                if dataset in included:
+                    continue
+                included.add(dataset)
+                for parent in asset.get("metadata",{}).get("derived_from",[]):
+                    pending[parent["dataset_id"]] = parent["sha256"]
                 for path in (dataset_dir() / dataset).iterdir():
                     total+=path.stat().st_size
                     if total>limits().job_bytes:raise ValueError('研究包超过导出大小预算')

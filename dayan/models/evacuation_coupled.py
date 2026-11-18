@@ -18,8 +18,14 @@ class RoadEvacuationModel:
     clock_type = "fixed_step"
     time_unit = "minute"
     requires_external = True  # Do not run catalog probes without explicit dataset IDs.
-    declared_observables = ["n_agents", "represented_population", "evacuated", "remaining", "elderly_remaining", "bus_queue", "on_bus", "rumor_mean", "exposure", "evacuated_fraction"]
-    implementation_note = ("真实输入路网上的加权抽样主体机制实验；时间分钟、坐标米、公交容量为人/车次。每个抽样主体不可拆分，车次装载会留下不足一个主体权重的余量。安置点/接驳站位置、行为、积水影响和公交调度是显式情景假设，未做武汉实证校准；轨迹是模型计算轨迹。")
+    declared_observables = ["n_agents", "represented_population", "evacuated", "remaining", "elderly_remaining", "bus_queue", "on_bus", "rumor_mean", "exposure", "evacuated_fraction",
+                            "people_evacuated", "people_waiting", "people_on_bus"]
+    output_units = {"n_agents":"model agent","represented_population":"person","evacuated":"model agent",
+                    "remaining":"model agent","elderly_remaining":"model agent","bus_queue":"model agent",
+                    "on_bus":"model agent","rumor_mean":"fraction","exposure":"person · minute × scenario severity",
+                    "evacuated_fraction":"fraction","people_evacuated":"person","people_waiting":"person","people_on_bus":"person"}
+    implementation_note = ("输入路网与普查人口上的加权抽样机制实验；分钟、米、人数/车次。主体组不可拆分。"
+                           "接驳站、安置点、年龄比例（来源缺字段时）、行为、积水与调度均为情景假设；轨迹由模型计算，未作地区实证验证。")
 
     def __init__(self, roads_dataset_id="", population_dataset_id="", n=200,
                  elderly_fraction=.2, elderly_speed_factor=.5, walk_speed=72.,
@@ -46,6 +52,9 @@ class RoadEvacuationModel:
         if not self.roads_dataset_id:
             raise ValueError("CPL001必须先采集/导入道路数据，并指定roads_dataset_id；不会生成假路网替代")
         record = load(self.roads_dataset_id)
+        self.road_scope = record.get("metadata", {}).get("bbox")
+        if record.get("metadata", {}).get("coordinate_crs") not in (None,"EPSG:4326"):
+            raise ValueError("道路坐标系须为 EPSG:4326 经度、纬度")
         if record["format"] == "osm":
             lines = [[(p["lon"], p["lat"]) for p in way["geometry"]] for way in record["data"]["elements"]
                      if way.get("type") == "way" and way.get("tags", {}).get("highway") and way.get("geometry")]
@@ -93,6 +102,16 @@ class RoadEvacuationModel:
         self.routes_pickup = self._routes(self.pickup)
         self.routes_shelter = self._routes(self.shelter)
         self.input_datasets = [{k: record[k] for k in ("dataset_id", "source", "sha256", "license", "role")}]
+        self.input_datasets[0]["port"] = "road_geometry"
+        xs,ys=zip(*(self.points[i] for i in self.nodes))
+        self.space = {"bounds":[min(xs), min(ys), max(xs), max(ys)], "unit":"m", "time_unit":"minute",
+                      "source_crs":"EPSG:4326","origin_lon_lat":list(self.origin),"projection":"local_equirectangular"}
+        self.facilities = [{"id":"roads","type":"road_network",
+                            "segments":[[list(self.points[a]),list(self.points[b])] for a in self.nodes for b in self.adjacency[a] if a<b],
+                            "source_dataset":self.roads_dataset_id}]
+        for role,node in (("pickup",self.pickup),("shelter",self.shelter)):
+            x,y=self.points[node]
+            self.facilities.append({"id":role,"type":f"assumed_{role}","x":x,"y":y,"assumed":True})
         self.events = [{"sim_t": 0., "etype": "assumption", "message": f"使用最大连通分量{len(self.nodes)}/{len(self.points)}节点；最西/最东路网节点假设为接驳站/安置点，非已验证设施位置"}]
 
     def _project(self, lon, lat):
@@ -141,12 +160,19 @@ class RoadEvacuationModel:
         self.represented_population = float(self.n)
         if self.population_dataset_id:
             record = load(self.population_dataset_id)
+            population_scope=record.get("metadata",{}).get("bbox")
+            if self.road_scope is not None and population_scope is not None and self.road_scope != population_scope:
+                raise ValueError("道路与人口输入的地理范围声明不一致")
             rows = record["data"]
             if not isinstance(rows, list) or not rows or not all(isinstance(row, dict) and {"lon", "lat", "population"} <= row.keys() for row in rows):
                 raise ValueError("人口数据须为CSV/JSON记录列表，字段lon、lat、population，可选elderly_fraction")
             origins, weights, elderly = [], [], []
+            assumed_age = 0
             for row in rows:
-                point = self._project(float(row["lon"]), float(row["lat"]))
+                lon,lat=float(row["lon"]),float(row["lat"])
+                if not (-180<=lon<=180 and -90<=lat<=90):
+                    raise ValueError("人口坐标须为有效 WGS84 经纬度")
+                point = self._project(lon, lat)
                 nearest = min(self.nodes, key=lambda i: math.dist(point, self.points[i]))
                 count, elder = float(row["population"]), float(row.get("elderly_fraction", self.elderly_fraction))
                 if not math.isfinite(count) or count <= 0 or not 0 <= elder <= 1 or math.dist(point, self.points[nearest]) > 2000:
@@ -154,8 +180,13 @@ class RoadEvacuationModel:
                 origins.append(nearest)
                 weights.append(count)
                 elderly.append(elder)
+                assumed_age += int("elderly_fraction" not in row)
             self.represented_population = float(sum(weights))
             self.input_datasets.append({k: record[k] for k in ("dataset_id", "source", "sha256", "license", "role")})
+            self.input_datasets[-1]["port"] = "population_by_origin"
+            if assumed_age:
+                self.events.append({"sim_t":0.,"etype":"assumption","affected_origins":assumed_age,
+                                    "message":"源数据未提供相关起点年龄结构，使用规约中的 elderly_fraction 进行主体属性抽样。"})
         else:
             self.events.append({"sim_t": 0., "etype": "assumption", "message": "未绑定真实人口；n个主体及年龄比例为明确情景假设，不是地区人口观测"})
         probabilities = np.asarray(weights, dtype=float)/sum(weights)
@@ -178,6 +209,23 @@ class RoadEvacuationModel:
         self.t = 0.
 
     def step(self, t, dt):
+        # A bus can board only people already waiting at the start of this interval.
+        # Agents reaching the pickup during this interval become eligible next time.
+        for bus in self.buses:
+            if bus["phase"] != "pickup" or not self.bus_capacity:
+                continue
+            seats = float(self.bus_capacity)
+            for agent in self.agents:
+                if agent["mode"] == "queue" and agent["weight"] <= seats + 1e-9:
+                    bus["passengers"].append(agent["id"])
+                    agent["mode"] = "on_bus"
+                    seats -= agent["weight"]
+            if bus["passengers"]:
+                self._route_entity(bus, self.bus_route)
+                bus["phase"] = "outbound"
+                self.events.append({"sim_t": round(t, 9), "etype": "bus_departure", "bus_id": bus["id"],
+                                    "boarded_agents":len(bus["passengers"]), "boarded_people":self.bus_capacity-seats,
+                                    "capacity":self.bus_capacity})
         mean_belief = float(np.mean([a["belief"] for a in self.agents]))
         for a in self.agents:
             if a["mode"] == "evacuated":
@@ -185,29 +233,16 @@ class RoadEvacuationModel:
             a["belief"] = min(1., max(0., a["belief"] + dt*(self.rumor_rate*mean_belief*(1-a["belief"])-self.information_rate*a["belief"])))
             a["exposure"] += dt*self.flood_severity
             motivation = max(.05, .8+.2*self.flood_severity-self.rumor_effect*a["belief"])
-            if a["mode"] == "preparing" and t+dt >= self.preparation_delay*(1+.5*a["elderly"])/motivation:
+            elapsed_walk = dt
+            earliest = self.preparation_delay*(1+.5*a["elderly"])/motivation
+            if a["mode"] == "preparing" and t+dt >= earliest:
                 a["mode"] = "walking"
+                elapsed_walk = max(0., t+dt-max(t,earliest))
             if a["mode"] == "walking":
                 speed = self.walk_speed*(self.elderly_speed_factor if a["elderly"] else 1)*(1-.4*self.flood_severity)
-                if self._move(a, speed*dt):
+                if self._move(a, speed*elapsed_walk):
                     a["mode"] = "queue" if a["use_bus"] else "evacuated"
         for bus in self.buses:
-            if bus["phase"] == "pickup":
-                waiting = [a for a in self.agents if a["mode"] == "queue"]
-                if self.bus_capacity and waiting:
-                    seats = float(self.bus_capacity)
-                    bus["passengers"] = []
-                    for agent in waiting:
-                        if agent["weight"] <= seats + 1e-9:
-                            bus["passengers"].append(agent["id"])
-                            seats -= agent["weight"]
-                    if not bus["passengers"]:
-                        continue
-                    for aid in bus["passengers"]:
-                        self.agents[aid]["mode"] = "on_bus"
-                    self._route_entity(bus, self.bus_route)
-                    bus["phase"] = "outbound"
-                    self.events.append({"sim_t": round(t, 9), "etype": "bus_departure", "bus_id": bus["id"], "boarded_agents": len(bus["passengers"]), "boarded_people": self.bus_capacity-seats, "capacity": self.bus_capacity})
             if bus["phase"] in ("outbound", "return"):
                 complete = self._move(bus, self.bus_speed*dt*(1-.3*self.flood_severity))
                 for aid in bus["passengers"]:
@@ -216,13 +251,18 @@ class RoadEvacuationModel:
                     if bus["phase"] == "outbound":
                         for aid in bus["passengers"]:
                             self.agents[aid]["mode"] = "evacuated"
-                        self.events.append({"sim_t": round(t+dt, 9), "etype": "bus_arrival", "bus_id": bus["id"], "evacuated": len(bus["passengers"])})
+                        self.events.append({"sim_t": round(t+dt, 9), "etype": "bus_arrival", "bus_id": bus["id"],
+                                            "evacuated":len(bus["passengers"]),
+                                            "evacuated_people":sum(self.agents[aid]["weight"] for aid in bus["passengers"])})
                         bus["passengers"] = []
                         self._route_entity(bus, list(reversed(self.bus_route)))
                         bus["phase"] = "return"
                     else:
                         bus["phase"] = "pickup"
         self.t = float(t+dt)
+        issues = self.validate_state()
+        if issues:
+            raise ValueError("疏散状态交换失败："+"；".join(issues))
 
     def observe(self):
         remaining = [a for a in self.agents if a["mode"] != "evacuated"]
@@ -233,17 +273,18 @@ class RoadEvacuationModel:
                 "on_bus": sum(a["mode"] == "on_bus" for a in self.agents),
                 "rumor_mean": float(np.mean([a["belief"] for a in self.agents])),
                 "exposure": float(sum(a["exposure"]*a["weight"] for a in self.agents)),
+                "people_evacuated": sum(a["weight"] for a in self.agents if a["mode"]=="evacuated"),
+                "people_waiting": sum(a["weight"] for a in self.agents if a["mode"]=="queue"),
+                "people_on_bus": sum(a["weight"] for a in self.agents if a["mode"]=="on_bus"),
                 "evacuated_fraction": 1-len(remaining)/self.n}
 
     def state_frame(self):
-        xs, ys = zip(*(self.points[i] for i in self.nodes))
-        segments = [[list(self.points[a]), list(self.points[b])] for a in self.nodes for b in self.adjacency[a] if a < b]
         return {"entities": [{"id": a["id"], "type": "pedestrian", "x": a["x"], "y": a["y"], "state": a["mode"], "elderly": a["elderly"], "weight": a["weight"], "rumor": a["belief"]} for a in self.agents] +
                             [{"id": "bus-"+str(b["id"]), "type": "bus", "x": b["x"], "y": b["y"], "state": b["phase"], "passengers": len(b["passengers"])} for b in self.buses],
-                "aggregates": self.observe(), "relations": [],
-                "space": {"bounds": [min(xs), min(ys), max(xs), max(ys)], "unit": "m", "time_unit": "minute"},
-                "facilities": [{"id": "roads", "type": "road_network", "segments": segments, "source_dataset": self.roads_dataset_id},
-                               {"id": "shelter", "type": "assumed_shelter", "x": self.points[self.shelter][0], "y": self.points[self.shelter][1], "assumed": True}]}
+                "aggregates": self.observe(),
+                "relations": [{"source":aid,"target":"bus-"+str(b["id"]),"kind":"rides","directed":True,
+                               "weight":self.agents[aid]["weight"],"unit":"person"} for b in self.buses for aid in b["passengers"]],
+                "space": self.space, "facilities":self.facilities}
 
     def snapshot(self):
         import inspect
@@ -259,4 +300,16 @@ class RoadEvacuationModel:
         self.rng.bit_generator.state = snapshot["rng_state"]
 
     def validate_state(self):
+        onboard={}
+        for bus in self.buses:
+            for aid in bus["passengers"]:
+                if aid in onboard:
+                    return ["同一主体出现在多辆车的载荷"]
+                onboard[aid]=bus
+        for a in self.agents:
+            bus=onboard.get(a["id"])
+            if (a["mode"]=="on_bus") != (bus is not None):
+                return ["步行主体状态与接驳车载荷不同步"]
+            if bus is not None and (a["x"],a["y"]) != (bus["x"],bus["y"]):
+                return ["车上主体位置与车辆状态不同步"]
         return []

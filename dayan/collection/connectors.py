@@ -13,6 +13,7 @@ import csv
 import gzip
 import io
 import json
+import re
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
@@ -81,13 +82,57 @@ def worldbank(params: dict, budget: int) -> Iterator[Page]:
                     "date": r.get("date"), "value": r.get("value"),
                     "unit": __import__("dayan.research.request_contract", fromlist=["INDICATORS"]).INDICATORS.get(indicator, {}).get("unit", r.get("unit")),
                     "indicator_label": (r.get("indicator") or {}).get("value") if isinstance(r.get("indicator"), dict) else None,
-                    "indicator": indicator} for r in (rows or [])]
+                    "indicator": (r.get("indicator") or {}).get("id")} for r in (rows or [])]
         yield Page(url=url, raw=raw, records=records,
                    meta={"total": total, "page": page, "pages": meta.get("pages") if isinstance(meta, dict) else None,
                          "has_more": page < int(meta.get("pages") or 1), "cursor": {"page": page + 1}})
         if total is not None and per_page * page >= total:
             return
         page += 1
+
+
+DATA360_WDI_UNITS = {"SL.UEM.TOTL.ZS": ("PT_LF", "%")}
+
+
+def worldbank_data360(params: dict, budget: int) -> Iterator[Page]:
+    """Alternate official transport for source-verified WDI annual indicators."""
+    from ..research.request_contract import country_code, year_range
+
+    country = country_code(params["country"])
+    indicator = str(params["indicator"])
+    if indicator not in DATA360_WDI_UNITS:
+        raise ValueError("该指标的 Data360 单位合同尚未登记")
+    unit_code, unit = DATA360_WDI_UNITS[indicator]
+    start, end = year_range(params["date"]).split(":")
+    series = "WB_WDI_" + indicator.replace(".", "_")
+    spec = {"DATABASE_ID": "WB_WDI", "INDICATOR": series, "REF_AREA": country,
+            "timePeriodFrom": start, "timePeriodTo": end}
+    url = "https://data360api.worldbank.org/data360/data?" + urllib.parse.urlencode(spec)
+    raw, final_url = _get(url, timeout=35)
+    answer = json.loads(raw)
+    if not isinstance(answer, dict) or not isinstance(answer.get("value"), list):
+        raise ValueError("Data360 未返回结构化指标页")
+    rows = answer["value"]
+    if type(answer.get("count")) is not int or answer["count"] != len(rows):
+        raise ValueError("Data360 返回数量与分页总数不一致")
+    records = []
+    for row in rows:
+        expected = {"DATABASE_ID":"WB_WDI", "INDICATOR":series, "REF_AREA":country, "FREQ":"A",
+                    "TIME_FORMAT":"P1Y", "SEX":"_T", "AGE":"_T", "URBANISATION":"_T",
+                    "COMP_BREAKDOWN_1":"_Z", "COMP_BREAKDOWN_2":"_Z", "COMP_BREAKDOWN_3":"_Z",
+                    "UNIT_MEASURE":unit_code}
+        if any(row.get(k) != value for k,value in expected.items()) or str(row.get("UNIT_MULT")) != "0":
+            raise ValueError("Data360 返回地区、指标、频率、总体维度或单位不匹配")
+        year = str(row.get("TIME_PERIOD", ""))
+        if not re.fullmatch(r"\d{4}", year) or not start <= year <= end:
+            raise ValueError("Data360 实际年份超出请求范围")
+        records.append({"country_id": country,"indicator": indicator,"date": year,
+                        "value": row.get("OBS_VALUE"),"unit": unit,"frequency": "annual",
+                        "observation_status": row.get("OBS_STATUS")})
+    yield Page(url=final_url, raw=raw, records=records,
+               meta={"total":len(rows),"page":1,"pages":1,"has_more":False,"provenance":{
+                   "database":"WB_WDI","indicator":series,"unit_code":unit_code,
+                   "license":"CC BY 4.0 · World Bank WDI, ILO modelled estimates"}})
 
 
 def eurostat_jsonstat(params: dict, budget: int) -> Iterator[Page]:
@@ -698,7 +743,7 @@ def ckan_resource(params, budget):
 
 
 CONNECTORS = {
-    "worldbank": worldbank, "eurostat_jsonstat": eurostat_jsonstat,
+    "worldbank": worldbank, "worldbank_data360":worldbank_data360, "eurostat_jsonstat": eurostat_jsonstat,
     "unsdg": unsdg, "who_gho": who_gho, "unesco_uis": unesco_uis,
     "us_census": us_census, "oecd_sdmx": oecd_sdmx,
     "ilostat_bulk": ilostat_bulk,
@@ -712,7 +757,7 @@ CONNECTORS = {
 
 CONNECTOR_SOURCE = {   # 连接器 → 主要来源（可一对多）
     "huggingface_file": "huggingface",
-    "worldbank": "wb_indicators", "eurostat_jsonstat": "eurostat",
+    "worldbank": "wb_indicators", "worldbank_data360":"wb_data360", "eurostat_jsonstat": "eurostat",
     "unsdg": "unsdg", "who_gho": "who_gho", "unesco_uis": "unesco_uis",
     "us_census": "us_census", "oecd_sdmx": "oecd_sdmx",
     "ilostat_bulk": "ilostat_bulk", "crossref": "crossref",

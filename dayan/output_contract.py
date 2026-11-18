@@ -139,6 +139,9 @@ def output_contract(mid, *, reference_results=None):
             scalar = set(kinds)-{'null'}
             fields[name] = {'type': next(iter(scalar)) if len(scalar)==1 else 'unknown',
                             'nullable': 'null' in kinds, 'optional': True}
+    for name, unit in getattr(cls, 'output_units', {}).items():
+        if name in fields:
+            fields[name]['unit'] = unit
     primary = getattr(cls, "primary_metric", None) or PRIMARY_METRICS.get(str(mid).upper())
     if primary not in fields:
         primary = None

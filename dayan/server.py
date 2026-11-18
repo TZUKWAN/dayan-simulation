@@ -1179,7 +1179,7 @@ async def api_study_file(study_id: str, filename: str):
     import re
     try: load(study_id)
     except (ValueError, OSError) as exc: raise HTTPException(400, str(exc))
-    if not re.fullmatch(r"[A-Za-z0-9_\-]+\.(docx|md|png|csv|json|zip)", filename):
+    if not re.fullmatch(r"[A-Za-z0-9_-]+\.(?:docx|md|png|csv|json|zip|facts\.json)", filename):
         raise HTTPException(400, "非法文件名")
     path = directory(study_id) / "reports" / filename
     if not path.is_file(): raise HTTPException(404, "研究文件尚未生成")

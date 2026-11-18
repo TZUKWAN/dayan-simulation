@@ -49,20 +49,40 @@ def _plots(s, target, kind="academic"):
     years, actual = [r["date"] for r in records], [r["value"] for r in records]
     predicted = {r["date"]: r["predicted"] for r in predictions}
     cut = min(r["date"] for r in s["holdout"])
+    selection = cal.get("selection", {})
+    validation = selection.get("validation")
+    role_cut = min(validation["dates"]) if validation else cut
+    unc = cal.get("uncertainty")
     axes[0,0].plot(years, actual, "o-", color="#087f8c", label="Observed")
     axes[0,0].plot(list(predicted), list(predicted.values()), "s--", color="#ae5c24", label="Model")
     axes[0,0].axvline(cut-.5, color="#777777", linestyle=":", label="Holdout starts")
+    if validation:
+        axes[0,0].axvline(role_cut-.5, color="#8564a4", linestyle=":", label="Validation starts")
+    if unc:
+        low, high = zip(*unc["holdout_interval"])
+        axes[0,0].fill_between(unc["holdout_dates"], low, high, color="#ae5c24", alpha=.18,
+                               label="Training residual quantiles")
     axes[0,0].set_title("Observed and actual model run"); axes[0,0].legend(fontsize=8)
     residual = [a-predicted[y] for y,a in zip(years,actual)]
-    axes[0,1].bar(years, residual, color=["#087f8c" if y < cut else "#ae5c24" for y in years])
-    axes[0,1].axhline(0, color="#777777", linewidth=.7); axes[0,1].set_title("Residuals by year (holdout orange)")
+    axes[0,1].bar(years, residual, color=["#087f8c" if y < role_cut else "#8564a4" if y < cut else "#ae5c24" for y in years])
+    axes[0,1].axhline(0, color="#777777", linewidth=.7); axes[0,1].set_title("Residuals: train / validation / test")
     valid = [e for e in cal["evaluations"] if e["loss"] is not None]
-    axes[1,0].scatter([e["combo_id"] for e in valid], [e["loss"] for e in valid], s=14, color="#087f8c")
+    scan_key = next(iter(s["param_grid"])) if len(s["param_grid"])==1 else None
+    x = lambda e:e["params"][scan_key] if scan_key else e["combo_id"]
+    axes[1,0].scatter([x(e) for e in valid], [e["loss"] for e in valid], s=14, color="#087f8c",label="Training RMSE")
+    finalists = [e for e in selection.get("finalists", []) if e["rmse"] is not None]
+    if finalists:
+        axes[1,0].scatter([x(e) for e in finalists], [e["rmse"] for e in finalists], s=23, color="#8564a4",label="Validation shortlist")
     axes[1,0].axhline(s["tolerance"], color="#ae5c24", linestyle="--", label="Declared threshold")
-    axes[1,0].set_title("Every valid grid evaluation"); axes[1,0].set_xlabel("Evaluation ID"); axes[1,0].legend(fontsize=8)
+    axes[1,0].set_title("Sensitivity across valid grid points"); axes[1,0].set_xlabel(scan_key or "Evaluation ID"); axes[1,0].legend(fontsize=8)
     hold = cal["holdout"]
     vals = [cal["best_loss"], cal["baseline_mean_rmse"], hold["rmse"], hold["baseline_train_mean_rmse"]]
-    axes[1,1].bar(["Train", "Train mean", "Holdout", "Hold mean"], vals, color=["#087f8c", "#b7c2cb", "#ae5c24", "#b7c2cb"])
+    names=["Train", "Train mean", "Holdout", "Hold mean"]
+    if validation:
+        vals.extend([validation["rmse"], hold["baseline_last_training_rmse"]])
+        names.extend(["Validation", "Last train"])
+    axes[1,1].bar(names, vals, color=["#087f8c", "#b7c2cb", "#ae5c24", "#b7c2cb","#8564a4","#b7c2cb"][:len(names)])
+    axes[1,1].tick_params(axis="x", labelsize=8)
     axes[1,1].axhline(s["tolerance"], color="#ae5c24", linestyle="--"); axes[1,1].set_title("RMSE vs training-mean baseline")
     axes[2,0].scatter([predicted[y] for y in years], actual, color="#087f8c")
     lo, hi = min(actual + list(predicted.values())), max(actual + list(predicted.values()))
@@ -71,6 +91,8 @@ def _plots(s, target, kind="academic"):
     axes[2,1].set_title("Observed annual change"); axes[2,1].set_xlabel("Calendar year")
     for ax in axes.flat:
         ax.grid(axis="y", alpha=.18); ax.set_axisbelow(True)
+    for ax in (axes[0,0],axes[0,1],axes[1,0],axes[1,1],axes[2,1]):
+        ax.set_ylabel(s["unit"])
     if kind == "data_quality":
         for ax in axes.flat: ax.clear(); ax.grid(axis="y",alpha=.18); ax.set_axisbelow(True)
         expected=list(range(int(s["contract"]["date"].split(":")[0]),int(s["contract"]["date"].split(":")[1])+1))
@@ -79,7 +101,9 @@ def _plots(s, target, kind="academic"):
         fields=["date","value","country_id","indicator","unit"]
         axes[0,1].bar(fields,[sum(r.get(f) is not None for r in records) for f in fields],color="#087f8c")
         axes[0,1].set_title("Required field coverage");axes[0,1].tick_params(axis="x",labelsize=8)
-        axes[1,0].bar(["Training","Holdout"],[len(s["training"]),len(s["holdout"])],color=["#087f8c","#ae5c24"])
+        roles=[("Training",len(s["training"])),("Holdout",len(s["holdout"]))]
+        if validation:roles.insert(1,("Validation",len(s["validation"])))
+        axes[1,0].bar([k for k,_ in roles],[n for _,n in roles],color=["#087f8c","#8564a4","#ae5c24"] if validation else ["#087f8c","#ae5c24"])
         axes[1,0].set_title("Independent time roles, same source batch")
         pages=s["source_pages"]
         axes[1,1].bar([str(p["idx"]) for p in pages],[p["n_records"] for p in pages],color="#087f8c")
@@ -128,10 +152,25 @@ def _generate_locked(study_id, kind="academic"):
         "training_dates": cal["training"]["dates"], "holdout_dates": hold["dates"], "status": cal["status"],
         "unit": s["unit"], "threshold": s["tolerance"], "kind": kind, "conclusion": conclusion}
     facts.update(quality=s["quality"],role_check=s["role_check"],source_license=s["training_dataset"]["license"])
+    selection = cal.get("selection")
+    validation = selection.get("validation") if selection else None
+    method_notes = []
+    if validation:
+        facts.update(selection=selection, uncertainty=cal.get("uncertainty"),
+                     holdout_diagnostics=hold, source_fingerprint=s["run_manifest"].get("source_fingerprint"),
+                     code_archive_sha256=s["run_manifest"].get("code_archive_sha256"))
+        method_notes = [
+            f"验证年份 {validation['dates']}，RMSE {validation['rmse']:.9g}；仅从训练排名前 {selection['limit']} 名按验证RMSE选参，测试不参与选择。",
+            f"测试 MAE {hold['mae']:.9g}；平均残差（实测减预测）{hold['bias_observed_minus_predicted']:.9g}；训练末值基线 RMSE {hold['baseline_last_training_rmse']:.9g}。",
+            f"训练残差 5%–95% 经验带在独立测试的观测覆盖率 {cal['uncertainty']['holdout_coverage']:.1%}；{cal['uncertainty']['scope']}",
+            f"异常标记年份 {s['quality']['outliers']['flagged_years']}；按训练集IQR规则标记，保留所有原始观测。",
+        ]
     image_path = folder / ("quality_diagnostics.png" if kind=="data_quality" else "diagnostics.png")
     if not image_path.exists(): _plots(s, image_path, kind)
     predicted = {r["date"]: r["predicted"] for r in s["predictions"]}
-    table = [[r["date"], "training" if r["date"] < min(hold["dates"]) else "holdout", r["value"], predicted[r["date"]], r["value"]-predicted[r["date"]]] for r in s["records"]]
+    roles = {year: role for role, profile in (("training",cal["training"]),("validation",validation),("holdout",hold))
+             if profile for year in profile["dates"]}
+    table = [[r["date"], roles[r["date"]], r["value"], predicted[r["date"]], r["value"]-predicted[r["date"]]] for r in s["records"]]
     with (folder / "observed_predicted.csv").open("w", encoding="utf-8-sig", newline="") as f:
         writer = csv.writer(f); writer.writerow(["year","role","observed","predicted","residual"]); writer.writerows(table)
     (folder / f"{stem}.facts.json").write_text(json.dumps(facts, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
@@ -139,7 +178,7 @@ def _generate_locked(study_id, kind="academic"):
         f"来源批次 {s['collection_id']}；指标 {s['contract']['indicator']}；国家 {s['contract']['country']}；范围 {s['contract']['date']}；单位 {s['unit']}。",
         f"训练年份 {cal['training']['dates']}；独立留出 {hold['dates']}；完整网格 {cal['n_evaluated']}/{cal['grid_size']}；实际最优参数 {cal['best_params']}。",
         f"模型定义 {s['model_definition']}。初值通过数据映射进入引擎，不在后续年份回灌目标。",
-        f"校准相对训练均值基线改善 {cal['improvement_vs_baseline']:.9g}；留出均值基线RMSE {hold['baseline_train_mean_rmse']:.9g}。",
+        f"校准相对训练均值基线改善 {cal['improvement_vs_baseline']:.9g}；留出均值基线RMSE {hold['baseline_train_mean_rmse']:.9g}。", *method_notes,
         "", "## 逐年结果", "| 年份 | 角色 | 观测 | 模型 | 残差 |", "|---|---|---|---|---|",
         *["| " + " | ".join(map(str,row)) + " |" for row in table], "", f"![同源诊断图]({image_path.name})",
         "", "## 适用性与未解决问题", *s["limitations"], cal["non_identifiable_note"],
@@ -167,6 +206,7 @@ def _generate_locked(study_id, kind="academic"):
     doc.add_heading("实际模型与验证", level=1)
     doc.add_paragraph(s["model_definition"]["description"])
     doc.add_paragraph(f"最优参数 {cal['best_params']}；训练均值基线RMSE {cal['baseline_mean_rmse']:.9g}；改善量 {cal['improvement_vs_baseline']:.9g}。")
+    for sentence in method_notes: doc.add_paragraph(sentence)
     t = doc.add_table(rows=1, cols=5); t.style="Light Shading Accent 1"
     for cell,value in zip(t.rows[0].cells,["年份","角色","观测","模型","残差"]): cell.text=value
     header = OxmlElement("w:tblHeader"); t.rows[0]._tr.get_or_add_trPr().append(header)
