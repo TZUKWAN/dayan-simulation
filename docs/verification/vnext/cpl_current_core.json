@@ -1,0 +1,38 @@
+{
+  "source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
+  "same_seed_repeat": true,
+  "seeds": [
+    7,
+    23
+  ],
+  "steps": 96,
+  "dt": 0.25,
+  "parameters": {
+    "roads_dataset_id": "DS-4f47c1ada5069cb9b39d41e9",
+    "population_dataset_id": "DS-e222666abc47272e76de6849",
+    "n": 120,
+    "elderly_fraction": 0.25,
+    "elderly_speed_factor": 0.5,
+    "walk_speed": 72,
+    "initial_rumor_fraction": 0.3,
+    "rumor_rate": 0.4,
+    "rumor_effect": 0.8,
+    "information_rate": 0.05,
+    "flood_severity": 0.5,
+    "preparation_delay": 1,
+    "bus_capacity": 80,
+    "bus_count": 2,
+    "bus_speed": 300
+  },
+  "variant": {
+    "at_t": 6,
+    "information_rate": 0.8
+  },
+  "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+  "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+  "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f",
+  "mechanism_assertions": true,
+  "baseline_end_rumor": 0.8747139877238965,
+  "variant_end_rumor": 0.00025717019772988084,
+  "source_run_id": "R20261118T054338-008d3aa900f04c4e8728450cf081970b"
+}

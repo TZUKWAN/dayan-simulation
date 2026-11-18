@@ -1,0 +1,154 @@
+{
+  "browser": "Firefox 146.0.1",
+  "mode": "Windows headless Firefox with reported WebGL driver; application animation-clock FPS and synchronous WebGL finish timings",
+  "system": "Windows 11",
+  "logical_cpus": 16,
+  "system_ram_mib": 48246.4,
+  "measurements": [
+    {
+      "name": "NLP hall replay",
+      "run_id": "R20261118T060934-bcfca75908aa4f0290ef18341d88e185",
+      "initial_restore_ms": 722.4,
+      "engine_rss_mib": 163.52,
+      "owned_firefox_summed_rss_mib": 787.02,
+      "driver": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "draw_ms": [
+        6,
+        5,
+        4,
+        4,
+        5,
+        3,
+        5,
+        3
+      ],
+      "draw_calls": 90,
+      "triangles": 13368,
+      "textures": 5,
+      "geometries": 93,
+      "entity_count": 37,
+      "saved_frames": 201,
+      "renderer": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "seconds": 2.00886,
+      "present_clock_fps": 75.66480491422998,
+      "raf_frame_median_ms": 10,
+      "raf_frame_p95_ms": 20.019999999999982,
+      "peak_rendered_entities": 37
+    },
+    {
+      "name": "TIGERweb CPL001 replay",
+      "run_id": "R20261118T062004-7f0100db8f1244f49c0993810477ed06",
+      "initial_restore_ms": 2163.9,
+      "engine_rss_mib": 164.96,
+      "owned_firefox_summed_rss_mib": 952.82,
+      "driver": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "draw_ms": [
+        5,
+        3,
+        2,
+        4,
+        3,
+        3,
+        2,
+        3
+      ],
+      "draw_calls": 257,
+      "triangles": 43718,
+      "textures": 2,
+      "geometries": 262,
+      "entity_count": 122,
+      "saved_frames": 97,
+      "renderer": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "seconds": 2.0010200000000005,
+      "present_clock_fps": 76.46100488750736,
+      "raf_frame_median_ms": 10,
+      "raf_frame_p95_ms": 20.019999999999982,
+      "peak_rendered_entities": 122
+    },
+    {
+      "name": "NET106 large sampled replay",
+      "run_id": "R20261118T061950-69ebbe464da94bff8dfa39a7cc256791",
+      "initial_restore_ms": 7026.6,
+      "engine_rss_mib": 136.91,
+      "owned_firefox_summed_rss_mib": 685.54,
+      "driver": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "draw_ms": [
+        9,
+        7,
+        6,
+        5,
+        4,
+        4,
+        5,
+        4
+      ],
+      "draw_calls": 41,
+      "triangles": 45696,
+      "textures": 13,
+      "geometries": 26,
+      "entity_count": 4000,
+      "saved_frames": 85,
+      "renderer": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "seconds": 2.00984,
+      "present_clock_fps": 70.1548381960753,
+      "raf_frame_median_ms": 10,
+      "raf_frame_p95_ms": 20.020000000000437,
+      "peak_rendered_entities": 3000
+    }
+  ],
+  "same_context_scene_cycles": [
+    {
+      "id": "R20261118T061933-b7bbb87adb7241e88a942fba61beee8d",
+      "geometries": 166,
+      "textures": 11,
+      "canvases": 1
+    },
+    {
+      "id": "R20261118T061950-69ebbe464da94bff8dfa39a7cc256791",
+      "geometries": 27,
+      "textures": 11,
+      "canvases": 1
+    },
+    {
+      "id": "R20261118T061933-b7bbb87adb7241e88a942fba61beee8d",
+      "geometries": 166,
+      "textures": 11,
+      "canvases": 1
+    },
+    {
+      "id": "R20261118T061950-69ebbe464da94bff8dfa39a7cc256791",
+      "geometries": 27,
+      "textures": 11,
+      "canvases": 1
+    },
+    {
+      "id": "R20261118T061933-b7bbb87adb7241e88a942fba61beee8d",
+      "geometries": 166,
+      "textures": 11,
+      "canvases": 1
+    },
+    {
+      "id": "R20261118T061950-69ebbe464da94bff8dfa39a7cc256791",
+      "geometries": 27,
+      "textures": 11,
+      "canvases": 1
+    }
+  ],
+  "large_run_before": {
+    "run_id": "R20261118T061950-69ebbe464da94bff8dfa39a7cc256791",
+    "entity_count": 4000,
+    "peak_rendered_entities": 3000,
+    "present_clock_fps": 5.9968816215567875,
+    "initial_restore_ms": 8369.3,
+    "draw_ms": [
+      9,
+      7,
+      11,
+      7,
+      5,
+      6,
+      6,
+      5
+    ]
+  }
+}

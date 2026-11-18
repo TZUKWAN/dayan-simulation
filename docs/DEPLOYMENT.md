@@ -26,6 +26,24 @@ For a separately stored project, set `DAYAN_DATA_DIR` and `DAYAN_REPORTS_DIR` to
 writable private directories. Existing runs are immutable; clearing history only
 changes visibility. Startup and tests do not rewrite tracked HTML or fixtures.
 
+The opening workspace shows live engine telemetry and research archives. Open
+Simulation Command to switch between conversational and professional modes.
+The right divider supports drag, arrow keys and double-click reset. Use
+`Ctrl/Cmd+K` to find recorded runs, datasets, and workspaces. The data centre
+offers the World Bank Data360 annual WDI and TIGERweb 2020 spatial presets.
+The integrated workbench runs without a CDN. Three.js is bundled under MIT and
+the checked-in Chinese plotting font is under OFL. See
+[browser assets](../site/console/vendor/) and [font assets](../assets/fonts/).
+
+DSH uses the project-owned native conversation and its own configured language
+model. Install the plugin using `link:/absolute/path/dayan-simulation/plugins/dayan`
+and load it in DSH. For a separate project set `DAYAN_PROJECT_ROOT`,
+`DAYAN_DATA_DIR`, `DAYAN_REPORTS_DIR`, and `DAYAN_PYTHON` in that DSH host so
+the Python service and the plugin agree. If connecting to a separately started
+engine, set `DAYAN_BACKEND_URL` to its loopback URL. Reload the plugin in DSH
+to activate code changes. The current native session restores its last workbench
+record after a page reload.
+
 ## External services
 
 The default test command makes no live LLM calls and needs no historical data.
@@ -45,10 +63,12 @@ python tests/run_all.py --only test_online_sources --online
 python tests/run_all.py --only test_live_llm --llm
 ```
 
-The first command downloads actual World Bank records and performs the real
-study/calibration/report chain. The second performs a paid, real model-agent
-call. A failed scientific holdout stays failed even when the software pipeline
-works. Network failures are separate from programming/protocol errors.
+The first command downloads actual World Bank and Census records and checks
+the study/report chain and spatial data ports. The second makes a paid call
+for each of the five language-model agent entries. The isolated test runner
+expects the exported environment settings for that command. It excludes the
+private `config.json` from its temporary checkout. Scientific holdout and
+pipeline outcomes are recorded separately.
 
 ## Budgets, fonts and archives
 
@@ -91,8 +111,11 @@ For repeatable headless UI verification, install `requirements-ui.txt` and run
 python tests/browser_acceptance.py --base-url http://127.0.0.1:8918 --output .claude/browser-verification
 ```
 
-This performs real professional-mode runs, rendered entity/coordinate checks,
-playback/pause/seek, aggregate labels, persistent queue identities, a large run,
-viewport changes and a labelled HTML escaping fixture. Screenshots and measured
-render times remain in the output directory. It uses a separate headless browser
-and does not operate the user's desktop or ordinary browser tabs.
+This exercises seven workspaces, the command palette, model discovery, actual
+professional runs and paired experiments, linked analytics export, archive
+lookup, rendered coordinates, state transitions, playback and resizing.
+The 4,000-actor archive checks genuine instance identities and positions with
+up to 3,000 rendered at once. Screenshots and render measurements are written
+to the supplied output directory for the separate headless browser. The real
+provider, WDI and TIGERweb runs have separate records in
+[research cases](VNEXT_RESEARCH_CASES.md) and [acceptance](VNEXT_ACCEPTANCE.md).

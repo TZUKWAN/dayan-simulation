@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "request": "创建一个二维主体模型：37名行人在宽40米、高30米的矩形大厅里，从左侧区域（x为1至8米，y为1至29米）以每秒1米的固定速度直线走向右侧出口（x=40米，y=15米），到达出口后停止。忽略人与人之间的避让，这是机制演示，不用真实数据。把人数作为n参数，出口位置作为有效参数，画面要显示大厅、出口和真实的行人位置。运行200步，步长0.2，种子7。",
+  "run_id": "R20261118T060934-bcfca75908aa4f0290ef18341d88e185",
+  "model_id": "USR69FBEA324526",
+  "code_version": "9746d5a2f1877c258fe4fd0fcebb719696cde69f6df4c58362c900a8fc244a31",
+  "source_fingerprint": "4f80487e8b2c66bb31c5fa608ff88d962872b1468a7a6a48ef62e6808d839589",
+  "planner": "rule",
+  "entities": 37,
+  "frames": 201,
+  "final_t": 40.0,
+  "saved_frames_sha256": "06a324e7607f47045303deee5e5d867390f2471663f09edd9dbcd5e6cd622f6f",
+  "actual_llm_calls": [
+    {
+      "purpose": "build-model",
+      "request_sha256": "7dbebb80546034f84d5dbffbaded8045fc570182678aa2b9e224586f86b91fb3",
+      "response_sha256": "9811f829dd2f616d367c8ce1fb142064f385473c3f54ee2c6f5bd73e6e6b7dfd",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "prompt_tokens": 1907,
+        "total_tokens": 3392,
+        "completion_tokens": 1485,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "image_tokens": 0,
+          "text_tokens": 1907
+        },
+        "completion_tokens_details": {
+          "text_tokens": 1485
+        }
+      }
+    },
+    {
+      "purpose": "scene-semantic-review",
+      "request_sha256": "1c0c24fdba862613d2b49faec8b2e922541ebe821503fe409ea51f1c75d0fb09",
+      "response_sha256": "a9562d75d2e698bd877b46bcf8237b4664a8b6ad6e7aba8fa35e27118c170235",
+      "model": "deepseek-v4.1-flash-1017",
+      "usage": {
+        "prompt_tokens": 2537,
+        "total_tokens": 7179,
+        "completion_tokens": 4642,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "image_tokens": 0,
+          "text_tokens": 2537
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4140,
+          "text_tokens": 501
+        }
+      }
+    }
+  ],
+  "checks": [
+    "exact original scene request",
+    "canonical geometry and motion match archived entity data",
+    "pause and step",
+    "entity select/camera focus",
+    "same-frame state flow",
+    "professional parameter inspection",
+    "successful bundle download"
+  ]
+}

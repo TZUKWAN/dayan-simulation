@@ -1,0 +1,61 @@
+{
+  "ok": true,
+  "browser": "firefox",
+  "checks": [
+    "actual WebGL renderer initialized",
+    "mission control shows measured engine and factory status",
+    "keyboard commands and seven routes activate one workspace",
+    "library exposes model-specific inputs and semantic relationships",
+    "professional mode exposes every real parameter",
+    "professional action creates actual saved requested configuration",
+    "rendered persistent IDs equal archived entity IDs",
+    "rendered ring positions transform actual saved cells",
+    "the visible replay slider seeks before repainting the archived frame",
+    "playback advances the actual shared clock",
+    "pause and seek never rerun a model",
+    "paused workbench stops repeated chart and clock repaint",
+    "entity selection and camera follow use the same persistent ID",
+    "state transitions export against the selected archive",
+    "intervention timeline displays one actual event",
+    "aggregate animation explicitly discloses no individual tracks",
+    "queue scene retains persistent server and customer types",
+    "a delayed older archive cannot overwrite the newly selected run",
+    "large run retains final frame and discloses render sampling",
+    "large-scene GPU instances retain actual entity IDs and coordinates",
+    "large-scene render remains bounded",
+    "dataset names render as text without executable markup",
+    "lab preserves the original question through six real paired runs",
+    "arbitrary slider positions resolve to recorded observation times",
+    "linked analytics export real run versions and the selected metric",
+    "research outputs resolves the same experiment and bundle",
+    "keyboard resizing changes the operation rail width",
+    "viewport resize keeps one renderer canvas",
+    "simple mode retains AI interaction",
+    "reload restores the saved run without creating a new one",
+    "unsent professional edits survive workspace switches and reload",
+    "no uncaught application JavaScript errors"
+  ],
+  "errors": [],
+  "performance": {
+    "timing": "completed GPU render (WebGL finish)",
+    "render_ms": [
+      10,
+      6,
+      8,
+      7,
+      7
+    ],
+    "geometries": 27,
+    "draw_calls": 36,
+    "triangles": 45686,
+    "archived_entities": 4000,
+    "frames": 85
+  },
+  "run_ids": [
+    "R20261118T065043-de54ce4e04b74672aabb89ee29c3a286",
+    "R20261118T065051-fa9a6d1014a949cc84bb4098bd19b35c",
+    "R20261118T065055-f36fcf64c5b2454c8aa77cfc48e877d5",
+    "R20261118T065103-798ca6aaa44b4552b0fd7a704f4fbc8b"
+  ],
+  "experiment_id": "EX-2aa43f18"
+}

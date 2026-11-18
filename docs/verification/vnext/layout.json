@@ -1,0 +1,216 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "page": "mission",
+      "document_width": 1440,
+      "viewport": 1440,
+      "workspace_width": 1209,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "page": "overview",
+      "document_width": 1440,
+      "viewport": 1440,
+      "workspace_width": 905,
+      "scene_width": 749,
+      "scene_height": 376
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "page": "models",
+      "document_width": 1440,
+      "viewport": 1440,
+      "workspace_width": 1209,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "page": "data",
+      "document_width": 1440,
+      "viewport": 1440,
+      "workspace_width": 1209,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "page": "lab",
+      "document_width": 1440,
+      "viewport": 1440,
+      "workspace_width": 1209,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "page": "analytics",
+      "document_width": 1440,
+      "viewport": 1440,
+      "workspace_width": 1209,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "page": "replay",
+      "document_width": 1440,
+      "viewport": 1440,
+      "workspace_width": 1209,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "page": "mission",
+      "document_width": 1920,
+      "viewport": 1920,
+      "workspace_width": 1689,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "page": "overview",
+      "document_width": 1920,
+      "viewport": 1920,
+      "workspace_width": 1325,
+      "scene_width": 1129,
+      "scene_height": 470
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "page": "models",
+      "document_width": 1920,
+      "viewport": 1920,
+      "workspace_width": 1689,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "page": "data",
+      "document_width": 1920,
+      "viewport": 1920,
+      "workspace_width": 1689,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "page": "lab",
+      "document_width": 1920,
+      "viewport": 1920,
+      "workspace_width": 1689,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "page": "analytics",
+      "document_width": 1920,
+      "viewport": 1920,
+      "workspace_width": 1689,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "page": "replay",
+      "document_width": 1920,
+      "viewport": 1920,
+      "workspace_width": 1689,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "page": "mission",
+      "document_width": 2560,
+      "viewport": 2560,
+      "workspace_width": 2291,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "page": "overview",
+      "document_width": 2560,
+      "viewport": 2560,
+      "workspace_width": 1927,
+      "scene_width": 1684,
+      "scene_height": 638
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "page": "models",
+      "document_width": 2560,
+      "viewport": 2560,
+      "workspace_width": 2291,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "page": "data",
+      "document_width": 2560,
+      "viewport": 2560,
+      "workspace_width": 2291,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "page": "lab",
+      "document_width": 2560,
+      "viewport": 2560,
+      "workspace_width": 2291,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "page": "analytics",
+      "document_width": 2560,
+      "viewport": 2560,
+      "workspace_width": 2291,
+      "scene_width": 0,
+      "scene_height": 0
+    },
+    {
+      "width": 2560,
+      "height": 1440,
+      "page": "replay",
+      "document_width": 2560,
+      "viewport": 2560,
+      "workspace_width": 2291,
+      "scene_width": 0,
+      "scene_height": 0
+    }
+  ],
+  "offline_recovered": true,
+  "errors": []
+}

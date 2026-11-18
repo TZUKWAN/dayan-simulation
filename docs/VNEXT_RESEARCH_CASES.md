@@ -6,7 +6,7 @@
 
 | 身份或指标 | 实际值 |
 | --- | --- |
-| 采集批次 | 见样本事实记录及源快照 |
+| 采集批次 | 见[报告事实记录](verification/vnext/canada_facts.json)及复现包内的源快照 |
 | 研究 | `ST-8df6797de0c2458bb3c2661f` |
 | 运行 | `R20261118T053458-207816b417c14f15bca34be83890899f` |
 | 研究 SHA-256 | `88be7c3936f31c4c28836f95b73b92a2e092748729dddf30b0cd0f01078441fe` |
@@ -22,14 +22,20 @@
 
 报告、证据 JSON、逐年 CSV、带原始页及执行源码的复现包都引用同一研究版本。档案逐年模型值与报告一致。主结果高于阈值。四个测试点的经验带覆盖率不足以支撑分布稳定或预测可靠的结论。原德国研究的 `failed_holdout` 按原版本保留。
 
+[世界银行原始响应](verification/vnext/wdi_can_unemployment_raw.json) · [逐年观测和预测 CSV](verification/vnext/canada_observed_predicted.csv) · [学术报告](verification/vnext/canada_report.docx)
+
 复现入口位于数据中心的「世界银行 Data360 · WDI 年度失业率」预设。填写 `CAN`、`1995` 和 `2019`，对已完成批次点击「用于研究」。按事前规约填写斜率网格、RMSE 1、测试 4 年、验证 3 年和候选数 3。保存合同后执行校准并下载学术报告及复现包。重新请求时提供方可能发布数据修订。精确重跑使用原始哈希版本。
 
 ## CPL001 路网与人口的耦合疏散
 
 以 `[-80.063, 40.490, -80.052, 40.497]` 为范围，取 TIGERweb 2020 地方道路和普查区人口。道路端点按 WGS84 投影到本地米。完整道路与边界相交即入原始候选，只用最大连通分量。人口端口按普查区内点落在同一边界筛选，保留区代码和该区全量 `POP100`。本次 49 条原始道路，54 个相交普查区中 36 个内点落在范围内，总计 2,280 人。 [2020 物理图层](https://tigerweb.geo.census.gov/arcgis/rest/services/Census2020/tigerWMS_PhysicalFeatures/MapServer) · [2020 Census Blocks](https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/tigerWMS_Census2020/MapServer/10)
 
-原始官方响应通过连接器下载并保留。内置在线采集在初次浏览器验收中遇到连接超时，验收以同一官方响应的精确快照继续。快照经过生产归一化函数，并通过浏览器仿真指挥专业模式提交同一组两个数据集。路网输入 `DS-4f47c1ada5069cb9b39d41e9`，派生 SHA-256 `968c5c46123cc10eae26e5d9fe4e31a07fa45710352a99612fbc723bfbed6147`，原始道路 SHA-256 `07219bfbca0f06c2d5cc0926fe25b01e6e0a37ca8a89f4040f12c599c6a6673b`。人口输入 `DS-e222666abc47272e76de6849`，派生 SHA-256 `737154ce59c41de3eb51bd3ad9ca5ebe526926bc7a75835dff7b96703be2a33e`，原始人口 SHA-256 `a53f2c710464664de3207ade0b38316d60904ffbeb2b3bd2bd6c5203286f9358`。
+内置在线采集在初次浏览器验收中遇到连接超时，先核验同一官方响应的归档快照。随后用有界重试和原查询参数，从「数据中心 → TIGERweb 2020 路网与普查人口」实际采集，点击「在 CPL001 检查输入与参数」，通过专业模式执行。在线采集结果与首次快照哈希一致。路网输入 `DS-4f47c1ada5069cb9b39d41e9`，派生 SHA-256 `968c5c46123cc10eae26e5d9fe4e31a07fa45710352a99612fbc723bfbed6147`，原始道路 SHA-256 `07219bfbca0f06c2d5cc0926fe25b01e6e0a37ca8a89f4040f12c599c6a6673b`。人口输入 `DS-e222666abc47272e76de6849`，派生 SHA-256 `737154ce59c41de3eb51bd3ad9ca5ebe526926bc7a75835dff7b96703be2a33e`，原始人口 SHA-256 `a53f2c710464664de3207ade0b38316d60904ffbeb2b3bd2bd6c5203286f9358`。
 
-运行 `R20261118T054338-008d3aa900f04c4e8728450cf081970b` 的输入为 120 个加权主体、种子 7、96 步、步长 0.25 分钟、两辆车每车 80 人，缺失实测的老年比例设为情景参数 0.25。第 6 分钟实际执行信息纠偏率 0.8。两处设施选自路网节点，位置、行为、积水、车辆数量与容量均为声明的情景设置。
+在线采集后的运行 `R20261118T062004-7f0100db8f1244f49c0993810477ed06` 使用 120 个加权主体、种子 7、96 步、步长 0.25 分钟、两辆车每车 80 人，缺失实测的老年比例设为情景参数 0.25。第 6 分钟实际执行信息纠偏率 0.8。两处设施选自路网节点，位置、行为、积水、车辆数量与容量均为声明的情景设置。 [在线验收凭证](verification/vnext/cpl_online_receipt.json)
 
 实际归档 97 帧、843 段连通道路、44 帧含乘车关系、2 次发车。检查了发车人数上界、车辆与乘客坐标同步、主体数量守恒、疏散人数单调、空间图层和研究包中的四个数据哈希。最终疏散 21 个采样主体，模型代表人口 2,280。相同源快照、参数、步长和种子重跑的逐步观测一致。作为模型内机制实验，该量级不提供地方应急或人口预测结论。
+
+实测使用 World Bank WDI / ILO 全球估计数据（CC BY 4.0）和美国人口普查局 TIGERweb 2020 公共数据。每个归档中的原始响应都有来源 URL 与 SHA-256。复现包执行方式见[部署说明](DEPLOYMENT.md)。[CPL001 多种子与干预对照凭证](verification/vnext/cpl_current_core.json)
+
+[道路原始响应](verification/vnext/tigerweb_roads_raw.geojson) · [人口原始响应](verification/vnext/tigerweb_blocks_raw.json)
