@@ -37,9 +37,12 @@
   const $ = s => document.querySelector(s);
   const put = (s,text) => {const e=$(s);if(e&&e.textContent!==String(text))e.textContent=text;};
   const at = (rows,t) => {let lo=0,hi=rows.length;while(lo<hi){const m=(lo+hi)>>>1;if(rows[m].sim_t<=t+1e-9)lo=m+1;else hi=m;}return Math.max(0,lo-1);};
-  function metricInfo(model,key) {
-    if(model==='NET106')return {name:label(key),unit:({flux:'模型通量',speed:'格/步',n_cars:'辆',density:'比例'})[key]||'原模型单位',definition:key==='flux'?'车辆密度 × 平均速度，未换算为现实交通流量':''};
+  const unitLabel=unit=>({'model agent':'模型主体','person':'人','people':'人','fraction':'比例','minute':'分钟','second':'秒','m':'米','person · minute × scenario severity':'人·分钟×情景强度'})[unit]||unit;
+  function metricInfo(model,key,manifest) {
+    const declared=manifest?.output_contract?.fields?.[key]?.unit;
+    if(model==='NET106')return {name:label(key),unit:({flux:'模型通量',speed:'格/步',n_cars:'辆',density:'比例'})[key]||unitLabel(declared)||'原模型单位',definition:key==='flux'?'车辆密度 × 平均速度，未换算为现实交通流量':''};
     if(model==='NET052'&&['I','S'].includes(key))return {name:key==='I'?'感染比例':'易感比例',unit:'比例',definition:'模型状态比例'};
+    if(declared)return {name:label(key),unit:unitLabel(declared),definition:''};
     return {name:label(key),unit:'原模型单位',definition:'保留模型原始量纲；不自动换算现实单位'};
   }
   function interventionTime(s) {
@@ -103,7 +106,7 @@
     element._hits=[];delete element._plot;delete element._timePlot;return {ctx,w,h,element};
   }
   function empty(element,text) {const c=canvas(element);if(!c)return;c.ctx.fillStyle='#a1b5c3';const max=Math.max(10,Math.floor((c.w-40)/12));let y=50;for(let i=0;i<text.length;i+=max){c.ctx.fillText(text.slice(i,i+max),20,y);y+=21;}element.setAttribute('aria-label',text);element.dataset.kind='empty';}
-  function drawLine(element,series,metric,time,limits,events=[],window=null,unit='原模型单位') {
+  function drawLine(element,series,metric,time,limits,events=[],window=null,unit='原模型单位',clock='模型时间 sim_t') {
     const c=canvas(element);if(!c)return;
     const {ctx,w,h}=c,all=series.flatMap(r=>r.rows.map(o=>o[metric]).filter(finite));
     if(!all.length){empty(element,'该指标没有可绘制的观测');return;}
@@ -115,7 +118,7 @@
     for(let i=0;i<4;i++){const value=lo+(hi-lo)*i/3,yy=y(value);ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(w-p.r,yy);ctx.stroke();ctx.textAlign='right';ctx.fillText(fmt(value),p.l-7,yy+4);}
     ctx.textAlign='left';ctx.fillText(unit,p.l,12);
     for(let i=0;i<=3;i++){const t=limits[0]+(limits[1]-limits[0])*i/3;ctx.textAlign=i===3?'right':i===0?'left':'center';ctx.fillText(fmt(t),x(t),h-16);}
-    ctx.textAlign='right';ctx.fillText('模型时间 sim_t',w-p.r,h-1);
+    ctx.textAlign='right';ctx.fillText(clock,w-p.r,h-1);
     for(const t of [...new Set(events.filter(finite))]){if(t<limits[0]||t>limits[1])continue;ctx.setLineDash([3,3]);ctx.strokeStyle='#99b8c080';ctx.beginPath();ctx.moveTo(x(t),p.t);ctx.lineTo(x(t),h-p.b);ctx.stroke();ctx.setLineDash([]);}
     series.forEach((r,j)=>{ctx.strokeStyle=r.color||colors[j%colors.length];ctx.lineWidth=1.8;ctx.setLineDash(j%2?[5,3]:[]);ctx.beginPath();let pen=false;const stride=Math.max(1,Math.ceil(r.rows.length/1200));
       r.rows.forEach((o,i)=>{if(!finite(o[metric])){pen=false;return;}if(i%stride&&i!==r.rows.length-1)return;const xx=x(o.sim_t),yy=y(o[metric]);if(pen)ctx.lineTo(xx,yy);else ctx.moveTo(xx,yy);pen=true;});ctx.stroke();ctx.setLineDash([]);
@@ -148,16 +151,37 @@
     put('#comparisonSample',summary.pairedN?`配对 n=${summary.pairedN}`:`${s.runs.length}次运行`);
     put('#comparisonNote',summary.arm?'先对每次运行计算窗口均值，再按方案汇总；不将时间点当作独立实验。':'仅描述本次运行；重复种子实验后才能判断跨运行稳定性。');
   }
+  let roadRaster;
   function renderStructure(s,frame) {
     const el=$('#structureChart'),frames=s.stream?.frames||[],entities=frame?.entities||[],road=frame?.facilities?.find(f=>f.type==='road'&&finite(f.length));
     if(road&&entities.length&&entities.every(e=>finite(e.x)&&finite(e.speed))){
       const c=canvas(el);if(!c)return;const {ctx,w,h}=c,p={l:38,r:14,t:20,b:35},pw=w-p.l-p.r,ph=h-p.t-p.b,step=Math.max(1,Math.ceil(frames.length/240)),selected=frames.filter((f,i)=>i%step===0||i===frames.length-1);
-      ctx.fillStyle='#182f3e';ctx.fillRect(p.l,p.t,pw,ph);
-      selected.forEach((f,i)=>(f.entities||[]).forEach(e=>{if(!finite(e.x)||!finite(e.speed))return;const xx=p.l+e.x/road.length*pw,yy=p.t+i/selected.length*ph;ctx.fillStyle=e.speed===0?'#eebb79':'#51decc';ctx.globalAlpha=e.speed===0?.95:.6;ctx.fillRect(xx,yy,Math.max(1,pw/road.length),Math.max(1,ph/selected.length));}));ctx.globalAlpha=1;
+      const span=Math.max(1e-12,s.end-s.start);
+      const signature=[el.width,el.height,road.length,s.start,s.end].join('/');
+      if(roadRaster?.frames!==frames||roadRaster.signature!==signature){
+        const bitmap=document.createElement('canvas');bitmap.width=el.width;bitmap.height=el.height;
+        const raster=bitmap.getContext('2d');
+        raster.scale(bitmap.width/w,bitmap.height/h);
+        raster.fillStyle='#182f3e';raster.fillRect(p.l,p.t,pw,ph);
+        raster.save();raster.beginPath();raster.rect(p.l,p.t,pw,ph);raster.clip();
+        const cellWidth=Math.max(1,pw/road.length);
+        selected.forEach((f,i)=>{
+          const y=(f.sim_t-s.start)/span*ph;
+          const height=Math.max(1,((selected[i+1]?.sim_t??s.end)-f.sim_t)/span*ph);
+          for(const e of f.entities||[]){
+            if(!finite(e.x)||!finite(e.speed))continue;
+            raster.fillStyle=e.speed===0?'#eebb79f2':'#51decc99';
+            raster.fillRect(p.l+e.x/road.length*pw,p.t+Math.min(ph-1,y),cellWidth,height);
+          }
+        });
+        raster.restore();roadRaster={frames,signature,bitmap};
+      }
+      ctx.drawImage(roadRaster.bitmap,0,0,w,h);
       ctx.fillStyle='#9bb7c7';ctx.textAlign='right';for(const f of [0,.5,1])ctx.fillText(fmt(s.start+(s.end-s.start)*f),p.l-6,p.t+f*ph+4);ctx.textAlign='left';ctx.fillText('sim_t',p.l,11);ctx.fillText('0',p.l,h-19);ctx.textAlign='right';ctx.fillText(fmt(road.length),w-p.r,h-19);ctx.fillText('道路位置（格）',w-p.r,h-2);
-      const yy=p.t+(s.time-s.start)/Math.max(1e-12,s.end-s.start)*ph;ctx.strokeStyle='#ecf7ffa0';ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(w-p.r,yy);ctx.stroke();el.dataset.kind='space-time';el._timePlot={top:p.t,bottom:p.t+ph,from:s.start,to:s.end};
+      const yy=p.t+(s.time-s.start)/span*ph;ctx.strokeStyle='#ecf7ffa0';ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(w-p.r,yy);ctx.stroke();el.dataset.kind='space-time';el._timePlot={top:p.t,bottom:p.t+ph,from:s.start,to:s.end};
       put('#structureTitle','停车在何处形成');put('#structureSubtitle',s.runs[s.selected].label);put('#structureNote',`青色：行驶；琥珀：速度=0；底色：空格。${selected.length<frames.length?'显示'+selected.length+'/'+frames.length+'帧，完整状态可导出。':'使用完整'+frames.length+'帧。'}点击图中时间可定位回放。`);el.setAttribute('aria-label',`${s.runs[s.selected].label}的实际道路位置与时间，停车按速度零判断。`);return;
     }
+    roadRaster=null;
     const spatial=entities.filter(e=>finite(e.x)&&finite(e.y));
     if(spatial.length){const c=canvas(el);if(!c)return;const {ctx,w,h}=c,p={l:36,r:15,t:20,b:34},shown=spatial.slice(0,3000),xs=spatial.map(e=>e.x),ys=spatial.map(e=>e.y),bx=extent(xs),by=extent(ys),loX=bx[0],hiX=bx[1],loY=by[0],hiY=by[1];ctx.fillStyle='#182f3e';ctx.fillRect(p.l,p.t,w-p.l-p.r,h-p.t-p.b);
       const x=v=>p.l+(v-loX)/Math.max(1e-12,hiX-loX)*(w-p.l-p.r),y=v=>h-p.b-(v-loY)/Math.max(1e-12,hiY-loY)*(h-p.t-p.b);
@@ -172,10 +196,16 @@
   }
   function render(s) {
     const run=s.runs[s.selected],frames=s.stream?.frames||[],frame=frames[at(frames,s.time)],entities=frame?.entities||[],summary=summarize(s);s.viewAnalysis=summary;
-    const info=metricInfo(run?.model_id,s.metric),observed=run?.observations?.[at(run.observations,s.time)]||{};
+    const info=metricInfo(run?.model_id,s.metric,run?.manifest),observed=run?.observations?.[at(run.observations,s.time)]||{};
     if(!run){for(const id of ['#obsChart','#distributionChart','#structureChart','#entityChart'])empty($(id),'开始研究后显示真实计算结果');document.querySelectorAll('.kpi-row article').forEach(e=>{e.hidden=true;e.style.display='none';});$('#comparisonChart').innerHTML='';put('#sampleNote','');put('#effectNumber','—');put('#insightSummary','');return;}
     const eventTimes=s.runs.flatMap(r=>(r.manifest?.interventions||[]).filter(i=>i.applied).map(i=>i.actual_t));
-    drawLine($('#obsChart'),s.runs.map((r,i)=>({rows:r.observations,color:colorFor(s,r,i)})),s.metric,s.time,[s.start,s.end],eventTimes,summary.window,info.unit);
+    const clock=unitLabel(frame?.space?.time_unit||run.manifest?.actual?.time_unit)||'模型时间 sim_t';
+    const entityUnit=key=>{
+      if(['x','y'].includes(key))return unitLabel(frame?.space?.unit)||'模型空间单位';
+      if(key==='speed'&&frame?.space?.unit&&frame?.space?.time_unit&&run.model_id!=='NET106')return unitLabel(frame.space.unit)+'/'+unitLabel(frame.space.time_unit);
+      return metricInfo(run.model_id,key).unit;
+    };
+    drawLine($('#obsChart'),s.runs.map((r,i)=>({rows:r.observations,color:colorFor(s,r,i)})),s.metric,s.time,[s.start,s.end],eventTimes,summary.window,info.unit,clock);
     put('#metricDescription',`${info.name} · ${info.unit}${info.definition?' · '+info.definition:''}`);
     const window=summary.window,per=summary.perRun[s.selected];put('#analysisWindowLabel',`${fmt(window.from)} ${window.exclusive?'<':'≤'} sim_t ≤ ${fmt(window.to)} · 当前方案 ${per?.n||0} 个观测时点`);
     const independent=s.kind==='experiment'?summary.pairedN:s.kind==='ensemble'?s.runs.length:1;
@@ -193,7 +223,7 @@
     const choices=[...fields.filter(k=>!['x','y'].includes(k)),...cat,...fields.filter(k=>['x','y'].includes(k))];
     if(!choices.includes(s.distributionField))s.distributionField=['speed','arrived','exited','state'].find(k=>choices.includes(k))||choices[0]||'';
     options($('#distributionField'),choices.map(k=>[k,label(k)]),s.distributionField,'无主体属性');
-    if(entities.length&&s.distributionField){const numeric=fields.includes(s.distributionField),dist=numeric?histogram(entities,s.distributionField):categories(entities,s.distributionField),binary=['arrived','exited'].includes(s.distributionField)&&dist.bins.every(b=>['0','1'].includes(b.label));if(binary)dist.bins=dist.bins.map(b=>({...b,color:b.label==='1'?'#eebb79':'#51decc',label:(s.distributionField==='arrived'?(b.label==='1'?'已到达':'未到达'):(b.label==='1'?'已离开':'未离开'))}));drawBars($('#distributionChart'),dist.bins,colorFor(s,run,s.selected));put('#distributionTitle',binary?(s.distributionField==='arrived'?'到达状态构成':'离开状态构成'):`${label(s.distributionField)}如何分布`);put('#distributionNote',`${run.label} · sim_t=${fmt(frame.sim_t)} · ${dist.n}个有效主体${dist.missing?'，另有'+dist.missing+'个缺失/非数值':''}${s.distributionField==='speed'?' · 速度单位：格/步':''}${numeric&&dist.bins.length>1&&dist.bins[0].from!==dist.bins[0].to?' · 等宽分箱，区间左闭右开，末箱含最大值':''}`);}
+    if(entities.length&&s.distributionField){const numeric=fields.includes(s.distributionField),dist=numeric?histogram(entities,s.distributionField):categories(entities,s.distributionField),binary=['arrived','exited'].includes(s.distributionField)&&dist.bins.every(b=>['0','1'].includes(b.label));if(binary)dist.bins=dist.bins.map(b=>({...b,color:b.label==='1'?'#eebb79':'#51decc',label:(s.distributionField==='arrived'?(b.label==='1'?'已到达':'未到达'):(b.label==='1'?'已离开':'未离开'))}));drawBars($('#distributionChart'),dist.bins,colorFor(s,run,s.selected));put('#distributionTitle',binary?(s.distributionField==='arrived'?'到达状态构成':'离开状态构成'):`${label(s.distributionField)}如何分布`);put('#distributionNote',`${run.label} · sim_t=${fmt(frame.sim_t)} · ${dist.n}个有效主体${dist.missing?'，另有'+dist.missing+'个缺失/非数值':''}${numeric&&!binary?' · 属性单位 '+entityUnit(s.distributionField):''}${numeric&&dist.bins.length>1&&dist.bins[0].from!==dist.bins[0].to?' · 等宽分箱，区间左闭右开，末箱含最大值':''}`);}
     else{const metrics=numericFields(run.observations).filter(k=>k!==s.metric).slice(0,6),bins=metrics.filter(k=>finite(observed[k])).map(k=>({label:label(k),count:observed[k]}));
       const scaled=bins.map(b=>{const key=metrics.find(k=>label(k)===b.label),values=run.observations.map(o=>o[key]).filter(finite),peak=values.reduce((v,x)=>Math.max(v,Math.abs(x)),0);return {label:b.label,count:peak?100*Math.abs(b.count)/peak:0};});
       drawBars($('#distributionChart'),scaled,colorFor(s,run,s.selected),'各自绝对峰值占比 %');put('#distributionTitle','汇总指标当前强度');put('#distributionNote',(bins.map(b=>b.label+'='+fmt(b.count)).join('；')||'无额外数值')+' · 各自绝对峰值归一；无主体状态，不是个体分布');}
@@ -211,7 +241,7 @@
     options($('#entityMetric'),attributes.map(k=>[k,label(k)]),s.entityField,'无数值属性');$('#focusEntity').disabled=!entity||!finite(entity.x);
     $('#followEntity').disabled=!entity||!finite(entity.x);$('#followEntity').setAttribute('aria-pressed',String(Boolean(s.followEntity)));$('#followEntity').textContent=s.followEntity?'停止跟随':'跟随主体';
     if(entity){const values=Object.entries(entity).filter(([k,v])=>k!=='id'&&!(entity.type==='car'&&k==='state')&&v!==null&&typeof v!=='object').map(([k,v])=>`<span>${esc(label(k))} <b>${esc(finite(v)?fmt(v):label(String(v)))}</b></span>`);if(entity.type==='car'&&finite(entity.speed))values.push(`<span>运动状态 <b>${entity.speed===0?'停车':'行驶'}</b></span>`);$('#entitySummary').innerHTML=values.join('');
-      drawLine($('#entityChart'),[{rows:trace}],s.entityField,s.time,[s.start,s.end],[],null,metricInfo(run.model_id,s.entityField).unit);}
+      drawLine($('#entityChart'),[{rows:trace}],s.entityField,s.time,[s.start,s.end],[],null,entityUnit(s.entityField),clock);}
     else{put('#entitySummary',s.entityId?'该主体在当前帧不存在，轨迹不补造缺失值。':'点击动画中的主体或在列表中选择，查看实际状态与轨迹。');if(s.entityId&&s.entityField)drawLine($('#entityChart'),[{rows:trace}],s.entityField,s.time,[s.start,s.end]);else empty($('#entityChart'),allIds.length?'选择一个主体，观察它随时间的变化。':'模型没有输出个体轨迹。');}
     put('#trackAgent',s.entityId?`已选主体 ${s.entityId} · 查看详情 ↗`:'在场景中点击主体 · 或从列表选择 ↗');
     put('#insightSummary',summary.arm&&!finite(summary.difference)?'所选指标在部分方案中缺失，尚不能直接比较。':summary.arm?`在当前窗口，${summary.arm.name}的${info.name}均值${summary.difference<0?'低于':summary.difference>0?'高于':'等于'}${summary.baseline.name}。${independent>1?'已按种子配对比较。':'当前仅有单个配对种子，不能据此判断稳健性。'}`:(s.kind==='ensemble'?`这里比较${s.runs.length}个种子的实际结果；标准差描述各次窗口均值的离散程度。`:'图表描述当前保存的运行；更改分析窗口仅重新统计已有结果，不会重跑模型。'));

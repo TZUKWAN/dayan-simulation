@@ -2339,12 +2339,14 @@
   let followingStateEntity = '';
   let stateCameraOverview = true;
   let studioProfile = null, studioStage = null;
+  const overviewTarget = new THREE.Vector3();
   let stateSmoothing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function fitStateCamera() {
     if(!camera)return;
     const scale=Math.max(1,1.2/Math.max(.2,camera.aspect));
-    const target=new THREE.Vector3(0,0,6);
-    const direction=new THREE.Vector3(27,43,51).sub(target).normalize();
+    const geographic=studioProfile?.kind==='geographic';
+    const target=overviewTarget.set(0,0,geographic?2:6);
+    const direction=(geographic?new THREE.Vector3(18,67,57):new THREE.Vector3(27,43,51)).sub(target).normalize();
     const circular=['ring-road','indicators','queue','cohorts'].includes(studioProfile?.kind);
     const radius=studioStage?.userData.radius||38.3;
     const points=circular?Array.from({length:48},(_,i)=>[Math.cos(i/48*Math.PI*2)*radius,Math.sin(i/48*Math.PI*2)*radius]):[[-39,-39],[-39,39],[39,39],[39,-39]];
@@ -2389,27 +2391,40 @@
   }
 
   const displaySamples=new WeakMap();
+  let displayPriorities=new Map();
   function displayEntities(frame) {
     const entities=frame.entities||[];if(entities.length<=3000)return entities;
     if(!displaySamples.has(frame)){
-      const priority=id=>{let h=2166136261;for(const c of String(id))h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;};
+      const priority=id=>{
+        let value=displayPriorities.get(id);
+        if(value===undefined){
+          let h=2166136261;for(const c of String(id))h=Math.imul(h^c.charCodeAt(0),16777619);
+          value=h>>>0;displayPriorities.set(id,value);
+        }
+        return value;
+      };
       displaySamples.set(frame,[...entities].sort((a,b)=>priority(a.id)-priority(b.id)||String(a.id).localeCompare(String(b.id))).slice(0,3000));
     }
     return displaySamples.get(frame);
   }
 
-  function syncStateInstances(group) {
+  const instanceColor=new THREE.Color();
+  function syncStateInstances(group,includeColors=true) {
     const batch=group?.userData.carBatch;if(!batch)return;
-    const ids=[];
-    group.userData.meshMap.forEach(m=>{
-      if(!m.userData.instancedCar||!m.visible)return;
-      m.updateMatrix();batch.setMatrixAt(ids.length,m.matrix);
-      batch.setColorAt(ids.length,new THREE.Color(String(m.userData.entityId)===selectedStateEntity?0x51decc:m.userData.stateColor));
-      ids.push(m.userData.entityId);
+    const map=group.userData.meshMap;
+    if(includeColors){
+      const ids=[];
+      map.forEach(m=>{
+        if(!m.userData.instancedCar||!m.visible)return;
+        instanceColor.setHex(String(m.userData.entityId)===selectedStateEntity?0x51decc:m.userData.stateColor);
+        batch.setColorAt(ids.length,instanceColor);ids.push(m.userData.entityId);
+      });
+      batch.count=ids.length;batch.userData.instanceIds=ids;batch.instanceColor.needsUpdate=true;
+    }
+    batch.userData.instanceIds.forEach((id,i)=>{
+      const mesh=map.get(id);mesh.updateMatrix();batch.setMatrixAt(i,mesh.matrix);
     });
-    batch.count=ids.length;batch.userData.instanceIds=ids;
-    batch.instanceMatrix.needsUpdate=true;if(batch.instanceColor)batch.instanceColor.needsUpdate=true;
-    batch.computeBoundingSphere();
+    batch.instanceMatrix.needsUpdate=true;
   }
 
   function stateWorldXY(ent, fr) {
@@ -2530,6 +2545,8 @@
             template.geometry.dispose();
             const batch=new THREE.InstancedMesh(new THREE.BoxGeometry(1.55,.42,.85),template.material,3000);
             batch.castShadow=true;batch.receiveShadow=true;batch.frustumCulled=false;
+            // Vehicles stay within the same world-space ring at every step.
+            batch.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,.65,0),32);
             batch.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
             group.userData.carBatch=batch;group.add(batch);
           }
@@ -2589,7 +2606,7 @@
           const positions=[];
           for(const segment of f.segments||[])for(const point of segment){const [x,y,z]=stateWorldXY({x:point[0],y:point[1]},fr);positions.push(x,.08,z);}
           const geometry=new THREE.BufferGeometry();geometry.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
-          fm=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x4cc7c3,transparent:true,opacity:.7}));
+          fm=new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0x9ce9e8,transparent:true,opacity:.82,toneMapped:false}));
         } else if(f.type === "assumed_pickup") {
           fm=new THREE.Mesh(new THREE.BoxGeometry(2.5,.5,2.5),new THREE.MeshStandardMaterial({color:0x7dbee7,emissive:0x1b4a77}));
         } else if(f.type === "assumed_shelter") {
@@ -2613,7 +2630,6 @@
         }
       }
     });
-    syncStateInstances(group);
     paintStateOverlay(fr);
   }
 
@@ -2622,24 +2638,33 @@
     if(!box){box=document.createElement('div');box.id='sceneLegend';container.appendChild(box);}
     box.replaceChildren();
     const heading=document.createElement('strong');heading.textContent=studioProfile.title;box.appendChild(heading);
+    if(studioProfile.kind==='geographic'){
+      const bounds=window._vizStateStream?.frames?.[0]?.space?.bounds;
+      if(bounds){
+        const extent=document.createElement('span');extent.className='scene-extent';
+        extent.textContent=`${Math.round(bounds[2]-bounds[0])} × ${Math.round(bounds[3]-bounds[1])} m`;
+        heading.appendChild(extent);
+      }
+    }
     const items=document.createElement('div');items.className='scene-legend-items';
     DAYAN_SCENE_STUDIO.legend(studioProfile).forEach(item=>{const line=document.createElement('span'),dot=document.createElement('i');dot.style.background='#'+item.color.toString(16).padStart(6,'0');line.appendChild(dot);line.appendChild(document.createTextNode(item.text));items.appendChild(line);});box.appendChild(items);
     if(!['indicators','cohorts'].includes(studioProfile.kind)){
       const label=document.createElement('label');label.className='scene-smoothing';
       const input=document.createElement('input');input.type='checkbox';input.id='sceneSmoothing';input.checked=stateSmoothing;input.addEventListener('change',()=>DAYAN3D.setSmoothing(input.checked));
-      label.append(input,document.createTextNode('平滑回放'));label.title='仅在相邻归档位置间做视觉插值；统计、主体详情与导出仍为原始帧。关闭可查看精确状态。';box.appendChild(label);
-      const note=document.createElement('small');note.textContent='平滑仅为帧间视觉插值';box.appendChild(note);
+      label.append(input,document.createTextNode('帧间插值'));label.title='仅在相邻归档位置间做视觉插值；统计、主体详情与导出仍为原始帧。关闭可查看精确状态。';box.appendChild(label);
     }
   }
 
+  let smoothNext=null, smoothPositions=null;
   function interpolateState(t,idx) {
     const frames=window._vizStateStream?.frames,fr=frames?.[idx],next=frames?.[idx+1];
-    if(!stateSmoothing||!next||['indicators','cohorts'].includes(studioProfile.kind))return;
+    if(!stateSmoothing||!next||['indicators','cohorts'].includes(studioProfile.kind))return false;
     const span=next.sim_t-fr.sim_t,alpha=span>0?THREE.MathUtils.clamp((t-fr.sim_t)/span,0,1):0;
-    if(!alpha)return;
-    const nextMap=new Map((next.entities||[]).map(e=>[e.id,e]));
+    if(!alpha)return false;
+    if(smoothNext!==next){smoothNext=next;smoothPositions=new Map((next.entities||[]).map(e=>[e.id,e]));}
+    const meshes=getScene().children.find(c=>c.userData?.isStateGroup)?.userData.meshMap;
     for(const e of displayEntities(fr)){
-      const m=stateEntityMesh(e.id),n=nextMap.get(e.id);if(!m||!n||n.type!==e.type||!m.visible)continue;
+      const m=meshes?.get(e.id),n=smoothPositions.get(e.id);if(!m||!n||n.type!==e.type||!m.visible)continue;
       if(studioProfile.kind==='ring-road'&&e.type==='car'){
         const length=(fr.facilities||[]).find(f=>f.type==='road')?.length||100,delta=((n.x-e.x)%length+length)%length;
         if(delta>length/2)continue; // Ambiguous large jumps are left at the saved position.
@@ -2652,6 +2677,7 @@
         if(m.userData.glyph==='vehicle'&&Math.hypot(b[0]-a[0],b[2]-a[2])>1e-6)m.rotation.y=Math.atan2(-(b[2]-a[2]),b[0]-a[0]);
       }
     }
+    return true;
   }
 
   function stateHud() {
@@ -2679,7 +2705,8 @@
       let lo=0,hi=n;while(lo<hi){const m=(lo+hi)>>>1;if((st.frames[m].sim_t??0)<=t+1e-9)lo=m+1;else hi=m;}idx=Math.max(0,lo-1);
     }else{const DUR=Math.max(12,Math.min(30,n*1.4));idx=Math.min(n-1,Math.floor((t%DUR)/DUR*n));}
     const previous=followingStateEntity?stateEntityMesh(followingStateEntity)?.position.clone():null;
-    if (idx !== window._vizStateIdx) {
+    const changed=idx!==window._vizStateIdx;
+    if (changed) {
       const prevFr = st.frames[window._vizStateIdx];
       window._vizStateIdx = idx;
       vizApplyFrame(st.frames[idx]);
@@ -2699,14 +2726,15 @@
           ? "rgba(0,255,163,.45)" : "rgba(255,183,77,.45)";
       }
     }
-    interpolateState(t,idx);
-    syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup));
+    const interpolated=interpolateState(t,idx);
+    if(changed||interpolated)syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup),changed);
     if(previous&&followingStateEntity){const mesh=stateEntityMesh(followingStateEntity);if(mesh?.visible){camera.position.add(mesh.position.clone().sub(previous));camera.lookAt(mesh.position);}else followStateEntity('',false);}
   }
 
   function visualizeState(stream) {
     clearScene();
     stateOverlay=null;
+    displayPriorities=new Map();smoothNext=null;smoothPositions=null;
     selectedStateEntity='';
     followingStateEntity='';
     stateCameraOverview=true;
@@ -2720,13 +2748,13 @@
     studioProfile=DAYAN_SCENE_STUDIO.resolve(stream);
     studioStage=DAYAN_SCENE_STUDIO.stage(scene,studioProfile,stream?.frames?.[0]||{});
     renderer.toneMappingExposure=1.05;
-    window._vizDayCycle = (window._vizDayCycle !== false);   // 状态世界默认昼夜流动
-    DAYCYCLE.ensure();
-    if (!stream?.preview && !matchMedia('(prefers-reduced-motion: reduce)').matches) startIntroCinematic();
+    window._vizDarkness=0;
+    INTRO.active=false;
     buildStateLegend();
     // 状态场景俯瞰机位：能同时读清环形/平面结构
     if (camera) {
       fitStateCamera();
+      if(!stream?.preview)startIntroCinematic();
     }
     currentScene = { type: "state_" + ((stream && stream.provenance) || "aggregate"),
                      update: vizStateUpdate };
@@ -2736,6 +2764,7 @@
 
   function clearSavedWorld() {
     clearScene();studioProfile=null;studioStage=null;selectedStateEntity='';followingStateEntity='';
+    displayPriorities=new Map();smoothNext=null;smoothPositions=null;
     window._vizStateStream=null;window._vizStateIdx=-1;stateOverlay=null;
     const annotated=document.getElementById('layerReadout');if(annotated) annotated.hidden=true;
     stateCameraOverview=true;currentScene=null;getScene().background=new THREE.Color(0x101f2e);
@@ -2754,7 +2783,7 @@
   // ============================================================
   // 视觉增强层（2026-11-13）：
   //   A. 轻量泛光后处理（自研，无新依赖；失败自动降级直渲）
-  //   B. 昼夜连续循环 + 车灯/环道灯随黑暗渐亮（状态世界默认开启）
+  //   B. 旧展示场景的昼夜循环
   //   C. 数据驱动特效：感染脉冲光环 / 疏散拖尾 / 干预冲击波
   //   D. 开场推近镜头（可交互打断）
   // 特效层只做视觉表现，不产生任何模型数据；provenance 标注不变。
@@ -2916,7 +2945,7 @@
   };
 
   function dayCycleTick(dt) {
-    if (!window._vizDayCycle || !sceneObj) return;
+    if (!window._vizDayCycle || !sceneObj || currentScene?.type?.startsWith('state_')) return;
     DAYCYCLE.ensure();
     DAYCYCLE.h = (DAYCYCLE.h + dt * (24 / 160)) % 24;   // 160 秒一昼夜
     applyDayPhase(DAYCYCLE.h);
@@ -3163,12 +3192,11 @@
   }
 
   // ---------- D. 开场推近镜头 ----------
-  const INTRO = { active: false, t0: 0, dur: 3200, from: null, to: null };
+  const INTRO = { active: false, t0: 0, dur: 620, from: null, to: null };
   function startIntroCinematic() {
     if (!camera || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     INTRO.to = camera.position.clone();
-    INTRO.from = INTRO.to.clone().multiplyScalar(2.4).add(
-      new THREE.Vector3(0, INTRO.to.y * 0.9, 0));
+    INTRO.from = INTRO.to.clone().lerp(overviewTarget,-.16);
     INTRO.t0 = performance.now();
     INTRO.active = true;
   }
@@ -3177,7 +3205,7 @@
     const a = Math.min(1, (performance.now() - INTRO.t0) / INTRO.dur);
     const e = 1 - Math.pow(1 - a, 3);   // easeOutCubic
     camera.position.lerpVectors(INTRO.from, INTRO.to, e);
-    camera.lookAt(0, 0, 0);
+    camera.lookAt(overviewTarget);
     if (a >= 1) INTRO.active = false;
   }
   window.addEventListener('pointerdown', () => { INTRO.active = false; }, { once: false });

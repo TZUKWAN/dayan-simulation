@@ -7,7 +7,7 @@
   const finite=Number.isFinite;
   const source = new Map();
   let initialized=false, userSelection=false, loading=null, mainChart=null, activeRows=[], activeMetric='', activeUnit='', cursor=null;
-  let pair=null;
+  let pair=null, observationTimes=[];
   function observationRuns(record) {
     if(record.kind==='run')return [{...record,label:record.model_id}];
     if(record.kind==='experiment'){
@@ -66,7 +66,9 @@
   }
   const cohort = r=>r.model_id+' · '+period(r);
   function allRows() {
-    return [...source.values()].flatMap(({record,runs})=>runs.map(run=>({...run,origin_id:record.run_id,declared_window:record.experiment_spec?.analysis_window,scan_param:record.analysis?.param})));
+    return [...source.values()].flatMap(({record,runs})=>runs.map(run=>({...run,origin_id:record.run_id,
+      declared_window:record.experiment_spec?.analysis_window,declared_metric:record.experiment_spec?.primary_metric||record.analysis?.metric,
+      scan_param:record.analysis?.param})));
   }
   function selectedRows() {
     const key=$('#analyticsCohort').value;
@@ -86,7 +88,7 @@
   function selectDetails(reset=false) {
     const rows=selectedRows();
     const fields=available(rows);
-    const first=rows[0], preferred=window.DAYAN_RESULTS?.metric || first?.manifest?.output_contract?.primary_metric;
+    const first=rows[0], preferred=first?.declared_metric||first?.manifest?.output_contract?.primary_metric||window.DAYAN_RESULTS?.metric;
     if(reset) $('#analyticsMetric').value='';
     setOptions($('#analyticsMetric'),fields,preferred);
     const time=rows.flatMap(r=>r.observations.map(o=>o.sim_t).filter(finite));
@@ -126,6 +128,15 @@
   }
   function updateCursor(value, moveChart=false) {
     if(!finite(value))return;
+    if(observationTimes.length){
+      let lo=0,hi=observationTimes.length-1;
+      while(lo<hi){
+        const mid=(lo+hi)>>>1;
+        if(observationTimes[mid]<value)lo=mid+1;else hi=mid;
+      }
+      const before=observationTimes[Math.max(0,lo-1)], after=observationTimes[lo];
+      value=Math.abs(before-value)<=Math.abs(after-value)?before:after;
+    }
     cursor=value;
     $('#analyticsCursor').value=String(value);
     write('#cursorAt',nfmt(value));
@@ -157,6 +168,7 @@
     const windowed=included.map(r=>({...r,window:r.observations.filter(o=>finite(o.sim_t)&&o.sim_t>=start&&o.sim_t<=end)}));
     const samples=windowed.flatMap(r=>r.window.map(o=>o[metric])).filter(finite),missing=windowed.reduce((n,r)=>n+r.window.filter(o=>!finite(o[metric])).length,0);
     activeRows=windowed;activeMetric=metric;activeUnit=unit;
+    observationTimes=[...new Set(windowed.flatMap(r=>r.window.map(o=>o.sim_t)))].sort((a,b)=>a-b);
     if(!samples.length){write('#analyticsStatus','所选时间窗没有有限观测。');panelsEmpty();return;}
     $('#analyticsFacts').innerHTML=[
       ['对照运行',included.length,rows[0].model_id],['有效观测',samples.length,'全部已选运行'],['缺失观测',missing,'保留空值'],['窗口极值',range(samples).map(nfmt).join(' — '),unit]
@@ -170,8 +182,9 @@
       cursor:Math.min(end,Math.max(start,cursor??end)),onHover:t=>updateCursor(t)});
     const first=windowed.find(r=>r.window.some(o=>finite(o[metric])));
     const d=distribution(first.window.map(o=>o[metric]));
-    plot($('#analyticsDistribution'),{title:label+'频数分布',xUnit:unit,yUnit:'观测数',zero:true,series:[{label:first.label,points:d.counts,kind:'bars',barHalfWidth:d.width*.44}]});
-    plot($('#analyticsDensity'),{title:label+'核密度',xUnit:unit,yUnit:`密度 / ${unit}`,zero:true,empty:'观测恒定，无法估计正带宽。',series:[{label:first.label,points:d.density,kind:'area',color:colors[1]}],
+    plot($('#analyticsDistribution'),{title:label+'频数分布',xUnit:unit,yUnit:'观测数',zero:true,height:180,xRange:d.domain,xTicks:d.ticks,
+      series:[{label:first.label,points:d.counts,kind:'bars',barHalfWidth:d.width*.44}]});
+    plot($('#analyticsDensity'),{title:label+'核密度',xUnit:unit,yUnit:`密度 / ${unit}`,zero:true,height:180,empty:'观测恒定，无法估计正带宽。',series:[{label:first.label,points:d.density,kind:'area',color:colors[1]}],
       note:'描述性分布 · 带宽 '+nfmt(d.bandwidth)+' '+unit});
     const boxGroups=windowed.slice(0,12).map((r,i)=>{
       const a=r.window.map(o=>o[metric]).filter(finite).sort((x,y)=>x-y);

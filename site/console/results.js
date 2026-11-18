@@ -32,11 +32,11 @@
                   rate:1, playing:false, metric:null, stream:null, payload:null, events:[], lastWall:null,
                   loop:false,followEntity:false,windowMode:'all',customWindow:null,entityId:'',entityField:'',distributionField:'',context:{},question:''};
   const controller = window.DAYAN_RESULTS = Object.assign(state, {});
-  let lastPaint = 0, requestRevision = 0, controls = [];
+  let lastPaint = 0, requestRevision = 0, pendingRestore = null, datasetRevision = 0, controls = [];
 
   function notice(text) { if (window.DAYAN_NOTICE) DAYAN_NOTICE(text); else message(text); }
   function modal(title, html) { if (window.DAYAN_MODAL) DAYAN_MODAL(title, html); }
-  function setPlaying(value) {
+  function setPlaying(value, repaint=true) {
     if (value && state.time >= state.end && state.end > state.start) state.time = state.start;
     state.playing = Boolean(value && state.runs.length && state.end > state.start);
     state.lastWall = null;
@@ -47,7 +47,7 @@
     const tiny=$(".tiny-live");if(tiny)tiny.innerHTML='<i class="dot"></i>'+(state.playing?(state.runs[state.selected]?.run_id?"已保存状态回放中":"观测回放中"):"回放已暂停");
     if (window.DAYAN3D) state.playing ? DAYAN3D.resume() : DAYAN3D.pause();
     if (state.playing) window.DAYAN_SCHEDULE_TICK?.();
-    if(!state.playing){paint();window.DAYAN3D?.renderAt?.(state.time);}
+    if(!state.playing&&repaint){paint();window.DAYAN3D?.renderAt?.(state.time);}
   }
   function seek(t) {
     state.time = Math.min(state.end, Math.max(state.start, Number(t)));
@@ -84,6 +84,7 @@
     const legend=state.runs.map((r,i)=>`<span><i style="background:${DAYAN_ANALYSIS.colorFor(state,r,i)}"></i>${esc(r.label+(r.observations.some(o=>finite(o[state.metric]))?'':'（无该指标）'))}</span>`).join('');
     if($('#obsLegend').innerHTML!==legend)$('#obsLegend').innerHTML=legend;
     $('#trackAgent').disabled=!entities.length;
+    $('#sceneProcess').disabled=!(state.stream?.frames?.length>1&&state.stream.provenance==='entity');
     const layers = {flow:true,heat:entities.some(e=>finite(e.x)&&finite(e.y)),network:!!frame?.relations?.length,
       trajectory:state.time>state.start&&!!state.entityId&&entities.some(e=>String(e.id)===String(state.entityId)&&finite(e.x)&&finite(e.y))};
     for(const button of document.querySelectorAll('[data-layer]')) button.disabled=!layers[button.dataset.layer];
@@ -139,10 +140,11 @@
   }
 
   async function select(index,options={}) {
-    const revision=++requestRevision,selected=Number(index),run=state.runs[selected];
-    if(!run)return;const previousTime=state.time,previousPlaying=state.playing;setPlaying(false);
+    const revision=options.revision??++requestRevision,selected=Number(index),run=state.runs[selected];
+    if(!run)return false;const previousTime=state.time,previousPlaying=state.playing;
+    if(!options.fresh)setPlaying(false);
     const pack=run.stream||(run.run_id?await api(`/api/runs/${encodeURIComponent(run.run_id)}/state?sample_every=1`):observationOnlyStream(run));
-    if(revision!==requestRevision)return;
+    if(revision!==requestRevision)return false;
     if(pack&&run.run_id&&pack.run_id!==run.run_id)throw new Error('动画运行标识与结果不一致，已停止显示');
     state.selected=selected;state.stream=pack;state.followEntity=false;
     state.events=DAYAN_ANALYSIS.savedEvents(pack);state.eventPaintKey=null;
@@ -154,12 +156,13 @@
     state.metric=metrics.includes(state.metric)?state.metric:(['flux','I','I_total','gini','evacuated','k'].find(k=>metrics.includes(k))||metrics[0]);
     if(options.fresh){state.windowMode=DAYAN_ANALYSIS.interventionTime(state)!==null?'post':'all';state.customWindow=null;state.entityId='';state.entityField='';state.distributionField='';}
     if(options.fresh&&pack?.frames?.[0]?.entities?.length){const first=pack.frames[0].entities[0];state.entityId=String(first.id);state.entityField=finite(first.speed)?'speed':finite(first.x)?'x':'';}
-    renderSelectors(metrics);await configurePolicies();if(revision!==requestRevision)return;paint();
+    renderSelectors(metrics);await configurePolicies();if(revision!==requestRevision)return false;paint();
     if(window.DAYAN3D?.renderAt)DAYAN3D.renderAt(state.time);
     if(options.fresh&&state.entityId)window.DAYAN3D?.selectEntity(state.entityId);
-    setPlaying(options.fresh?true:previousPlaying);
+    setPlaying(options.fresh?options.play!==false:previousPlaying);
     updateActions();
     window.dispatchEvent(new CustomEvent('dayan:result',{detail:run.run_id}));
+    return true;
   }
   function selectLayer(mode,render=true) {
     if (render) window.DAYAN3D?.setLayer(mode);
@@ -182,9 +185,8 @@
     if(tool==="compose")return(p.stages||[]).map((r,i)=>({...r,label:`阶段${i+1} · ${r.model_id}`}));
     return(p.runs||[]).map(r=>({...r,label:tool==="sweep"?`${p.param}=${r.value}`:tool==="ensemble"?`seed=${r.seed}`:r.model_id}));
   }
-  async function showResult(tool,p,context={}) {
-    if(p.run_id&&globalThis.DAYAN_STUDY?.run_id&&p.run_id!==globalThis.DAYAN_STUDY.run_id)globalThis.DAYAN_RESEARCH?.clearContext();
-    if(p.archive_only){const id=p.experiment_id||p.analysis_id||p.run_id;if(id){await restore(id);if(context.question){state.question=context.question;$('#researchQuestion').textContent=context.question;$('#scenarioTitle').textContent=context.question.slice(0,70);}return true;}if(p.dataset_id){navigate('data');await openDataManager(p.dataset_id);return true;}return false;}
+  async function showResult(tool,p,context={},revision=++requestRevision) {
+    if(p.archive_only){const id=p.experiment_id||p.analysis_id||p.run_id;if(id){const restored=await restore(id);if(restored&&context.question){state.question=context.question;$('#researchQuestion').textContent=context.question;$('#scenarioTitle').textContent=context.question.slice(0,70);}return restored;}if(p.dataset_id){state.datasetFocus=p.dataset_id;await navigate('data');return true;}return false;}
     if(tool==='explain')return false;
     if(tool==='build_model'&&p.result_kind==='ensemble')tool='ensemble';
     if(tool==="collect_data"||tool==="analyze_data"){
@@ -198,6 +200,9 @@
       if(pack.run_id!==runs[0].run_id)throw new Error('动画运行标识与结果不一致');
       runs[0].stream=pack;runs[0].observations=pack.observations;runs[0].manifest=pack.manifest;
     }
+    if(revision!==requestRevision)return false;
+    if(globalThis.DAYAN_STUDY?.run_id&&runs[0].run_id!==globalThis.DAYAN_STUDY.run_id)globalThis.DAYAN_RESEARCH?.clearContext();
+    setPlaying(false);
     state.active=true;state.kind=tool;state.payload=p;state.runs=runs;state.metric=p.primary_metric||p.analysis?.metric||null;
     window._chartMode=tool;window._dashModel=true;document.body.classList.add("model-results-active");
     document.querySelectorAll(".weather").forEach(el=>el.style.display="none");
@@ -210,7 +215,9 @@
     $("#researchQuestion").textContent=state.question||"当前为已保存模型的实际运行；可通过 AI 助手继续描述研究问题。";
     if(context.question)$("#scenarioTitle").textContent=context.question.length>70?context.question.slice(0,70)+"…":context.question;
     const code=$(".scenario-strip .code");if(code)code.textContent=(p.experiment_id?"EXPERIMENT":"RESEARCH")+" / "+(p.model_id||runs[0].model_id);
-    navigate("overview");await select(0,{fresh:true});addDownloadLinks(p,runs[0],context);return true;
+    navigate("overview");
+    if(!await select(0,{fresh:true,play:!context.replaying,revision}))return false;
+    addDownloadLinks(p,runs[0],context);return true;
   }
   function addDownloadLinks() { updateActions(); }
   function setStatus(text,kind='ready') {
@@ -288,13 +295,22 @@
   }
   async function restore(id) {
     const revision=++requestRevision;
-    const record=await api(`/api/runs/${encodeURIComponent(id)}`);
-    if(revision!==requestRevision)return false;
-    if(record.kind==="run")await showResult("run",{...record,state_url:`/api/runs/${id}/state`},{intent:record.intent});
-    else if(record.kind==="analysis")await showResult(record.tool,record.analysis,{intent:record.intent});
-    else {const byArm=record.observations;await showResult("experiment",{...record,experiment_id:record.run_id,observations_by_arm:byArm,observations:(byArm["基线"]||[[]])[0]},{intent:record.intent});}
-    setPlaying(false);navigate("overview");
-    await globalThis.DAYAN_RESEARCH?.associateRun(id);
+    pendingRestore=revision;
+    const current=()=>revision===requestRevision;
+    try{
+      const record=await api(`/api/runs/${encodeURIComponent(id)}`);
+      if(!current())return false;
+      const context={intent:record.intent,replaying:true};
+      let shown;
+      if(record.kind==="run")shown=await showResult("run",{...record,state_url:`/api/runs/${id}/state`},context,revision);
+      else if(record.kind==="analysis")shown=await showResult(record.tool,record.analysis,context,revision);
+      else {const byArm=record.observations;shown=await showResult("experiment",{...record,experiment_id:record.run_id,observations_by_arm:byArm,observations:(byArm["基线"]||[[]])[0]},context,revision);}
+      if(!shown||!current())return false;
+      await globalThis.DAYAN_RESEARCH?.associateRun(id,current);
+      return current();
+    }finally{
+      if(pendingRestore===revision)pendingRestore=null;
+    }
   }
   async function loadReplay() {
     const response=await api("/api/history?limit=30"),el=$("#replayList");if(!el)return;
@@ -388,13 +404,20 @@
   }
   async function openDataManager(focusId=null) {
     const target=$('#dataWorkspace');if(!target)return;
-    target.innerHTML=`<p class="chart-caption">保留原始文件、来源与哈希；导入不自动代表完成现实校准。</p><div class="data-input-row"><label>本地 CSV / JSON / GeoJSON <input id="datasetFile" type="file" accept=".csv,.json,.geojson"></label><button class="ws-button" id="datasetUpload">导入文件</button></div><div class="data-input-row"><input id="datasetUrl" type="url" aria-label="公开HTTPS数据地址" placeholder="公开 HTTPS 数据地址"><select id="datasetFormat" aria-label="数据格式"><option value="json">JSON</option><option value="csv">CSV</option><option value="geojson">GeoJSON</option></select><button class="ws-button" id="datasetFetch">采集数据</button></div><div id="datasetStatus" class="data-status" role="status">正在读取已保存的数据…</div><div id="datasetList"></div><section id="datasetAnalysis"></section>`;
-    const status=text=>{if($('#datasetStatus'))$('#datasetStatus').textContent=text;};let datasets=[];
+    const revision=++datasetRevision;
+    let selectedRevision=0;
+    target.innerHTML=`<div class="data-input-row"><label>本地 CSV / JSON / GeoJSON <input id="datasetFile" type="file" accept=".csv,.json,.geojson"></label><button class="ws-button" id="datasetUpload">导入文件</button></div><div class="data-input-row"><input id="datasetUrl" type="url" aria-label="公开HTTPS数据地址" placeholder="公开 HTTPS 数据地址"><select id="datasetFormat" aria-label="数据格式"><option value="json">JSON</option><option value="csv">CSV</option><option value="geojson">GeoJSON</option></select><button class="ws-button" id="datasetFetch">采集数据</button></div><div id="datasetStatus" class="data-status" role="status">正在读取已保存的数据…</div><div class="data-inspect-grid"><div id="datasetList" aria-label="数据资产"></div><section id="datasetAnalysis" aria-label="数据质量与来源"><p class="space-empty">选择数据资产查看字段、原始来源与映射。</p></section></div>`;
+    const status=text=>{if(revision===datasetRevision)$('#datasetStatus').textContent=text;};let datasets=[];
     async function analyzeDataset(d,path='') {
+      const selection=++selectedRevision;
+      if(revision!==datasetRevision)return;
       status('正在统计完整数据…');
       const result=await api(`/api/datasets/${d.dataset_id}?path=${encodeURIComponent(path)}`);if(result.analysis_error)throw new Error(result.analysis_error);
       const stats=result.analysis,numeric=Object.entries(stats.numeric),run=state.runs[state.selected];
       const contract=run?(await api(`/api/models/contract/${run.model_id}?include_fidelity=false`)).contract:null;
+      if(revision!==datasetRevision||selection!==selectedRevision)return;
+      state.datasetFocus=d.dataset_id;
+      for(const item of $('#datasetList').querySelectorAll('.dataset-row'))item.classList.toggle('selected',item.dataset.assetId===d.dataset_id);
       const box=$('#datasetAnalysis');box.innerHTML=`<h3>${esc(d.name)} · 数据概况</h3><div class="data-quality"><div><span>完整记录数</span><b>${stats.n_rows}</b></div><div><span>字段数</span><b>${stats.fields.length}</b></div><div><span>数值字段数</span><b>${numeric.length}</b></div><div><span>存在缺失的数值字段</span><b>${numeric.filter(([,v])=>v.missing_or_non_numeric>0).length}</b></div></div><h4>数值字段质量</h4><canvas id="datasetQualityChart" class="data-chart" aria-label="各数值字段的缺失或非数值记录数"></canvas><div style="overflow-x:auto"><table class="data-stat-table"><thead><tr><th>字段</th><th>有效数</th><th>缺失/非数值</th><th>最小</th><th>最大</th><th>均值</th></tr></thead><tbody>${stats.fields.map(k=>{const v=stats.numeric[k];return v?`<tr><td>${esc(k)}</td><td>${v.n}</td><td>${v.missing_or_non_numeric}</td><td>${fmt(v.min)}</td><td>${fmt(v.max)}</td><td>${fmt(v.mean)}</td></tr>`:`<tr><td>${esc(k)}</td><td colspan="5">未识别为可统计的数值字段</td></tr>`;}).join('')}</tbody></table></div><p class="chart-caption">缺失与非数值统计以每个字段的完整记录为分母；不静默补值。</p>`;
       DAYAN_ANALYSIS.drawBars($('#datasetQualityChart'),numeric.map(([field,v])=>({label:field,count:v.missing_or_non_numeric})),'#eebb79','缺失/非数值记录数');
       const metadata=d.metadata||{};
@@ -413,9 +436,9 @@
       status('统计已完成，来源为完整导入数据。');
     }
     async function refresh(){
-      datasets=(await api('/api/datasets')).datasets||[];const box=$('#datasetList');if(!box)return;
-      box.innerHTML=datasets.map((d,i)=>`<article class="dataset-row"><div><strong>${esc(d.name)}</strong><p>${esc(d.source)}</p><small>许可 ${esc(d.license||'未提供')} · ${esc(d.dataset_id)}</small><details><summary>文件依据</summary><small>SHA256 ${esc(d.sha256)}</small></details></div><div><label>JSON记录路径 <input data-json-path="${i}" aria-label="${esc(d.name)}的JSON记录路径" placeholder="顶层列表留空" style="width:150px"></label><button class="ws-button" data-analyze-dataset="${i}">查看分析</button> <a class="ws-button" href="${esc(d.data_url)}" download>原始文件</a></div></article>`).join('')||'<p class="data-status">暂无输入数据。导入文件或提供可访问的数据地址后，可检查字段质量和模型映射。</p>';
-      box.querySelectorAll('[data-analyze-dataset]').forEach(button=>button.onclick=async()=>{const i=Number(button.dataset.analyzeDataset);try{await analyzeDataset(datasets[i],box.querySelector(`[data-json-path="${i}"]`).value);}catch(error){status('分析未完成：'+error.message);}});
+      datasets=(await api('/api/datasets')).datasets||[];if(revision!==datasetRevision)return;const box=$('#datasetList');
+      box.innerHTML=datasets.map((d,i)=>`<article class="dataset-row" data-asset-id="${esc(d.dataset_id)}"><div><strong>${esc(d.name)}</strong><small>${esc(d.role)} · ${esc(d.dataset_id)}</small></div><div class="dataset-actions"><button class="ws-button" data-analyze-dataset="${i}">查看分析</button><a class="ws-button" href="${esc(d.data_url)}" download>原始文件</a>${d.format==='csv'?'':`<details><summary>指定 JSON 记录路径</summary><input data-json-path="${i}" aria-label="${esc(d.name)}的JSON记录路径" placeholder="顶层数组时留空"></details>`}</div></article>`).join('')||'<p class="data-status">暂无输入数据。导入文件或提供可访问的数据地址后，可检查字段质量和模型映射。</p>';
+      box.querySelectorAll('[data-analyze-dataset]').forEach(button=>button.onclick=async()=>{const i=Number(button.dataset.analyzeDataset);try{await analyzeDataset(datasets[i],box.querySelector(`[data-json-path="${i}"]`)?.value||'');}catch(error){status('分析未完成：'+error.message);}});
       status(datasets.length?`已保存 ${datasets.length} 个输入数据集。`:'尚未导入数据。');
     }
     $('#datasetUpload').onclick=async()=>{const button=$('#datasetUpload');button.disabled=true;try{
@@ -428,11 +451,13 @@
   }
   Object.assign(controller,{setPlaying,seek,clear,paint,showResult,restore,applyPolicy,loadReplay,openDataManager,select,generateReport,send,pollJob,
     cancelPendingView:()=>{requestRevision++;},
+    hasPendingView:()=>pendingRestore!==null&&pendingRestore===requestRevision,
     addEvent:(type,title,desc)=>{setStatus([title,desc].filter(Boolean).join(' · '));},
     tick(ts){const wasPlaying=state.playing;if(state.lastWall!==null&&state.playing){const next=state.time+(ts-state.lastWall)/1000*state.rate;if(next>=state.end){if(state.loop&&state.end>state.start)state.time=state.start+(next-state.start)%(state.end-state.start);else{state.time=state.end;setPlaying(false);}}else state.time=next;}state.lastWall=ts;if(wasPlaying&&ts-lastPaint>80){paint();lastPaint=ts;}}});
   function boot() {
     DAYAN_ANALYSIS.bind(state,paint,notice);
     $('#loopPlayback').onchange=e=>{state.loop=e.target.checked;};
+    $('#sceneProcess').onclick=()=>window.DAYAN_CHARTS.renderProcess(state);
     $('#resetCamera').onclick=()=>window.DAYAN3D?.resetCamera();
     document.querySelectorAll('[data-workspace-view]').forEach(button=>button.addEventListener('click',()=>{document.body.classList.toggle('view-immersive',button.dataset.workspaceView==='immersive');document.querySelectorAll('[data-workspace-view]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));window.dispatchEvent(new Event('resize'));paint();}));
     document.querySelectorAll('[data-layer]').forEach(button=>button.addEventListener('click',()=>selectLayer(button.dataset.layer)));
@@ -442,7 +467,7 @@
     $("#resumeButton").onclick=resumeDialog;
      $("#dataManagerButton").onclick=()=>{navigate("data");};
     $("#helpButton")?.addEventListener("click",e=>{e.stopImmediatePropagation();modal("研究工作台说明","<p>先描述需求或选择模型。每次计算保存独立run_id，动画、数值、原始数据与报告引用该记录。</p><p>暂停、倍速和时间轴只改变回放，不会重新运行模型。模型干预仅支持合同中声明的可变参数。</p><p>个体状态和汇总示意明确区分；旧记录可能截断，不能冒充完整实验。</p>");},true);
-    const footer=document.querySelector("footer");if(footer){const label=footer.children[1];if(label){label.textContent="正在读取登记运行入口…";api("/api/models/runnable").then(r=>{label.textContent=`${r.count}个登记运行入口（包含原型与方法例题）`;$("#connectionStatus").textContent="本地引擎已连接";}).catch(()=>{label.textContent="后端尚未连接";$("#connectionStatus").textContent="连接未成功";});}}
+    const footer=document.querySelector("footer");if(footer){const label=footer.children[1];if(label){label.textContent="正在读取登记运行入口…";api("/api/models/runnable").then(r=>{label.textContent=`${r.count}个登记运行入口（包含原型与方法例题）`;}).catch(()=>{label.textContent="运行入口暂未读取";});}}
     api("/api/agent/planner_status").then(r=>{const badge=$("#aiDrawer .ai-head b span");if(badge)badge.textContent=["rule","unreachable"].includes(r.planner)||String(r.planner).startsWith("error")?"规则保底":"LLM规划已配置";}).catch(()=>{});
     $("#playButton").addEventListener("click",e=>{e.stopImmediatePropagation();setPlaying(!state.playing);},true);
     $("#resetButton").addEventListener("click",e=>{e.stopImmediatePropagation();setPlaying(false);seek(state.start);},true);
@@ -451,7 +476,12 @@
       const next=rows[at(rows,state.time)+delta];if(!next)return;
       setPlaying(false);seek(next.sim_t);
     };
-    $("#timeline").addEventListener("input",e=>{e.stopImmediatePropagation();setPlaying(false);seek(Number(e.target.value));},true);
+    $("#timeline").addEventListener("input",e=>{
+      e.stopImmediatePropagation();
+      const position=Number(e.currentTarget.value);
+      setPlaying(false,false);
+      seek(position);
+    },true);
     document.querySelectorAll("[data-speed]").forEach(b=>{b.classList.toggle("selected",Number(b.dataset.speed)===state.rate);b.addEventListener("click",e=>{e.stopImmediatePropagation();state.rate=Number(b.dataset.speed);document.querySelectorAll("[data-speed]").forEach(x=>x.classList.toggle("selected",x===b));},true);});
     $("#trackAgent").addEventListener("click",e=>{e.stopImmediatePropagation();$("#entityPanel").scrollIntoView({behavior:'smooth',block:'center'});$("#entitySelect").focus({preventScroll:true});},true);
     $("#snapshotButton").addEventListener("click",e=>{e.stopImmediatePropagation();const r=state.runs[state.selected];if(!r)return notice("没有可保存的运行");const a=JSON.parse(localStorage.getItem("dayan_bookmarks_v3")||"[]");a.push({run_id:r.run_id,sim_t:state.time});localStorage.setItem("dayan_bookmarks_v3",JSON.stringify(a));notice("已保存回放标记；标记不代表可续算检查点");},true);
@@ -461,8 +491,10 @@
     window.DAYAN_APPLY_INTERVENTION=applyPolicy;
     window.DAYAN_HIST_RESTORE=async i=>{const r=window._histEntries?.[i];if(r?.run_id)await restore(r.run_id);};
     clear();updateActions();
-    const recordId=new URLSearchParams(location.search).get("run");const restored=recordId?restore(recordId).catch(error=>{setStatus("未能读取指定研究记录："+error.message,"error");}):Promise.resolve();restored.then(resumePendingJob);
+    const context=new URLSearchParams(location.search),recordId=context.get("run");
+    const restored=recordId?restore(recordId).catch(error=>{setStatus("未能读取指定研究记录："+error.message,"error");}):Promise.resolve();
+    if(context.get('embed')!=='dsh')restored.then(resumePendingJob);
   }
-  function navigate(name){switchPage(name);}
+  function navigate(name){return switchPage(name);}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();

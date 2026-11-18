@@ -30,7 +30,7 @@
     <header class="space-heading"><div><p class="space-kicker">MISSION CONTROL</p><h2>系统总览</h2><p id="missionContext">读取本机研究档案与运行状态</p></div><div class="space-actions"><button class="ws-button" id="refreshMission">刷新视图</button><button class="ws-button ws-primary" data-go="lab">设计研究 <span aria-hidden="true">↗</span></button></div></header>
     <div id="missionStats" class="mission-stats" aria-live="polite">
       <div><span>模型入口</span><strong id="missionModels">—</strong><small id="missionModelNote">目录读取中</small></div>
-      <div><span>输入数据集</span><strong id="missionDatasets">—</strong><small id="missionDataNote">资产读取中</small></div>
+      <div><span>本地数据资产</span><strong id="missionDatasets">—</strong><small id="missionDataNote">资产读取中</small></div>
       <div><span>执行 / 排队</span><strong id="missionJobs">—</strong><small id="missionQueueNote">队列读取中</small></div>
       <div><span>研究规约</span><strong id="missionStudies">—</strong><small id="missionStudiesNote">档案读取中</small></div>
     </div>
@@ -52,7 +52,7 @@
     <section class="kpi-row" aria-label="研究结果摘要"><article class="kpi" hidden></article><article class="kpi" hidden></article><article class="kpi" hidden></article><article class="kpi" hidden></article></section>
     <main class="workspace-grid">
       <section class="panel live-panel">
-        <div class="panel-head scene-head"><div class="scene-caption"><h2><span class="live"><i></i>准备中</span>仿真现场</h2><span id="sceneProvenance">运行后呈现对应模型世界</span></div><div class="view-modes" aria-label="观看方式"><button data-workspace-view="combined" aria-pressed="true">综合研究</button><button data-workspace-view="immersive" aria-pressed="false">沉浸观看</button><button id="resetCamera" aria-label="回到场景总览机位">总览机位</button></div></div>
+        <div class="panel-head scene-head"><div class="scene-caption"><h2><span class="live"><i></i>准备中</span>仿真现场</h2><span id="sceneProvenance">运行后呈现对应模型世界</span></div><div class="view-modes" aria-label="观看方式"><button data-workspace-view="combined" aria-pressed="true">综合研究</button><button data-workspace-view="immersive" aria-pressed="false">沉浸观看</button><button id="sceneProcess" disabled>主体过程</button><button id="resetCamera" aria-label="回到场景总览机位">总览机位</button></div></div>
         <div class="stage-row"><div class="map-viewport" id="mapViewport"><div id="viz3dContainer"></div><div class="scene-vignette"></div>
           <div class="map-top-left"><span class="tiny-live"><i class="dot"></i>等待真实运行</span><strong id="simClock">sim_t=0</strong><p></p></div><div class="scene-status"><span class="micro">无运行</span><span class="tag">3D</span><span id="fps">同源回放</span></div>
           <div id="sceneEmptyState" class="scene-empty"><span class="empty-orbit" aria-hidden="true">◎</span><h2>让一个问题，开始演化</h2><p>生成或选择模型后，在这里观察真实状态与主体行动。</p><div><button class="ws-button ws-primary" onclick="toggleAIDrawer()">描述研究问题</button><button class="ws-button" id="modelButton">选择模型</button></div><small>不自动运行示例，不填入演示结果</small></div>
@@ -86,6 +86,6 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop" id="modalBackdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-heading"><div><span class="micro">RESEARCH WORKSPACE</span><h2 id="modalTitle">研究详情</h2></div><button id="closeModal" aria-label="关闭弹窗">×</button></div><div id="modalBody"></div></section></div>
-<script src="scene-studio.js?v=studio-20261113"></script><script src="viz3d.js?v=studio-20261113"></script><script src="app.js?v=research-20261113"></script><script src="pages.js?v=command-20261113"></script><script src="analysis.js?v=research-20261113"></script><script src="command.js?v=command-20261113"></script><script src="results.js?v=command-20261113"></script>
-<script src="research.js?v=integrity-20261115"></script>
+<script src="scene-studio.js?v=vnext"></script><script src="viz3d.js?v=vnext"></script><script src="app.js?v=research-20261113"></script><script src="pages.js?v=vnext"></script><script src="analysis.js?v=vnext"></script><script src="command.js?v=vnext"></script><script src="results.js?v=vnext"></script>
+<script src="research.js?v=vnext"></script>
 <script src="workbench.js?v=vnext"></script><script src="workbench-charts.js?v=vnext"></script><script src="workbench-analytics.js?v=vnext"></script><script src="workbench-tools.js?v=vnext"></script></body></html>

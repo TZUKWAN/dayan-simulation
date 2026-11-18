@@ -27,7 +27,7 @@ function switchPage(name, remember = true) {
     if (name === "overview") requestAnimationFrame(() => {window.dispatchEvent(new Event("resize"));window.DAYAN_RESULTS?.paint();});
   }
   const task = window.DAYAN_WORKBENCH?.load(name) || loadPageContent(name);
-  Promise.resolve(task).catch(error => window.DAYAN_NOTICE?.(error.message));
+  return Promise.resolve(task).catch(error => window.DAYAN_NOTICE?.(error.message));
 }
 
 /* ---- AI 助手抽屉 ---- */

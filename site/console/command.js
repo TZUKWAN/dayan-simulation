@@ -1,6 +1,8 @@
 /* Command workspace. Every displayed quantity is derived from a saved run. */
 (() => {
   'use strict';
+  const context = new URLSearchParams(location.search);
+  const nativeScope = context.get('embed') === 'dsh' ? context.get('dsh_session') || 'unbound' : null;
   const finite = v => typeof v === 'number' && Number.isFinite(v);
   const numericFields = rows => [...new Set(rows.flatMap(r => Object.keys(r || {})))].filter(k => k !== 'sim_t' && rows.some(r => finite(r[k])));
   function stats(values) {
@@ -49,14 +51,22 @@
   const $=s=>document.querySelector(s), A=()=>window.DAYAN_ANALYSIS;
   const esc=v=>A().esc(v),fmt=v=>A().fmt(v),label=v=>A().label(v);
   const palette=['#4ce0cf','#98abff','#f2c579','#75b9f4','#ee9fba','#a8cc91'];
-  let mode='simple',railTab='ai',lastPaintKey='',historyPromise,analysisCache=null,proRevision=0,lastRunKey=null;
+  let mode='simple',railTab='ai',lastPaintKey='',historyPromise,analysisCache=null,proRevision=0,editRevision=0,lastRunKey=null,lastManualReceipt=null;
   let pro={modelId:'',contract:null,source:null},manualRunning=false;
   async function api(path,body) {
     const r=await fetch(path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const v=await r.json();if(!r.ok||v.ok===false)throw new Error(typeof v.detail==='string'?v.detail:JSON.stringify(v.detail||v.error||'请求失败'));return v;
   }
   function at(rows,t) {let i=0;for(;i+1<rows.length&&(rows[i+1].sim_t??i+1)<=t+1e-9;i++);return i;}
-  function storage(key,value) {try{if(value===undefined)return localStorage.getItem(key);localStorage.setItem(key,value);}catch{}return null;}
+  function storage(key,value) {
+    const storeKey=nativeScope?'dayan_native:'+nativeScope+':'+key:key;
+    try{
+      const store=nativeScope?sessionStorage:localStorage;
+      if(value===undefined)return store.getItem(storeKey);
+      store.setItem(storeKey,value);
+    }catch{}
+    return null;
+  }
   function text(id,value) {const e=$(id);if(e&&e.textContent!==String(value))e.textContent=value;}
   function spark(values,color) {
     const valid=values.filter(finite);if(!valid.length)return '<svg viewBox="0 0 160 30" aria-hidden="true"></svg>';
@@ -155,10 +165,34 @@
     requestAnimationFrame(()=>{window.dispatchEvent(new Event('resize'));window.DAYAN_RESULTS?.paint();paint(window.DAYAN_RESULTS,true);});
   }
   function proError(message) {text('#proStatus',message);$('#proStatus').dataset.state='error';}
+  const draftKey='dayan_pro_draft_vnext:'+(nativeScope||'standalone');
+  const editFields=()=>[...document.querySelectorAll('#proForm [data-model-param],#proTicks,#proDt,#proSeed,#proInterventions,#proBindings,#proCheckpoint')];
+  const fieldKey=e=>e.dataset.modelParam?'param:'+e.dataset.modelParam:e.id;
+  function saveDraft() {
+    if(!pro.contract)return;
+    const fields=Object.fromEntries(editFields().filter(e=>!e.readOnly).map(e=>[fieldKey(e),e.value]));
+    try{sessionStorage.setItem(draftKey,JSON.stringify({model:pro.modelId,run:pro.source?.run_id||null,fields}));}catch{}
+  }
+  function restoreDraft(mid,source){
+    let draft;
+    try{draft=JSON.parse(sessionStorage.getItem(draftKey)||'null');}catch{}
+    if(draft?.model!==mid||draft.run!==(source?.run_id||null))return false;
+    for(const input of editFields()){
+      const value=draft.fields?.[fieldKey(input)];
+      if(!input.readOnly&&typeof value==='string')input.value=value;
+    }
+    return true;
+  }
   async function loadParameters(mid,source=null) {
-    const revision=++proRevision;$('#proRun').disabled=true;text('#proStatus','正在读取真实参数合同…');
+    const revision=++proRevision, editedAtRequest=editRevision;
+    $('#proRun').disabled=true;text('#proStatus','正在读取真实参数合同…');
     try {
       const result=await api('/api/models/contract/'+encodeURIComponent(mid)+'?include_fidelity=false');if(revision!==proRevision)return;
+      if(pro.contract&&editedAtRequest!==editRevision){
+        $('#proModel').value=pro.modelId;$('#proRun').disabled=false;
+        text('#proStatus','已保留刚编辑的 '+pro.modelId+' 参数。点击「读取」可选择另一份合同。');
+        return;
+      }
       pro={modelId:mid,contract:result.contract,source};$('#proModel').value=mid;
       const params=source?.manifest?.actual?.effective_parameters||source?.manifest?.actual?.parameters||{};
       const policies=new Map((result.contract.policies||[]).map(p=>[p.param,p]));
@@ -169,11 +203,17 @@
         return `<label class="parameter-field"><span>${esc(meta.label||label(name))}<small>${esc(name)} · ${esc(meta.type||'JSON')}${meta.unit?' · '+esc(meta.unit):''}</small></span><input data-model-param="${esc(name)}" type="${type}" ${numeric?'step="'+(meta.type==='int'?'1':'any')+'"':''} ${finite(meta.minimum)?'min="'+meta.minimum+'"':''} ${finite(meta.maximum)?'max="'+meta.maximum+'"':''} value="${esc(value)}" ${spec.required?'required':''} aria-label="模型参数 ${esc(name)}"><em>${meta.mutable_at_runtime?'支持运行中干预':'初始化参数'}${finite(meta.minimum)||finite(meta.maximum)?' · '+(meta.minimum??'−∞')+'…'+(meta.maximum??'∞'):''}</em></label>`;
       }).join('')||'<p>该模型未公开构造参数。</p>';
       text('#parameterCount',Object.keys(result.contract.params).length+' 项全部参数');
-      $('#proTicks').value=source?.manifest?.requested?.ticks??100;$('#proDt').value=source?.manifest?.requested?.dt??'';$('#proSeed').value=source?.manifest?.rng?.seed??'';
+      $('#proTicks').value=source?.manifest?.requested?.ticks??100;
+      $('#proDt').value=result.contract.fixed_dt??source?.manifest?.requested?.dt??'';
+      $('#proDt').readOnly=Boolean(result.contract.fixed_dt);
+      $('#proSeed').value=source?.manifest?.rng?.seed??'';
       $('#proCheckpoint').value='';
       $('#proInterventions').value=JSON.stringify((source?.manifest?.interventions||[]).filter(i=>i.applied).map(i=>({at_t:i.requested_t,params:i.params,label:i.label})),null,2);
       $('#proBindings').value=JSON.stringify((source?.manifest?.data_bindings||[]).filter(b=>b.parameter).map(b=>Object.fromEntries(Object.entries(b).filter(([k])=>['dataset_id','path','field','aggregate','parameter','scale','source_unit','target_unit','source_scope','target_scope','filters','order_by'].includes(k)))),null,2);
-      text('#proStatus',source?'已载入当前归档的实际初始配置；编辑后创建独立新运行。':'已读取模型默认合同；更改尚未执行。');$('#proStatus').dataset.state='ready';$('#proRun').disabled=false;
+      const reused=restoreDraft(mid,source);
+      const resultMessage=source?.run_id&&source.run_id===lastManualReceipt?'新运行已真实归档：'+source.run_id:
+        source?'已载入当前归档的实际初始配置；编辑后创建独立新运行。':'已读取模型默认合同；更改尚未执行。';
+      text('#proStatus',reused?'已恢复同一模型配置的未执行草稿。':resultMessage);$('#proStatus').dataset.state='ready';$('#proRun').disabled=false;
     } catch(e) {if(revision===proRevision){pro={modelId:mid,contract:null,source:null};proError('参数合同未取得：'+e.message);}}
   }
   function proRequest() {
@@ -200,6 +240,7 @@
     try {
       const {job_id}=await api('/api/run',{...request,async_job:true});
       const result=await DAYAN_RESULTS.pollJob(job_id,note=>text('#proStatus',note));
+      lastManualReceipt=result.run_id;
       await DAYAN_RESULTS.showResult('run',result,{intent:'专业模式参数运行',question:`专业参数运行 ${request.model_id}`});
       text('#proStatus','新运行已真实归档：'+result.run_id);
     }
@@ -215,7 +256,7 @@
   async function restoreDefault() {
     try {
       const h=await history(),saved=storage('dayan_last_record_v1'),complete=h.entries.filter(e=>e.complete&&e.run_id),chosen=complete.find(e=>e.run_id===saved)||complete[0];
-      if(chosen&&!defaultRestoreCancelled&&!DAYAN_RESULTS.runs.length&&!$('#aiSend').disabled){const restored=await DAYAN_RESULTS.restore(chosen.run_id);if(restored!==false&&!defaultRestoreCancelled)text('#workspaceStatus','已恢复最近保存的归档；当前为暂停回放，未启动新计算。');}
+      if(chosen&&!defaultRestoreCancelled&&!DAYAN_RESULTS.hasPendingView()&&!DAYAN_RESULTS.runs.length&&!$('#aiSend').disabled){const restored=await DAYAN_RESULTS.restore(chosen.run_id);if(restored&&!defaultRestoreCancelled)text('#workspaceStatus','已恢复最近保存的归档；当前为暂停回放，未启动新计算。');}
     }catch(e){text('#workspaceStatus','未能恢复最近记录：'+e.message+'；可直接向AI描述新任务。');}
   }
   async function recentRecords() {
@@ -269,7 +310,8 @@
     window.toggleAIDrawer=()=>{if(document.body.dataset.page!=='overview')window.switchPage?.('overview');selectRail('ai');$('#aiInput').focus({preventScroll:true});if(innerWidth<1000)rail.scrollIntoView({block:'start'});};
     $('#proLoad').onclick=()=>{manualIntent();return loadParameters($('#proModel').value.trim().toUpperCase()).catch(e=>proError(e.message));};
     $('#aiInput').addEventListener('input',manualIntent);
-    $('#proReset').onclick=()=>pro.modelId&&loadParameters(pro.modelId);
+    $('#proReset').onclick=()=>{try{sessionStorage.removeItem(draftKey);}catch{}if(pro.modelId)loadParameters(pro.modelId);};
+    $('#proForm').addEventListener('input',e=>{if(e.target.id!=='proModel'){editRevision++;saveDraft();}});
     $('#proForm').onsubmit=e=>{e.preventDefault();executeProfessional();};
     $('#askAboutParameters').onclick=()=>prefill('解释当前模型的参数含义，并建议如何调整来研究不同方案');
     $('#chatDataFile').onchange=async e=>{

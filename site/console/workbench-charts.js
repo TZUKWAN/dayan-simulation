@@ -59,7 +59,8 @@
     }
     const [loX,hiX]=domain(xValues,spec.xRange);
     const [loY,hiY]=domain(spec.zero ? [...yValues,0] : yValues,spec.yRange);
-    const w=650,h=spec.height||274,L=68,R=w-18,T=25,B=h-48;
+    const w=Math.max(320,Math.min(1440,host.clientWidth-22||650));
+    const h=spec.height||260,L=68,R=w-18,T=25,B=h-48;
     const x=v=>L+(v-loX)/(hiX-loX)*(R-L),y=v=>B-(v-loY)/(hiY-loY)*(B-T);
     const xTicks=spec.xTicks || Array.from({length:6},(_,i)=>[loX+i*(hiX-loX)/5,nfmt(loX+i*(hiX-loX)/5)]);
     const yTicks=Array.from({length:5},(_,i)=>loY+i*(hiY-loY)/4);
@@ -147,7 +148,13 @@
     const [min,max]=[sorted[0],sorted.at(-1)], m=mean(sorted);
     const deviation=Math.sqrt(mean(sorted.map(x=>(x-m)**2)));
     const q1=quantile(sorted,.25),q3=quantile(sorted,.75);
-    const span=max-min||1, bins=Math.min(16,Math.max(3,Math.ceil(Math.sqrt(sorted.length)))), step=span/bins;
+    const span=max-min;
+    if(span===0){
+      const width=Math.max(Math.abs(min)*.1,.01);
+      return {counts:[[min,sorted.length,'每条有效观测皆为 '+nfmt(min)]],width,domain:[min-width,min+width],
+        ticks:[[min,nfmt(min)]],sorted,quantiles:[min,q1,quantile(sorted,.5),q3,max],density:[],bandwidth:0};
+    }
+    const bins=Math.min(16,Math.max(3,Math.ceil(Math.sqrt(sorted.length)))), step=span/bins;
     const counts=Array(bins).fill(0);
     for(const val of sorted) counts[Math.min(bins-1,Math.max(0,Math.floor((val-min)/step)))]++;
     const bandwidth = 0.9*Math.min(deviation,(q3-q1)/1.34||deviation)*sorted.length**(-.2);
@@ -155,7 +162,90 @@
       const x=min-bandwidth+i*(max-min+2*bandwidth)/60;
       return [x,mean(sorted.map(v=>Math.exp(-.5*((x-v)/bandwidth)**2)))/(bandwidth*Math.sqrt(2*Math.PI))];
     }):[];
-    return {counts:counts.map((n,i)=>[min+(i+.5)*step,n]),width:step,sorted,quantiles:[min,q1,quantile(sorted,.5),q3,max],density,bandwidth};
+    return {counts:counts.map((n,i)=>[min+(i+.5)*step,n]),width:step,domain:[min,max],sorted,quantiles:[min,q1,quantile(sorted,.5),q3,max],density,bandwidth};
   }
-  window.DAYAN_CHARTS={colors,plot,correlationMatrix,distribution,csv,download,quantile,nfmt,mean,range};
+  function renderProcess(state) {
+    const {frames=[],run_id:runId}=state.stream||{};
+    const typeList=[...new Set(frames.flatMap(f=>(f.entities||[]).map(e=>e.type)))].filter(Boolean);
+    if(!typeList.length){window.DAYAN_NOTICE('当前档案没有可追踪的主体状态。');return;}
+    window.DAYAN_MODAL('主体状态迁移',`<div class="tool-bar"><label>主体类型<select id="processType">${typeList.map(k=>`<option>${esc(k)}</option>`).join('')}</select></label>
+      <label>迁移分界帧<select id="processFrame"></select></label><button class="ws-button" id="exportProcess">状态迁移 CSV</button></div>
+      <p class="space-note">档案 ${esc(runId)} · 只匹配相邻已存帧中的同 ID 主体 · ${frames.length} 帧</p><div class="process-layout"><div id="processArea" class="chart-host"></div><div id="processFlows" class="chart-host"></div></div>`);
+    const type=document.querySelector('#processType'), frame=document.querySelector('#processFrame');
+    const current=Math.max(1,frames.findLastIndex(f=>f.sim_t<=state.time));
+    frame.replaceChildren(...frames.slice(1).map((f,i)=>new Option(`${nfmt(frames[i].sim_t)} → ${nfmt(f.sim_t)}`,i+1)));
+    frame.value=current;
+    const stateName=e=>String(e.state ?? '未记录状态');
+    const collect=f=>(f.entities||[]).filter(e=>e.type===type.value);
+    let exports=[];
+    const draw=()=>{
+      const populations=frames.map(f=>{
+        const counts=new Map();
+        for(const e of collect(f)){const k=stateName(e);counts.set(k,(counts.get(k)||0)+1);}
+        return counts;
+      });
+      const total=new Map();
+      for(const group of populations)for(const [k,v] of group)total.set(k,(total.get(k)||0)+v);
+      const ranking=[...total.keys()].sort((a,b)=>total.get(b)-total.get(a));
+      const categories=ranking.slice(0,7), other=new Set(ranking.slice(7));
+      const set=other.size?[...categories,'其他记录状态']:categories;
+      const stack=Array(frames.length).fill(0);
+      const traces=set.map((category,i)=>({
+        label:category,kind:'area',lower:true,color:colors[i%colors.length],
+        points:frames.map((f,j)=>{
+          const value=i<categories.length?(populations[j].get(category)||0):[...other].reduce((n,k)=>n+(populations[j].get(k)||0),0);
+          const begin=stack[j];stack[j]+=value;
+          return [f.sim_t,stack[j],`此状态 ${value} 个`,begin];
+        }),
+      }));
+      plot(document.querySelector('#processArea'),{title:'各类状态的实际数量',xUnit:frames[0]?.space?.time_unit||'模型时间',yUnit:'模型主体数',zero:true,series:traces,
+        note:'堆叠高度表示全部所选类型主体数。悬停显示各状态的独立计数。'});
+      drawFlow();
+    };
+    function drawFlow() {
+      const host=document.querySelector('#processFlows'), i=Number(frame.value);
+      if(!i||!frames[i]){host.innerHTML=empty('需要两个以上相邻归档帧。');exports=[];return;}
+      const old=new Map(collect(frames[i-1]).map(e=>[String(e.id),stateName(e)]));
+      const links=new Map();
+      for(const ent of collect(frames[i]) ){
+        const key=String(ent.id);if(!old.has(key))continue;
+        const a=old.get(key),b=stateName(ent),label=JSON.stringify([a,b]);
+        links.set(label,(links.get(label)||0)+1);
+      }
+      exports=[...links].map(([label,n])=>[...JSON.parse(label),n]);
+      if(!exports.length){host.innerHTML=empty('相邻帧没有可匹配的主体 ID。');return;}
+      const side=index=>{
+        const counts=new Map();
+        for(const row of exports)counts.set(row[index],(counts.get(row[index])||0)+row[2]);
+        const highest=[...counts].sort((a,b)=>b[1]-a[1]).slice(0,7);
+        const overflow=[...counts].filter(([k])=>!highest.some(([name])=>k===name)).reduce((z,[,v])=>z+v,0);
+        if(overflow)highest.push(['其他记录状态',overflow]);
+        return highest;
+      };
+      const starts=side(0),ends=side(1);
+      const total=exports.reduce((sum,row)=>sum+row[2],0);
+      const scale=141/total, axis=(items)=>{let y=34;return new Map(items.map(([k,v],j)=>{const block={y,height:v*scale,offset:y,idx:j};y+=block.height+7;return [k,block];}));};
+      const x0=138,x1=492, left=axis(starts),right=axis(ends);
+      const paths=exports.map(([a,b,n])=>{
+        const u=left.get(a)||left.get('其他记录状态'),v=right.get(b)||right.get('其他记录状态');
+        const size=n*scale,top=u.offset+size/2,bottom=v.offset+size/2;
+        u.offset+=size;v.offset+=size;
+        return `<path d="M${x0} ${top} C280 ${top} 350 ${bottom} ${x1} ${bottom}" stroke="${colors[u.idx%colors.length]}" stroke-width="${size}" opacity=".53" fill="none"><title>${esc(a+' → '+b+' · '+n+' 主体')}</title></path>`;
+      }).join('');
+      const labels=(rows,x,anchor)=>[...rows].map(([k,v])=>`<text ${textAttr} x="${x}" y="${v.y+v.height/2+4}" text-anchor="${anchor}">${esc(k.length>15?k.slice(0,13)+'…':k)}<title>${esc(k)}</title></text>`).join('');
+      host.innerHTML=`<svg viewBox="0 0 630 260" role="img" aria-label="相邻实际帧的主体状态流向">
+        <rect width="630" height="260" fill="#0d1826"/>${paths}${labels(left,x0-5,'end')}${labels(right,x1+5,'start')}
+        <text ${textAttr} x="${x0}" y="18" text-anchor="end">t=${nfmt(frames[i-1].sim_t)}</text><text ${textAttr} x="${x1}" y="18">t=${nfmt(frames[i].sim_t)}</text></svg>
+        <p class="space-note">流带宽度为匹配的主体数量，总计 ${total}。以鼠标停留核对两端状态。未跨中间缺失帧推断路径。</p>`;
+    }
+    type.oninput=draw;
+    frame.oninput=drawFlow;
+    document.querySelector('#exportProcess').onclick=()=>{
+      const i=Number(frame.value);
+      csv('DAYAN-state-flow.csv',[['run_id','previous_t','next_t','entity_type','previous_state','next_state','agents'],
+        ...exports.map(r=>[runId,frames[i-1].sim_t,frames[i].sim_t,type.value,...r])]);
+    };
+    draw();
+  }
+  window.DAYAN_CHARTS={colors,plot,correlationMatrix,distribution,csv,download,quantile,nfmt,mean,range,renderProcess};
 })();

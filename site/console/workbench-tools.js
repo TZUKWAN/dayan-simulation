@@ -62,7 +62,7 @@
       <div class="space-actions"><button class="ws-button" id="pinModel">加入比较</button><button class="ws-button ws-primary" id="runModelDetail" ${row.has_factory?'':'disabled'}>检查参数并运行 ↗</button></div></section>
       <div class="model-evidence-grid">
         ${panel('机制关系',linkMap(row),'model-map-panel')}
-        ${panel('科学与执行证据',`<dl class="fact-list"><dt>实现级别</dt><dd>${esc(meta.fidelity_zh)}</dd><dt>运行入口</dt><dd>${esc(meta.entry_status)}</dd><dt>机制审查</dt><dd>${esc(meta.reviewed?'与当前实现匹配':meta.review_status==='stale_or_unanchored'?'历史资料待复核':'尚未完成')}</dd><dt>站点校准</dt><dd>以具体研究规约、实测数据和独立测试判定</dd><dt>依据</dt><dd>${esc(meta.basis)}</dd><dt>适用范围 / 假设</dt><dd>${esc(meta.simplifications?.join('；')||'见模型定义与原始文献')}</dd><dt>数据要求</dt><dd>${esc(cfg.join('、')||'构造器与研究设计声明')}</dd><dt>外部依赖</dt><dd>${esc(meta.dependencies?.map(d=>d.type||d.name).join('、')||(meta.requires_external?'需配置语言模型':'无外部服务声明'))}</dd></dl>
+        ${panel('科学与执行证据',`<dl class="fact-list"><dt>实现级别</dt><dd>${esc(meta.fidelity_zh)}</dd><dt>运行入口</dt><dd>${esc(meta.entry_status)}</dd><dt>机制审查</dt><dd>${esc(meta.reviewed?'与当前实现匹配':meta.review_status==='stale_or_unanchored'?'历史资料待复核':'尚未完成')}</dd><dt>站点校准</dt><dd>以具体研究规约、实测数据和独立测试判定</dd><dt>依据</dt><dd>${esc(meta.basis)}</dd><dt>适用范围 / 假设</dt><dd>${esc(meta.simplifications?.join('；')||'见模型定义与原始文献')}</dd><dt>数据要求</dt><dd>${esc(cfg.join('、')||'构造器与研究设计声明')}</dd><dt>依赖状态</dt><dd>${esc((c?.dependencies||meta.dependencies)?.map(d=>d.name+' · '+({requires_configuration:'需配置',configured_not_probed:'已配置，未发出调用',missing_configuration:'缺少配置',invalid_configuration:'配置不可读取',requires_saved_dataset:'需选择归档数据集'}[d.state]||d.state)).join('、')||'本地计算')}</dd></dl>
           ${sources.length?`<div class="tag-row">${sources.join('')}</div>`:''}${meta.evidence?`<p class="space-note">${esc(meta.evidence)}</p>`:''}`)}
       </div>
       ${panel('参数与输入输出合同',(!row.has_factory?empty(row.entry_kind==='software_reference'?'外部软件登记，使用对应软件及所在环境执行。':'无内置执行合同。'):error?empty(error):!c?empty('读取参数合同…'):parametersTable(c.params))+ (fields.length?`<details class="tool-detail"><summary>查看观测输出字段（${fields.length}）</summary><div class="table-scroll"><table class="workbench-table"><thead><tr><th>指标</th><th>类型</th><th>单位</th><th>证据</th></tr></thead><tbody>${fields.map(([key,f])=>`<tr><td>${esc(key)}</td><td>${esc(f.type)}</td><td>${esc(f.unit||'由模型定义')}</td><td>${esc(f.source||row.output_contract.evidence_status||'输出合同')}</td></tr>`).join('')}</tbody></table></div></details>`:'') )}`;
@@ -278,6 +278,7 @@
   }
   async function useCollection(id) {
     lab();switchPage('lab');labTab('calibration');$('#researchPanel').open=true;
+    $('#studyEditor').open=true;
     $('#researchCollection').value=id;
     $('#researchQuestionInput').focus();
   }

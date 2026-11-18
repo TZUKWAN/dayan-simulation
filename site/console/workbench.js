@@ -110,11 +110,11 @@
       const labels = {full:'完整实现',lite:'显式简化',prototype:'原型',method_demo:'方法示例',registered:'仅登记'};
       $('#missionCapability').innerHTML = `<div class="capability-chart" aria-label="按实现级别统计目录条目">
         ${Object.entries(c.fidelity).map(([key,v]) => `<div data-fidelity="${esc(key)}"><span>${esc(labels[key] || key)}</span><div class="capability-bar"><i style="width:${v / Math.max(1,c.total) * 100}%"></i></div><b>${number(v)}</b></div>`).join('')}
-        </div><p class="space-note">当前源码探针通过 ${number(c.probe_passed)} · 外部依赖 ${number(c.probe_skipped_external)} · 无模型工厂 ${number(c.registered_no_factory)}</p>`;
+        </div><p class="space-note">当前源码探针通过 ${number(c.probe_passed)} · 待探针 ${number(c.probe_not_run)} · 模型服务 ${number(c.provider_entries)} · 须绑定数据 ${number(c.dataset_required_entries)} · 软件引用 ${number(c.registered_no_factory)}</p>`;
     }
     if (datasetData && collectionData) {
-      write('#missionDatasets', number(datasetData.datasets.filter(d => d.role === 'input').length));
-      write('#missionDataNote', `${number(datasetData.datasets.length)} 个本地资产 · ${number(collectionData.n_tasks)} 个采集任务`);
+      write('#missionDatasets', number(datasetData.datasets.length));
+      write('#missionDataNote', `${number(datasetData.datasets.filter(d=>d.role==='source_snapshot').length)} 个原始快照 · ${number(collectionData.n_tasks)} 个采集任务`);
     }
     if (studyData) {
       const completed = studyData.studies.filter(s => Boolean(s.calibration));
