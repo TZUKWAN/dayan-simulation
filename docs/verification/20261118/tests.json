@@ -1,0 +1,71 @@
+{
+  "complete_local": {
+    "passed": 507,
+    "skipped": 3,
+    "failed_suites": 0,
+    "suites": 83,
+    "scope": "Behavioral-source freeze before checkout-newline identity normalization; subsequent final-source CI separately records 508 assertions"
+  },
+  "delivered_contracts": {
+    "passed": 47,
+    "skipped": 0,
+    "failed_suites": 0,
+    "suites": [
+      {
+        "suite": "test_assistant_scene_routing",
+        "verdict": "PASS",
+        "passed": 8,
+        "skipped": 0,
+        "duration_s": 8.925
+      },
+      {
+        "suite": "test_catalog_performance",
+        "verdict": "PASS",
+        "passed": 3,
+        "skipped": 0,
+        "duration_s": 1.892
+      },
+      {
+        "suite": "test_dayan_agent",
+        "verdict": "PASS",
+        "passed": 6,
+        "skipped": 0,
+        "duration_s": 5.374
+      },
+      {
+        "suite": "test_dayan_fidelity",
+        "verdict": "PASS",
+        "passed": 27,
+        "skipped": 0,
+        "duration_s": 1.998
+      },
+      {
+        "suite": "test_output_contracts",
+        "verdict": "PASS",
+        "passed": 3,
+        "skipped": 0,
+        "duration_s": 2.529
+      }
+    ]
+  },
+  "commands": [
+    "python tests/run_all.py --output .claude/ci",
+    "python tests/check_sources.py",
+    "python -m pip check",
+    "git diff --exit-code",
+    "python tests/run_all.py --only test_online_sources --online",
+    "python tests/run_all.py --only test_live_llm --llm"
+  ],
+  "online_pipeline": {
+    "executed": true,
+    "passed": 1,
+    "scientific_holdout": "failed_holdout"
+  },
+  "live_llm": {
+    "executed": true,
+    "original_opt_in_test_passed": 1,
+    "additional_architectures": 5,
+    "additional_real_decisions": 10
+  },
+  "method": "No skipped external check is counted as passed. Protocol/security fixtures remain explicitly labelled fixtures."
+}

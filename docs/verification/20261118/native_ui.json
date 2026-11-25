@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "checks": [
+    "native conversation and iframe use reserved project session",
+    "bridge uses isolated authenticated backend",
+    "actual native AI executed requested tool",
+    "same session restores exact study and saved run",
+    "native answer retains Germany and failed validation",
+    "embedded workbench hides second AI chat",
+    "native chat and workbench actually resize",
+    "resizing preserves session and draft",
+    "no uncaught native application errors"
+  ],
+  "errors": [],
+  "session_id": "session-dayan-f501c923-f2c8-49fc-8ca0-2d87451313eb",
+  "study_id": "ST-104262efaab049d5aca5e635",
+  "run_id": "R20261117T201800-fffeb83407084ad3ad4d701e8b465926"
+}

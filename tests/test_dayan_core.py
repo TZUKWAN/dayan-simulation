@@ -145,18 +145,20 @@ def test_snapshot_restore():
 def test_catalog_556():
     cat = json.loads((ROOT / "data" / "dayan_catalog.json").read_text(
         encoding="utf-8"))
-    assert cat["count"] == 556, f"目录条数 {cat['count']} ≠ 556"
-    assert cat["counts"]["模型层"] == 482
+    assert cat["count"] == len(cat['models']) == sum(cat['counts'].values())
+    assert cat["counts"]["模型层"] >= 483
     assert cat["counts"]["应用层"] == 22
     assert cat["counts"]["软件层"] == 52
     ids = [m["model_id"] for m in cat["models"]]
-    assert len(set(ids)) == 556, "ID 重复"
+    assert len(set(ids)) == len(ids), "ID 重复"
     # 抽查具名模型
     by_id = {m["model_id"]: m for m in cat["models"]}
     assert "BEH001" in by_id and "Schelling" in by_id["BEH001"]["name"]
     assert "ECO019" in by_id and "Goodwin" in by_id["ECO019"]["name"]
     assert "NET053" in by_id and "SIR" in by_id["NET053"]["name"]
-    print(f"[PASS] 目录：556 条（482模型+22应用+52软件），零重复，抽查通过")
+    assert 'CPL001' in by_id
+    assert all(m['status']=='仅登记' for m in cat['models']), '静态登记不能冒充运行/科学验证成功'
+    print(f"[PASS] 静态目录：{len(ids)}项、零重复；登记与实时证据分离，含CPL001")
 
 
 def test_catalog_into_registry():

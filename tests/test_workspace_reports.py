@@ -11,7 +11,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 OUT=ROOT/'.claude/ui_implementation_20261113/report_tests'
 os.environ['DAYAN_REPORTS_DIR']=str(OUT)
-from fastapi.testclient import TestClient
+from api_client import local_client as TestClient
 from docx import Document
 from dayan.server import app
 
@@ -39,20 +39,34 @@ class WorkspaceReportTests(unittest.TestCase):
             self.assertEqual(view['entity_metric'],'x')
             self.assertEqual(len(view['run_ids']),4)
             expected=[]
+            means_by_arm={}
             for group in ['基线','干预组']:
                 per_seed=[]
                 for rows in experiment['observations_by_arm'][group]:
                     values=[o['flux'] for o in rows if o['sim_t']>2]
                     self.assertEqual(len(values),40)
                     per_seed.append(sum(values)/len(values))
+                means_by_arm[group]=per_seed
                 expected.append(sum(per_seed)/len(per_seed))
             for actual,wanted in zip(view['groups'],expected):self.assertAlmostEqual(actual['mean'],wanted,places=12)
             self.assertEqual(view['comparisons'][0]['paired_n'],2)
             self.assertAlmostEqual(view['comparisons'][0]['relative'],(expected[1]-expected[0])/expected[0],places=12)
             document=Document(report['path']);text='\n'.join(p.text for p in document.paragraphs)
             self.assertNotIn('fake_metric',text);self.assertNotIn('99999',text)
-            self.assertGreaterEqual(len(document.inline_shapes),5)
-            self.assertEqual({f['kind'] for f in view['figures']},{'comparison_time_series','window_comparison','entity_distribution','road_space_time','selected_entity_trace'})
+            self.assertEqual(len(document.inline_shapes),report['figure_count'])
+            figures={figure['kind']:figure for figure in view['figures']}
+            self.assertEqual(set(figures),{'comparison_time_series','window_comparison','paired_effects',
+                'entity_distribution','road_space_time','selected_entity_trace'})
+            for field in ('n_cars','density'):
+                metric=facts['research_evidence']['metrics'][field]
+                self.assertEqual(metric['minimum'],metric['maximum'])
+            self.assertTrue(all(figure['evidence']['window']==view['window'] for figure in figures.values()))
+            paired=figures['paired_effects']['evidence']['pairs'][0]
+            deltas=[arm-base for base,arm in zip(means_by_arm['基线'],means_by_arm['干预组'])]
+            self.assertEqual(paired['n'],len(deltas))
+            self.assertAlmostEqual(paired['minimum'],min(deltas),places=12)
+            self.assertAlmostEqual(paired['maximum'],max(deltas),places=12)
+            self.assertAlmostEqual(paired['mean'],sum(deltas)/len(deltas),places=12)
             self.assertTrue(all(Path(f['path']).is_file() for f in view['figures']))
             OUT.mkdir(parents=True,exist_ok=True)
             (OUT/'verification.json').write_text(json.dumps({'report':report,'means':expected,'figure_kinds':[f['kind'] for f in view['figures']],'selected_run_id':chosen['run_id']},ensure_ascii=False,indent=2),encoding='utf-8')

@@ -193,7 +193,7 @@ def test_birth_death_mean():
 
 
 def test_poisson_family():
-    """齐次泊松均值匹配；NHPP 稀疏化均值 ≈ ∫λ。"""
+    """齐次泊松基准与非齐次过程的累计强度、采样网格不变性。"""
     p = PoissonProcessModel(lam=2.0)
     p.initialize({}, {}, None, None, np.random.default_rng(0))
     for _ in range(500):
@@ -202,15 +202,23 @@ def test_poisson_family():
     assert abs(o["count"] - o["E"]) / o["E"] < 0.15, \
         f"Poisson N={o['count']} vs λt={o['E']:.1f}"
 
-    nh = NHPPModel(lam0=1.0, alpha=0.5, t_max=4.0)
-    nh.initialize({}, {"t_max": 4.0}, None, None, np.random.default_rng(0))
-    for _ in range(400):
-        nh.step(0, 0.01)
-    on = nh.observe()
-    assert abs(on["count"] - on["E_integral"]) / on["E_integral"] < 0.25, \
-        f"NHPP N={on['count']} vs ∫λ={on['E_integral']:.1f}"
+    expected = 2*np.expm1(2.)
+    counts = []
+    for seed in range(32):
+        outcomes = []
+        for ticks,dt in ((400,.01),(40,.1)):
+            nh = NHPPModel(lam0=1.0, alpha=0.5, t_max=4.0)
+            nh.initialize({}, {"t_max": 4.0}, None, None, np.random.default_rng(seed))
+            for _ in range(ticks):
+                nh.step(0,dt)
+            outcomes.append(nh.observe())
+        assert outcomes[0]["count"]==outcomes[1]["count"], "同种子过程不应依赖观察步长"
+        assert np.isclose(outcomes[0]["E_integral"],expected), "强度积分错误"
+        counts.append(outcomes[0]["count"])
+    average = float(np.mean(counts))
+    assert abs(average-expected)/expected < 0.25, f"NHPP 均值 {average:.2f} vs ∫λ={expected:.2f}"
     print(f"[PASS] 泊松族：N={o['count']}≈{o['E']:.1f}；"
-          f"NHPP {on['count']}≈∫λ={on['E_integral']:.1f}")
+          f"NHPP 32种子均值 {average:.2f}≈∫λ={expected:.2f}，两组观测网格计数一致")
 
 
 def test_sde_family():

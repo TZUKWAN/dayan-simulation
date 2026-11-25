@@ -1,0 +1,530 @@
+{
+  "mission-1920": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "mission",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    }
+  },
+  "command-1920": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "overview",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 381.3500061035156,
+      "y": 326.75,
+      "width": 1149.6500244140625,
+      "height": 577.7833251953125,
+      "top": 326.75,
+      "right": 1531.0000305175781,
+      "bottom": 904.5333251953125,
+      "left": 381.3500061035156
+    }
+  },
+  "command-2560": {
+    "viewport": [
+      2560,
+      1440
+    ],
+    "bodyOverflow": false,
+    "active": "overview",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 462.95001220703125,
+      "y": 380.3500061035156,
+      "width": 1704.3499755859375,
+      "height": 788.0999755859375,
+      "top": 380.3500061035156,
+      "right": 2167.2999877929688,
+      "bottom": 1168.4499816894531,
+      "left": 462.95001220703125
+    }
+  },
+  "immersive": {
+    "viewport": [
+      1298,
+      730
+    ],
+    "bodyOverflow": false,
+    "active": "overview",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 0,
+      "y": 46,
+      "width": 1297.699951171875,
+      "height": 639.5999755859375,
+      "top": 46,
+      "right": 1297.699951171875,
+      "bottom": 685.5999755859375,
+      "left": 0
+    }
+  },
+  "narrow": {
+    "viewport": [
+      940,
+      900
+    ],
+    "bodyOverflow": false,
+    "active": "overview",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 166.9499969482422,
+      "y": 310.54998779296875,
+      "width": 759.6500244140625,
+      "height": 474.8666687011719,
+      "top": 310.54998779296875,
+      "right": 926.6000213623047,
+      "bottom": 785.4166564941406,
+      "left": 166.9499969482422
+    }
+  },
+  "hall": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "overview",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 381.3500061035156,
+      "y": 326.75,
+      "width": 1149.6500244140625,
+      "height": 577.7833251953125,
+      "top": 326.75,
+      "right": 1531.0000305175781,
+      "bottom": 904.5333251953125,
+      "left": 381.3500061035156
+    }
+  },
+  "data": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "data",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    }
+  },
+  "models": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "models",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    }
+  },
+  "lab": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "lab",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    }
+  },
+  "analytics": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "analytics",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    }
+  },
+  "outputs": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "bodyOverflow": false,
+    "active": "replay",
+    "nav": [
+      {
+        "text": "系统总览",
+        "shown": true
+      },
+      {
+        "text": "仿真指挥",
+        "shown": true
+      },
+      {
+        "text": "模型宇宙",
+        "shown": true
+      },
+      {
+        "text": "研究实验室",
+        "shown": true
+      },
+      {
+        "text": "数据中心",
+        "shown": true
+      },
+      {
+        "text": "实验分析",
+        "shown": true
+      },
+      {
+        "text": "研究成果",
+        "shown": true
+      }
+    ],
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0,
+      "left": 0
+    }
+  }
+}

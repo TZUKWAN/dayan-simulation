@@ -1,0 +1,83 @@
+{
+  "mode": "Uninterrupted Playwright Firefox browser recording of scripted user actions",
+  "stages": [
+    {
+      "s": 1.62,
+      "activity": "引擎与真实研究档案载入总览"
+    },
+    {
+      "s": 6.01,
+      "activity": "搜索与操作"
+    },
+    {
+      "s": 9.0,
+      "activity": "模型目录与真实机制关系"
+    },
+    {
+      "s": 14.01,
+      "activity": "高亮关联机制"
+    },
+    {
+      "s": 19.01,
+      "activity": "从归档打开 CPL001"
+    },
+    {
+      "s": 25.01,
+      "activity": "路网镜头与时间轴"
+    },
+    {
+      "s": 31.0,
+      "activity": "主体位置、轨迹和近邻"
+    },
+    {
+      "s": 36.01,
+      "activity": "跟随当前主体并播放真实状态"
+    },
+    {
+      "s": 43.0,
+      "activity": "恢复总览并打开主体密度"
+    },
+    {
+      "s": 48.01,
+      "activity": "专注模式展开场景并保留密度层"
+    },
+    {
+      "s": 54.01,
+      "activity": "从配对实验归档加载分析"
+    },
+    {
+      "s": 62.02,
+      "activity": "拖选时间窗并联动观测"
+    },
+    {
+      "s": 68.01,
+      "activity": "切换曲线图例并打开当时点观测明细"
+    },
+    {
+      "s": 73.01,
+      "activity": "核对加拿大独立留出与报告来源"
+    },
+    {
+      "s": 82.0,
+      "activity": "结束连续录制"
+    }
+  ],
+  "details": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "avg_frame_rate": "25/1"
+      }
+    ],
+    "format": {
+      "duration": "83.160000",
+      "size": "9774453"
+    }
+  },
+  "sha256": "e534d55b5a4bfa1187cb35cf47ca3e91e0b2d515c89141bf60f0bb1b3401960c",
+  "application_errors": []
+}

@@ -17,11 +17,21 @@ function sdkFixture({ own = true, ownRoot = root, actualId = id, openState = 'op
     ...(own ? { [id]: { id, cwd: ownRoot } } : {}) } };
   const listeners = new Set(), calls = [], binding = { session: {
     getSnapshot: () => ({ sessionId: snapshotId, openState }), rename: async title => { calls.push(['rename', title]); } } };
-  const reference = { sessionId: id, ready: Promise.resolve(binding), release: () => calls.push(['release']) };
+  let released = false, currentBinding = binding;
+  const reference = {
+    sessionId: id,
+    ready: Promise.resolve(binding),
+    get binding() {
+      if (released) throw new Error('Session reference is released');
+      return binding;
+    },
+    release() { released = true; calls.push(['release']); },
+  };
   const sessions = { list: { getSnapshot: () => snapshot, subscribe: fn => { listeners.add(fn); return () => listeners.delete(fn); } },
     create: async args => { calls.push(['create', args]); snapshot.byId[id] = { id, cwd: root }; return actualId; },
-    retain: (...args) => { calls.push(['retain', ...args]); return reference; }, binding: () => binding };
-  return { sessions, calls, ready: () => { snapshot = { ...snapshot, phase: 'ready' }; for (const fn of listeners) fn(); } };
+    retain: (...args) => { calls.push(['retain', ...args]); return reference; }, binding: () => currentBinding };
+  return { sessions, calls, invalidate: () => { currentBinding = undefined; },
+    ready: () => { snapshot = { ...snapshot, phase: 'ready' }; for (const fn of listeners) fn(); } };
 }
 
 test('host reservation survives reload and isolates both profile and project', () => {
@@ -51,6 +61,35 @@ test('foreign mainView retention cannot override the reserved project session', 
   assert.equal(bound.sessionId, id);
   assert.deepEqual(fixture.calls.map(c => c[0]), ['retain']);
   assert.equal(fixture.calls[0][1], id);
+});
+
+test('a superseded connection remains live until its provider has unmounted', async () => {
+  const fixture = sdkFixture();
+  const owned = await openProjectConversation({ sessions: fixture.sessions, record, projectRoot: root });
+  assert.equal(owned.isCurrent(), true);
+  const binding = owned.reference.binding;
+  const unmount = owned.hold();
+  owned.retire();
+  await Promise.resolve();
+  assert.equal(owned.isCurrent(), false);
+  assert.equal(owned.reference.binding, binding);
+  unmount();
+  assert.equal(owned.reference.binding, binding);
+  owned.retire();
+  unmount();
+  await Promise.resolve();
+  assert.throws(() => owned.reference.binding, /is released/);
+  assert.equal(fixture.calls.filter(([action]) => action === 'release').length, 1);
+});
+
+test('an invalidated session controller cannot be rendered as a current connection', async () => {
+  const fixture = sdkFixture();
+  const owned = await openProjectConversation({ sessions: fixture.sessions, record, projectRoot: root });
+  fixture.invalidate();
+  assert.equal(owned.isCurrent(), false);
+  owned.retire();
+  await Promise.resolve();
+  assert.equal(fixture.calls.filter(([action]) => action === 'release').length, 1);
 });
 
 test('missing owned session is created with the exact reserved identity', async () => {

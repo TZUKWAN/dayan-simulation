@@ -645,7 +645,8 @@ class _StrategyDuel(DayanModel):
 
     def observe(self):
         return {"score_vs_alld": float(self.my_score),
-                "coop_rate": float(np.mean([m == "C" for m in self.my_hist]))}
+                "coop_rate": float(np.mean([m == "C" for m in self.my_hist])) if self.my_hist else None,
+                'n_rounds':len(self.my_hist)}
 
     def validate_state(self):
         return []
@@ -763,7 +764,7 @@ class _NormSimBase(DayanModel):
 
 
 class SimpleNormModel(_NormSimBase):
-    """BEH075 简单立场规范（image scoring：合作取决于接受者声誉）。"""
+    """BEH075 简单立场规范，评价取决于接受者状态。"""
 
     model_id = "BEH075"
     _norm_name = "simple_standing"
@@ -797,6 +798,48 @@ class ShunningModel(_NormSimBase):
         self.coop_hist.append(1.0 if coop else 0.0)
 
 
+class YoungConventionModel(DayanModel):
+    """BEH081 two-role coordination with limited history and mutations."""
+    model_id="BEH081"
+    clock_type="fixed_step"
+
+    def __init__(self, memory=20, sample=5, epsilon=.02, reward_0=1., reward_1=.9):
+        if not 1<=sample<=memory<=2000 or not 0<=epsilon<=1 or min(reward_0,reward_1)<=0:
+            raise ValueError("样本/记忆大小或协调收益、突变概率非法")
+        self.memory,self.sample,self.epsilon=memory,sample,epsilon
+        self.reward_0,self.reward_1=reward_0,reward_1
+
+    def initialize(self, context, parameters, population, topology, rng):
+        self.rng=rng
+        self.history=rng.integers(0,2,(self.memory,2))
+        self.index=0
+        self.rounds=0
+        self.coordinated=0
+
+    def step(self, t, dt):
+        pair=[]
+        for role in range(2):
+            sample=self.rng.choice(self.memory,self.sample,replace=False)
+            frac=float(np.mean(self.history[sample,1-role]))
+            v0,v1=self.reward_0*(1-frac),self.reward_1*frac
+            if self.rng.random()<self.epsilon or v0==v1:
+                pair.append(int(self.rng.integers(2)))
+            else:
+                pair.append(int(v1>v0))
+        self.history[self.index]=pair
+        self.index=(self.index+1)%self.memory
+        self.rounds+=1
+        self.coordinated+=int(pair[0]==pair[1])
+
+    def observe(self):
+        return {"convention_1_share":float(np.mean(self.history)),
+                "coordination_rate":self.coordinated/self.rounds if self.rounds else None,
+                "rounds":self.rounds}
+
+    def validate_state(self):
+        return []
+
+
 class AxelrodNormCatalogModel(DayanModel):
     """BEH078 Axelrod 规范博弈（game_lib.AxelrodNormGame）。"""
 
@@ -818,8 +861,8 @@ class AxelrodNormCatalogModel(DayanModel):
 
     def observe(self):
         tail = self.venge_hist[-30:]
-        return {"mean_vengeance": float(np.mean(tail)),
-                "norm_evolved": bool(np.mean(tail) > 0.5)}
+        return {"mean_vengeance": float(np.mean(tail)) if tail else None,
+                "norm_evolved": bool(np.mean(tail) > 0.5) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []
@@ -846,8 +889,8 @@ class MetaNormModel(DayanModel):
 
     def observe(self):
         tail = self.venge_hist[-30:]
-        return {"mean_vengeance": float(np.mean(tail)),
-                "meta_norm_stronger": bool(np.mean(tail) > 0.5)}
+        return {"mean_vengeance": float(np.mean(tail)) if tail else None,
+                "meta_norm_stronger": bool(np.mean(tail) > 0.5) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []
@@ -963,9 +1006,9 @@ class ElFarolModel(DayanModel):
 
     def observe(self):
         tail = self.history[-50:]
-        return {"mean_attendance": float(np.mean(tail)),
+        return {"mean_attendance": float(np.mean(tail)) if tail else None,
                 "att_near_threshold": bool(abs(np.mean(tail) - self.threshold)
-                                           < 0.15)}
+                                           < 0.15) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []
@@ -997,8 +1040,8 @@ class MinorityGameModel(DayanModel):
 
     def observe(self):
         tail = self.att_hist[-50:]
-        return {"mean_ones_share": float(np.mean(tail)),
-                "near_half": bool(abs(np.mean(tail) - 0.5) < 0.12)}
+        return {"mean_ones_share": float(np.mean(tail)) if tail else None,
+                "near_half": bool(abs(np.mean(tail) - 0.5) < 0.12) if tail else None,'n_samples':len(tail)}
 
     def validate_state(self):
         return []

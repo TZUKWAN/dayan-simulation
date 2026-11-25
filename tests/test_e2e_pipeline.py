@@ -1,115 +1,62 @@
-"""端到端链路验收：自然语言→规约→采集→质检→校准→留出→政策→报告。
-
-验证的是「全链路真的通了」，不是逐组件独立正确。"""
-from __future__ import annotations
-
+"""Offline data -> actual model -> paired experiment -> calibration/archive checks.
+Inputs are explicitly generated unit fixtures, never claimed as empirical evidence.
+The live collection/research/report chain is in test_online_sources.
+"""
 import json
+import os
 import sys
+import tempfile
+import unittest
 from pathlib import Path
+from unittest.mock import patch
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from dayan import datasets
+from dayan.runtime import run_model_full
+from dayan.run_store import get_store
+from dayan.research.specs import ExperimentSpec
+from dayan.research.experiment import run_experiment
+from dayan.research.quality import check_quality,check_role_leakage
+from dayan.research.calibration import grid_search_calibrate,time_split
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+class OfflinePipeline(unittest.TestCase):
+    def test_fixture_data_drives_model_paired_experiment_and_archive(self):
+        with tempfile.TemporaryDirectory() as td,patch.dict(os.environ,{'DAYAN_DATA_DIR':td}):
+            source=b'density\n0.2\n0.4\n'
+            ds=datasets.ingest(source,name='synthetic density fixture',format='csv',source='unit-fixture; not empirical')
+            binding={'dataset_id':ds['dataset_id'],'field':'density','aggregate':'mean','parameter':'density'}
+            ref=run_model_full('NET106',parameters={'cells':100,'density':.3},ticks=12,dt=1,seed=7,capture_state=True)
+            actual=run_model_full('NET106',parameters={'cells':100},data_bindings=[binding],ticks=12,dt=1,seed=7,capture_state=True)
+            self.assertEqual(actual.observations,ref.observations)
+            self.assertEqual(actual.manifest['data_bindings'][0]['sha256'],ds['sha256'])
+            get_store().save_run(actual,'run','offline unit fixture')
+            saved=get_store().load(actual.manifest['run_id'])
+            self.assertEqual(saved['observations'],actual.observations)
+            self.assertEqual(saved['state_frames'],actual.state_frames)
+            spec=ExperimentSpec(model_id='NET106',ticks=12,dt=1,seeds=[7,8],primary_metric='flux',
+                baseline_params={'cells':100},data_bindings=[binding],
+                arms=[{'label':'slowdown','params':{'p':.8}}]).finalize()
+            result=run_experiment(spec)
+            self.assertTrue(result.ok,result.analysis)
+            self.assertEqual(len(result.runs),4)
+            for run in result.runs:
+                self.assertAlmostEqual(run['manifest']['actual']['effective_parameters']['density'],.3,places=14)
+    def test_actual_model_output_calibration_and_disjoint_holdout(self):
+        ref=run_model_full('NET052',parameters={'beta':.4},ticks=8,dt=1,seed=7)
+        rows=[{'date':int(r['sim_t']),'value':r['I'],'unit':'model_population'} for r in ref.observations]
+        quality=check_quality(rows,variable_name='I',unit='model_population',frequency='model_step')
+        self.assertEqual(quality['status'],'pass')
+        train,hold=time_split(rows,holdout_years=2)
+        leak=check_role_leakage(['fixture'],['fixture'],train,hold)
+        self.assertTrue(leak['verified']);self.assertFalse(leak['has_leakage'])
+        def predict(p,dates):
+            run=run_model_full('NET052',parameters=p,ticks=int(max(dates)),dt=1,seed=7)
+            by_time={int(r['sim_t']):r['I'] for r in run.observations}
+            return [by_time[int(t)] for t in dates]
+        fitted=grid_search_calibrate(model_fn=predict,param_grid={'beta':[.2,.4,.6]},
+            observations=train,holdout_observations=hold,tolerance=1e-10)
+        self.assertEqual(fitted['status'],'pass')
+        self.assertEqual(fitted['best_params'],{'beta':.4})
+        self.assertEqual(fitted['holdout']['dates'],[7.,8.])
+        self.assertEqual(len(fitted['evaluations']),3)
 
-from dayan.agent.data_tools import (build_data_requirement,              # noqa: E402
-                                     build_collection_plan, execute_plan,
-                                     check_data_quality, calibrate_model)
-from dayan.collection import engine                                      # noqa: E402
-from dayan.research.calibration import time_split                        # noqa: E402
-from dayan.research.quality import check_role_leakage, clean_transform   # noqa: E402
-from dayan.research.report_academic import generate_academic_report      # noqa: E402
-
-
-def run_tests():
-    passed, failed = 0, 0
-
-    def check(name, cond, detail=""):
-        nonlocal passed, failed
-        if cond:
-            passed += 1
-            print(f"[PASS] {name}")
-        else:
-            failed += 1
-            print(f"[FAIL] {name} {detail}")
-
-    # ---- 1. 构建规约 ----
-    r = build_data_requirement(
-        question="E2E: 中国人口趋势指数模型",
-        variables=[{"name": "pop_total", "concept": "人口总量", "unit": "人",
-                     "purpose": "calibration", "geo_level": "national",
-                     "time_range": "2018:2022", "min_records": 3}],
-        geo_scope="中国", time_scope="2018:2022")
-    check("E2E-1: DR构建通过", r["ok"] and not r["payload"]["issues"])
-    req = r["payload"]["requirement"]
-
-    # ---- 2. 自动生成采集计划 ----
-    plan = build_collection_plan(req)
-    plan_data = plan["payload"]["plan"]
-    check("E2E-2: 采集计划自动生成", plan_data["plan_id"].startswith("CP-") and
-          len(plan_data["steps"]) >= 1 and
-          plan_data["steps"][0]["connector"] != "(无匹配路由)")
-
-    # ---- 3. 修改参数指向校准段并执行 ----
-    plan_data["steps"][0]["params"]["date"] = "2018:2021"
-    plan_data["steps"][0]["params"]["country"] = "CHN"
-    plan_data["steps"][0]["params"]["per_page"] = 20
-    ex = execute_plan(plan_data, page_budget=1)
-    check("E2E-3: 真实采集执行成功",
-          ex["ok"] and ex["payload"]["summary"]["done"] >= 1 and
-          ex["payload"]["summary"]["total_records"] > 0)
-
-    # ---- 4. 质检 ----
-    records = engine.records_preview(plan_data["steps"][0]["collection_id"], 100)
-    valid = [r for r in records if r.get("country_id") == "CHN" and r.get("value")]
-    q = check_data_quality(valid, variable_name="pop_total", unit="人", min_records=3)
-    check("E2E-4: 质检通过", q["ok"] and q["payload"]["status"] == "pass",
-          f"status={q.get('payload', {}).get('status')}")
-
-    # ---- 5. 清洗 + 切分 ----
-    valid_sorted = sorted(valid, key=lambda r: int(r["date"]))
-    cleaned, clean_log = clean_transform(valid_sorted, [{"op": "drop_missing_value"}])
-    cal, hold = time_split(cleaned, holdout_years=1, time_field="date")
-    check("E2E-5: 清洗+切分有数据", len(cal) >= 2 and len(hold) >= 1,
-          f"cal={len(cal)} hold={len(hold)}")
-
-    # ---- 6. 泄漏检查 ----
-    leak = check_role_leakage([r["date"] for r in cal], [r["date"] for r in hold])
-    check("E2E-6: 无泄漏", not leak["has_leakage"])
-
-    # ---- 7. 校准+留出 ----
-    model_fn = "lambda params, years: [params['K'] / (1 + math.exp(-params['r'] * (y - params['t_mid']))) for y in years]"
-    grid = {"K": [1414000000, 1415000000],
-             "r": [0.3, 0.5, 0.7],
-             "t_mid": [2008, 2010, 2012]}
-    cal_rec = [{"date": r["date"], "value": r["value"]} for r in cal if r.get("value")]
-    hold_rec = [{"date": r["date"], "value": r["value"]} for r in hold if r.get("value")]
-    cr = calibrate_model(model_fn, grid, cal_rec, holdout_records=hold_rec,
-                         tolerance=2000000, calibration_name="E2E_Logistic")
-    check("E2E-7: 校准通过（有真实RMSE改善）",
-          cr["ok"] and cr["payload"]["status"] == "pass" and
-          cr["payload"]["improvement_vs_baseline"] is not None and
-          cr["payload"]["improvement_vs_baseline"] > 0,
-          f"loss={cr.get('payload', {}).get('best_loss')} "
-          f"improve={cr.get('payload', {}).get('improvement_vs_baseline')}")
-
-    # ---- 8. 报告生成 ----
-    uc_data = {"requirement": req, "calibration": cr["payload"],
-               "n_records_used": len(cleaned),
-               "plan": plan_data}
-    report_path = generate_academic_report(uc_data)
-    report_text = Path(report_path).read_text(encoding="utf-8")
-    check("E2E-8: 学术报告生成（含校准/留出/局限）",
-          "RMSE" in report_text and "留出" in report_text and "局限" in report_text)
-
-    # ---- 9. 复现证据在盘 ----
-    task = engine.get_task(plan_data["steps"][0]["collection_id"])
-    check("E2E-9: 原始快照在盘可复核",
-          task is not None and len(task.get("pages", [])) >= 1 and
-          all(Path(ROOT / "data" / "collections" / p["raw"]).exists()
-              for p in task["pages"]))
-
-    print(f"\n端到端: {passed}/{passed + failed} 步通过")
-    return 1 if failed else 0
-
-
-if __name__ == "__main__":
-    sys.exit(run_tests())
+if __name__=='__main__':unittest.main(verbosity=2)

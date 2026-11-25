@@ -1,6 +1,6 @@
 """DAYAN 行人家族（目录 NET113–NET120）。
 
-社会力族：Helbing–Molnár 社会力 / 含接触摩擦疏散 / 广义离心力
+社会力族：Helbing–Molnár 社会力 / 含接触排斥疏散 / 广义离心力
 速度障碍族：VO / RVO / ORCA
 元胞与步长：静态—动态地板场 CA / 最优步长 OSM
 
@@ -169,8 +169,7 @@ class SocialForceModel(_PedBase):
 
 
 class ContactEvacModel(SocialForceModel):
-    """NET114 含身体接触与摩擦的疏散社会力：重叠时加接触推挤+摩擦。
-    基准：出口处无穿透（重叠深度受接触力约束）、完成疏散。"""
+    """NET114 疏散社会力，带基于几何重叠的法向接触排斥项。"""
 
     model_id = "NET114"
 

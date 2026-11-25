@@ -18,6 +18,7 @@ class CognitiveSimulation:
     clock_type = "fixed_step"
     time_unit = "abstract model time"
     requires_external = True
+    external_dependencies = ("language_model",)
     declared_observables = ["n_agents", "n_memories", "n_reflections", "llm_calls", "actions_executed", "mean_energy", "resources", "hazard", "objective"]
     cognitive_mode = "memory-reflection-plan"
     implementation_note = "真实LLM调用与模拟环境行动闭环；简化架构适配，非原论文全量复现；非真实居民数据"
@@ -63,7 +64,7 @@ class CognitiveSimulation:
                   "Concordia裁决模式另返回allowed布尔值，程序只执行通过裁决且满足资源约束的动作。")
         raw = complete([{"role": "system", "content": prompt},
                         {"role": "user", "content": json.dumps(context, ensure_ascii=False)}],
-                       max_tokens=4096, timeout=60, purpose=self.model_id + ":" + self.cognitive_mode,
+                       timeout=180, purpose=self.model_id + ":" + self.cognitive_mode,
                        audit=self.llm_audit)
         decision = json_object(raw)
         if decision.get("action") not in ("rest", "work", "help", "share", "move"):

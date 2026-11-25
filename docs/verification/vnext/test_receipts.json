@@ -1,0 +1,528 @@
+{
+  "local_offline": {
+    "groups": 85,
+    "passed": 517,
+    "skipped": 3,
+    "failed": 0,
+    "original_named_groups": 83,
+    "suites": [
+      {
+        "name": "test_agent_job_store",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_api_security",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_assistant_scene_routing",
+        "passed": 8,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_benchmarks",
+        "passed": 2,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_catalog_performance",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_civil_violence",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_collection_core",
+        "passed": 2,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_collection_transport",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_coupling_contracts",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_cross_pack",
+        "passed": 1,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_agent",
+        "passed": 6,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_catalog_map",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_core",
+        "passed": 10,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_coupled",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_eco_batch",
+        "passed": 21,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_eco_flagship",
+        "passed": 7,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_engines",
+        "passed": 8,
+        "skipped": 1,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_experiment",
+        "passed": 15,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_families",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_fidelity",
+        "passed": 27,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_final_batch",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_manifest",
+        "passed": 14,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_mechfix",
+        "passed": 21,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_met",
+        "passed": 13,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_met_registry",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_migration",
+        "passed": 1,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_models",
+        "passed": 13,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_net_final16",
+        "passed": 2,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_runtime",
+        "passed": 22,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_scene_state",
+        "passed": 16,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_sys",
+        "passed": 19,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_sys_extras",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_traffic_ped",
+        "passed": 13,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_dayan_wave2",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_defined_statistics",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_e2e_pipeline",
+        "passed": 2,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_game_contract",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_god_bridge",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_kernel_facilities",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_ledger",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_live_llm",
+        "passed": 0,
+        "skipped": 1,
+        "verdict": "SKIP"
+      },
+      {
+        "name": "test_llm_limits",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_media",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_model_probe_all",
+        "passed": 1,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_negative_cases",
+        "passed": 14,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_online_sources",
+        "passed": 0,
+        "skipped": 1,
+        "verdict": "SKIP"
+      },
+      {
+        "name": "test_orglabor",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_output_contracts",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_pipeline",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_platform",
+        "passed": 7,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_politics",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_registry",
+        "passed": 6,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_artifacts",
+        "passed": 7,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_composer",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_coupled_evacuation",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_custom_models",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_datasets",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_execution_inputs",
+        "passed": 16,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_generative",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_parameters",
+        "passed": 6,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_policy_contract",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_report",
+        "passed": 2,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_requirements",
+        "passed": 7,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_resume",
+        "passed": 1,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_repair_same_run",
+        "passed": 6,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_report_fonts",
+        "passed": 2,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_reproducible_bundle",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_research_constraints",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_research_integrity",
+        "passed": 13,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_scenario_alignment",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_scene_contract",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_scene_review_protocol",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_site",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_sociology",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_state_identity",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_static_delivery",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_task_manager",
+        "passed": 6,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_test_runner",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_vnext_evidence",
+        "passed": 4,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_vnext_models",
+        "passed": 5,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "test_workspace_reports",
+        "passed": 2,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "dayan_backend_start.test",
+        "passed": 1,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "dayan_bridge.test",
+        "passed": 1,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "dayan_scene_data.test",
+        "passed": 3,
+        "skipped": 0,
+        "verdict": "PASS"
+      },
+      {
+        "name": "dayan_session_binding.test",
+        "passed": 9,
+        "skipped": 0,
+        "verdict": "PASS"
+      }
+    ]
+  },
+  "actual_online": [
+    "World Bank WDI Data360 study and report source hashes",
+    "Census TIGERweb exact source snapshots and CPL001 data ports"
+  ],
+  "provider_suite": "BEH129–BEH133 exact real tool calls, response hashes and applied actions via subtests",
+  "headless_checks": 32,
+  "dsh_native_checks": 12
+}

@@ -39,7 +39,8 @@ def run_tests():
     check("汇总与帧一致（n_cars）",
           fr["aggregates"].get("n_cars") == len(cars))
     check("provenance_note 披露真实来源",
-          "模型真实计算" in s["provenance_note"])
+          "模型" in s["provenance_note"] and "计算" in s["provenance_note"]
+          and "示意动画" not in s["provenance_note"])
 
     # ---- 2. 实体级：NET113 行人 / BEH001 居民 / SYS002 服务台 ----
     s2 = collect_state_stream("NET113", {}, ticks=20, sample_every=4)

@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "reviewed_at": "2026-11-18",
+  "review_scope": "仅这些实际读码与定向验证的核心机制；full/lite不是实证有效性、校准或政策可用性的证明",
+  "empirical_validation": false,
+  "reviews": [
+    {
+      "model_id": "NET052",
+      "fidelity": "full",
+      "basis": "正参数闭合齐次SIS核心方程 dI/dt=beta*I*(N-I)/N-gamma*I；I_star明确采用R0<=1的无病均衡分支。RK4运行、明确时点beta减半及配对种子归档已验证。",
+      "simplifications": [
+        "齐次混合闭合人口；无年龄、空间或接触网络",
+        "I_star为比例，非真实病例预测；步长误差由调用者控制",
+        "没有现实数据校准或独立留出通过证明"
+      ],
+      "evidence": "dayan/models/wave2.py:SISModel；tests/test_dayan_wave2.py；tests/test_defined_statistics.py；tests/test_repair_requirements.py；docs/verification/20261118/representative_scenarios.json",
+      "references": [
+        "https://doi.org/10.1137/S0036144500371907"
+      ]
+    },
+    {
+      "model_id": "NET053",
+      "fidelity": "full",
+      "basis": "同一实际SIR工厂的三仓室齐次闭合方程；beta/gamma与S/I/R联合检索、总人口守恒与终局规模数值基准均有实际测试。",
+      "simplifications": [
+        "齐次混合、永久移出；不包括出生死亡、潜伏期或异质网络",
+        "NET-SIR为兼容入口，NET053为目录入口；不是两个独立科学模型",
+        "未绑定实际地区时间尺度，不作现实预测"
+      ],
+      "evidence": "dayan/models/benchmarks.py:SIRModel；dayan/model_index.py；tests/test_dayan_models.py；tests/test_output_contracts.py；tests/test_assistant_scene_routing.py",
+      "references": [
+        "https://doi.org/10.1137/S0036144500371907"
+      ]
+    },
+    {
+      "model_id": "NET-SIR",
+      "fidelity": "full",
+      "basis": "同一实际SIR工厂的三仓室齐次闭合方程；beta/gamma与S/I/R联合检索、总人口守恒与终局规模数值基准均有实际测试。",
+      "simplifications": [
+        "齐次混合、永久移出；不包括出生死亡、潜伏期或异质网络",
+        "NET-SIR为兼容入口，NET053为目录入口；不是两个独立科学模型",
+        "未绑定实际地区时间尺度，不作现实预测"
+      ],
+      "evidence": "dayan/models/benchmarks.py:SIRModel；dayan/model_index.py；tests/test_dayan_models.py；tests/test_output_contracts.py；tests/test_assistant_scene_routing.py",
+      "references": [
+        "https://doi.org/10.1137/S0036144500371907"
+      ]
+    },
+    {
+      "model_id": "BEH005",
+      "fidelity": "lite",
+      "basis": "实际警察移动、公民G=H(1-L)、风险R*(1-exp(-k*C/A))、周期视野、逮捕/刑期/释放及深快照随机恢复已核对。",
+      "simplifications": [
+        "移动、公民决策、警察逮捕三阶段调度；不等同原文所有随机异步变体",
+        "方形Moore视野；局部无空位释放时使用全局空位",
+        "暴力均值与episodic标记是描述性统计；没有现实冲突校准"
+      ],
+      "evidence": "dayan/models/beh_abm.py:EpsteinViolenceModel；tests/test_civil_violence.py 五项实际机制测试",
+      "references": [
+        "https://doi.org/10.1073/pnas.092080199",
+        "https://ccl.northwestern.edu/netlogo/models/Rebellion"
+      ]
+    },
+    {
+      "model_id": "NET106",
+      "fidelity": "full",
+      "basis": "单车道周期NaSch加速、前距限速、独立随机慢化和同步前进规则；车辆数量、持久ID、随机检查点恢复以及密度/p参数独立性已验证。",
+      "simplifications": [
+        "单车道周期元胞，无真实道路拓扑、路口或换道",
+        "vmax为格/更新，density为占用比例，p为每次更新慢化概率；dt不是自动校准的物理秒",
+        "画面超过3000实体明确采样；全量模型状态保留"
+      ],
+      "evidence": "dayan/models/traffic.py:NSModel；tests/test_dayan_traffic_ped.py；tests/test_defined_statistics.py；tests/test_repair_parameters.py；tests/test_state_identity.py；tests/browser_acceptance.py",
+      "references": [
+        "https://doi.org/10.1051/jp1:1992277"
+      ]
+    },
+    {
+      "model_id": "SYS002",
+      "fidelity": "lite",
+      "basis": "实际M/M/c近似队列、持久到达顾客ID/服务台分配、Erlang-C参照、服务率干预残余寿命变换与检查点续算一致性已验证。",
+      "simplifications": [
+        "离散时间边界处理到达/完成，非精确连续事件M/M/c",
+        "Erlang-C稳态参照要求lam<c*mu；未将短时样本称为稳态精确值",
+        "排队示意坐标为队列序位，不是客户真实物理地理轨迹"
+      ],
+      "evidence": "dayan/models/sys_models.py:MMCQueueModel；tests/test_dayan_sys.py；tests/test_state_identity.py；docs/verification/20261118/representative_scenarios.json",
+      "references": []
+    },
+    {
+      "model_id": "BEH001",
+      "fidelity": "lite",
+      "basis": "周期Moore邻域相似度阈值、随机空位批量搬迁；居民类型/数量及随迁持久身份已逐帧验证。",
+      "simplifications": [
+        "两类周期格点、批量调度；不声称复刻Schelling全部空间/调度变体",
+        "无房价、迁移成本、真实人口或城市边界",
+        "有限时长阈值对照不保证隔离指数对阈值单调"
+      ],
+      "evidence": "dayan/models/beh_abm.py:SchellingModel；tests/test_state_identity.py；tests/test_sociology.py；docs/verification/20261118/representative_scenarios.json",
+      "references": [
+        "https://doi.org/10.1080/0022250X.1971.9989794"
+      ]
+    },
+    {
+      "model_id": "ECO019",
+      "fidelity": "full",
+      "basis": "Goodwin工资份额-就业率的线性Lotka-Volterra核心方程；目录模型与独立核心使用同一实际经过时长，RK4第一积分及共同初态对照已核对，未裁剪输出。",
+      "simplifications": [
+        "线性工资增长函数，只有两个宏观状态；参数为规范化系数",
+        "正轨道对任意初态不保证经济比例小于1；不能用数值裁剪掩盖域外轨道",
+        "与ABM耦合时工资份额到微观工资的映射是显式假设，并非完整结构宏观模型",
+        "未用真实工资/就业数据校准或证明留出预测能力"
+      ],
+      "evidence": "dayan/coupled.py:GoodwinSDCore；dayan/models/eco_final.py:GoodwinCatalogModel；tests/test_coupling_contracts.py；docs/verification/20261118/representative_scenarios.json",
+      "references": [
+        "https://www.icts.res.in/sites/default/files/Goodwin_growth_cycle_1967.pdf"
+      ]
+    }
+  ],
+  "source_fingerprint": "e9b7223c7090128b9180c4f81c41219565bb8771b2dbb48cbd42daf812fe70c4"
+}

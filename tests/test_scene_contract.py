@@ -32,7 +32,10 @@ class SceneContractTests(unittest.TestCase):
 
     def test_illegal_scene_hints_are_rejected(self):
         for visual in [{'glyph':'execute-js'},{'script':'alert(1)'},{'color_by':'not_computed'},
-                       {'label':'x'*33},{'glyph':['person']},{'color_by':['energy']}]:
+                       {'label':'x'*33},{'glyph':['person']},{'color_by':['energy']},
+                       {'glyph':'person','action_by':'missing','action_poses':{'0':'idle'}},
+                       {'glyph':'person','action_by':'energy','action_poses':{'0':'script'}},
+                       {'glyph':'person','action_by':'energy','action_poses':{'00':'idle'}}]:
             with self.subTest(visual=visual):
                 d=definition();d['visualization']=visual
                 with self.assertRaises(ValueError):validate_definition(d)
@@ -42,7 +45,11 @@ class SceneContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):validate_definition(d)
 
     def test_real_execution_and_archive_keep_visual_contract(self):
-        d=definition();d['visualization']={'glyph':'person','color_by':'energy','label':'能量'}
+        d=definition()
+        d["agents"]["initial"]["activity"]=0
+        d["agents"]["update"]["activity"]="1 if t >= 0.15 else 0"
+        d['visualization']={'glyph':'person','color_by':'energy','label':'能量',
+                            'action_by':'activity','action_poses':{'0':'idle','1':'walk'}}
         with tempfile.TemporaryDirectory() as tmp,patch.dict(os.environ,{'DAYAN_DATA_DIR':tmp}):
             result=build_model(definition=d,ticks=4,dt=.1,seed=7)
             self.assertTrue(result['ok'],result)
@@ -52,6 +59,9 @@ class SceneContractTests(unittest.TestCase):
             self.assertEqual(stream['provenance'],'entity')
             self.assertEqual(len(stream['frames']),5)
             self.assertEqual(len(stream['frames'][0]['entities']),37)
+            self.assertEqual(stream['frames'][0]['presentation']['visualization'],d['visualization'])
+            self.assertEqual(stream['frames'][0]['entities'][0]['activity'],0)
+            self.assertEqual(stream['frames'][-1]['entities'][0]['activity'],1)
             self.assertNotEqual(stream['frames'][0]['entities'][0]['x'],stream['frames'][-1]['entities'][0]['x'])
             self.assertIn('visualization={glyph:',DSL_CONTRACT)
 

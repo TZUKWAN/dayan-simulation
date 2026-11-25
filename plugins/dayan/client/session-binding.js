@@ -21,6 +21,47 @@ function waitForCatalog(store, signal) {
   });
 }
 
+function ownConversation(sessions, reference, binding) {
+  let mounts = 0, retired = false, released = false;
+  function releaseWhenUnmounted() {
+    if (!retired || mounts !== 0 || released) return;
+    // The host's SessionProvider may still be finishing this React commit.
+    queueMicrotask(() => {
+      if (released || mounts !== 0) return;
+      released = true;
+      reference.release();
+    });
+  }
+  return {
+    sessionId: reference.sessionId,
+    reference,
+    isCurrent() {
+      if (retired) return false;
+      try {
+        return reference.binding === binding && sessions.binding(reference.sessionId) === binding;
+      } catch {
+        // A replaced Session Controller invalidates the entire reference generation.
+        return false;
+      }
+    },
+    hold() {
+      if (retired) return () => {};
+      mounts += 1;
+      let active = true;
+      return () => {
+        if (!active) return;
+        active = false;
+        mounts -= 1;
+        releaseWhenUnmounted();
+      };
+    },
+    retire() {
+      retired = true;
+      releaseWhenUnmounted();
+    },
+  };
+}
+
 export async function openProjectConversation({ sessions, record, projectRoot, signal }) {
   signal?.throwIfAborted();
   if (record?.schemaVersion !== 2 || !/^session-dayan-[a-f0-9-]{36}$/.test(record?.sessionId || '') ||
@@ -56,7 +97,7 @@ export async function openProjectConversation({ sessions, record, projectRoot, s
     }
     if (created) await binding.session.rename('大衍研究对话');
     signal?.throwIfAborted();
-    return { sessionId: id, reference };
+    return ownConversation(sessions, reference, binding);
   } catch (error) {
     reference?.release();
     throw error;

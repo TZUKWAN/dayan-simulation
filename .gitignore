@@ -15,6 +15,8 @@
 /.codex/
 /.agents/
 /.dsh/
+/acl-reports/
+/scenarios/
 
 # Generated runs, collected data, personal custom models, logs and snapshots
 /reports/
@@ -22,7 +24,12 @@
 /archive/
 /data/*
 /dayan/data/
+/dayan_runtime_data/
+# Capability tokens must never be staged, including custom runtime locations.
+**/.workbench-token
 !/data/dayan_catalog.json
+!/data/output_contract_evidence.json
+!/data/model_semantics.json
 !/data/fidelity_review/
 !/data/calibration_targets.md
 !/data/targets.json
@@ -32,6 +39,10 @@
 /docs/AGENT_*.txt
 /docs/DAYAN_链路修复与实测验收_*.md
 /docs/DAYAN_对话绑定与分栏拖拽修复_*.md
+/docs/FEATURE_CLOSURE_*.md
+/docs/HARNESS_PROMPT_AUDIT_*.md
+/docs/SYSTEM_REPAIR_*.md
+/docs/SYSTEM_REVIEW_*.md
 
 # Optional third-party checkouts are installed separately
 /external/

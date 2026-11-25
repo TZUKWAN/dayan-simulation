@@ -15,6 +15,32 @@ from dayan.research.compiler import compile_research
 
 
 class RequirementsTests(unittest.TestCase):
+    def test_symbolic_equations_indices_and_event_time_are_not_truncated_into_parameters(self):
+        text=('构建4096名居民与64家企业的模型，居民编号i=0到4095，企业编号j=0到63。'
+              'q_i=0.01*(1+(i模3))，dcapital_j/dt=0.2*capital_j-q_i。'
+              '在t=0.35秒，企业各注资2元。运行10步，步长0.2秒。')
+        request=extract_request(text)
+        self.assertEqual(request['parameters'],{})
+        self.assertEqual(request['interventions'],[])
+        self.assertEqual(request['options'],{'ticks':10,'dt':.2})
+        self.assertEqual(request['original_text'],text)
+        literals=extract_request('新建模型，alpha=0.01，beta=2e-3，x=40米，weights=[1,2,3]。')
+        self.assertEqual(literals['parameters'],{'alpha':.01,'beta':.002,'x':40,'weights':[1,2,3]})
+        formulas=extract_request('新建模型，alpha=0.01*x，beta=2+3，i=0至9，state.x=2，密度=0.2*x。')
+        self.assertEqual(formulas['parameters'],{})
+        timed=extract_request('新建模型，beta=0.4。在t=0.35秒把beta改为0.2。')
+        self.assertEqual(timed['parameters'],{'beta':.4})
+        self.assertEqual([(iv['at_t'],iv['params']) for iv in timed['interventions']],[(.35,{'beta':.2})])
+
+    def test_facility_coordinates_do_not_overwrite_agent_state_parameters(self):
+        text='创建37名行人的模型，右侧出口（x=40米，y=15米），目标(x=20,y=10)，起点（x=2，y=3）。运行20步，步长0.2。'
+        request=extract_request(text)
+        self.assertEqual(request['explicit_parameters'],{'exit_x':40,'exit_y':15,
+                         'target_x':20,'target_y':10,'start_x':2,'start_y':3,'n':37})
+        self.assertEqual(request['options'],{'ticks':20,'dt':.2})
+        self.assertEqual(request['original_text'],text)
+        self.assertEqual(extract_request('新建方程模型，x=40，y=15')['explicit_parameters'],{'x':40,'y':15})
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.env = patch.dict(os.environ, {"DAYAN_DATA_DIR": self.temp.name})
@@ -56,6 +82,18 @@ class RequirementsTests(unittest.TestCase):
             self.assertEqual(m["actual"]["effective_parameters"]["cells"], 100)
             self.assertEqual(m["actual"]["effective_parameters"]["p"], .2)
             self.assertEqual(len(run["observations"]), 36)
+
+    def test_clock_origin_and_each_scheduled_update_keep_their_meaning(self):
+        original = ("新建存量模型，初始存量 backlog=20、done=0。初始效率 efficiency=1。"
+                    "从 t=0 推进12步，dt=0.25，随机种子为3、5。"
+                    "t=1.0 时把 efficiency 改为0.5；t=2 当时 efficiency=0.75。")
+        parsed = extract_request(original)
+        self.assertEqual(parsed["original_text"], original)
+        self.assertEqual(parsed["initial_state"], {"backlog": 20, "done": 0})
+        self.assertEqual(parsed["parameters"], {"efficiency": 1})
+        self.assertEqual(parsed["options"], {"ticks": 12, "dt": .25, "seeds": [3, 5]})
+        self.assertEqual([(i["at_t"], i["params"]) for i in parsed["interventions"]],
+                         [(1.0, {"efficiency": .5}), (2.0, {"efficiency": .75})])
 
     def test_no_unrelated_sis_substitute(self):
         text = "武汉暴雨疏散，老人行动困难，谣言传播，公交接驳提高30%，使用真实道路人口"

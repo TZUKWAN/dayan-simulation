@@ -90,7 +90,7 @@ def run_collection(connector_id: str, params: dict, *, name="", theme="", purpos
         source_id = {"data.humdata.org": "hdx", "data.gov.uk": "ckan_uk"}.get(
             str(params["instance"]).removeprefix("https://").rstrip("/"))
     if not source_id or registry.get(source_id) is None:
-        raise ValueError("需要有效source_id，不能将任意地址冒充受核验来源")
+        raise ValueError("需要有效source_id：请使用search_sources返回的来源编号；公开文件URL可直接用collect_data(url=地址, format=实际格式)")
     budget = int(page_budget if page_budget is not None else DEFAULT_PAGE_BUDGET)
     if not 1 <= budget <= 50:
         raise ValueError("page_budget须为1..50（每次新增页预算）")
@@ -172,8 +172,10 @@ def run_collection(connector_id: str, params: dict, *, name="", theme="", purpos
                 task["status"] = "partial" if task["partial"] else "done"
                 if task["partial"]:
                     task["incomplete_reason"] = "新增页预算用尽；以同collection_id续采，不会从第一页重算"
-                elif not task["n_records"]:
-                    task["status"] = "empty"
+                else:
+                    task.pop('incomplete_reason',None)
+                    if not task["n_records"]:
+                        task["status"] = "empty"
         except Exception as exc:
             task["status"] = "failed"
             task["error"] = f"{type(exc).__name__}: {exc}"

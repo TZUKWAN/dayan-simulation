@@ -168,7 +168,7 @@ def verified_records(collection_id):
 
 
 def create_study(question, collection_id, model_family, param_grid, tolerance,
-                 holdout_years=1, budget=500, forecast_years=0):
+                 holdout_years=1, budget=500, forecast_years=0, validation_years=0, selection_top=3):
     contract = parse_data_request(question)
     if contract["errors"]:
         raise ValueError("；".join(contract["errors"]))
@@ -182,7 +182,7 @@ def create_study(question, collection_id, model_family, param_grid, tolerance,
     if re.search(r"微观|主体行为|多智能体|SIR|Goodwin|因果|政策干预", question, re.I):
         raise ValueError("趋势拟合不覆盖请求的机制/因果/主体模型，须先建立相应机制模型，不能替代需求")
     task, raw_rows = verified_records(collection_id)
-    if task["connector"] != "worldbank":
+    if task["connector"] not in ("worldbank", "worldbank_data360"):
         raise ValueError("此研究时间序列适配器仅支持已核验WB统计记录；其他来源请通过显式数据映射运行模型，不能猜字段/单位")
     if task["params"].get("indicator") != contract["indicator"] or task["params"].get("country") != contract["country"] or task["params"].get("date") != contract["date"]:
         raise ValueError("采集查询与原始研究需求的国家/指标/时期不一致")
@@ -191,8 +191,12 @@ def create_study(question, collection_id, model_family, param_grid, tolerance,
     for row in raw_rows:
         if row.get("country_id") != contract["country"] or row.get("indicator") != contract["indicator"]:
             raise ValueError("实际返回记录国家/指标不匹配，不会过滤掉不匹配记录后宣称完整")
+        if row.get("unit") != unit or row.get("frequency", "annual") != "annual":
+            raise ValueError("采集实际单位或频率与研究合同不一致")
         if row.get("value") is None:
             raise ValueError(f"{row.get('date')}缺失实测值；需显式修订研究时间范围/数据缺口，不能静默填充")
+        if not re.fullmatch(r"\d{4}", str(row.get("date") or "")):
+            raise ValueError("指标记录不是四位整数年份")
         value, date = float(row["value"]), int(row["date"])
         if not math.isfinite(value):
             raise ValueError("统计值非有限")
@@ -203,10 +207,30 @@ def create_study(question, collection_id, model_family, param_grid, tolerance,
         expected_geo=contract["country"], expected_time_range=contract["date"], min_records=4)
     if quality["status"] != "pass":
         raise ValueError("数据质量合同未满足：" + "；".join(quality["issues"]))
+    if type(validation_years) is not int or validation_years < 0:
+        raise ValueError("验证年份数须为非负整数")
+    if validation_years and (type(selection_top) is not int or not 1 <= selection_top <= 30):
+        raise ValueError("验证候选数须为1..30的整数")
     training, holdout = time_split(records, holdout_years=holdout_years)
+    validation = []
+    if validation_years:
+        training, validation = time_split(training, holdout_years=validation_years)
     if len(training) < 3:
         raise ValueError("训练时间点至少3个，须另外保留独立的后续年份")
     role_check = check_role_leakage([collection_id], [collection_id], training, holdout)
+    if validation:
+        role_check["validation_pairs"] = [
+            check_role_leakage([collection_id], [collection_id], group, validation)
+            for group in (training, holdout)
+        ]
+        role_check["has_leakage"] |= any(pair["has_leakage"] for pair in role_check["validation_pairs"])
+    if validation:
+        import numpy as np
+        q1, q3 = (float(v) for v in np.quantile([r["value"] for r in training], [.25,.75]))
+        low, high = q1-1.5*(q3-q1), q3+1.5*(q3-q1)
+        quality["outliers"] = {"method": "training_iqr_1.5", "fences": [low, high],
+                               "flagged_years": [r["date"] for r in records if not low <= r["value"] <= high],
+                               "treatment": "retained"}
     if role_check["has_leakage"]:
         raise ValueError("数据角色重叠")
     required = {"linear": {"slope"}, "exponential": {"r"}, "logistic": {"r", "K"}}[family]
@@ -226,7 +250,8 @@ def create_study(question, collection_id, model_family, param_grid, tolerance,
             raise ValueError("参数网格包含非法值")
         if key == "K" and min(vals) <= p0:
             raise ValueError("此Logistic增长模型的容量K须高于初值")
-        params[key] = {"default": vals[0], "minimum": min(vals), "maximum": max(vals)}
+        params[key] = {"default": vals[0], "minimum": min(vals), "maximum": max(vals),
+                       "unit": {"r": "1/year", "slope": f"{unit}/year", "K": unit}[key]}
     rate = {"linear": "slope", "exponential": "r*x", "logistic": "r*x*(1-x/K)"}[family]
     limitations = ["这是单变量描述性趋势模型，不建立当地政策效应或人群行为的因果识别。",
         "有限网格及有限留出点不能证明参数结构可识别；外推风险需单独评估。",
@@ -240,13 +265,17 @@ def create_study(question, collection_id, model_family, param_grid, tolerance,
     registered = custom_models.register(definition, original_request=question)
     dataset = datasets.ingest(json.dumps(training, ensure_ascii=False, allow_nan=False).encode(),
         name=question, format="json", source=f"collection:{collection_id}", license="World Bank CC BY 4.0 (indicator terms apply)",
-        role="calibration", metadata={"collection_id": collection_id, "raw_pages": [p["sha256"] for p in task["pages"]],
+        role="calibration", metadata={"unit":unit,"scope":contract['country'],"frequency":"annual",
+            "collection_id": collection_id, "raw_pages": [p["sha256"] for p in task["pages"]],
             "transform": {"sort_by": "date ASC", "date": "integer year", "value": "float", "unit_mapping": contract["indicator"]},
-            "holdout_excluded": [r["date"] for r in holdout], "input_records_sha256": digest(raw_rows)})
-    binding = {"dataset_id": dataset["dataset_id"], "field": "value", "aggregate": "first", "parameter": "p0", "scale": 1}
-    return save({"schema_version": 1, "phase": "prepared", "question": question, "contract": contract,
+            "holdout_excluded": [r["date"] for r in holdout], "validation_excluded": [r["date"] for r in validation],
+            "input_records_sha256": digest(raw_rows)})
+    binding = {"dataset_id": dataset["dataset_id"], "field": "value", "aggregate": "first", "parameter": "p0", "scale": 1,
+               "source_unit":unit,"target_unit":unit,"source_scope":contract['country'],"target_scope":contract['country'],"order_by":"date"}
+    return save({"schema_version": 2 if validation else 1, "phase": "prepared", "question": question, "contract": contract,
         "collection_id": collection_id, "source_pages": task["pages"], "records": records,
-        "training": training, "holdout": holdout, "quality": quality, "role_check": role_check,
+        "training": training, "validation": validation, "holdout": holdout, "quality": quality, "role_check": role_check,
+        "selection_top": selection_top if validation else None,
         "unit": unit, "model_family": family, "model_id": registered["model_id"], "model_definition": registered["definition"],
         "training_dataset": dataset, "data_binding": binding, "param_grid": param_grid,
         "tolerance": float(tolerance), "budget": int(budget), "forecast_years": forecast_years,
@@ -266,18 +295,21 @@ def calibrate_study(study_id):
         return rr, [lookup[int(y)] for y in years]
     cal = grid_search_calibrate(model_fn=lambda p,y: execute(p,y)[1], param_grid=source["param_grid"],
         observations=source["training"], holdout_observations=source["holdout"], tolerance=source["tolerance"],
-        budget=source["budget"], name=source["question"])
+        budget=source["budget"], name=source["question"], validation_observations=source.get("validation"),
+        selection_top=source.get("selection_top") or 3)
     result = {k: v for k, v in source.items() if k not in ("study_id", "created_at", "artifact_sha256")}
     result.update(parent_study_id=study_id, phase="calibrated" if cal.get("best_params") else "calibration_failed", calibration=cal)
     if cal.get("best_params"):
         years = list(range(source["base_year"], source["records"][-1]["date"] + source["forecast_years"] + 1))
         rr, predictions = execute(cal["best_params"], years, True)
+        # Compare the final archive against the exact predictions used in calibration and holdout.
+        expected = dict(zip(cal["training"]["dates"], cal["training"]["predicted"]))
+        for role in (cal.get("selection",{}).get("validation"), cal.get("holdout")):
+            if role and role.get("predicted"):
+                expected.update(dict(zip(role["dates"], role["predicted"])))
+        if any(not math.isclose(expected[y], p, rel_tol=1e-12, abs_tol=1e-9) for y,p in zip(years,predictions) if y in expected):
+            raise ValueError("最终运行与校准预测不一致，停止发布研究")
         run_id = get_store().save_run(rr, "research", intent=source["question"], request_text=source["question"])
         result.update(run_id=run_id, run_manifest=rr.manifest, run_observations_sha256=digest(rr.observations),
                       predictions=[{"date": y, "predicted": p} for y,p in zip(years,predictions)])
-        # Compare the final archive against the exact predictions used in calibration and holdout.
-        expected = dict(zip(cal["training"]["dates"], cal["training"]["predicted"]))
-        expected.update(dict(zip(cal["holdout"]["dates"], cal["holdout"]["predicted"])))
-        if any(not math.isclose(expected[y], p, rel_tol=1e-12, abs_tol=1e-9) for y,p in zip(years,predictions) if y in expected):
-            raise ValueError("最终运行与校准预测不一致，停止发布研究")
     return save(result)

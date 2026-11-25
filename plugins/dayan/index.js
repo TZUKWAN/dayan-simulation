@@ -10,10 +10,14 @@
  */
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { backendOnline, ensureBackend, stopManagedBackend, registerDayanTool, PROJECT_ROOT, BACKEND_URL } from './host/tools.js';
+import { createHash } from 'node:crypto';
+import * as bridge from './host/tools.js';
+import { backendOnline, ensureBackend, stopManagedBackend, registerDayanContext, registerDayanTool, PROJECT_ROOT, BACKEND_URL } from './host/tools.js';
 import { reserveProjectSession } from './host/session-binding.js';
+import { registerDayanArgumentRecovery } from './host/request-recovery.js';
 
 export const name = 'dayan';
+const LOADED_HOST_SOURCE=createHash('sha256').update(readFileSync(new URL(import.meta.url))).digest('hex');
 
 function send(res, status, payload) {
   if (res.destroyed || res.headersSent) return;
@@ -30,7 +34,9 @@ export function apply(ctx) {
       handler: async (_req, res) => {
         const online = await backendOnline();
         send(res, 200, { ok: true, online, url: BACKEND_URL, projectRoot: PROJECT_ROOT,
-          bridge_version: 'native-research-integrity-1', conversation_binding: 'project-session-v2' });
+          bridge_version: 'native-research-integrity-1', conversation_binding: 'project-session-v2',
+          loaded_modules:{host_sha256:LOADED_HOST_SOURCE,bridge_sha256:bridge.LOADED_BRIDGE_SOURCE||null,
+            proof:'captured_at_module_evaluation',feature_contract:'feature-closure-20261125'} });
       }
     },
     {
@@ -79,6 +85,8 @@ export function apply(ctx) {
 
   // DSH agent 工具：让 DSH 的 AI 直接驱动采集/仿真/报告
   registerDayanTool(ctx);
+  registerDayanContext(ctx);
+  registerDayanArgumentRecovery(ctx, PROJECT_ROOT);
 
   ctx.effect(() => () => {
     // 宿主卸载插件时不主动杀后端：工作台可能仍被外部浏览器使用。

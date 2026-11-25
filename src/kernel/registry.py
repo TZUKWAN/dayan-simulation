@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -20,7 +21,7 @@ from typing import Any
 
 import yaml
 
-DEFAULT_DB = Path(__file__).resolve().parents[2] / "data" / "spec_registry.json"
+DEFAULT_DB = Path(os.environ.get('DAYAN_DATA_DIR', Path(__file__).resolve().parents[2] / 'data')) / 'spec_registry.json'
 
 
 def _canonical(obj: Any) -> str:

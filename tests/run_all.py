@@ -1,163 +1,246 @@
-"""全平台回归运行器（WP2 测试可信性版）。
+"""Discover Python + Node suites, isolate sources/data, preserve real outcomes.
 
-判定规则（不再以 [PASS] 计数代替验收）：
-1. 子进程退出码非 0            → 套件失败
-2. 超时（默认 900s/套件）       → 套件失败
-3. 输出含 [FAIL]               → 套件失败
-4. 无任何 [PASS] 且退出码 0     → 失败（空跑不算过）
-5. Traceback 出现               → 失败（同时记录摘录）
-汇总写 data/test_stats.json；本脚本退出码非 0 当且仅当存在失败套件。
-自检：python tests/run_all.py --selftest 构造一个必败套件验证判定链路。
+Default: all offline categories. --online/--llm opt into external services;
+unselected external suites are explicitly SKIP, never counted as passed.
 """
 from __future__ import annotations
-
+import argparse
+import ast
 import json
 import os
 import re
+import shutil
+import signal
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
+from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[1]
-SUITE_TIMEOUT_S = 900
-SUITES = [
-    "test_platform", "test_ledger", "test_pipeline", "test_benchmarks",
-    "test_sociology", "test_politics", "test_media", "test_orglabor",
-    "test_registry", "test_site", "test_god_bridge",
-    "test_kernel_facilities", "test_cross_pack",
-    "test_dayan_core", "test_dayan_models", "test_dayan_migration",
-    "test_dayan_engines", "test_dayan_wave2", "test_dayan_families",
-    "test_dayan_traffic_ped", "test_dayan_eco_batch", "test_dayan_sys",
-    "test_dayan_met", "test_dayan_met_registry", "test_dayan_sys_extras",
-    "test_dayan_eco_flagship", "test_dayan_catalog_map", "test_dayan_coupled",
-    "test_dayan_agent", "test_dayan_net_final16", "test_dayan_final_batch",
-    "test_dayan_fidelity", "test_dayan_runtime", "test_dayan_manifest",
-    "test_dayan_experiment", "test_dayan_scene_state", "test_dayan_mechfix", "test_collection_core", "test_negative_cases", "test_e2e_pipeline",
-    "test_repair_execution_inputs", "test_repair_same_run", "test_repair_artifacts",
-    "test_repair_policy_contract", "test_repair_parameters", "test_repair_composer",
-    "test_repair_requirements", "test_repair_report", "test_repair_datasets",
-    "test_repair_custom_models", "test_repair_generative", "test_repair_resume",
-    "test_repair_coupled_evacuation",
-]
+SUITE_TIMEOUT_S = 180
+CATEGORIES = ('unit','mechanism','api','e2e','online','llm','performance')
 
 
-def judge_suite(name: str, returncode: int | None, stdout: str,
-                stderr: str, duration_s: float, timed_out: bool = False,
-                missing: bool = False) -> dict:
-    """纯判定函数：单套件 → 结构化结论。独立出来便于单元测试。"""
-    output = (stdout or "") + (stderr or "")
-    reasons: list[str] = []
-    if missing:
-        reasons.append("套件文件不存在")
-    if timed_out:
-        reasons.append(f"超时>{SUITE_TIMEOUT_S}s")
-    if returncode not in (0, None):
-        reasons.append(f"退出码={returncode}")
-    if "[FAIL]" in output:
-        reasons.append("输出含 [FAIL]")
-    n_pass = output.count("[PASS]")
-    unittest_run = re.search(r"^Ran (\d+) tests? in ", output, re.M)
-    unittest_ok = re.search(r"^OK(?: \(skipped=(\d+)\))?\s*$", output, re.M)
-    if unittest_run and unittest_ok and returncode == 0:
-        n_pass += int(unittest_run.group(1))-int(unittest_ok.group(1) or 0)
-    if n_pass == 0 and not reasons:
-        reasons.append("无任何 [PASS]（空跑）")
-    tb_idx = output.find("Traceback (most recent call last)")
-    if tb_idx >= 0:
-        reasons.append("输出含 Traceback")
-    verdict = "FAIL" if reasons else "PASS"
-    excerpt = ""
-    if verdict == "FAIL":
-        tail = (stderr or "")[-400:] or output[tb_idx:tb_idx + 400] \
-            if tb_idx >= 0 else (stderr or output)[-400:]
-        excerpt = tail[:400]
-    return {
-        "suite": name, "verdict": verdict, "reasons": reasons,
-        "passed": n_pass, "returncode": returncode,
-        "duration_s": round(duration_s, 2), "excerpt": excerpt,
-    }
+def category(name):
+    if 'online' in name: return 'online'
+    if 'live_llm' in name: return 'llm'
+    if 'performance' in name: return 'performance'
+    if any(s in name for s in ('e2e','requirements','scenario_alignment','assistant_scene','workspace_reports','research_integrity')): return 'e2e'
+    if any(s in name for s in ('report','datasets','artifacts','job_store','security','task_manager')): return 'api'
+    if any(s in name for s in ('civil_violence','game_contract','benchmarks','model_probe','mechfix','families','models','engines','eco_','net_','coupled')): return 'mechanism'
+    return 'unit'
 
 
-def run_suite(name: str) -> dict:
-    path = ROOT / "tests" / f"{name}.py"
-    if not path.exists():
-        return judge_suite(name, None, "", "", 0.0, missing=True)
-    t0 = time.perf_counter()
+def python_framework(path):
+    """Preserve executable legacy suites; collect function/class suites with pytest."""
     try:
-        r = subprocess.run(
-            [sys.executable, str(path)], capture_output=True, text=True,
-            encoding="utf-8", errors="replace", timeout=SUITE_TIMEOUT_S,
-            env={**os.environ, "PYTHONIOENCODING": "utf-8"},
-            cwd=str(ROOT))
-        return judge_suite(name, r.returncode, r.stdout, r.stderr,
-                           time.perf_counter() - t0)
-    except subprocess.TimeoutExpired as e:
-        out = (e.stdout or b"").decode("utf-8", errors="replace") \
-            if isinstance(e.stdout, bytes) else (e.stdout or "")
-        err = (e.stderr or b"").decode("utf-8", errors="replace") \
-            if isinstance(e.stderr, bytes) else (e.stderr or "")
-        return judge_suite(name, None, out, err, SUITE_TIMEOUT_S,
-                           timed_out=True)
+        module=ast.parse(path.read_text(encoding='utf-8-sig'))
+    except (OSError,SyntaxError,UnicodeError):
+        return 'script'  # Let the real interpreter report the source error.
+    for node in module.body:
+        if isinstance(node,ast.If):
+            guard=list(ast.walk(node.test))
+            if (any(isinstance(item,ast.Name) and item.id=='__name__' for item in guard)
+                    and any(isinstance(item,ast.Constant) and item.value=='__main__' for item in guard)):
+                return 'script'
+    functions=(ast.FunctionDef,ast.AsyncFunctionDef)
+    if any(isinstance(node,functions) and node.name.startswith('test_') for node in module.body):
+        return 'pytest'
+    if any(isinstance(node,ast.ClassDef) and node.name.startswith('Test')
+           and any(isinstance(item,functions) and item.name.startswith('test_') for item in node.body)
+           for node in module.body):
+        return 'pytest'
+    return 'script'
+
+
+def discover(root=ROOT):
+    paths = sorted((root/'tests').rglob('test_*.py'))+sorted((root/'tests').rglob('*.test.mjs'))
+    return [{'name':p.stem,'path':p.relative_to(root).as_posix(),'timeout_s':600 if p.stem=='test_model_probe_all' else SUITE_TIMEOUT_S,
+             'runtime':'node' if p.suffix=='.mjs' else 'python','category':category(p.stem),
+             'framework':'node' if p.suffix=='.mjs' else python_framework(p)}
+            for p in paths if '__pycache__' not in p.parts]
+
+
+SUITES = [s['name'] for s in discover()]
+
+
+def judge_suite(name, returncode, stdout, stderr, duration_s, timed_out=False, missing=False,
+                pytest_report=None):
+    output = (stdout or '')+(stderr or '')
+    reasons = []
+    if missing: reasons.append('套件文件不存在')
+    if timed_out: reasons.append('执行超时')
+    if returncode != 0: reasons.append('退出码='+str(returncode))
+    if '[FAIL]' in output: reasons.append('输出含失败断言')
+    if 'Traceback (most recent call last)' in output: reasons.append('输出含Traceback')
+    passed, skipped = output.count('[PASS]'), output.count('[SKIP]')
+    ran = re.search(r'^Ran (\d+) tests? in ',output,re.M)
+    ok = re.search(r'^OK(?: \(skipped=(\d+)\))?\s*$',output,re.M)
+    if ran and ok:
+        skipped += int(ok.group(1) or 0)
+        passed += int(ran.group(1))-int(ok.group(1) or 0)
+    node_tests = re.search(r'^# tests (\d+)',output,re.M)
+    if node_tests:
+        node_pass = re.search(r'^# pass (\d+)',output,re.M)
+        node_skip = re.search(r'^# skipped (\d+)',output,re.M)
+        node_fail = re.search(r'^# fail (\d+)',output,re.M)
+        passed += int(node_pass.group(1)) if node_pass else 0
+        skipped += int(node_skip.group(1)) if node_skip else 0
+        if node_fail and int(node_fail.group(1)): reasons.append('Node失败断言')
+    if pytest_report is not None:
+        # Counts come from the actual child process report, never marker text.
+        passed,skipped=pytest_report['passed'],pytest_report['skipped']
+        if pytest_report.get('error'): reasons.append(pytest_report['error'])
+        if pytest_report.get('failures') or pytest_report.get('errors'): reasons.append('pytest失败或错误')
+    if passed+skipped == 0 and not reasons: reasons.append('未发现执行或明确跳过的断言（空跑）')
+    verdict = 'FAIL' if reasons else 'PASS' if passed else 'SKIP'
+    return {'suite':name,'verdict':verdict,'reasons':reasons,'passed':passed,
+            'skipped':skipped,'returncode':returncode,'duration_s':round(duration_s,3),
+            'excerpt':output[-2500:] if verdict=='FAIL' else ''}
+
+
+def pytest_counts(path):
+    try:
+        cases=list(ElementTree.parse(path).getroot().iter('testcase'))
+    except (OSError,ElementTree.ParseError) as exc:
+        return {'passed':0,'skipped':0,'error':'pytest实际JUnit报告缺失或损坏：'+str(exc)}
+    failed=sum(case.find('failure') is not None for case in cases)
+    errors=sum(case.find('error') is not None for case in cases)
+    skipped=sum(case.find('skipped') is not None for case in cases)
+    passed=sum(not any(case.find(tag) is not None for tag in ('failure','error','skipped')) for case in cases)
+    return {'passed':passed,'skipped':skipped,'failures':failed,'errors':errors,'testcases':len(cases)}
+
+
+def _snapshot(target):
+    for directory in ('dayan','src','tests','experiments','plugins','site','assets','scripts'):
+        if (ROOT/directory).is_dir():
+            shutil.copytree(ROOT/directory,target/directory,
+                ignore=shutil.ignore_patterns('__pycache__','node_modules','data','config.json','*.pyc'))
+    (target/'data').mkdir()
+    for path in (ROOT/'data').glob('*'):
+        if path.name=='fidelity_review' and path.is_dir(): shutil.copytree(path,target/'data'/path.name)
+        elif path.name in {'dayan_catalog.json','calibration_targets.md','targets.json','output_contract_evidence.json','model_semantics.json'}:
+            shutil.copy2(path,target/'data'/path.name)
+    for name in ('README.md','requirements.txt','requirements-dev.txt','.gitignore'):
+        if (ROOT/name).exists(): shutil.copy2(ROOT/name,target/name)
+
+
+def _stop_tree(proc):
+    if proc.poll() is not None: return
+    if os.name=='nt':
+        subprocess.run(['taskkill','/PID',str(proc.pid),'/T','/F'],capture_output=True,timeout=15)
+    else:
+        try: os.killpg(proc.pid,signal.SIGKILL)
+        except ProcessLookupError: pass
+    proc.wait(timeout=15)
+
+
+def run_suite(suite, root, output, timeout=SUITE_TIMEOUT_S, online=False, llm=False):
+    started = time.perf_counter()
+    work = output/suite['name']; work.mkdir(parents=True,exist_ok=True)
+    env = {**os.environ,'PYTHONIOENCODING':'utf-8','PYTHONPATH':str(root),
+           'DAYAN_DATA_DIR':str(work/'data'),'DAYAN_REPORTS_DIR':str(work/'reports'),
+           'DAYAN_PYTHON':sys.executable,
+           'DAYAN_TEST_ONLINE':'1' if online else '0','DAYAN_TEST_LLM':'1' if llm else '0',
+           'OPENBLAS_NUM_THREADS':'1','OMP_NUM_THREADS':'1','MKL_NUM_THREADS':'1'}
+    if not llm:
+        env.update(DAYAN_API_KEY='',DAYAN_BASE_URL='',DAYAN_MODEL='')
+    path = root/suite['path']
+    if not path.exists(): return judge_suite(suite['name'],None,'','',0,missing=True)
+    node = shutil.which('node')
+    framework=suite.get('framework') or (python_framework(path) if suite['runtime']=='python' else 'node')
+    junit=(work/'pytest-results.xml').resolve() if framework=='pytest' else None
+    if junit is not None:
+        junit.unlink(missing_ok=True)  # Never accept a previous invocation's report.
+        command=[sys.executable,'-m','pytest',str(path),'-q','--color=no','--junitxml',str(junit)]
+    else:
+        command = [sys.executable,str(path)] if suite['runtime']=='python' else [node or 'node','--test','--test-reporter=tap',str(path)]
+    proc = None; timed_out = False
+    try:
+        proc = subprocess.Popen(command,cwd=root,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+             text=True,encoding='utf-8',errors='replace',
+             creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0) if os.name=='nt' else 0,
+             start_new_session=os.name!='nt')
+        try: stdout,stderr = proc.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            timed_out = True; _stop_tree(proc); stdout,stderr = proc.communicate(timeout=5)
+        code = proc.returncode
+    except (OSError,subprocess.SubprocessError) as exc:
+        if proc is not None: _stop_tree(proc)
+        stdout,stderr,code = '',str(exc),-1
+    (work/'stdout.log').write_text(stdout,encoding='utf-8')
+    (work/'stderr.log').write_text(stderr,encoding='utf-8')
+    report=pytest_counts(junit) if junit is not None else None
+    result = judge_suite(suite['name'],code,stdout,stderr,time.perf_counter()-started,
+                         timed_out=timed_out,pytest_report=report)
+    result.update(category=suite['category'],runtime=suite['runtime'],framework=framework,logs=str(work))
+    if report is not None: result.update(pytest_report=report,junit=str(junit))
+    return result
 
 
 def _selftest():
-    """构造必败/必过样例，验证 judge_suite 判定链路本身可信。"""
-    cases = [
-        # (描述, judge参数, 期望verdict)
-        ("正常通过", dict(returncode=0, stdout="[PASS] a\n[PASS] b",
-                          stderr="", duration_s=1.0), "PASS"),
-        ("非零退出码", dict(returncode=1, stdout="[PASS] a",
-                            stderr="boom", duration_s=1.0), "FAIL"),
-        ("超时", dict(returncode=None, stdout="", stderr="",
-                      duration_s=900.0, timed_out=True), "FAIL"),
-        ("含FAIL标记", dict(returncode=0, stdout="[PASS] a\n[FAIL] b",
-                            stderr="", duration_s=1.0), "FAIL"),
-        ("空跑", dict(returncode=0, stdout="(无测试)", stderr="",
-                      duration_s=0.5), "FAIL"),
-        ("Traceback但退出码0", dict(returncode=0,
-                                    stdout="Traceback (most recent call last)\n x",
-                                    stderr="", duration_s=1.0), "FAIL"),
-        ("文件缺失", dict(returncode=None, stdout="", stderr="",
-                          duration_s=0.0, missing=True), "FAIL"),
-    ]
-    bad = 0
-    for desc, kw, expect in cases:
-        got = judge_suite("selftest", **kw)["verdict"]
-        ok = got == expect
-        bad += 0 if ok else 1
-        print(f"[{'PASS' if ok else 'FAIL'}] selftest {desc}: got={got} expect={expect}")
-    print(f"[{'PASS' if bad == 0 else 'FAIL'}] selftest 汇总: {len(cases) - bad}/{len(cases)}")
-    return 1 if bad else 0
+    cases = [(0,'[PASS] a','',False,'PASS'),(1,'[PASS] a','',False,'FAIL'),
+             (None,'','',True,'FAIL'),(0,'[FAIL] a','',False,'FAIL'),
+             (0,'nothing','',False,'FAIL'),(0,'','Traceback (most recent call last)',False,'FAIL'),
+             (0,'Ran 2 tests in 0.1s\n\nOK (skipped=2)\n','',False,'SKIP'),
+             (0,'# tests 2\n# pass 2\n# fail 0\n# skipped 0\n','',False,'PASS')]
+    for code,out,err,timed,expect in cases:
+        assert judge_suite('self',code,out,err,0,timed_out=timed)['verdict']==expect
+    print('[PASS] runner selftest: exit, timeout, assertion, empty, traceback, unittest skip, Node TAP')
+    return 0
 
 
-def main(argv: list[str]) -> int:
-    if "--selftest" in argv:
-        return _selftest()
-    only = None
-    if len(argv) > 1 and not argv[1].startswith("-"):
-        only = argv[1]
-    stats: dict = {"suites": {}, "passed": 0, "failed_suites": 0}
-    suites = [only] if only else SUITES
-    for t in suites:
-        res = run_suite(t)
-        stats["suites"][t] = res
-        stats["passed"] += res["passed"]
-        if res["verdict"] == "FAIL":
-            stats["failed_suites"] += 1
-        flag = "✓" if res["verdict"] == "PASS" else "✗"
-        print(f"{flag} {t}: {res['passed']} PASS  {res['duration_s']}s"
-              + (f"  ← {'; '.join(res['reasons'])}" if res["reasons"] else ""))
-    stats["total"] = stats["passed"]
-    stats["generated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-    out = ROOT / "data" / "test_stats.json"
-    out.parent.mkdir(exist_ok=True)
-    out.write_text(json.dumps(stats, ensure_ascii=False, indent=2),
-                   encoding="utf-8")
-    print(f"\n合计 {stats['passed']} 项 PASS，{stats['failed_suites']} 个套件失败"
-          f" → {out}")
-    return 1 if stats["failed_suites"] else 0
+def main(argv=None):
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('suite',nargs='?')
+    parser.add_argument('--only',nargs='+')
+    parser.add_argument('--category',choices=CATEGORIES)
+    parser.add_argument('--online',action='store_true')
+    parser.add_argument('--llm',action='store_true')
+    parser.add_argument('--list',action='store_true')
+    parser.add_argument('--selftest',action='store_true')
+    parser.add_argument('--timeout',type=float,default=None,help='Override per-suite timeout; full-model probe defaults to 600s, other suites 180s')
+    parser.add_argument('--output',type=Path)
+    args=parser.parse_args(argv)
+    if args.selftest: return _selftest()
+    if args.timeout is not None and not 0 < args.timeout <= 1800: parser.error('timeout必须在0..1800秒')
+    suites=discover(); names=args.only or ([args.suite] if args.suite else None)
+    if names:
+        missing=set(names)-{s['name'] for s in suites}
+        if missing: parser.error('未知套件: '+str(sorted(missing)))
+        suites=[s for s in suites if s['name'] in names]
+    if args.category: suites=[s for s in suites if s['category']==args.category]
+    if args.list:
+        print(json.dumps(suites,ensure_ascii=False,indent=2));return 0
+    output=(args.output or ROOT/'.claude'/'test_runs'/time.strftime('%Y%m%dT%H%M%S')).resolve()
+    output.mkdir(parents=True,exist_ok=True)
+    stats={'suites':{},'passed':0,'skipped':0,'failed_suites':0,'categories':{},
+           'online_requested':args.online,'llm_requested':args.llm,'source_isolated':True}
+    with tempfile.TemporaryDirectory(prefix='dayan-tests-') as td:
+        root=Path(td);_snapshot(root)
+        for suite in suites:
+            if suite['category'] in ('online','llm') and not (args.online if suite['category']=='online' else args.llm):
+                res={'suite':suite['name'],'category':suite['category'],'runtime':suite['runtime'],
+                     'verdict':'SKIP','passed':0,'skipped':1,'reasons':['未选择外部服务；未执行，不能当作通过'],'duration_s':0}
+            else: res=run_suite(suite,root,output,args.timeout or suite['timeout_s'],args.online,args.llm)
+            stats['suites'][suite['name']]=res
+            stats['passed']+=res['passed'];stats['skipped']+=res.get('skipped',0)
+            stats['failed_suites']+=int(res['verdict']=='FAIL')
+            print(res['verdict']+' '+suite['name']+': '+str(res['passed'])+' passed, '+str(res.get('skipped',0))+' skipped; '+str(res['duration_s'])+'s',flush=True)
+            if res['verdict']=='FAIL':
+                print('Reasons: '+'; '.join(res.get('reasons',[])),flush=True)
+                print(res.get('excerpt',''),flush=True)
+            (output/'test_stats.json').write_text(json.dumps(stats,ensure_ascii=False,indent=2),encoding='utf-8')
+    stats['total']=stats['passed'];stats['generated_at']=time.strftime('%Y-%m-%dT%H:%M:%S')
+    for cat in CATEGORIES:
+        rows=[v for v in stats['suites'].values() if v['category']==cat]
+        stats['categories'][cat]={v:sum(r['verdict']==v for r in rows) for v in ('PASS','FAIL','SKIP')}
+    (output/'test_stats.json').write_text(json.dumps(stats,ensure_ascii=False,indent=2),encoding='utf-8')
+    print('Result: '+str(stats['passed'])+' assertions passed; '+str(stats['skipped'])+' skipped; '+str(stats['failed_suites'])+' suites failed. '+str(output),flush=True)
+    return int(bool(stats['failed_suites']))
 
 
-if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+if __name__=='__main__':
+    sys.exit(main())

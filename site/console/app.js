@@ -17,6 +17,7 @@
     $('#closeModal').focus();
   }
   function closeModal() {
+    if (!$('#modalBackdrop').classList.contains('open')) return;
     $('#modalBackdrop').classList.remove('open');
     if (previousFocus?.isConnected) previousFocus.focus();
   }
@@ -43,7 +44,19 @@
     catch { notice('当前浏览器无法进入全屏。'); }
   });
   $('#modelButton').addEventListener('click', () => window.switchPage?.('models'));
-  document.addEventListener('visibilitychange', () => { if (window.DAYAN_RESULTS) window.DAYAN_RESULTS.lastWall = null; });
-  function frame(time) { window.DAYAN_RESULTS?.tick(time); requestAnimationFrame(frame); }
-  requestAnimationFrame(frame);
+  let tickFrame;
+  function scheduleTick() {
+    if (!tickFrame && !document.hidden && window.DAYAN_RESULTS?.playing) tickFrame = requestAnimationFrame(frame);
+  }
+  function frame(time) {
+    tickFrame = null;
+    window.DAYAN_RESULTS?.tick(time);
+    scheduleTick();
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (window.DAYAN_RESULTS) window.DAYAN_RESULTS.lastWall = null;
+    if (document.hidden && tickFrame) {cancelAnimationFrame(tickFrame);tickFrame=null;}
+    else scheduleTick();
+  });
+  window.DAYAN_SCHEDULE_TICK = scheduleTick;
 })();

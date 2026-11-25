@@ -1,0 +1,64 @@
+[
+  {
+    "model_id": "ECO038",
+    "run_id": "R20261118T061434-02334abb6e4b410993c82ee47a9a98cd",
+    "data_bindings": [
+      {
+        "dataset_id": "DS-25f9253c7b35e10bf53ac75e",
+        "sha256": "4875c49ced68dbe356aa3a344615a385e05e9b06269d02b71ac78f81781e00ae",
+        "source": "collection:C20261118T133448-57c949dc",
+        "license": "World Bank CC BY 4.0 (indicator terms apply)",
+        "role": "calibration",
+        "fields": [
+          "value"
+        ],
+        "time_field": "date",
+        "ordering": "validated source order",
+        "port": "var_training",
+        "n_rows": 18
+      }
+    ],
+    "observations": 4,
+    "last": {
+      "sim_t": 3.0,
+      "prediction": [
+        7.317808749939283
+      ],
+      "coefficient": [
+        [
+          0.687099767436804
+        ]
+      ],
+      "intercept": [
+        2.2785980852508554
+      ],
+      "spectral_radius": 0.687099767436804
+    }
+  },
+  {
+    "model_id": "ECO045",
+    "run_id": "R20261118T061434-f91250655cda4a96ae3015b1a9e87eb2",
+    "data_bindings": [
+      {
+        "dataset_id": "DS-67c153d4838b6487581c7b47",
+        "sha256": "6c5019da63807bfbb9996cc2ac2bfa5ec145cac7e2a222c5da3a6a3383b7cd4b",
+        "source": "dataset:DS-25f9253c7b35e10bf53ac75e",
+        "license": "World Bank CC BY 4.0 (indicator terms apply)",
+        "role": "calibration",
+        "fields": [
+          "change"
+        ],
+        "time_field": "date",
+        "ordering": "validated source order",
+        "port": "garch_observed_returns",
+        "n_rows": 17
+      }
+    ],
+    "observations": 18,
+    "last": {
+      "sim_t": 17.0,
+      "conditional_variance": 0.5725983816727016,
+      "observation_index": 17
+    }
+  }
+]

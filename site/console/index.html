@@ -5,53 +5,167 @@
   <meta name="theme-color" content="#08131d"><meta name="description" content="大衍 DAYAN 社会仿真工作台：观察模型世界，比较方案，追溯研究证据。">
   <title>大衍 DAYAN · 社会仿真工作台</title>
   <link rel="stylesheet" href="style.css?v=research-20261113"><link rel="stylesheet" href="workspace.css?v=research-20261113"><link rel="stylesheet" href="command.css?v=command-20261113">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+  <link rel="stylesheet" href="workbench.css?v=lattice-20261120">
+  <script src="vendor/three.min.js?v=0.160.0"></script>
 </head>
-<body class="command-center mode-simple" data-operation-mode="simple">
+<body class="command-center">
 <div class="app research-workspace">
   <header class="masthead">
-    <div class="brand"><div class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div><h1>大衍 DAYAN</h1><p>社会仿真 · 观察变化，理解结果</p></div></div>
-    <nav aria-label="主导航"><button class="nav active" data-nav="overview">研究工作台</button><button class="nav" data-nav="data">数据</button><button class="nav" data-nav="scenarios">机制案例</button><button class="nav" data-nav="models">模型库</button><button class="nav" data-nav="replay">研究记录</button></nav>
-    <div class="headright"><span id="connectionStatus" class="connection-state">连接中</span><button class="ws-button" id="assistantButton" onclick="toggleAIDrawer()">打开 AI 助手</button><button class="iconbtn" id="fullscreen" aria-label="切换全屏">⛶</button></div>
+    <div class="brand"><div class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div><h1>大衍 <small>DAYAN</small></h1><p>社会仿真研究系统</p></div></div>
+    <div class="headright"><span id="connectionStatus" class="connection-state">连接中</span><button class="iconbtn" id="notificationButton" aria-label="任务与通知" title="任务与通知" hidden>◇<sup id="notificationCount" hidden>0</sup></button><button class="ws-button" id="assistantButton" onclick="toggleAIDrawer()">AI 助手</button><button class="iconbtn" id="fullscreen" aria-label="切换全屏" title="切换全屏" hidden>⛶</button></div>
   </header>
-  <div id="pageOverview">
-    <section class="scenario-strip"><div class="scenario-name"><span class="code">RESEARCH WORKSPACE</span><strong id="scenarioTitle">从一个问题，进入一个可观察的世界</strong><span class="tag">准备就绪</span><p id="researchQuestion">描述您想研究的问题，或从机制案例和研究记录中开始。</p></div><div class="context"><span>暂无运行</span><span>模型时间 —</span><span>种子 —</span></div></section>
+  <nav id="systemNavigation" aria-label="主导航">
+    <button class="nav active" data-nav="overview" aria-current="page" title="仿真现场">仿真现场</button>
+    <button class="nav" data-nav="replay" title="历史记录">历史记录</button>
+    <button class="ws-button" id="openExperiment" aria-expanded="false" aria-controls="operationRail">参数</button>
+  </nav>
+  <div id="pageMission" data-workspace-page hidden>
+    <header class="space-heading"><div><p class="space-kicker">MISSION CONTROL</p><h2>系统总览</h2><p id="missionContext">读取本机研究档案与运行状态</p></div><button class="ws-button ws-primary" data-go="lab">设计研究</button></header>
+    <div class="mission-stage">
+      <section class="mission-visual" aria-labelledby="missionGraphTitle"><div class="mission-visual-head"><h2 id="missionGraphTitle">研究证据链</h2></div><div id="missionGraph"><p class="space-empty">正在读取研究档案…</p></div></section>
+      <section id="missionStats" class="mission-stats" aria-label="工作区状态">
+        <div><span>模型入口</span><strong id="missionModels">—</strong><small id="missionModelNote">目录读取中</small></div>
+        <div><span>本地数据资产</span><strong id="missionDatasets">—</strong><small id="missionDataNote">资产读取中</small></div>
+        <div><span>执行 / 排队</span><strong id="missionJobs">—</strong><small id="missionQueueNote">队列读取中</small></div>
+        <div><span>研究规约</span><strong id="missionStudies">—</strong><small id="missionStudiesNote">档案读取中</small></div>
+      </section>
+    </div>
+    <div class="mission-grid">
+      <section class="panel mission-library"><div class="panel-head"><h2>模型能力构成</h2></div><div id="missionCapability" class="mission-panel-body"></div></section>
+      <section class="panel mission-queue"><div class="panel-head"><h2>运行队列</h2><span id="missionSample" class="micro">等待采样</span></div><div id="missionQueue" class="mission-panel-body" role="region" aria-label="运行队列"></div></section>
+      <section class="panel mission-records"><div class="panel-head"><h2>最新实验与回放</h2></div><div id="missionHistory" class="mission-panel-body"></div></section>
+      <section class="panel mission-resources"><div class="panel-head"><h2>本机资源</h2><span class="micro">实时采样</span></div><div id="missionResources" class="mission-panel-body"></div></section>
+      <section class="panel mission-evidence"><div class="panel-head"><h2>验证与告警</h2></div><div id="missionEvidence" class="mission-panel-body"></div></section>
+    </div>
+    <p id="missionError" class="space-status" role="status"></p>
+  </div>
+  <div id="pageOverview" data-workspace-page>
+    <div id="simulationSurface">
+    <section class="scenario-strip"><div class="scenario-name"><span class="code" id="scenarioModel"></span><strong id="scenarioTitle">等待仿真任务</strong><span class="tag" id="runPhase">待开始</span><p id="researchQuestion">在对话中描述想研究的场景、问题和观察目标。</p></div><div id="runScope" class="context"><span></span><span></span><span></span></div></section>
     <section class="workspace-toolbar" aria-label="研究与分析操作">
       <div id="resultSelectors" class="result-selectors"><label>观察方案<select id="resultRunSelect" aria-label="选择运行" disabled><option>等待运行</option></select></label><label>结果指标<select id="resultMetricSelect" aria-label="选择观测量" disabled><option>等待指标</option></select></label></div>
-      <div class="workspace-actions"><button class="ws-button" id="dataManagerButton">管理输入数据</button><button class="ws-button" id="configButton">实验依据</button><a class="ws-button" id="exportCsv" aria-disabled="true">原始 CSV</a><a class="ws-button" id="exportBundle" aria-disabled="true">研究包</a><button class="ws-button" id="resumeButton" disabled>从检查点续算</button><button class="ws-button ws-primary" id="reportButton" disabled>生成研究报告</button></div>
+      <div class="workspace-actions">
+        <button class="ws-button ws-primary" id="reportButton" hidden disabled>生成报告</button>
+        <details class="control-menu" id="runActions">
+          <summary class="ws-button">实验操作</summary>
+          <div class="control-menu-panel">
+            <button class="ws-button" id="dataManagerButton">管理输入数据</button>
+            <button class="ws-button" id="configButton" data-close-menu>查看实验依据</button>
+            <button class="ws-button" id="modelDesignButton" data-close-menu hidden>建模记录</button>
+            <a class="ws-button" id="exportCsv" aria-disabled="true" data-close-menu>下载原始 CSV</a>
+            <a class="ws-button" id="exportBundle" aria-disabled="true" data-close-menu>下载研究包</a>
+            <button class="ws-button" id="resumeButton" data-close-menu disabled>从检查点续算</button>
+          </div>
+        </details>
+      </div>
     </section>
     <section class="kpi-row" aria-label="研究结果摘要"><article class="kpi" hidden></article><article class="kpi" hidden></article><article class="kpi" hidden></article><article class="kpi" hidden></article></section>
     <main class="workspace-grid">
       <section class="panel live-panel">
-        <div class="panel-head scene-head"><div class="scene-caption"><h2><span class="live"><i></i>准备中</span>仿真现场</h2><span id="sceneProvenance">运行后呈现对应模型世界</span></div><div class="view-modes" aria-label="观看方式"><button data-workspace-view="combined" aria-pressed="true">综合研究</button><button data-workspace-view="immersive" aria-pressed="false">沉浸观看</button><button id="resetCamera" aria-label="回到场景总览机位">总览机位</button></div></div>
-        <div class="stage-row"><div class="map-viewport" id="mapViewport"><div id="viz3dContainer"></div><div class="scene-vignette"></div>
+        <div class="panel-head scene-head">
+          <div class="scene-caption"><h2><span class="live"><i></i>准备中</span><span id="sceneViewLabel">仿真现场</span></h2><span id="sceneProvenance">运行后呈现对应模型世界</span></div>
+          <div class="view-modes" aria-label="观看方式">
+            <details class="control-menu" id="sceneOptions">
+              <summary class="ws-button">场景设置</summary>
+              <div class="control-menu-panel scene-options-panel">
+                <div class="scene-options-group" role="group" aria-label="工作台布局"><span>布局</span><div><button data-workspace-view="combined" aria-pressed="true" data-close-menu>综合</button><button data-workspace-view="immersive" aria-pressed="false" data-close-menu>专注</button></div></div>
+                <div class="scene-options-group scene-run-option" role="group" aria-label="镜头机位"><span>机位</span><div><button id="resetCamera" aria-label="回到场景总览机位" aria-pressed="true">总览</button><button data-camera-preset="plan" aria-pressed="false">俯视</button><button data-camera-preset="low" aria-pressed="false">低角度</button></div></div>
+                <div class="scene-options-group scene-run-option" role="group" aria-label="场景图层"><span>图层</span><div><button data-scene-toggle="base" aria-pressed="true">基础空间</button><button data-scene-toggle="entities" aria-pressed="true">主体</button><button data-scene-toggle="roads" aria-pressed="true">道路</button><button data-scene-toggle="facilities" aria-pressed="true">设施</button><button data-scene-toggle="labels" aria-pressed="true">标签</button><button data-scene-toggle="events" aria-pressed="true">事件</button></div></div>
+                <div class="scene-options-group scene-run-option" role="group" aria-label="仿真分析覆盖层"><span>叠层</span><div><button class="active" data-layer="flow" aria-pressed="true">实体状态</button><button data-layer="roadFlow" disabled aria-pressed="false">道路通量</button><button data-layer="heat" disabled aria-pressed="false">主体密度</button><button data-layer="network" disabled aria-pressed="false">关系网络</button><button data-layer="trajectory" disabled aria-pressed="false">选中轨迹</button></div></div>
+                <div class="scene-options-group scene-run-option" role="group" aria-label="场景检查"><span>检查</span><div><button id="sceneProcess" data-close-menu disabled>状态流</button><button id="sceneDebug" aria-expanded="false" aria-controls="sceneDebugInfo" data-close-menu>诊断</button></div></div>
+              </div>
+            </details>
+            <button id="sceneFullscreen" aria-pressed="false">场景全屏</button>
+          </div>
+        </div>
+        <div class="stage-row"><div class="map-viewport" id="mapViewport"><div id="viz3dContainer"></div><section id="latticeScene" aria-label="逐格策略回放" hidden><header><h3>三方策略空间</h3><output></output></header><div class="lattice-layers"></div></section><div class="scene-vignette"></div>
+          <section id="researchStage" class="research-stage" aria-label="实际研究过程" hidden>
+            <header><div><span id="researchStageMode">指标演化</span><h3 id="researchStageTitle"></h3></div><output id="researchStageTime"></output></header>
+            <div class="research-stage-values"><div><span>当前值 <small id="researchStageUnit"></small></span><strong id="researchStageValue"></strong></div><div><span>较初态变化</span><strong id="researchStageChange"></strong></div></div>
+            <canvas id="researchStageChart" aria-label="真实模型与实测数据"></canvas><div id="researchStageLegend" class="research-stage-legend"></div>
+            <section id="researchStageResidual" hidden><span>模型减实测</span><canvas id="researchResidualChart" aria-label="同一展示种子的实际残差"></canvas></section>
+          </section>
           <div class="map-top-left"><span class="tiny-live"><i class="dot"></i>等待真实运行</span><strong id="simClock">sim_t=0</strong><p></p></div><div class="scene-status"><span class="micro">无运行</span><span class="tag">3D</span><span id="fps">同源回放</span></div>
-          <div id="sceneEmptyState" class="scene-empty"><span class="empty-orbit" aria-hidden="true">◎</span><h2>让一个问题，开始演化</h2><p>生成或选择模型后，在这里观察真实状态与主体行动。</p><div><button class="ws-button ws-primary" onclick="toggleAIDrawer()">描述研究问题</button><button class="ws-button" id="modelButton">选择模型</button></div><small>不自动运行示例，不填入演示结果</small></div>
-          <div class="map-tools" aria-label="仿真图层"><button class="active" data-layer="flow">实体状态</button><button data-layer="heat" disabled>风险热力</button><button data-layer="network" disabled>关系网络</button></div><button class="track-agent" id="trackAgent">选择主体，查看它的变化 ↗</button>
+          <div id="sceneEmptyState" class="scene-empty"><h2 id="sceneEmptyTitle">等待仿真任务</h2><p id="sceneEmptyNote" hidden></p><div><button class="ws-button ws-primary" id="startWithAssistant" onclick="toggleAIDrawer()">描述研究问题</button><button class="ws-button" id="modelButton">选择模型</button></div></div>
+          <div id="liveCalculation" hidden role="status"></div><div id="archiveLoading" hidden role="status"></div>
+          <output id="layerReadout" hidden></output>
+          <div id="sceneHover" hidden aria-hidden="true"></div><section id="mapInspector" aria-label="主体检查器" hidden></section>
+          <output id="sceneDebugInfo" hidden></output><button class="track-agent" id="trackAgent" aria-expanded="false" hidden>查看主体</button>
         </div></div>
-        <div class="playbar"><button class="play" id="playButton" aria-label="播放回放">▶</button><button class="replay-btn" id="resetButton" aria-label="回到初态">↺</button><div class="speed" aria-label="回放倍速"><button data-speed="0.25">0.25×</button><button class="selected" data-speed="1">1×</button><button data-speed="4">4×</button><button data-speed="16">16×</button></div><div class="timeline"><div class="timeline-labels"><span>0</span><span id="timelineText">等待模型运行</span><span>0</span></div><input type="range" id="timeline" min="0" max="1" value="0" aria-label="仿真时间回放进度"><div class="timeline-ticks"></div></div><button class="snap-btn" id="snapshotButton" aria-label="保存回放位置">◇<span>标记</span></button><label class="loop-control"><input id="loopPlayback" type="checkbox">循环回放</label></div>
+        <div class="playbar">
+          <button class="play" id="playButton" aria-label="播放回放">▶</button>
+          <div class="timeline"><div class="timeline-labels"><span>0</span><span id="timelineText">等待模型运行</span><span>0</span></div><input type="range" id="timeline" min="0" max="1" value="0" aria-label="仿真时间回放进度"><div class="timeline-ticks"></div></div>
+          <details class="control-menu menu-up" id="playbackActions" hidden>
+            <summary class="ws-button">回放设置</summary>
+            <div class="control-menu-panel">
+              <label>回放倍速<select id="playbackSpeed"><option value="0.25">0.25×</option><option value="1" selected>1×</option><option value="4">4×</option><option value="16">16×</option></select></label>
+              <label class="loop-control"><input id="loopPlayback" type="checkbox">循环回放</label>
+              <button class="ws-button" id="resetButton">回到初态</button>
+              <button class="ws-button" id="stepBack">上一观测帧</button><button class="ws-button" id="stepForward">下一观测帧</button>
+              <button class="ws-button" id="snapshotButton">保存回放位置</button>
+            </div>
+          </details>
+        </div>
       </section>
       <aside class="analysis-column" aria-label="同屏分析">
-        <section class="panel obs-column" id="obsColumn" aria-label="指标趋势"><div class="panel-head"><h2>变化发生在何时</h2><span id="obsModel" class="micro">等待运行</span></div><div class="metric-description" id="metricDescription">选择结果指标，查看过程与方案差异。</div><canvas id="obsChart" class="analysis-canvas" aria-label="同源指标时间序列"></canvas><div class="obs-legend" id="obsLegend"></div><div class="obs-tick" id="obsTick"></div></section>
-        <section class="panel" id="distributionPanel"><div class="panel-head"><h2 id="distributionTitle">当前状态如何分布</h2><label class="compact-label">维度<select id="distributionField" aria-label="分布维度" disabled><option>等待主体状态</option></select></label></div><canvas id="distributionChart" class="analysis-canvas" aria-label="当前主体属性或状态分布"></canvas><p class="chart-caption" id="distributionNote">有主体状态时显示分布；汇总模型按已有指标展示。</p></section>
+        <section class="panel obs-column" id="obsColumn" aria-label="指标趋势"><div class="panel-head"><h2>指标趋势</h2><span id="obsModel" class="micro" hidden></span></div><div class="metric-description" id="metricDescription"></div><canvas id="obsChart" class="analysis-canvas" aria-label="同源指标时间序列"></canvas><div class="obs-legend" id="obsLegend"></div><div class="obs-tick" id="obsTick" hidden></div></section>
+        <section class="panel" id="ratePanel" hidden><div class="panel-head"><h2>变化速率</h2><span class="chart-value" id="rateValue"></span></div><canvas id="rateChart" class="analysis-canvas" aria-label="所选指标每模型时间单位的变化速率"></canvas></section>
+        <section class="panel" id="distributionPanel" hidden><div class="panel-head"><h2 id="distributionTitle">状态分布</h2><label class="compact-label"><select id="distributionField" aria-label="分布维度" disabled></select></label></div><canvas id="distributionChart" class="analysis-canvas" aria-label="当前主体属性或状态分布"></canvas><p class="chart-caption" id="distributionNote"></p></section>
       </aside>
     </main>
-    <section class="analysis-controls" aria-label="比较口径"><label>分析窗口<select id="analysisWindow"><option value="all">全程</option><option value="post" disabled>干预后</option><option value="custom">自选区间</option></select></label><div id="customWindowInputs" hidden><label>起点<input id="analysisFrom" type="number" step="any"></label><label>终点<input id="analysisTo" type="number" step="any"></label><button class="ws-button" id="applyWindow">应用区间</button></div><span id="analysisWindowLabel">运行后可选择分析窗口</span><span id="sampleNote"></span></section>
+    <section id="runMoments" class="run-moments" aria-label="关键时刻" hidden><strong>关键时刻</strong><div id="momentButtons"></div><button class="ws-button" id="askMoment" hidden>问 AI</button></section>
+    <section class="analysis-controls" aria-label="分析口径" hidden><label>分析窗口<select id="analysisWindow"><option value="all">全程</option><option value="post" disabled>干预后</option><option value="custom">自选区间</option></select></label><div id="customWindowInputs" hidden><label>起点<input id="analysisFrom" type="number" step="any"></label><label>终点<input id="analysisTo" type="number" step="any"></label><button class="ws-button" id="applyWindow">应用区间</button></div><span id="analysisWindowLabel"></span><span id="sampleNote" hidden></span></section>
     <section class="analysis-grid">
-      <section class="panel space-panel"><div class="panel-head"><h2 id="structureTitle">变化发生在哪里</h2><span class="micro" id="structureSubtitle">位置与时间</span></div><canvas id="structureChart" class="analysis-canvas" aria-label="实际状态的空间或过程结构"></canvas><p class="chart-caption" id="structureNote">按模型实际提供的位置、群体或指标显示。</p></section>
-      <section class="panel comparison"><div class="panel-head"><h2 id="comparisonTitle">方案差异有多大</h2><span class="micro" id="comparisonSample"></span></div><div class="compare-body"><div class="chart-wrap"><svg id="comparisonChart" role="img" aria-label="所选窗口的运行结果比较"></svg></div><div class="effect"><span id="effectLabel">等待研究结果</span><strong id="effectNumber">—</strong><small id="effectSub"></small></div></div><p class="chart-caption" id="comparisonNote">各方案使用同一指标与分析窗口。</p><div id="insightSummary" class="insight-summary" aria-live="polite"></div></section>
-      <section class="panel entity-panel" id="entityPanel"><div class="panel-head"><h2>走近一个主体</h2><span class="micro" id="entityCount">无实体</span></div><div class="entity-picker"><label>主体<select id="entitySelect" aria-label="选择主体" disabled><option value="">等待主体状态</option></select></label><label>轨迹属性<select id="entityMetric" aria-label="主体轨迹属性" disabled><option>—</option></select></label><button id="focusEntity" class="ws-button" disabled>在场景中定位</button><button id="followEntity" class="ws-button" aria-pressed="false" disabled>跟随主体</button></div><div id="entitySummary" class="entity-summary">点击场景中的主体，或从列表中选择。</div><canvas id="entityChart" class="analysis-canvas" aria-label="所选主体的实际属性轨迹"></canvas></section>
+      <section class="panel structure-panel"><div class="panel-head"><h2 id="structureTitle">空间与过程</h2><span class="micro" id="structureSubtitle">位置与时间</span></div><canvas id="structureChart" class="analysis-canvas" aria-label="实际状态的空间或过程结构"></canvas><p class="chart-caption" id="structureNote">按模型实际提供的位置、群体或指标显示。</p></section>
+      <section class="panel" id="metricHeatPanel" hidden><div class="panel-head"><h2>多指标时序</h2><span class="heat-scale" title="以各指标在所选分析窗口内的真实最小值和最大值着色">低 <i></i> 高</span></div><canvas id="metricHeatChart" class="analysis-canvas" aria-label="分指标着色的真实观测时序热图"></canvas></section>
+      <section class="panel" id="metricRelationPanel" hidden><div class="panel-head"><h2>指标关系</h2><span id="metricRelationCount" class="chart-value"></span></div><canvas id="metricRelationChart" class="analysis-canvas" aria-label="同一模型时点的真实指标散点"></canvas></section>
+      <section class="panel comparison" hidden><div class="panel-head"><h2 id="comparisonTitle">方案差异</h2><span class="micro" id="comparisonSample"></span></div><div class="compare-body"><div class="chart-wrap"><svg id="comparisonChart" role="img" aria-label="所选窗口的运行结果比较"></svg><canvas id="effectTrend" class="analysis-canvas" hidden></canvas></div><div class="effect"><span id="effectLabel"></span><strong id="effectNumber">—</strong><small id="effectSub"></small></div></div><p class="chart-caption" id="comparisonNote"></p><div id="insightSummary" class="insight-summary" aria-live="polite"></div></section>
+      <section class="panel entity-panel" id="entityPanel"><div class="panel-head"><h2>走近一个主体</h2><span class="micro" id="entityCount">无实体</span></div><div class="entity-picker"><label>主体编号<input id="entitySelect" list="entityChoices" aria-label="选择或输入主体编号" placeholder="输入编号" autocomplete="off" disabled><datalist id="entityChoices"></datalist></label><label>轨迹属性<select id="entityMetric" aria-label="主体轨迹属性" disabled><option>—</option></select></label><button id="focusEntity" class="ws-button" disabled>在场景中定位</button><button id="followEntity" class="ws-button" aria-pressed="false" disabled>跟随主体</button></div><div id="entitySummary" class="entity-summary">输入主体编号或点击场景中的主体。</div><canvas id="entityChart" class="analysis-canvas" aria-label="所选主体的实际属性轨迹"></canvas></section>
     </section>
-    <section class="details-grid"><details class="panel intervention-details"><summary>设置干预并运行配对实验<span>修改机制，观察世界如何变化</span></summary><section class="policy"></section></details><details class="panel events"><summary>过程事件<span id="eventCounter">0</span></summary><div class="event-list" id="eventList"></div></details></section>
-    <div id="workspaceStatus" class="workspace-status" role="status" aria-live="polite">等待研究任务</div>
+    <section class="details-grid"><details class="panel intervention-details"><summary>干预实验</summary><section class="policy"></section></details><details class="panel events"><summary>过程事件<span id="eventCounter">0</span></summary><div class="event-list" id="eventList"></div></details></section>
+    <div id="workspaceStatus" class="workspace-status" role="status" aria-live="polite" hidden></div>
+    </div>
   </div>
-  <div id="pageData" class="resource-page" style="display:none"><section class="panel data-workspace"><div class="panel-head"><h2>研究数据</h2><span>来源、质量与模型映射</span></div><div id="dataWorkspace"></div></section></div>
-  <div id="pageScenarios" class="resource-page" style="display:none"><section class="panel resource-content"><div class="resource-heading"><span class="eyebrow">MECHANISM CASES</span><h2>从一个机制开始</h2><p>案例用于理解模型。真实地区研究需要核对数据、机制与假设。</p></div><div id="scenariosGrid"></div></section></div>
-  <div id="pageModels" class="resource-page" style="display:none"><section class="panel resource-content"><div class="resource-heading"><span class="eyebrow">MODEL LIBRARY</span><h2>选择适合问题的模型</h2><p>先核对实现等级与机制覆盖，再决定如何使用。</p></div><div id="modelsTable"></div></section></div>
-  <div id="pageReplay" class="resource-page" style="display:none"><section class="panel resource-content"><div class="resource-heading"><span class="eyebrow">RESEARCH RECORDS</span><h2>回到已有研究</h2><p>读取保存的实验、方案和状态，继续观察与分析。</p></div><div id="replayList"></div></section></div>
-  <footer><span>等待首次仿真</span><span>正在读取运行入口</span><button id="helpButton">工作台说明 ↗</button></footer>
+  <div id="pageData" class="resource-page" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">DATA OBSERVATORY</p><h2>数据中心</h2><p>从来源核验到模型输入，保留每个版本的转换记录。</p></div><button class="ws-button" id="refreshSources">刷新来源与采集</button></header><div class="data-layout"><section class="panel data-workspace"><div class="panel-head"><h2>数据资产与模型映射</h2></div><div id="dataWorkspace"></div></section><section class="panel data-sources"><div class="panel-head"><h2>来源与采集</h2></div><div class="tool-body" id="spatialSource"></div><div class="tool-body" id="dsContent"></div></section></div></div>
+  <div id="pageScenarios" class="resource-page" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">MECHANISM CASES</p><h2>机制案例</h2><p>案例用于理解模型。真实地区研究需要核对数据、机制与假设。</p></div><button class="ws-button" data-go="lab">返回实验室</button></header><div id="scenariosGrid"></div></div>
+  <div id="pageModels" class="resource-page" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">MODEL UNIVERSE</p><h2>模型库</h2><p>按机制、证据和输入约束选择模型。</p></div></header><div id="modelsTable"></div></div>
+  <div id="pageLab" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">RESEARCH LAB</p><h2>研究实验室</h2><p>把研究问题转成可复查的实验规约。</p></div></header><div id="labWorkspace"></div></div>
+  <div id="pageAnalytics" data-workspace-page hidden><header class="space-heading"><div><p class="space-kicker">EXPERIMENT ANALYTICS</p><h2>实验分析</h2><p>在同一时间窗检查过程、分布、参数和方案差异。</p></div></header><div id="analyticsWorkspace"></div></div>
+  <div id="pageReplay" class="resource-page" data-workspace-page hidden>
+    <header class="space-heading" id="historyHeading"><h2>历史记录</h2></header>
+    <div id="replayList"></div>
+    <section id="historyDetail" hidden>
+      <div class="history-detail-bar">
+        <button id="historyBack" class="ws-button">← 历史记录</button>
+        <div id="historyDetailActions"></div>
+      </div>
+      <h2 id="historyTitle"></h2><p id="historyIdentity" class="micro"></p>
+      <div class="history-tabs" role="tablist" aria-label="记录详情">
+        <button data-history-tab="playback" id="historyPlaybackTab" role="tab" aria-controls="historyPlayback" aria-selected="true">回放</button>
+        <button data-history-tab="report" id="historyReportTab" role="tab" aria-controls="historyReport" aria-selected="false">分析报告</button>
+      </div>
+      <div id="historyPlayback" role="tabpanel" aria-labelledby="historyPlaybackTab"><p id="historyLoading" role="status"></p></div>
+      <div id="historyReport" role="tabpanel" aria-labelledby="historyReportTab" hidden><article id="outputDetail" class="report-article"></article></div>
+    </section>
+    <dialog id="historyManage" class="history-dialog" aria-labelledby="historyManageTitle" aria-describedby="historyManageText">
+      <form id="historyManageForm">
+        <h3 id="historyManageTitle"></h3>
+        <p id="historyManageText"></p>
+        <label id="historyNameField">记录名称<input id="historyName" type="text" maxlength="80" required></label>
+        <p id="historyManageError" role="alert"></p>
+        <div class="history-dialog-actions">
+          <button type="button" class="history-use-auto" id="historyUseAuto">恢复自动命名</button>
+          <button type="button" class="ws-button" id="historyManageCancel">取消</button>
+          <button type="submit" class="ws-button ws-primary" id="historyManageApply"></button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+  <footer><button id="helpButton">工作台说明</button></footer>
 </div>
+<aside id="researchDrawer" aria-label="研究工具" hidden><header><button id="closeResearchDrawer" class="ws-button">← 返回</button></header></aside>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="modal-backdrop" id="modalBackdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-heading"><div><span class="micro">RESEARCH WORKSPACE</span><h2 id="modalTitle">研究详情</h2></div><button id="closeModal" aria-label="关闭弹窗">×</button></div><div id="modalBody"></div></section></div>
-<script src="scene-studio.js?v=studio-20261113"></script><script src="viz3d.js?v=studio-20261113"></script><script src="app.js?v=research-20261113"></script><script src="pages.js?v=command-20261113"></script><script src="analysis.js?v=research-20261113"></script><script src="command.js?v=command-20261113"></script><script src="results.js?v=command-20261113"></script>
-<script src="research.js?v=integrity-20261115"></script></body></html>
+<script src="scene-studio.js?v=future-os"></script><script src="scene-spatial.js?v=spatial-20261125"></script><script src="viz3d.js?v=future-os"></script><script src="app.js?v=research-20261113"></script><script src="pages.js?v=future-os"></script><script src="analysis.js?v=lattice-20261120"></script><script src="command.js?v=future-os"></script><script src="results.js?v=lattice-20261120"></script>
+<script src="research.js?v=future-os"></script>
+<script src="workbench.js?v=future-os"></script><script src="workbench-charts.js?v=future-os"></script><script src="workbench-analytics.js?v=future-os"></script><script src="workbench-tools.js?v=future-os"></script><script src="workbench-research-stage.js?v=research-stage"></script><script src="workbench-live.js?v=future-os"></script></body></html>

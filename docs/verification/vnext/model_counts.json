@@ -1,0 +1,39 @@
+{
+  "source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
+  "counts": {
+    "total": 561,
+    "static_registered": 557,
+    "factory_entries": 509,
+    "registered_by_layer": {
+      "模型层": 483,
+      "应用层": 22,
+      "软件层": 52
+    },
+    "compatibility_or_benchmark_entries": 4,
+    "registered_model_factories": 505,
+    "registered_models_without_factory": 0,
+    "runnable": 509,
+    "registered_no_factory": 52,
+    "factory_outside_static": [
+      "MET-DTMC",
+      "MET-MM1",
+      "NET-SIR",
+      "NET064_jump"
+    ],
+    "probe_passed": 501,
+    "probe_failed": 0,
+    "probe_skipped_external": 8,
+    "provider_entries": 5,
+    "dataset_required_entries": 3,
+    "probe_not_run": 0,
+    "fidelity": {
+      "full": 10,
+      "lite": 10,
+      "prototype": 425,
+      "method_demo": 64,
+      "registered": 52
+    },
+    "reviewed": 21,
+    "historical_reviews_stale": 474
+  }
+}

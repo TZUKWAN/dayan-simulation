@@ -9,16 +9,22 @@ import asyncio
 import json
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
+from .access import WorkbenchAccess
+from .task_manager import managed_endpoint, get_manager
+from .source_version import source_fingerprint
+
+# The server's import-time identity is separate from files subsequently edited
+# on disk and from the fresh, supervised workers which execute calculations.
+_LOADED_REVISION = source_fingerprint()
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -26,10 +32,15 @@ sys.path.insert(0, str(ROOT))
 
 
 app = FastAPI(title="大衍 DAYAN", version="2.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"],
-                   allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(WorkbenchAccess)
 
 _state: dict = {}
+
+
+@app.on_event('shutdown')
+async def shutdown():
+    from .task_manager import close_managers
+    close_managers()
 
 
 def _dt_now():
@@ -37,49 +48,32 @@ def _dt_now():
     return _d.now()
 
 
+def configure_planner():
+    from .agent import intent
+    from .agent.llm_planner import llm_planner
+    from .llm_client import configured
+    available=configured()
+    intent.set_llm_planner(llm_planner if available else None)
+    _state['llm_planner']='configured-not-probed' if available else 'unconfigured'
+    return _state['llm_planner']
+
+
 def _load_catalog():
-    cat_path = ROOT / "data" / "dayan_catalog.json"
-    cat = json.loads(cat_path.read_text(encoding="utf-8")) if cat_path.exists() else {"models": []}
-    from .custom_models import capabilities
-    extra = [{"model_id": c["model_id"], "name": c.get("name", c["model_id"]),
-              "kind": "自定义可执行规约", "layer": "模型层",
-              "status": "未独立审查" if c["runnable"] else "规约未通过"} for c in capabilities()]
-    extra.append({"model_id": "CPL001", "name": "路网疏散 老年行动 信息 公交耦合", "kind": "复合机制模型", "layer": "模型层", "status": "情景原型 需真实数据输入"})
-    existing = {m["model_id"] for m in cat["models"]}
-    cat["models"] += [m for m in extra if m["model_id"] not in existing]
-    cat["count"] = len(cat["models"])
-    return cat
+    from .fidelity import get_catalog
+    catalog=get_catalog()
+    return {'count':catalog['counts']['total'],'counts':catalog['counts'],'models':catalog['models']}
 
 
 @app.on_event("startup")
 async def startup():
+    from .access import access_token
+    access_token()  # Native DSH may use tools before any page has been opened.
     _state["catalog"] = _load_catalog()
-    # 前端缓存自动爆破：每次启动把 index.html 的 ?v=N 统一替换为启动时间戳
-    try:
-        _html_path = ROOT / "site" / "console" / "index.html"
-        if _html_path.exists():
-            _h = _html_path.read_text(encoding="utf-8")
-            _stamp = _dt_now().strftime("%H%M%S%f")[:-3]
-            import re as _re
-            _h2 = _re.sub(r"v=\d+", "v=" + _stamp, _h)
-            if _h2 != _h:
-                _html_path.write_text(_h2, encoding="utf-8")
-                print("[DAYAN] 前端版本号已自动更新: v=" + _stamp)
-    except Exception as _e:
-        print("[DAYAN] 版本号更新失败(不影响运行):", _e)
+    # Asset versions are transformed in the response, never in tracked sources.
     print(f"[DAYAN] 目录加载：{_state['catalog']['count']} 条")
     # 注入阿里云 MaaS LLM planner（失败时规则路由自动保底）
     try:
-        from .agent import intent as _intent
-        from .agent.llm_planner import llm_planner
-        from .llm_client import configured
-        if configured():
-            _intent.set_llm_planner(llm_planner)
-            _state["llm_planner"] = "configured-not-probed"
-            print("[DAYAN] LLM planner 已配置；实际请求结果单独记录")
-        else:
-            _state["llm_planner"] = "unreachable"
-            print("[DAYAN] LLM planner 不可达，使用规则路由")
+        print('[DAYAN] planner '+configure_planner()+'；实际请求结果单独记录')
     except Exception as e:
         _state["llm_planner"] = f"error:{e}"
         print(f"[DAYAN] LLM planner 注入失败：{e}")
@@ -91,7 +85,12 @@ async def index():
     html_path = ROOT / "site" / "console" / "index.html"
     if html_path.exists():
         # no-cache：JS/CSS 有 ?v= 版本号，但 HTML 本身必须每次拉新，否则更新后用户拿旧页
-        return HTMLResponse(html_path.read_text(encoding="utf-8"),
+        import hashlib
+        digest=hashlib.sha256()
+        for file in sorted((ROOT/'site'/'console').glob('*')):
+            if file.suffix in ('.js','.css','.html'):digest.update(file.read_bytes())
+        html=re.sub(r'([?&]v=)[^"&\s<>]+',lambda m:m.group(1)+digest.hexdigest()[:12],html_path.read_text(encoding='utf-8'))
+        return HTMLResponse(html,
                             headers={"Cache-Control": "no-cache"})
     html_path2 = ROOT / "site" / "dayan_ui.html"
     if html_path2.exists():
@@ -106,6 +105,14 @@ async def root_js():
         return HTMLResponse(fp.read_text(encoding="utf-8"),
                             media_type="application/javascript", headers={"Cache-Control": "no-store"})
     raise HTTPException(404)
+
+
+@app.get('/vendor/three.min.js')
+async def local_three():
+    from fastapi.responses import FileResponse
+    path=ROOT/'site/console/vendor/three.min.js'
+    if not path.is_file():raise HTTPException(404,'缺少本地3D运行库')
+    return FileResponse(path,media_type='application/javascript',headers={'Cache-Control':'no-cache'})
 
 
 @app.get("/pages.js")
@@ -162,13 +169,20 @@ async def console_css():
 
 @app.get("/console/assets/{filename}")
 async def console_assets(filename: str):
-    fp = ROOT / "site" / "console" / "assets" / filename
-    if fp.exists():
+    # Validate before touching the filesystem: POSIX realpath rejects NUL,
+    # whereas a bad asset name must consistently return 404 on every OS.
+    if not re.fullmatch(r'[A-Za-z0-9_.-]+',filename):
+        raise HTTPException(404,'资源路径不在允许目录')
+    base=(ROOT/'site'/'console'/'assets').resolve()
+    fp=(base/filename).resolve()
+    if fp.parent!=base:
+        raise HTTPException(404,'资源路径不在允许目录')
+    if fp.is_file():
         suffix = fp.suffix.lower()
-        media = {"webp": "image/webp", "png": "image/png",
+        media = {".webp": "image/webp", ".png": "image/png",
                  ".jpg": "image/jpeg", ".svg": "image/svg+xml"}
-        return HTMLResponse(fp.read_bytes(),
-                            media_type=media.get(suffix, "application/octet-stream"))
+        if suffix not in media:raise HTTPException(404,'资源类型不允许')
+        return Response(fp.read_bytes(),media_type=media[suffix])
     raise HTTPException(404)
 
 
@@ -352,7 +366,7 @@ async def api_models_search(theme: str = "", limit: int = 60):
     if matched:
         rx = re.compile("|".join(MECHANISMS[m] for m in matched), re.I)
         for m in models:
-            blob = " ".join([m.get("basis") or "", m.get("model_id") or "",
+            blob = " ".join([m.get("name") or "", m.get("description") or "", " ".join(m.get("mechanisms") or []), m.get("basis") or "", m.get("model_id") or "",
                              " ".join(m.get("simplifications") or []),
                              m.get("evidence") or "", m.get("fidelity_zh") or ""])
             if rx.search(blob):
@@ -388,7 +402,7 @@ def _manifest_public(m: dict) -> dict:
             "started_at", "finished_at", "duration_s", "warnings",
             "runtime_version", "model_id", "protocol", "code_version", "software",
             "artifact_schema", "state_frame_count", "state_every", "data_bindings", "model_definition",
-            "llm_calls", "implementation_note", "fidelity", "scenario_review")
+            "llm_calls", "implementation_note", "fidelity", "scenario_review", "scale")
     return {k: m.get(k) for k in keys if k in m}
 
 
@@ -411,6 +425,7 @@ async def api_implemented():
 
 # ============ API: 运行仿真 ============
 @app.post("/api/custom_models")
+@managed_endpoint
 async def api_custom_model(req: dict):
     from .agent.model_tools import build_model
     try:
@@ -442,9 +457,11 @@ class DatasetInput(BaseModel):
     source: str = "user-upload"
     license: str = "unknown"
     role: str = "input"
+    parse_options: dict | None = None
 
 
 @app.post("/api/datasets/import")
+@managed_endpoint
 async def api_dataset_import(req: DatasetInput):
     from .datasets import ingest
     try:
@@ -453,12 +470,14 @@ async def api_dataset_import(req: DatasetInput):
         import base64
         raw = req.content.encode("utf-8") if req.content is not None else base64.b64decode(req.content_base64, validate=True)
         return await asyncio.to_thread(ingest, raw, name=req.name,
-                                        format=req.format, source=req.source, license=req.license, role=req.role)
+                                        format=req.format, source=req.source, license=req.license, role=req.role,
+                                        parse_options=req.parse_options)
     except ValueError as exc:
         raise HTTPException(400, str(exc))
 
 
 @app.post("/api/datasets/collect")
+@managed_endpoint
 async def api_dataset_collect(req: dict):
     from .agent.data_tools import collect_data
     result = await asyncio.to_thread(collect_data, **req)
@@ -511,14 +530,15 @@ class SimRequest(BaseModel):
     data_bindings: list = []
     checkpoint_at: int | None = Field(default=None, ge=0, strict=True)
     interventions: list = []   # WP8 时点干预：[{"at_t": sim时刻, "label": str, "params": {...}}]
+    async_job: bool = False
 
 
 @app.post("/api/run")
+@managed_endpoint
 async def api_run(req: SimRequest):
     """统一运行入口（WP3/WP4/WP5）：run_model_full → 单次初始化、
     参数合同、派生随机流、sim_t 时间戳、RunManifest。
     成功运行完整归档到research_runs，回放与续算读取同一记录。"""
-    from .model_index import ALL_INDEX
     from .runtime import run_model_full
     from .agent.tools import _clean_nan
     mid = str(req.model_id).strip().upper()          # 小写/空格容忍（与 Agent 工具一致）
@@ -555,6 +575,7 @@ class ResumeRequest(BaseModel):
 
 
 @app.post("/api/runs/{run_id}/resume")
+@managed_endpoint
 async def api_resume(run_id: str, req: ResumeRequest):
     from .run_store import resume_saved_run
     try:
@@ -577,11 +598,12 @@ class StateStreamRequest(BaseModel):
 
 
 @app.post("/api/state_stream")
+@managed_endpoint
 async def api_state_stream(req: StateStreamRequest):
     """WP7 状态同源沙盘：运行模型并采样状态帧。
     provenance=entity：主体位置/状态来自模型真实计算；
     provenance=aggregate：模型未导出个体状态，前端必须标注「汇总驱动的示意动画」。"""
-    from .model_index import ALL_INDEX
+    from .model_index import resolve
     from .run_store import get_store, state_stream
     from .runtime import run_model_full
     from .agent.tools import _clean_nan
@@ -591,7 +613,7 @@ async def api_state_stream(req: StateStreamRequest):
             record = await asyncio.to_thread(store.load, req.run_id)
         else:
             mid = str(req.model_id or "").strip().upper()
-            if mid not in ALL_INDEX:
+            if resolve(mid)[0] is None:
                 raise KeyError(f"模型 {mid} 无运行工厂")
             rr = await asyncio.to_thread(run_model_full, mid, parameters=req.parameters,
                                          ticks=req.ticks, dt=req.dt, seed=req.seed,
@@ -609,7 +631,11 @@ async def api_state_stream(req: StateStreamRequest):
         raise HTTPException(500, f"{type(e).__name__}: {e}")
 
 
-HIST_PATH = ROOT / "data" / "run_history.jsonl"
+HIST_PATH: Path | None = None
+
+
+def _history_log(store):
+    return HIST_PATH if HIST_PATH is not None else store.directory.parent / "run_history.jsonl"
 
 
 @app.get("/api/runs/{run_id}")
@@ -624,19 +650,29 @@ async def api_saved_run(run_id: str):
 
 
 @app.post("/api/experiments")
+@managed_endpoint
 async def api_experiment(body: dict):
-    from .research.specs import ExperimentSpec
+    from .research.specs import ExperimentSpec, ResearchSpec
     from .research.experiment import run_experiment, experiment_payload
     from .run_store import get_store
     try:
+        body = dict(body)
+        research_payload = body.pop('research_spec', None)
         spec = ExperimentSpec.from_dict(body).finalize()
         problems = spec.validate()
+        if research_payload is not None:
+            research_spec = ResearchSpec.from_dict(research_payload)
+            problems += research_spec.validate()
+            if not research_spec.research_id or spec.research_id != research_spec.research_id:
+                problems.append('实验必须引用同一份研究规约')
+            if research_spec.unsupported_requirements:
+                problems.append('研究规约仍有未满足的要求')
         if problems:
             raise ValueError("；".join(problems))
         result = await asyncio.to_thread(run_experiment, spec, strict=True, persist=True)
         if not result.ok:
             raise ValueError("实验未完成: " + str(result.warnings))
-        await asyncio.to_thread(get_store().save_experiment, result)
+        await asyncio.to_thread(get_store().save_experiment, result, research_spec=research_payload)
         return {"ok": True, **experiment_payload(result)}
     except (ValueError, TypeError) as exc:
         raise HTTPException(400, str(exc))
@@ -688,14 +724,35 @@ async def results_js():
                     headers={"Cache-Control": "no-store"})
 
 
+@app.get("/{asset}")
+async def workbench_asset(asset: str):
+    types = {
+        'workbench.css': 'text/css',
+        'workbench.js': 'application/javascript',
+        'workbench-tools.js': 'application/javascript',
+        'workbench-charts.js': 'application/javascript',
+        'workbench-analytics.js': 'application/javascript',
+        'workbench-live.js': 'application/javascript',
+        'workbench-research-stage.js': 'application/javascript',
+        'scene-spatial.js':'application/javascript',
+    }
+    if asset not in types:
+        raise HTTPException(404, '工作台资源不存在')
+    path = ROOT / 'site' / 'console' / asset
+    if not path.is_file():
+        raise HTTPException(404, '工作台资源不存在')
+    return Response(path.read_text(encoding='utf-8'), media_type=types[asset],
+                    headers={'Cache-Control': 'no-store'})
+
+
 @app.get("/api/runs/{run_id}/state")
 async def api_saved_state(run_id: str, sample_every: int = 1):
     from .run_store import get_store, state_stream
     try:
-        record = await asyncio.to_thread(get_store().load, run_id)
+        record = await asyncio.to_thread(get_store().load, run_id, exclude=("checkpoint.json",))
         if record["kind"] != "run":
             raise ValueError("请选择实验内具体运行的run_id")
-        return state_stream(record, sample_every)
+        return await asyncio.to_thread(state_stream, record, sample_every)
     except KeyError as e:
         raise HTTPException(404, str(e))
     except ValueError as e:
@@ -715,54 +772,192 @@ async def api_saved_csv(run_id: str):
         raise HTTPException(400, str(e))
 
 
+@app.get("/api/runs/{run_id}/entities/{entity_id:path}")
+@managed_endpoint
+async def api_entity_trace(run_id: str, entity_id: str, field: str | None = None):
+    from .run_store import get_store
+    from .population import entity_trace
+    from .view_analysis import number
+    try:
+        record = get_store().load(run_id, exclude=('checkpoint.json',))
+        if record.get('kind') != 'run':
+            raise ValueError('请选择实际运行的run_id')
+        frames = record.get('state_frames') or []
+        trace = entity_trace(frames, entity_id, [field, 'x', 'y'] if field else None)
+        if not any('id' in row for row in trace):
+            raise ValueError('归档没有所选主体的轨迹')
+        if field and not any(number(row.get(field)) for row in trace):
+            raise ValueError('所选主体没有该数值属性')
+        return {'run_id':run_id, 'entity_id':entity_id, 'field':field, 'trace':trace,
+                'state_source':'full_archive', 'interpolated':False}
+    except KeyError as exc:
+        raise HTTPException(404, str(exc))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get('/api/runs/{run_id}/state-transitions')
+@managed_endpoint
+async def api_state_transitions(run_id: str, start: float | None = None, end: float | None = None, exclusive: bool = False):
+    from .run_store import get_store
+    from .state_transitions import state_history
+    from .view_analysis import in_window, number
+    try:
+        record = get_store().load(run_id, exclude=('checkpoint.json',))
+        if record.get('kind') != 'run':
+            raise ValueError('请选择实际运行的run_id')
+        frames = record.get('state_frames') or []
+        if start is not None or end is not None:
+            if not number(start) or not number(end) or start > end:
+                raise ValueError('时间窗口须给出有限且有序的start与end')
+            frames = [fr for fr in frames if in_window(fr['sim_t'], {'from': start, 'to': end, 'exclusive': exclusive})]
+        return {'run_id': run_id, **state_history(frames)}
+    except KeyError as exc:
+        raise HTTPException(404, str(exc))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
+class PopulationQuery(BaseModel):
+    sim_t: float
+    field: str
+    region: list[float] | None = None
+
+
+@app.post('/api/runs/{run_id}/population')
+@managed_endpoint
+async def api_population_query(run_id: str, req: PopulationQuery):
+    from .population_analysis import distribution
+    from .run_store import get_store
+    from .view_analysis import number
+    try:
+        record = get_store().load(run_id, exclude=('checkpoint.json',))
+        frames = record.get('state_frames') or []
+        if not frames or not number(req.sim_t) or not frames[0]['sim_t'] <= req.sim_t <= frames[-1]['sim_t']:
+            raise ValueError('查询时间须在完整归档范围内')
+        frame = next(frame for frame in reversed(frames) if frame['sim_t'] <= req.sim_t + 1e-9)
+        if not frame.get('population'):
+            raise ValueError('该运行未使用全量列式主体归档')
+        return {'run_id':run_id, 'sim_t':frame['sim_t'], 'requested_time':req.sim_t,
+                'region':req.region, 'scope':'full_population',
+                'distribution':distribution(frame, req.field, req.region)}
+    except KeyError as exc:
+        raise HTTPException(404, str(exc))
+    except ValueError as exc:
+        raise HTTPException(400, str(exc))
+
+
 @app.get("/api/runs/{run_id}/bundle.zip")
 async def api_saved_bundle(run_id: str):
-    from .run_store import get_store
+    from fastapi.responses import FileResponse
+    from .task_manager import get_manager
     try:
-        data = await asyncio.to_thread(get_store().bundle, run_id)
-        return Response(data, media_type="application/zip",
-                        headers={"Content-Disposition": f'attachment; filename="{run_id}.zip"'})
+        result=await get_manager().execute('api_prepare_bundle',{'run_id':run_id})
+        return FileResponse(result['path'],media_type='application/zip',filename=run_id+'.zip')
     except KeyError as e:
         raise HTTPException(404, str(e))
     except ValueError as e:
         raise HTTPException(400, str(e))
 
 
+async def api_prepare_bundle(run_id: str):
+    from .run_store import get_store
+    try:return {'path':str(get_store().prepare_bundle(run_id))}
+    except KeyError as exc:raise HTTPException(404,str(exc))
+
+
 def _log_history(entry: dict):
     try:
-        HIST_PATH.parent.mkdir(exist_ok=True)
-        with HIST_PATH.open("a", encoding="utf-8") as f:
+        from .run_store import get_store
+
+        path = _history_log(get_store())
+        path.parent.mkdir(exist_ok=True)
+        with path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(entry, ensure_ascii=False, default=str) + "\n")
     except Exception:                          # noqa: BLE001
         pass
 
 
 @app.get("/api/history")
-async def api_history(limit: int = 30):
-    """磁盘运行历史（最新在前，含截断观测序列，供回放页恢复）。"""
-    import time as _time
+async def api_history(limit: int = 30, metadata_only: bool = False, offset: int = 0,
+                      search: str = '', before: datetime | None = None, after: datetime | None = None,
+                      workbench: bool = False):
+    """Archive metadata or the original run history response."""
     from .run_store import get_store
+    if any(bound is not None and bound.utcoffset() is None for bound in (before, after)):
+        raise HTTPException(400, '日期边界必须包含时区')
     store = get_store()
-    entries = await asyncio.to_thread(store.history, limit)
-    seen = {e["run_id"] for e in entries}
-    if HIST_PATH.exists() and len(entries) < min(limit, 60) \
-            and not (store.directory / "history_cutoff.json").exists():
-        lines = HIST_PATH.read_text(encoding="utf-8").splitlines()
-        for line in reversed(lines[-300:]):
-            try:
-                e = json.loads(line)
-                if e.get("run_id") in seen:
+    legacy_path = _history_log(store)
+    entries = await asyncio.to_thread(store.history, limit, metadata_only=metadata_only, offset=offset,
+                                      search=search[:500], before=before, after=after,
+                                      workbench=workbench, legacy_path=legacy_path)
+    if not (metadata_only or offset or search or before or after) and len(entries) < min(limit, 60):
+        from collections import deque
+        from .history_records import cutoff, legacy_records, preferences, presentation
+
+        if not cutoff(store):
+            saved = preferences(store)
+            for row, original in reversed(deque(legacy_records(store, legacy_path), maxlen=300)):
+                state = saved.get(row["run_id"], {})
+                if state.get("deleted"):
                     continue
-                e.update(complete=False, legacy=True,
-                         legacy_warning="旧格式记录可能截断，缺少完整状态/规约，不能作为完整研究归档")
-                e["age_min"] = max(0, int((_time.time() - _time.mktime(
-                    _time.strptime(e["ts"], "%Y-%m-%dT%H:%M:%S"))) / 60))
-                entries.append(e)
-            except Exception:                  # noqa: BLE001
-                continue
-            if len(entries) >= min(limit, 60):
-                break
+                elapsed = datetime.now(timezone.utc) - datetime.fromisoformat(row["created_at"])
+                entries.append({**original, **presentation(store, row, state), "history_id": row["run_id"],
+                                "complete": False, "legacy": True, "age_min": max(0, int(elapsed.total_seconds()/60)),
+                                "legacy_warning": "旧记录可能截断，仅供观测回放"})
+                if len(entries) >= min(limit, 60):
+                    break
     return {"count": len(entries), "entries": entries}
+
+
+class HistoryTitle(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    title: str | None
+
+
+def _change_history(record_id, **updates):
+    from .history_records import change
+    from .run_store import get_store
+
+    store = get_store()
+    try:
+        return {"ok": True, "record": change(store, _history_log(store), record_id, **updates)}
+    except KeyError as exc:
+        raise HTTPException(404, "历史记录不存在") from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except TimeoutError as exc:
+        raise HTTPException(409, "历史记录正在更新，请重试") from exc
+
+
+@app.patch("/api/history/{record_id}")
+def api_history_rename(record_id: str, req: HistoryTitle):
+    return _change_history(record_id, title=req.title)
+
+
+@app.delete("/api/history/{record_id}")
+def api_history_delete(record_id: str):
+    return _change_history(record_id, deleted=True)
+
+
+@app.post("/api/history/{record_id}/restore")
+def api_history_restore(record_id: str):
+    return _change_history(record_id, deleted=False)
+
+
+@app.get("/api/history/{record_id}/legacy")
+def api_history_legacy(record_id: str):
+    from .history_records import load_legacy
+    from .run_store import get_store
+
+    store = get_store()
+    try:
+        _, original = load_legacy(store, _history_log(store), record_id)
+        return {**original, "run_id": None, "complete": False, "legacy": True}
+    except KeyError as exc:
+        raise HTTPException(404, "历史记录不存在") from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @app.delete("/api/history")
@@ -781,13 +976,10 @@ async def api_runnable():
     """可运行模型清单（ID + 协议）。"""
     from dayan.model_index import ALL_INDEX, resolve
     from .custom_models import capabilities
-    for cap in capabilities():
-        if cap["runnable"]:
-            resolve(cap["model_id"])
-    out = []
-    for mid in sorted(ALL_INDEX):
-        protocol, _ = resolve(mid)
-        out.append({"model_id": mid, "protocol": protocol})
+    out = [{"model_id": mid, "protocol": resolve(mid)[0]} for mid in ALL_INDEX]
+    out.extend({"model_id": cap["model_id"], "protocol": cap["protocol"]}
+               for cap in capabilities() if cap["runnable"])
+    out.sort(key=lambda item: item["model_id"])
     return {"count": len(out), "models": out}
 
 
@@ -798,102 +990,39 @@ class AgentRequest(BaseModel):
     async_job: bool = True
 
 
-# ---- 异步 job：LLM 规划+多工具执行可达 60s+，前端轮询 stage 流式反馈 ----
-_JOBS: dict = {}
-
-
-def _persist_agent_job(job_id,text):
-    from .agent.job_store import save_job
-    try:save_job(job_id,_JOBS[job_id],text)
-    except (OSError,ValueError,TypeError) as exc:
-        _JOBS[job_id]['audit_warning']='任务日志保存失败：'+str(exc)
-
-
-def _run_agent_job(job_id, text, history, last_run):
-    job = _JOBS[job_id]
-
-    def progress(msg):
-        job["stages"].append(str(msg))
-        _persist_agent_job(job_id,text)
-
-    try:
-        from .agent.agent import get_agent
-        agent = get_agent()
-        job["stages"].append("AI 理解需求并规划中…")
-        result = agent.fulfill(text, history=history, last_run=last_run,
-                               progress=progress)
-        job["result"] = {"ok": result.get("ok", False),
-                         "planner": result.get("planner"),
-                         "intent": result.get("intent"),
-                         "scene": result.get("scene"),
-                         "requirements":result.get("requirements"),"errors":result.get("errors",[]),
-                         "constraint_corrections":result.get("constraint_corrections",[]),
-                         "planner_error":result.get("planner_error"),
-                         "summary": agent.summarize(result),
-                         "executed": result.get("executed", [])}
-        # Tools persist complete artifacts before returning. Do not create a second truncated history.
-        from .run_store import get_store
-        intent = result.get("intent") or ""
-        for e in result.get("executed", []):
-            if not e.get("ok"):
-                continue
-            payload = e.get("payload") or {}
-            rid = payload.get("analysis_id") or payload.get("experiment_id") or payload.get("run_id")
-            if rid:
-                get_store().annotate(rid, intent, text)
-        job["status"] = "done"
-    except Exception as e:                             # noqa: BLE001
-        import traceback
-        job["status"] = "error"
-        job["error"] = f"{type(e).__name__}: {e} | " + traceback.format_exc()[-400:]
-    finally:
-        _persist_agent_job(job_id,text)
-
+# Expensive work is queued in supervised processes; no thread per request.
 
 @app.post("/api/agent")
+@managed_endpoint
 async def api_agent(req: AgentRequest):
-    """DAYAN Agent：自然语言 → 意图路由 → 工具执行 → 报告。
-    async_job=True 时立即返回 job_id，前端轮询 /api/jobs/{id} 获取阶段流。"""
-    if req.async_job:
-        import threading
-        import time as _time
-        import uuid
-        job_id = uuid.uuid4().hex
-        _JOBS[job_id] = {"status": "running", "stages": [],
-                         "result": None, "ts": _time.time()}
-        _persist_agent_job(job_id,req.text)
-        threading.Thread(target=_run_agent_job,
-                         args=(job_id, req.text, req.history, req.last_run),
-                         daemon=True).start()
-        return {"job_id": job_id}
+    """One grounded agent result. managed_endpoint handles sync/queued delivery."""
     from .agent.agent import get_agent
-    agent = get_agent()
-    try:
-        result = await asyncio.to_thread(agent.fulfill, req.text,
-                                         history=req.history, last_run=req.last_run)
-        summary = agent.summarize(result)
-        return {"ok": result.get("ok", False),
-                "planner": result.get("planner"),
-                "intent": result.get("intent"),
-                "scene": result.get("scene"),
-                "requirements": result.get("requirements"),
-                "errors": result.get("errors", []),
-                "summary": summary,
-                "executed": result.get("executed", [])}
-    except Exception as e:                     # noqa: BLE001
-        raise HTTPException(500, f"{type(e).__name__}: {e}")
+    from .task_worker import progress
+    agent=get_agent()
+    callback=progress if __import__('os').environ.get('DAYAN_TASK_DIR') else None
+    result=await asyncio.to_thread(agent.fulfill,req.text,history=req.history,last_run=req.last_run,progress=callback)
+    return {"ok":result.get("ok",False),"planner":result.get("planner"),
+            "intent":result.get("intent"),"scene":result.get("scene"),
+            "requirements":result.get("requirements"),"errors":result.get("errors",[]),
+            "constraint_corrections":result.get("constraint_corrections",[]),
+            "planner_error":result.get("planner_error"),
+            "summary":agent.summarize(result),"executed":result.get("executed",[])}
 
 
 @app.get("/api/jobs/{job_id}")
-async def api_job(job_id: str):
-    job = _JOBS.get(job_id)
-    if job is None:
+async def api_job(job_id: str, preview: bool = False):
+    try:
+        return get_manager().get(job_id, preview=preview)
+    except (KeyError,ValueError):
         from .agent.job_store import load_job
-        try:job=await asyncio.to_thread(load_job,job_id)
-        except (KeyError,ValueError,OSError):raise HTTPException(404,"job 不存在或无法核验")
-    if not job:
-        raise HTTPException(404, "job 不存在")
-    return job
+        try:return await asyncio.to_thread(load_job,job_id)
+        except (KeyError,ValueError,OSError):raise HTTPException(404,'job不存在或无法核验')
+
+
+@app.delete('/api/jobs/{job_id}')
+async def api_job_cancel(job_id: str):
+    try:return get_manager().cancel(job_id)
+    except (KeyError,ValueError):raise HTTPException(404,'job不存在')
 
 
 @app.get("/api/agent/planner_status")
@@ -917,17 +1046,97 @@ class ReportRequest(BaseModel):
     entity_id: str | None = None
     entity_metric: str | None = None
     distribution_field: str | None = None
+    distribution_region: list[float] | None = None
+
+
+def _report_material(req: ReportRequest):
+    from .view_analysis import analysis_time_series, analyze_view
+    from .run_store import get_store
+
+    if not req.run_id:
+        raise HTTPException(400, "研究报告需要已归档的run_id，不能仅凭客户端观测生成")
+    report_kind, intent = 'run', req.intent
+    try:
+        record = get_store().load(req.run_id)
+        if record.get("kind") != "run":
+            raise ValueError("请选择研究记录内的具体运行")
+        if record["model_id"] != req.model_id:
+            raise ValueError("报告模型与归档运行不一致")
+        observations, manifest = record["observations"], record["manifest"]
+        analysis = {}
+        records = [{**record, "view_label": record["model_id"], "view_group": record["model_id"]}]
+        if req.experiment_id and req.analysis_id:
+            raise ValueError("报告不能同时指定实验和分析组")
+        if req.experiment_id:
+            exp = get_store().load(req.experiment_id)
+            if exp.get('kind') != 'experiment' or not any(r["run_id"] == req.run_id for r in exp.get("runs", [])):
+                raise ValueError("运行不属于报告指定实验")
+            analysis = exp["analysis"]
+            report_kind = "experiment"
+            intent = intent or (exp.get('research_spec') or {}).get('original_request') or exp.get('intent')
+            records = [{**get_store().load(ref["run_id"]), "view_label": f"{ref['arm']} · seed={ref['seed']}",
+                        "view_group": ref["arm"], "view_seed": ref["seed"]} for ref in exp["runs"]]
+        elif req.analysis_id:
+            group = get_store().load(req.analysis_id)
+            if group.get("kind") != "analysis" or not any(r["run_id"] == req.run_id for r in group.get("runs", [])):
+                raise ValueError("运行不属于报告指定分析组")
+            payload = group["analysis"]
+            analysis = payload.get("analysis", {})
+            report_kind = payload.get("tool", group.get("tool", "analysis"))
+            intent = intent or group.get('request_text') or group.get('intent')
+            refs=group['runs'] if report_kind!='global_sensitivity' else [ref for ref in group['runs'] if ref['run_id']==req.run_id]
+            records = [{**get_store().load(ref["run_id"]),
+                        "view_label": str(ref.get("label") or (f"{payload.get('param')}={ref['value']}" if "value" in ref else f"seed={ref['seed']}" if "seed" in ref else ref["model_id"]))}
+                       for ref in refs]
+            if report_kind == "ensemble":
+                for item in records:
+                    item["view_group"] = "种子重复"
+        time_quality = []
+        for record_view in records:
+            original = record_view["observations"]
+            verified = analysis_time_series(original)
+            record_view["observations"] = verified
+            time_quality.append({"run_id":record_view["run_id"], "raw_rows":len(original),
+                                 "distinct_times":len(verified), "duplicates_removed":len(original)-len(verified)})
+        default_metric = (manifest.get("output_contract") or {}).get("primary_metric")
+        if default_metric and not any(default_metric in row and isinstance(row[default_metric], (int, float))
+                                      and not isinstance(row[default_metric], bool) for row in observations):
+            default_metric = None
+        view = analyze_view(records, req.run_id, req.primary_metric or analysis.get("metric") or default_metric,
+                            req.analysis_window, req.sim_t, req.entity_id, report_kind,
+                            req.entity_metric, req.distribution_field, req.distribution_region)
+        if report_kind=='global_sensitivity':
+            view['global_sensitivity']=analysis
+            view['run_ids']=[ref['run_id'] for ref in group['runs']]
+    except KeyError as exc:
+        raise HTTPException(400, "报告关联记录类型不匹配") from exc
+    except (ValueError, FileNotFoundError) as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return observations, {"intent": intent or record.get('request_text') or record.get('intent') or '',
+                          "planner": req.planner, "manifest": manifest, "analysis": analysis,
+                          "view_analysis": view, "view_records": records, "time_quality": time_quality}
+
+
+@app.get('/api/runs/{run_id}/report')
+def api_run_report(run_id: str, model_id: str, experiment_id: str | None = None,
+                   analysis_id: str | None = None, primary_metric: str | None = None,
+                   figure_preview: bool = False):
+    """Read the same calculated facts available to the document generator."""
+    from .report_gen import report_facts
+
+    req = ReportRequest(run_id=run_id, model_id=model_id, experiment_id=experiment_id,
+                        analysis_id=analysis_id, primary_metric=primary_metric)
+    observations, meta = _report_material(req)
+    return {'ok': True, 'facts': report_facts(model_id, observations, meta, include_figures=figure_preview)}
 
 
 @app.post("/api/report")
+@managed_endpoint
 async def api_report(req: ReportRequest):
-    """生成 Word 仿真实验事实报告（程序统计 + docx + 结果图）。
-    报告基于 manifest 实际配置与程序分析，不用默认值叙事。"""
+    """生成使用实际归档的 Word 报告。"""
     from .report_gen import generate_report
-    from .view_analysis import analyze_view
-    if not req.run_id:
-        raise HTTPException(400, "研究报告需要已归档的run_id，不能仅凭客户端观测生成")
-    if not req.experiment_id and not req.analysis_id:
+
+    if req.run_id and not req.experiment_id and not req.analysis_id:
         from .research.studies import for_run
         study = await asyncio.to_thread(for_run, req.run_id)
         if study:
@@ -936,51 +1145,7 @@ async def api_report(req: ReportRequest):
             from .research.study_reports import generate_report as study_report
             report = await asyncio.to_thread(study_report, study["study_id"], "academic")
             return {**report, "url": report["file"], "source": "verified_study"}
-    records, view, report_kind = [], None, "run"
-    observations, manifest, analysis = req.observations, req.manifest, req.analysis
-    if req.run_id:
-        from .run_store import get_store
-        try:
-            record = get_store().load(req.run_id)
-            if record.get("kind") != "run":
-                raise ValueError("请选择研究记录内的具体运行")
-            if record["model_id"] != req.model_id:
-                raise ValueError("报告模型与归档运行不一致")
-            observations, manifest = record["observations"], record["manifest"]
-            analysis = {}
-            records = [{**record, "view_label": record["model_id"], "view_group": record["model_id"]}]
-            if req.experiment_id and req.analysis_id:
-                raise ValueError("报告不能同时指定实验和分析组")
-            if req.experiment_id:
-                exp = get_store().load(req.experiment_id)
-                if not any(r["run_id"] == req.run_id for r in exp.get("runs", [])):
-                    raise ValueError("运行不属于报告指定实验")
-                analysis = exp["analysis"]
-                report_kind = "experiment"
-                records = [{**get_store().load(ref["run_id"]), "view_label": f"{ref['arm']} · seed={ref['seed']}",
-                            "view_group": ref["arm"], "view_seed": ref["seed"]} for ref in exp["runs"]]
-            elif req.analysis_id:
-                group = get_store().load(req.analysis_id)
-                if group.get("kind") != "analysis" or not any(r["run_id"] == req.run_id for r in group.get("runs", [])):
-                    raise ValueError("运行不属于报告指定分析组")
-                payload = group["analysis"]
-                analysis = payload.get("analysis", {})
-                report_kind = payload.get("tool", group.get("tool", "analysis"))
-                records = [{**get_store().load(ref["run_id"]),
-                            "view_label": str(ref.get("label") or (f"{payload.get('param')}={ref['value']}" if "value" in ref else f"seed={ref['seed']}" if "seed" in ref else ref["model_id"]))}
-                           for ref in group["runs"]]
-                if report_kind == "ensemble":
-                    for item in records:
-                        item["view_group"] = "种子重复"
-            view = analyze_view(records, req.run_id, req.primary_metric or analysis.get("metric"),
-                                req.analysis_window, req.sim_t, req.entity_id, report_kind,
-                                req.entity_metric, req.distribution_field)
-        except KeyError as exc:
-            raise HTTPException(400, "报告关联记录类型不匹配")
-        except (ValueError, FileNotFoundError) as exc:
-            raise HTTPException(400, str(exc))
-    meta = {"intent": req.intent, "planner": req.planner,
-             "manifest": manifest, "analysis": analysis, "view_analysis": view, "view_records": records}
+    observations, meta = _report_material(req)
     try:
         result = await asyncio.to_thread(
             generate_report, req.model_id, observations, meta)
@@ -1019,6 +1184,7 @@ async def api_collection_presets():
 
 
 @app.post("/api/collection/run_preset")
+@managed_endpoint
 async def api_run_preset(body: dict):
     """执行采集预设。"""
     from .agent.data_tools import run_preset
@@ -1053,6 +1219,7 @@ async def api_collection_report_docx(filename: str, legacy: bool = False):
 
 
 @app.post("/api/collection/reports/render_docx")
+@managed_endpoint
 async def api_render_collection_reports(body: dict):
     """Reports always require a concrete immutable study; legacy templates never overwrite outputs."""
     from .agent.data_tools import research_report
@@ -1065,45 +1232,174 @@ async def api_render_collection_reports(body: dict):
 
 @app.get("/api/health")
 async def api_health():
-    return {"ok": True, "service": "dayan", "contract_version": "research-integrity-1"}
+    from .access import access_token
+    access_token()
+    return {"ok": True, "service": "dayan", "contract_version": "research-integrity-1", "access_contract": "loopback-capability-1", "task_contract": "bounded-process-1"}
+
+
+@app.get("/api/workbench/status")
+def api_workbench_status():
+    """Current local engine telemetry. Historical values remain in their own archives."""
+    import time
+    import psutil
+    from .access import data_root
+    disk = psutil.disk_usage(str(data_root()))
+    memory = psutil.virtual_memory()
+    disk_revision = source_fingerprint()
+    runtime = sys.modules.get('dayan.runtime')
+    runtime_revision = getattr(runtime, '_PROCESS_SOURCE_FINGERPRINT', None)
+    return {
+        "sampled_at": datetime.now().astimezone().isoformat(),
+        "revision": _LOADED_REVISION,
+        "loaded_revision": _LOADED_REVISION,
+        "disk_revision": disk_revision,
+        "restart_required": _LOADED_REVISION != disk_revision,
+        "runtime_loaded_revision": runtime_revision,
+        "runtime_matches_disk": runtime_revision == disk_revision if runtime_revision is not None else None,
+        "uptime_seconds": max(0, time.time() - psutil.Process().create_time()),
+        "planner": "configured" if _state.get("llm_planner") == "configured-not-probed" else "rule",
+        "queue": get_manager().snapshot(),
+        "resources": {
+            "engine_rss_bytes": psutil.Process().memory_info().rss,
+            "host_memory_used_bytes": memory.total - memory.available,
+            "host_memory_total_bytes": memory.total,
+            "disk_free_bytes": disk.free,
+            "disk_total_bytes": disk.total,
+        },
+    }
 
 
 @app.post("/api/tools/{tool_name}")
+@managed_endpoint
 async def api_platform_tool(tool_name: str, body: dict):
-    """Shared explicit tool execution for DSH and professional UI. No second LLM planner."""
+    """Shared tool execution for DSH and the web workbench."""
     from .agent.tools import call_tool, TOOL_IMPL
+    from .agent.progress import progress_scope
     if tool_name not in TOOL_IMPL:
         raise HTTPException(404, "未知平台工具")
     args = body.get("arguments", body)
     if not isinstance(args, dict): raise HTTPException(400, "arguments必须为对象")
+    if __import__('os').environ.get('DAYAN_TASK_DIR'):
+        from .task_worker import progress
+    else:
+        progress = None
+    native = body.get("origin") == "dsh"
+    session_id = str(body.get("session_id") or "")
+    original_text = body.get("original_text") or ""
+    memory_scope = None
+    if native:
+        from .research.integration_events import validate_session
+        try:
+            validate_session(session_id)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
     try:
-        if body.get("origin") == "dsh":
+        if any(key.startswith('_') for key in args):
+            raise ValueError('工具内部参数不能由调用者指定')
+        if native:
+            if progress:
+                progress('正在核对原始研究问题与工具输入')
+            if not isinstance(original_text, str):
+                raise ValueError("original_text必须是DSH用户原文")
             from .research.native_contract import protect
-            args = protect(tool_name, args, str(body.get("original_text", "")), str(body.get("session_id", "")))
-        result = await asyncio.to_thread(call_tool, tool_name, **args)
+            args = protect(tool_name, args, original_text, session_id)
+        if progress:
+            progress(f'正在执行 {tool_name}')
+        with progress_scope(progress):
+            if native and tool_name=='memory_feedback':
+                from .research.model_memory import native_scope,remember_correction
+                memory_scope=await asyncio.to_thread(native_scope,session_id,body.get('research_scope'),body.get('research_scope_proof'))
+                result={'ok':True,'payload':await asyncio.to_thread(remember_correction,memory_scope,session_id,original_text,
+                    design_id=args.get('design_id'),run_id=args.get('run_id'))}
+            elif native and tool_name=='research_model_prepare':
+                from .research.model_intents import call_native_prepare
+                result=await asyncio.to_thread(call_native_prepare,args,original_text,session_id)
+            elif native and tool_name=='research_model_context':
+                from .research.model_intents import call_native_context
+                result=await asyncio.to_thread(call_native_context,args,original_text,session_id)
+            elif native and tool_name in ("build_model", "validate_model", "design_model"):
+                from .agent.model_tools import call_native_model
+                from .research.model_memory import native_scope
+                memory_scope = await asyncio.to_thread(
+                    native_scope, session_id, body.get("research_scope"), body.get("research_scope_proof"))
+                result = await asyncio.to_thread(
+                    call_native_model, tool_name, args, original_text, session_id, memory_scope=memory_scope)
+            else:
+                if native and tool_name in ('modeling_guide','reviewed_run'):
+                    args={**args,'request':original_text}
+                    if tool_name=='reviewed_run':
+                        args['_session']=session_id
+                result = await asyncio.to_thread(call_tool, tool_name, **args)
+        if native and result.get('ok') and tool_name in (
+                'run', 'reviewed_run', 'build_model', 'resume', 'experiment', 'ensemble', 'sweep', 'compare', 'compose'):
+            payload = result.get('payload') or {}
+            archive_id = payload.get('experiment_id') or payload.get('analysis_id') or payload.get('run_id')
+            if archive_id:
+                from .run_store import get_store
+                await asyncio.to_thread(get_store().annotate, archive_id, request_text=original_text)
     except Exception as exc:
         result = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
-    if body.get("origin") == "dsh":
+    if native:
         from .research.integration_events import append_event
-        result["integration_event"] = append_event(str(body.get("session_id", "")), tool_name, result)
+        result["integration_event"] = append_event(session_id, tool_name, result, memory_scope=memory_scope)
     return result
+
+
+@app.get("/api/model-designs/{design_id}")
+async def api_model_design(design_id: str, session_id: str | None = None):
+    from .agent.model_design import load_design
+    try:
+        return await asyncio.to_thread(load_design, design_id, session_id)
+    except (ValueError, FileNotFoundError) as exc:
+        raise HTTPException(404, "未找到建模方案") from exc
 
 
 @app.get("/api/integrations/dsh/events")
 async def api_dsh_events(session_id: str, after: int = 0):
     from .research.integration_events import events
-    return {"ok": True, "events": events(session_id, after)}
+    return {"ok": True, "events": events(session_id, after),
+            "active_jobs": get_manager().snapshot(native_session=session_id)['jobs']}
 
 
 @app.get("/api/research/studies")
 async def api_studies():
-    from .research.studies import list_studies
-    return {"ok": True, "studies": await asyncio.to_thread(list_studies)}
+    from .agent.data_tools import research_status
+    result=await asyncio.to_thread(research_status)
+    return {'ok':True,'studies':result['payload']}
+
+
+class ResearchCompileRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    text: str = Field(min_length=1, max_length=10000)
+    model_id: str | None = None
+    metric: str | None = None
+    parameters: dict = Field(default_factory=dict)
+
+
+@app.post("/api/research/compile")
+def api_research_compile(request: ResearchCompileRequest):
+    """Rules used by Agent and the experiment editor share one requirement compiler."""
+    from .research.compiler import compile_research
+    from .limits import validate_envelope
+    try:
+        validate_envelope(request.parameters, array=True)
+        result = compile_research(request.text, model_id=request.model_id,
+                                  metric=request.metric, parameters=request.parameters)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(400, str(exc))
+    return {
+        'research_spec': result.research_spec.to_dict(),
+        'experiment_spec': result.experiment_spec.to_dict() if result.experiment_spec else None,
+        'candidates': result.candidates[:40], 'warnings': result.warnings, 'notes': result.notes,
+    }
 
 
 @app.get("/api/research/for_run/{run_id}")
 async def api_research_for_run(run_id: str):
     from .research.studies import for_run, summary
+    from .research.model_study_runs import for_model_run
+    model_study=await asyncio.to_thread(for_model_run,run_id)
+    if model_study:return {'ok':True,'study':model_study}
     study = await asyncio.to_thread(for_run, run_id)
     return {"ok": True, "study": summary(study) if study else None}
 
@@ -1117,8 +1413,28 @@ async def api_legacy_research():
 @app.get("/api/research/studies/{study_id}")
 async def api_study(study_id: str):
     from .research.studies import load
-    try: return {"ok": True, "study": await asyncio.to_thread(load, study_id)}
+    from .research.study_reports import report_index
+    try:
+        if study_id.startswith('MS-'):
+            from .research.model_studies import load_study
+            from .research.model_study_reports import report_index as model_report_index
+            study=await asyncio.to_thread(load_study,study_id)
+            reports=(await asyncio.to_thread(model_report_index,study_id)
+                     if study['state']['status'] in ('complete','failed') else [])
+            return {'ok':True,'study':study,'reports':reports}
+        study = await asyncio.to_thread(load, study_id)
+        reports = await asyncio.to_thread(report_index, study)
+        return {"ok": True, "study": study, "reports": reports}
     except (ValueError, OSError) as exc: raise HTTPException(400, str(exc))
+
+
+@app.get('/api/research/studies/{study_id}/reports/{report_id}/files/{filename}')
+async def api_model_study_report_file(study_id: str,report_id: str,filename: str):
+    from .research.model_study_reports import report_file
+    from fastapi.responses import FileResponse
+    try:path=await asyncio.to_thread(report_file,study_id,report_id,filename)
+    except (ValueError,OSError,KeyError) as exc:raise HTTPException(400,str(exc))
+    return FileResponse(path,filename=filename)
 
 
 @app.get("/api/research/studies/{study_id}/files/{filename}")
@@ -1128,7 +1444,7 @@ async def api_study_file(study_id: str, filename: str):
     import re
     try: load(study_id)
     except (ValueError, OSError) as exc: raise HTTPException(400, str(exc))
-    if not re.fullmatch(r"[A-Za-z0-9_\-]+\.(docx|md|png|csv|json|zip)", filename):
+    if not re.fullmatch(r"[A-Za-z0-9_-]+\.(?:docx|md|png|csv|json|zip|facts\.json)", filename):
         raise HTTPException(400, "非法文件名")
     path = directory(study_id) / "reports" / filename
     if not path.is_file(): raise HTTPException(404, "研究文件尚未生成")
@@ -1148,6 +1464,7 @@ async def download_report(filename: str):
         raise HTTPException(404, "文件不存在")
     return FileResponse(str(path),
                         filename=filename,
+                        content_disposition_type="inline" if path.suffix == ".png" else "attachment",
                         media_type={".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                                     ".png": "image/png", ".json": "application/json"}[path.suffix])
 
@@ -1175,6 +1492,7 @@ class ChatMessage(BaseModel):
 
 
 @app.post("/api/ai/chat")
+@managed_endpoint
 async def api_ai_chat(msg: ChatMessage):
     """Compatibility endpoint using the same grounded agent, not a second promise-only chatbot."""
     from .agent.agent import get_agent

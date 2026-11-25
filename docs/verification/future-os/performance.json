@@ -1,0 +1,272 @@
+{
+  "method": "Same host, Firefox headless, 1920×1080 unless noted. FPS samples 5 s browser animation-frame spacing during actual model playback; finish timings include CPU submission and WebGL finish. RSS sums actual owned Firefox processes, not JS heap. The sampled archive is the same saved run in both versions.",
+  "host": "Windows AMD64",
+  "versions": {
+    "vnext_4730a3e": {
+      "first_interactive_ms": 965.9,
+      "browser": "146.0.1",
+      "rss_mib_at_mission": 660.18,
+      "webgl": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "model_workspace_ms": 221.2,
+      "spatial_playback": {
+        "elapsed_ms": 5012.679999999999,
+        "frames": 331,
+        "fps": 66.03254147481987,
+        "p95_ms": 30.020000000000437,
+        "max_gap_ms": 50.039999999999964,
+        "gaps_over_50ms": 1,
+        "draw_commands": 1660,
+        "model_time": 11.33285999999997
+      },
+      "spatial_coverage": {
+        "1920": {
+          "width_ratio": 0.20284957613858315,
+          "height_ratio": 0.5213473667137828,
+          "clipped": false,
+          "road_segments": 843,
+          "canvas": [
+            1129,
+            470
+          ]
+        },
+        "2560": {
+          "width_ratio": 0.13599594504777934,
+          "height_ratio": 0.5213473667137828,
+          "clipped": false,
+          "road_segments": 843,
+          "canvas": [
+            1684,
+            470
+          ]
+        }
+      },
+      "large_first_draw_ms": 8133.2,
+      "first_frames": 85,
+      "first_frame_limit": 85,
+      "large_full_archive_ms": 8143.4,
+      "full_archive": {
+        "frames": 85,
+        "subjects": 4000,
+        "drawn": 3000
+      },
+      "large_playback": {
+        "elapsed_ms": 5002.620000000003,
+        "frames": 356,
+        "fps": 71.16271073957243,
+        "p95_ms": 30.020000000000437,
+        "max_gap_ms": 40.02000000000044,
+        "gaps_over_50ms": 0,
+        "draw_commands": 357,
+        "model_time": 5.459039999999974
+      },
+      "webgl_finish_ms": [
+        12,
+        6,
+        8,
+        5,
+        5,
+        7,
+        6
+      ],
+      "webgl_finish_median_ms": 6,
+      "large_gpu_resources": {
+        "geometries": 27,
+        "textures": 16,
+        "calls": 41,
+        "triangles": 45696
+      },
+      "rss_mib_after_large": 732.16,
+      "extra_paused_renderer_calls_1s": 0
+    },
+    "future_os": {
+      "first_interactive_ms": 855.3,
+      "browser": "146.0.1",
+      "rss_mib_at_mission": 680.21,
+      "webgl": "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar",
+      "model_workspace_ms": 141.6,
+      "spatial_playback": {
+        "elapsed_ms": 5002.54,
+        "frames": 364,
+        "fps": 72.76303637752022,
+        "p95_ms": 30.019999999999527,
+        "max_gap_ms": 40.01999999999998,
+        "gaps_over_50ms": 0,
+        "draw_commands": 1825,
+        "model_time": 11.370919999999941
+      },
+      "spatial_coverage": {
+        "1920": {
+          "width_ratio": 0.6520470383997914,
+          "height_ratio": 0.7373171924086698,
+          "clipped": false,
+          "road_segments": 843,
+          "canvas": [
+            1150,
+            578
+          ]
+        },
+        "2560": {
+          "width_ratio": 0.5999368737490162,
+          "height_ratio": 0.7373171924086698,
+          "clipped": false,
+          "road_segments": 843,
+          "canvas": [
+            1704,
+            788
+          ]
+        }
+      },
+      "large_first_draw_ms": 927.3,
+      "first_frames": 5,
+      "first_frame_limit": 85,
+      "large_full_archive_ms": 3898.1,
+      "full_archive": {
+        "frames": 85,
+        "subjects": 4000,
+        "drawn": 3000
+      },
+      "large_playback": {
+        "elapsed_ms": 5012.540000000001,
+        "frames": 406,
+        "fps": 80.9968598754324,
+        "p95_ms": 20.020000000000437,
+        "max_gap_ms": 30.020000000000437,
+        "gaps_over_50ms": 0,
+        "draw_commands": 2035,
+        "model_time": 5.396739999999968
+      },
+      "webgl_finish_ms": [
+        11,
+        4,
+        4,
+        5,
+        5,
+        4,
+        6
+      ],
+      "webgl_finish_median_ms": 5,
+      "large_gpu_resources": {
+        "geometries": 27,
+        "textures": 11,
+        "calls": 36,
+        "triangles": 45686
+      },
+      "rss_mib_after_large": 957.04,
+      "extra_paused_renderer_calls_1s": 0,
+      "endurance": [
+        {
+          "seconds": 0.0,
+          "rss_mib": 955.96,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 0.20048000000001048,
+          "context_lost": false
+        },
+        {
+          "seconds": 15.1,
+          "rss_mib": 984.16,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 60.391199999999614,
+          "context_lost": false
+        },
+        {
+          "seconds": 30.1,
+          "rss_mib": 1011.31,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 120.7020000000032,
+          "context_lost": false
+        },
+        {
+          "seconds": 45.2,
+          "rss_mib": 1041.3,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 180.97272000000024,
+          "context_lost": false
+        },
+        {
+          "seconds": 60.3,
+          "rss_mib": 367.92,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 241.16399999999769,
+          "context_lost": false
+        },
+        {
+          "seconds": 75.3,
+          "rss_mib": 447.85,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 51.31439999999689,
+          "context_lost": false
+        },
+        {
+          "seconds": 90.4,
+          "rss_mib": 499.83,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 111.70591999999942,
+          "context_lost": false
+        },
+        {
+          "seconds": 105.5,
+          "rss_mib": 496.91,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 172.01703999999802,
+          "context_lost": false
+        },
+        {
+          "seconds": 120.6,
+          "rss_mib": 480.89,
+          "scene": {
+            "geometries": 27,
+            "textures": 11,
+            "calls": 1,
+            "triangles": 2
+          },
+          "sim_t": 232.32783999999378,
+          "context_lost": false
+        }
+      ]
+    }
+  },
+  "run_ids": {
+    "spatial": "R20261118T062004-7f0100db8f1244f49c0993810477ed06",
+    "large": "R20261118T061950-69ebbe464da94bff8dfa39a7cc256791"
+  }
+}

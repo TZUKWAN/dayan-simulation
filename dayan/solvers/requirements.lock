@@ -1,0 +1,4 @@
+# CPython 3.13, Linux amd64 wheels from https://pypi.org, verified 2026-11-24.
+numpy==2.2.6 --hash=sha256:1bc23a79bfabc5d056d106f9befb8d50c31ced2fbc70eedb8155aec74a45798f
+scipy==1.17.0 --hash=sha256:6680f2dfd4f6182e7d6db161344537da644d1cf85cf293f015c60a17ecf08752
+networkx==3.6.1 --hash=sha256:d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762

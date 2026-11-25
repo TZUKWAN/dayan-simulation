@@ -13,12 +13,13 @@ import csv
 import gzip
 import io
 import json
+import re
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from typing import Iterator
 
-from ..datasets import _public_url, _Redirect
+from ..datasets import _public_url, public_opener
 
 UA_DAYAN = "DAYAN-Research-Workbench/2.4 (research data collection; contact: local-workbench)"
 UA_BROWSER = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -46,7 +47,7 @@ def _get(url: str, *, accept="application/json,text/csv,*/*", timeout=75,
     if headers:
         h.update(headers)
     req = urllib.request.Request(url, headers=h)
-    with urllib.request.build_opener(_Redirect()).open(req, timeout=timeout) as resp:
+    with public_opener().open(req, timeout=timeout) as resp:
         data = resp.read(cap + 1)
         if len(data) > cap:
             raise ValueError(f"单页超过 {cap} 字节上限（可调小查询范围或分页）")
@@ -81,13 +82,57 @@ def worldbank(params: dict, budget: int) -> Iterator[Page]:
                     "date": r.get("date"), "value": r.get("value"),
                     "unit": __import__("dayan.research.request_contract", fromlist=["INDICATORS"]).INDICATORS.get(indicator, {}).get("unit", r.get("unit")),
                     "indicator_label": (r.get("indicator") or {}).get("value") if isinstance(r.get("indicator"), dict) else None,
-                    "indicator": indicator} for r in (rows or [])]
+                    "indicator": (r.get("indicator") or {}).get("id")} for r in (rows or [])]
         yield Page(url=url, raw=raw, records=records,
                    meta={"total": total, "page": page, "pages": meta.get("pages") if isinstance(meta, dict) else None,
                          "has_more": page < int(meta.get("pages") or 1), "cursor": {"page": page + 1}})
         if total is not None and per_page * page >= total:
             return
         page += 1
+
+
+DATA360_WDI_UNITS = {"SL.UEM.TOTL.ZS": ("PT_LF", "%")}
+
+
+def worldbank_data360(params: dict, budget: int) -> Iterator[Page]:
+    """Alternate official transport for source-verified WDI annual indicators."""
+    from ..research.request_contract import country_code, year_range
+
+    country = country_code(params["country"])
+    indicator = str(params["indicator"])
+    if indicator not in DATA360_WDI_UNITS:
+        raise ValueError("该指标的 Data360 单位合同尚未登记")
+    unit_code, unit = DATA360_WDI_UNITS[indicator]
+    start, end = year_range(params["date"]).split(":")
+    series = "WB_WDI_" + indicator.replace(".", "_")
+    spec = {"DATABASE_ID": "WB_WDI", "INDICATOR": series, "REF_AREA": country,
+            "timePeriodFrom": start, "timePeriodTo": end}
+    url = "https://data360api.worldbank.org/data360/data?" + urllib.parse.urlencode(spec)
+    raw, final_url = _get(url, timeout=35)
+    answer = json.loads(raw)
+    if not isinstance(answer, dict) or not isinstance(answer.get("value"), list):
+        raise ValueError("Data360 未返回结构化指标页")
+    rows = answer["value"]
+    if type(answer.get("count")) is not int or answer["count"] != len(rows):
+        raise ValueError("Data360 返回数量与分页总数不一致")
+    records = []
+    for row in rows:
+        expected = {"DATABASE_ID":"WB_WDI", "INDICATOR":series, "REF_AREA":country, "FREQ":"A",
+                    "TIME_FORMAT":"P1Y", "SEX":"_T", "AGE":"_T", "URBANISATION":"_T",
+                    "COMP_BREAKDOWN_1":"_Z", "COMP_BREAKDOWN_2":"_Z", "COMP_BREAKDOWN_3":"_Z",
+                    "UNIT_MEASURE":unit_code}
+        if any(row.get(k) != value for k,value in expected.items()) or str(row.get("UNIT_MULT")) != "0":
+            raise ValueError("Data360 返回地区、指标、频率、总体维度或单位不匹配")
+        year = str(row.get("TIME_PERIOD", ""))
+        if not re.fullmatch(r"\d{4}", year) or not start <= year <= end:
+            raise ValueError("Data360 实际年份超出请求范围")
+        records.append({"country_id": country,"indicator": indicator,"date": year,
+                        "value": row.get("OBS_VALUE"),"unit": unit,"frequency": "annual",
+                        "observation_status": row.get("OBS_STATUS")})
+    yield Page(url=final_url, raw=raw, records=records,
+               meta={"total":len(rows),"page":1,"pages":1,"has_more":False,"provenance":{
+                   "database":"WB_WDI","indicator":series,"unit_code":unit_code,
+                   "license":"CC BY 4.0 · World Bank WDI, ILO modelled estimates"}})
 
 
 def eurostat_jsonstat(params: dict, budget: int) -> Iterator[Page]:
@@ -303,7 +348,7 @@ def ilostat_bulk(params: dict, budget: int) -> Iterator[Page]:
 
 
 # ============ 文献 / 事件 / 文本 ============
-def crossref(params: dict, budget: int) -> Iterator[Page]:
+def crossref(params: dict, budget: int, *, timeout=75) -> Iterator[Page]:
     """Crossref works 检索（polite pool 带 mailto）。"""
     q = {"query": params["query"], "rows": str(params.get("rows", 50)),
          "offset": str((params.get("_cursor") or {}).get("offset", 0))}
@@ -315,7 +360,7 @@ def crossref(params: dict, budget: int) -> Iterator[Page]:
     total = None
     while budget > 0:
         url = base + urllib.parse.urlencode(q)
-        raw, _ = _get(url)
+        raw, _ = _get(url, timeout=timeout)
         data = json.loads(raw).get("message", {})
         items = data.get("items") or []
         total = data.get("total-results")
@@ -337,7 +382,7 @@ def crossref(params: dict, budget: int) -> Iterator[Page]:
         budget -= 1
 
 
-def openalex(params: dict, budget: int) -> Iterator[Page]:
+def openalex(params: dict, budget: int, *, timeout=75) -> Iterator[Page]:
     """OpenAlex works 检索（mailto polite pool）。"""
     q = {"search": params["search"], "per-page": str(params.get("per_page", 50))}
     if params.get("mailto"):
@@ -350,7 +395,7 @@ def openalex(params: dict, budget: int) -> Iterator[Page]:
     end_page = page + budget
     while page < end_page:
         url = base + urllib.parse.urlencode(q) + f"&page={page}"
-        raw, _ = _get(url)
+        raw, _ = _get(url, timeout=timeout)
         data = json.loads(raw)
         total = data.get("meta", {}).get("count")
         records = [{
@@ -598,8 +643,15 @@ def ckan_search(params: dict, budget: int) -> Iterator[Page]:
         budget -= 1
 
 
-def _file_page(url, format, *, provenance=None, archive_member=None):
-    raw, final = _get(url)
+def _file_page(url, format, *, provenance=None, archive_member=None, download_cap=DEFAULT_PAGE_CAP,
+               member_only=False, archive_md5=None, retry_url=None, parse_options=None):
+    raw, final = _get(url, cap=download_cap, headers={'Accept-Encoding':'identity'} if archive_md5 else None)
+    if archive_md5:
+        import hashlib
+        if hashlib.md5(raw).hexdigest()!=archive_md5 and retry_url:
+            raw,final=_get(retry_url,cap=download_cap,headers={'Accept-Encoding':'identity'})
+        if hashlib.md5(raw).hexdigest()!=archive_md5:
+            raise ValueError("公开数据包与发布者校验和不一致")
     format = str(format).lower().removesuffix(".zip")
     payload = raw
     provenance = dict(provenance or {})
@@ -609,9 +661,8 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
             members=archive.infolist()
             if len(members)>200: raise ValueError("压缩包条目超过200，须缩小资源")
-            candidates=[m for m in members if not m.is_dir() and m.filename.lower().endswith("."+format)]
-            if archive_member:
-                candidates=[m for m in candidates if m.filename==archive_member]
+            candidates=[m for m in members if not m.is_dir() and
+                        (m.filename==archive_member if archive_member else m.filename.lower().endswith("."+format))]
             if len(candidates)!=1:
                 raise ValueError("压缩包须明确唯一数据文件archive_member；可选："+str([m.filename for m in candidates[:12]]))
             member=candidates[0]
@@ -621,16 +672,20 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
             if len(payload)>DEFAULT_PAGE_CAP: raise ValueError("解压数据超过16MiB")
             provenance.update(archive_member=member.filename,payload_sha256=hashlib.sha256(payload).hexdigest(),
                               archive_note="仅内存读取指定表格；不提取文件，不执行内容")
+            if member_only:
+                provenance.update(archive_sha256=hashlib.sha256(raw).hexdigest(), archive_bytes=len(raw))
+                raw = payload
+    elif member_only:
+        raise ValueError("数据源未返回约定的公开压缩包")
     if payload.lstrip().lower().startswith((b"<!doctype html", b"<html")):
         raise ValueError("实际返回HTML，不能将门户/登录页当表格资源")
-    if format == "csv":
-        reader = csv.DictReader(io.StringIO(payload.decode("utf-8-sig")))
-        if not reader.fieldnames or len(set(reader.fieldnames)) != len(reader.fieldnames):
-            raise ValueError("CSV缺少唯一字段标题")
-        records = list(reader)
-        if any(None in r for r in records):
-            raise ValueError("CSV列数不一致")
+    if format in ("csv", "tsv"):
+        from ..dataset_parsing import parse_table
+        records, parsing = parse_table(payload, parse_options, format=format)
+        provenance['parsing'] = parsing
     elif format in ("json", "geojson", "jsonl"):
+        if parse_options:
+            raise ValueError('此采集器的parse_options仅用于CSV/TSV表格')
         if format == "jsonl":
             records = [json.loads(line) for line in payload.decode("utf-8-sig").splitlines() if line.strip()]
         else:
@@ -638,11 +693,14 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
             if isinstance(data, list):
                 records = data
             elif isinstance(data, dict) and data.get("type") == "FeatureCollection":
-                records = [{**f.get("properties", {}), "geometry": f.get("geometry")} for f in data["features"]]
+                # Preserve feature identity and the original properties namespace.
+                # A property named id/geometry must not overwrite the GeoJSON envelope.
+                records = [{**(f.get("properties") or {}), 'geometry': f.get('geometry'),
+                            'geojson_feature': f} for f in data['features']]
             else:
                 records = data.get("data") if isinstance(data, dict) else None
     else:
-        raise ValueError("仅下载并解析CSV/JSON/JSONL/GeoJSON，不执行脚本或自动解包")
+        raise ValueError("仅下载并解析CSV/TSV/JSON/JSONL/GeoJSON，不执行脚本或自动解包")
     if not isinstance(records, list) or not all(isinstance(r, dict) for r in records):
         raise ValueError("资源必须是可解析的表格记录，目录/HTML/错误响应不能当作数据")
     if len(records) > 100000:
@@ -654,7 +712,39 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
 
 def resource_file(params, budget):
     yield _file_page(params["url"], params["format"], provenance={
-        "source_id": params.get("source_id"), "license": params.get("license", "unknown")},archive_member=params.get("archive_member"))
+        "source_id": params.get("source_id"), "license": params.get("license", "unknown")},
+        archive_member=params.get("archive_member"), parse_options=params.get('parse_options'))
+
+
+def park_visit_speeds(params, budget):
+    """A public ordinary-visit walking-speed sample. No tracks or geometry are imported."""
+    import math
+
+    if set(params) - {"_cursor"}:
+        raise ValueError("该数据版本固定，不接受覆盖来源或字段")
+    page = _file_page(
+        "https://zenodo.org/records/20748587/files/theme-park-visitor-movement-v1.0.0.zip?download=1",
+        "csv", archive_member="kbf/tables/visits.csv", download_cap=36_000_000, member_only=True,
+        archive_md5="ad19abbe1636a0cbda4bf0e153f524ab",
+        retry_url="https://zenodo.org/api/records/20748587/files/theme-park-visitor-movement-v1.0.0.zip/content",
+        provenance={"source_id":"zenodo", "license":"CC-BY-4.0", "reference":"https://doi.org/10.5281/zenodo.20748587",
+                    "units":{"avg_speed_mps":"m/s"}, "scope":"ordinary_theme_park_visits",
+                    "method":"按发布者 analyzed=1 选行，仅保留日常访问平均步速。步速用于输入参考，不代表无干扰自由速度或事故数据。"},
+    )
+    rows = []
+    for row in page.records:
+        if row.get("analyzed") != "1":
+            continue
+        speed = float(row["avg_speed_mps"])
+        if not math.isfinite(speed) or speed <= 0:
+            raise ValueError("来源标记已分析的样本含无效步速")
+        rows.append({"avg_speed_mps":speed})
+    if not rows:
+        raise ValueError("发布表内没有可用的实测步速")
+    page.meta["provenance"]["published_rows"] = len(page.records)
+    page.records = rows
+    page.meta["total"] = len(rows)
+    yield page
 
 
 def huggingface_file(params, budget):
@@ -698,7 +788,7 @@ def ckan_resource(params, budget):
 
 
 CONNECTORS = {
-    "worldbank": worldbank, "eurostat_jsonstat": eurostat_jsonstat,
+    "worldbank": worldbank, "worldbank_data360":worldbank_data360, "eurostat_jsonstat": eurostat_jsonstat,
     "unsdg": unsdg, "who_gho": who_gho, "unesco_uis": unesco_uis,
     "us_census": us_census, "oecd_sdmx": oecd_sdmx,
     "ilostat_bulk": ilostat_bulk,
@@ -708,11 +798,12 @@ CONNECTORS = {
     "huggingface_datasets": huggingface_datasets,
     "web_page": web_page,
     "resource_file": resource_file, "huggingface_file": huggingface_file, "ckan_resource": ckan_resource,
+    "park_visit_speeds": park_visit_speeds,
 }
 
 CONNECTOR_SOURCE = {   # 连接器 → 主要来源（可一对多）
-    "huggingface_file": "huggingface",
-    "worldbank": "wb_indicators", "eurostat_jsonstat": "eurostat",
+    "huggingface_file": "huggingface", "park_visit_speeds": "zenodo",
+    "worldbank": "wb_indicators", "worldbank_data360":"wb_data360", "eurostat_jsonstat": "eurostat",
     "unsdg": "unsdg", "who_gho": "who_gho", "unesco_uis": "unesco_uis",
     "us_census": "us_census", "oecd_sdmx": "oecd_sdmx",
     "ilostat_bulk": "ilostat_bulk", "crossref": "crossref",

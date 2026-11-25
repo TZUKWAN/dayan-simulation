@@ -261,6 +261,46 @@ class HadwigerModel(DayanModel):
 
 
 # ============ 迁移 ============
+class UnconstrainedGravityModel(DayanModel):
+    """ECO067 unconstrained origin–destination flow with explicit scale and impedance."""
+    model_id="ECO067"
+    clock_type="fixed_step"
+
+    def __init__(self, origin=(80.,120.), destination=(95.,105.), distance=((0.,8.),(8.,0.)),
+                 origin_elasticity=1., destination_elasticity=1., distance_elasticity=1., scale=.001):
+        self.origin,self.destination=np.asarray(origin,float),np.asarray(destination,float)
+        self.distance=np.asarray(distance,float)
+        self.origin_elasticity,self.destination_elasticity=origin_elasticity,destination_elasticity
+        self.distance_elasticity,self.scale=distance_elasticity,scale
+        n=len(self.origin)
+        if (self.origin.shape!=(n,) or self.destination.shape!=(n,) or self.distance.shape!=(n,n)
+                or not 2<=n<=100 or any(not np.isfinite(x).all() or np.any(x<0)
+                                      for x in (self.origin,self.destination,self.distance))
+                or min(origin_elasticity,destination_elasticity,distance_elasticity,scale)<0):
+            raise ValueError("需要同维有限非负的起点人口、吸引量与距离矩阵")
+        self.off_diagonal=~np.eye(n,dtype=bool)
+        if np.any(self.distance[self.off_diagonal]<=0):
+            raise ValueError("地理单位之间的距离必须为正")
+
+    def initialize(self, context, parameters, population, topology, rng):
+        weights=np.outer(self.origin**self.origin_elasticity,self.destination**self.destination_elasticity)
+        with np.errstate(over='ignore', invalid='ignore'):
+            flow=self.scale*weights/np.where(self.off_diagonal,self.distance,1.)**self.distance_elasticity
+        self.flow=np.where(self.off_diagonal,flow,0.)
+        if not np.isfinite(self.flow).all():
+            raise ValueError("流量计算溢出")
+
+    def step(self, t, dt):
+        pass
+
+    def observe(self):
+        return {"od_flows":self.flow.tolist(),"outflow":self.flow.sum(axis=1).tolist(),
+                "inflow":self.flow.sum(axis=0).tolist(),"total_flow":float(self.flow.sum())}
+
+    def validate_state(self):
+        return []
+
+
 class WilsonGravityModel(DayanModel):
     """ECO069 Wilson 双约束最大熵空间交互：T_ij = A_i B_j O_i D_j exp(-βc_ij)，
     IPF 迭代使行列和闭合。基准：行和=O、列和=D。"""

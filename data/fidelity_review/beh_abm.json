@@ -50,15 +50,18 @@
   {
    "mid": "BEH005",
    "class_name": "EpsteinViolenceModel",
-   "fidelity": "prototype",
-   "basis": "激活-逮捕回路在，但风险公式方向反、无刑期、grievance未按H(1-L)，常驻约49%暴力非间歇态。",
+   "fidelity": "lite",
+   "basis": "G=H(1-L)、N=R[1-exp(-k C/A)]、周期格点视野、空位移动、逮捕与0..Jmax刑期、释放及完整随机状态恢复已实现；不是现实冲突校准。",
    "simplifications": [
-    "risk=1-exp(-距警距离)方向与原模型相反",
-    "jailed数组未使用",
-    "grievance一次性采样不更新",
-    "警察随机游走"
+    "采用移动/公民决策/警察逮捕三阶段调度，不声称复刻原文所有随机异步调度变体",
+    "方形Moore视野；释放时局部无空位则置于全局空位",
+    "violence_frac为最近50步均值，active_frac为当步比例，episodic仅为描述性波动标记"
    ],
-   "evidence": "beh_abm.py:172 激活规则(210-215)+逮捕(200-207)；实测violence_frac≈0.49"
+   "evidence": "EpsteinViolenceModel.arrest_probability/step/snapshot/restore/state_frame；tests/test_civil_violence.py 五项实际机制与恢复测试，2026-11-18",
+   "references": [
+    "https://doi.org/10.1073/pnas.092080199",
+    "https://ccl.northwestern.edu/netlogo/models/Rebellion"
+   ]
   },
   {
    "mid": "BEH006",

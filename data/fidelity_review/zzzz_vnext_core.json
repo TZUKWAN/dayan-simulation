@@ -1,0 +1,840 @@
+{
+  "version": 1,
+  "source_fingerprint": "165070c04e0076f36ae0c93228f7c2704da6da5701313d6aba2c4de016c1d492",
+  "scope": "20 distinct reviewed model factories; one compatibility alias",
+  "reviews": [
+    {
+      "model_id": "ECO001",
+      "fidelity": "full",
+      "basis": "开放投入产出固定技术系数迭代，明确保留指定矩阵。二部门向量与可生产矩阵的闭式数值解一致。",
+      "simplifications": [
+        "固定技术系数与最终需求，无价格、稀缺约束或内生技术。"
+      ],
+      "evidence": "dayan/models/eco_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.2307/1927824"
+      ]
+    },
+    {
+      "model_id": "ECO015",
+      "fidelity": "lite",
+      "basis": "人均 Solow 特例，A=1、n=0；稳态条件和提高储蓄率的轨迹经执行核对。",
+      "simplifications": [
+        "正折旧且资本弹性低于1时使用稳态式；没有人口和技术增长。"
+      ],
+      "evidence": "dayan/models/wave2.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.2307/1884513"
+      ]
+    },
+    {
+      "model_id": "ECO017",
+      "fidelity": "full",
+      "basis": "AK 线性技术与显式 Euler 更新，解析指数参考按实际时刻从真实初态生成。",
+      "simplifications": [
+        "恒定投入系数；观测 k 与解析曲线的数值误差受步长影响。"
+      ],
+      "evidence": "dayan/models/eco_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1086/261764"
+      ]
+    },
+    {
+      "model_id": "ECO019",
+      "fidelity": "full",
+      "basis": "工资份额与就业 Goodwin 核心方程；正轨迹及政策系数响应在固定规格下通过。",
+      "simplifications": [
+        "比例经济域需按初态与系数检验，模型无现实工资与就业校准。"
+      ],
+      "evidence": "dayan/models/eco_final.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://www.icts.res.in/sites/default/files/Goodwin_growth_cycle_1967.pdf"
+      ]
+    },
+    {
+      "model_id": "NET052",
+      "fidelity": "full",
+      "basis": "固定人口的齐次混合 SIS 与地方病均衡分支，零传播指数衰减对照已运行。",
+      "simplifications": [
+        "无网络、年龄或地理，抽象时钟不能直接作为实际日历。"
+      ],
+      "evidence": "dayan/models/wave2.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1098/rspa.1932.0171"
+      ]
+    },
+    {
+      "model_id": "NET053",
+      "fidelity": "full",
+      "basis": "闭合齐次 SIR 三仓室，质量守恒和零传播输入测试通过。",
+      "simplifications": [
+        "永久移出，无潜伏期、空间、生育和死亡。"
+      ],
+      "evidence": "dayan/models/benchmarks.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1098/rspa.1927.0118"
+      ]
+    },
+    {
+      "model_id": "NET-SIR",
+      "fidelity": "full",
+      "basis": "NET053 对应的兼容入口，使用相同模型工厂。",
+      "simplifications": [
+        "兼容别名不计独立科研模型数。"
+      ],
+      "evidence": "dayan/model_index.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1098/rspa.1927.0118"
+      ]
+    },
+    {
+      "model_id": "NET055",
+      "fidelity": "full",
+      "basis": "闭合确定性 SEIR 四仓室，加入指数式等待的潜伏转移率。",
+      "simplifications": [
+        "同质接触，无数据校准；需要有效非负初值和有限步长。"
+      ],
+      "evidence": "dayan/models/benchmarks.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1137/S0036144500371907"
+      ]
+    },
+    {
+      "model_id": "NET061",
+      "fidelity": "lite",
+      "basis": "三组 SEIR 用接触率乘源组感染比例，首步、维数、符号、总量与真实关系记录通过。",
+      "simplifications": [
+        "三组等初始人数，接触矩阵和速率为规约输入；没有地区观测。"
+      ],
+      "evidence": "dayan/models/net_final16.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1017/S002217240006160X"
+      ]
+    },
+    {
+      "model_id": "NET106",
+      "fidelity": "full",
+      "basis": "单车道环形 NaSch 同步四阶段规则；持久车辆 ID 和逐帧不冲突。",
+      "simplifications": [
+        "速度格/更新，单车道周期边界，物理尺度由研究另定。"
+      ],
+      "evidence": "dayan/models/traffic.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1051/jp1:1992277"
+      ]
+    },
+    {
+      "model_id": "NET113",
+      "fidelity": "lite",
+      "basis": "有限场景社会力，期望速度、排斥、墙与出口状态相连。",
+      "simplifications": [
+        "简化域与力项，阴影和符号为视图表现，无个体实测轨迹。"
+      ],
+      "evidence": "dayan/models/pedestrian.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1103/PhysRevE.51.4282"
+      ]
+    },
+    {
+      "model_id": "BEH001",
+      "fidelity": "lite",
+      "basis": "周期网格相似度阈值与搬迁，保存跨帧身份，实际阈值变体重复。",
+      "simplifications": [
+        "周期边界、两类居民、批量调度。"
+      ],
+      "evidence": "dayan/models/beh_abm.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1080/0022250X.1971.9989794"
+      ]
+    },
+    {
+      "model_id": "BEH005",
+      "fidelity": "lite",
+      "basis": "受控抽象格点中怨愤、状态演化和随机恢复的源码机制核查。",
+      "simplifications": [
+        "局部视野、分阶段更新与抽象参量，限于机制说明。"
+      ],
+      "evidence": "dayan/models/beh_abm.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1073/pnas.092080199"
+      ]
+    },
+    {
+      "model_id": "BEH016",
+      "fidelity": "lite",
+      "basis": "固定锚权且完整混合的 Friedkin–Johnsen 更新；锚权1时意见不变。",
+      "simplifications": [
+        "权重同质，拓扑简化为等权他人平均。"
+      ],
+      "evidence": "dayan/models/opinion.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1080/0022250X.1990.9990069"
+      ]
+    },
+    {
+      "model_id": "BEH018",
+      "fidelity": "full",
+      "basis": "单次均匀取有界信任的对称意见更新；均值守恒、冻结对照与离散度经过运行比较。",
+      "simplifications": [
+        "抽到相同主体会跳过，完全混合。"
+      ],
+      "evidence": "dayan/models/opinion.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1142/S0219525900000078"
+      ]
+    },
+    {
+      "model_id": "SYS002",
+      "fidelity": "lite",
+      "basis": "有限台数 Poisson 到达和指数服务，Erlang-C 比较及队列守恒。",
+      "simplifications": [
+        "按离散边界调度，稳态解析仅适用稳定负荷。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1214/aoms/1177728975"
+      ]
+    },
+    {
+      "model_id": "SYS003",
+      "fidelity": "lite",
+      "basis": "M/M/c/c 阻塞模型与正确 Erlang-B 解析递推。",
+      "simplifications": [
+        "同一时间步批量处理会带来短窗和离散误差。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1214/aoms/1177728975"
+      ]
+    },
+    {
+      "model_id": "SYS006",
+      "fidelity": "lite",
+      "basis": "无限服务位的加权占用与 Little 定律解析对照。",
+      "simplifications": [
+        "到达与释放按固定步聚合，短窗口尚可能未达到稳态。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1287/opre.9.3.383"
+      ]
+    },
+    {
+      "model_id": "SYS007",
+      "fidelity": "full",
+      "basis": "真实连续时间到达，FIFO 确定服务，服务开始计数及等待和解析参考各自呈现。",
+      "simplifications": [
+        "基准稳定区要求到达率低于服务率，等待未完成不填为零。"
+      ],
+      "evidence": "dayan/models/sys_models.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://academic.oup.com/jrsssb/article/13/2/151/7026631"
+      ]
+    },
+    {
+      "model_id": "SYS024",
+      "fidelity": "prototype",
+      "basis": "有限工作池遇负荷变化调整并发，Poisson 到达、指数服务与队列守恒。",
+      "simplifications": [
+        "来源启发动态结构系统，当前仅替换工作池大小，不覆盖通用动态拓扑。"
+      ],
+      "evidence": "dayan/models/sys_extras.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://doi.org/10.1145/268403.268423"
+      ]
+    },
+    {
+      "model_id": "CPL001",
+      "fidelity": "lite",
+      "basis": "真实来源路网与人口权重、分钟尺度步行及车辆耦合、按绝对时点信息干预和公交载荷状态同步。",
+      "simplifications": [
+        "地区行为、老年比例、积水与接驳点为情景设定，物理场景完成了数据接入，未作实地验证。"
+      ],
+      "evidence": "dayan/models/evacuation_coupled.py；docs/VNEXT_MODEL_REVIEW.md；docs/verification/vnext/core_model_runs.json",
+      "references": [
+        "https://tigerweb.geo.census.gov/arcgis/rest/services/Census2020/tigerWMS_PhysicalFeatures/MapServer"
+      ]
+    }
+  ],
+  "prior_source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
+  "transport_recheck": {
+    "changed_python_sources": [
+      "dayan/access.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "workbench_recheck": {
+    "prior_source_fingerprint": "63b1935d860cf98e0bff289e18bad739d5e179d35b9064373d05ad18dd6294ae",
+    "changed_python_sources": [
+      "dayan/report_gen.py",
+      "dayan/run_store.py",
+      "dayan/server.py",
+      "dayan/task_manager.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "harness_recheck": {
+    "prior_source_fingerprint": "8a4ea88c890cb1be9e426c1cd386dc55829c5938938eb64030e63dedc2ebba23",
+    "changed_python_sources": [
+      "dayan/agent/model_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/custom_models.py",
+      "dayan/research/native_contract.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "physical_scene_recheck": {
+    "prior_source_fingerprint": "7e929691a2eac380aefb95922ee85904e5a158db53045f8892af8d24ba42d13a",
+    "changed_python_sources": [
+      "dayan/agent/model_tools.py",
+      "dayan/custom_models.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "model_design_recheck": {
+    "prior_source_fingerprint": "f655cd5d74b82d9261aa00092a2ecfc88bd98e95875a6a7c0d8861fb0d7dae74",
+    "changed_python_sources": [
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/research/integration_events.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "native_harness_recheck": {
+    "prior_source_fingerprint": "34481b61fad2fa1260749b3486603bfba8306457f57de4027b2815fa618257d8",
+    "changed_execution_sources": [
+      "data/dayan_catalog.json",
+      "data/model_semantics.json",
+      "dayan/agent/data_tools.py",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/collection/connectors.py",
+      "dayan/collection/presets.py",
+      "dayan/datasets.py",
+      "dayan/models/pedestrian.py",
+      "dayan/report_gen.py",
+      "dayan/research/integration_events.py",
+      "dayan/research/native_contract.py",
+      "dayan/research/requirements.py",
+      "dayan/research_charts.py",
+      "dayan/server.py",
+      "dayan/task_manager.py",
+      "dayan/view_analysis.py"
+    ],
+    "identical_direct_model_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "scenario_report_recheck": {
+    "prior_source_fingerprint": "d42bc4d9fec360f9db5c0bfb2c24ca1d6823f570ce726f3a20a457d5c499c52c",
+    "changed_execution_sources": [
+      "data/dayan_catalog.json",
+      "data/model_semantics.json",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/datasets.py",
+      "dayan/model_index.py",
+      "dayan/model_method.py",
+      "dayan/models/crowd_response.py",
+      "dayan/report_evidence.py",
+      "dayan/report_gen.py",
+      "dayan/research/native_contract.py",
+      "dayan/research/requirements.py",
+      "dayan/research_charts.py",
+      "dayan/runtime.py",
+      "dayan/view_analysis.py"
+    ],
+    "identical_direct_model_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "research_rigor_recheck": {
+    "prior_source_fingerprint": "4297044c23de1b38c20e8852bb8218d36d95b1dd6355540877799a65c11e4610",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/agent/composer.py",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/agent/verification.py",
+      "dayan/core.py",
+      "dayan/model_method.py",
+      "dayan/models/crowd_response.py",
+      "dayan/report_evidence.py",
+      "dayan/report_gen.py",
+      "dayan/research/native_contract.py",
+      "dayan/research/requirements.py",
+      "dayan/runtime.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py",
+      "dayan/view_analysis.py"
+    ]
+  },
+  "report_visuals_recheck": {
+    "prior_source_fingerprint": "ae865303e86c9a107176a0c250a7e702e833d07c7a84690b291825348356c733",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/datasets.py",
+      "dayan/report_evidence.py",
+      "dayan/report_gen.py",
+      "dayan/report_spatial_charts.py",
+      "dayan/report_stock_graph.py",
+      "dayan/research_charts.py",
+      "dayan/server.py",
+      "dayan/view_analysis.py"
+    ]
+  },
+  "history_management_recheck": {
+    "prior_source_fingerprint": "2a97bb277fc15650d452df8e8dc817a5fdd83cd4e8e6dc6ffd8ce37c3c9fe372",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/access.py",
+      "dayan/history_records.py",
+      "dayan/run_store.py",
+      "dayan/server.py"
+    ]
+  },
+  "phased_harness_recheck": {
+    "prior_source_fingerprint": "4ef7a483b98efd167061be8ca345bf8b21d144a2439a38defa278f330a75910f",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "data/dayan_catalog.json",
+      "data/model_semantics.json",
+      "dayan/agent/composer.py",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_prompts.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/agent/verification.py",
+      "dayan/custom_models.py",
+      "dayan/engine_capabilities.py",
+      "dayan/grid_neighborhood.py",
+      "dayan/lattice.py",
+      "dayan/model_index.py",
+      "dayan/model_method.py",
+      "dayan/models/spatial_audit.py",
+      "dayan/output_contract.py",
+      "dayan/policies.py",
+      "dayan/report_gen.py",
+      "dayan/report_spatial_charts.py",
+      "dayan/research/requirements.py",
+      "dayan/research/semantics.py",
+      "dayan/run_store.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py",
+      "dayan/stateframe.py",
+      "dayan/view_analysis.py"
+    ]
+  },
+  "prompt_runtime_contract_recheck": {
+    "prior_source_fingerprint": "7713bff30600c3d840946570cf50ca9e626c7ce434cb9d7a1aa8f537e556f1ae",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/agent/model_prompts.py",
+      "dayan/scene_contract.py"
+    ]
+  },
+  "phased_plan_and_resume_recheck": {
+    "prior_source_fingerprint": "d1079cbbe4e7f1f9c90c9db386a1f6aa1a127f2cb5a02a0c4657da39712ecf95",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/agent/model_prompts.py",
+      "dayan/agent/verification.py"
+    ]
+  },
+  "research_memory_recheck": {
+    "prior_source_fingerprint": "d04a8bb6142fb7a58aea50eadbbca4bdf24a55f8789d95f78e390cc47d147f29",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/research/model_memory.py"
+    ]
+  }
+}

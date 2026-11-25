@@ -99,7 +99,7 @@ def main():
         client = LMStudioClient(base_url=args.url, model=args.model,
                                 cache_path=outdir / "cache.jsonl",
                                 log_path=outdir / "llm_log.jsonl",
-                                max_workers=args.workers, default_max_tokens=120)
+                                max_workers=args.workers)
 
     rows = []
     for t in range(args.ticks):
@@ -126,7 +126,7 @@ def main():
             ctx = "\n".join(f"- {GOODS[g]}：{prices[g]:.2f}（本期转产人数{int((np.array(choices)==g).sum())}，"
                              f"劳动价值约{labor_value[g]:.2f}）" for g in range(6))
             jobs = [{"messages": build_prompt(ctx), "temperature": 0.4,
-                     "max_tokens": 120} for _ in range(args.agents)]
+                     "max_tokens": None} for _ in range(args.agents)]
             outs = client.batch(jobs)
             for i, o in enumerate(outs):
                 g = parse_good(o)
