@@ -37,5 +37,46 @@ class TestRunner(unittest.TestCase):
             result=run_all.run_suite(suite,root,output,.2)
             self.assertEqual(result['verdict'],'FAIL');self.assertIn('执行超时',result['reasons'])
 
+    def test_function_suites_execute_in_real_pytest_child_and_keep_failure_and_skip_counts(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);(root/'tests').mkdir()
+            fixture=root/'tests/test_pytest_fixture.py'
+            source=('import pytest\n'
+                    '@pytest.mark.parametrize("value", [1, 2])\n'
+                    'def test_values(value):\n'
+                    '    print("[PASS] labelled transport fixture")\n'
+                    '    assert value > 0\n'
+                    '@pytest.mark.skip(reason="labelled skip fixture")\n'
+                    'def test_skipped():\n'
+                    '    raise AssertionError("must not execute")\n')
+            fixture.write_text(source,encoding='utf-8')
+            suite=run_all.discover(root)[0]
+            self.assertEqual(suite['framework'],'pytest')
+            success=run_all.run_suite(suite,root,root/'success',30)
+            self.assertEqual((success['verdict'],success['passed'],success['skipped']),('PASS',2,1))
+            self.assertEqual(success['pytest_report']['testcases'],3)
+            fixture.write_text(source.replace('assert value > 0','assert value == 1'),encoding='utf-8')
+            failure=run_all.run_suite(suite,root,root/'failure',30)
+            self.assertEqual((failure['verdict'],failure['passed'],failure['skipped']),('FAIL',1,1))
+            self.assertEqual(failure['pytest_report']['failures'],1)
+            self.assertNotEqual(failure['returncode'],0)
+            self.assertTrue(Path(success['junit']).is_file())
+            self.assertTrue(Path(failure['junit']).is_file())
+
+    def test_framework_preserves_script_main_and_rejects_absent_or_empty_pytest_report(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);script=root/'legacy.py'
+            script.write_text('def test_helper(value): pass\n'
+                              'if __name__ == "__main__": test_helper(1)\n',encoding='utf-8')
+            self.assertEqual(run_all.python_framework(script),'script')
+            absent=run_all.pytest_counts(root/'missing.xml')
+            self.assertEqual(run_all.judge_suite('missing',0,'[PASS] invented','',0,
+                             pytest_report=absent)['verdict'],'FAIL')
+            empty=root/'empty.xml';empty.write_text('<testsuites><testsuite tests="0"/></testsuites>')
+            self.assertEqual(run_all.judge_suite('empty',0,'[PASS] invented','',0,
+                             pytest_report=run_all.pytest_counts(empty))['verdict'],'FAIL')
+            broken=root/'broken.xml';broken.write_text('<invalid')
+            self.assertIn('损坏',run_all.pytest_counts(broken)['error'])
+
 
 if __name__=='__main__':unittest.main(verbosity=2)

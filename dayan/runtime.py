@@ -28,7 +28,7 @@ import uuid
 
 import numpy as np
 
-from .core import RngStreams
+from .core import RngStreams, fixed_step_end
 from .source_version import source_fingerprint
 _PROCESS_SOURCE_FINGERPRINT=source_fingerprint()
 
@@ -170,7 +170,14 @@ def execution_dependencies(mid, *, check_configuration=True):
     names = getattr(cls,"external_dependencies",())
     result = []
     for name in names:
-        if name == "language_model":
+        if name == 'managed_solver':
+            state='requires_built_image'
+            if check_configuration:
+                from .solvers.sandbox import image_contract, SolverError
+                try:image_contract();state='ready'
+                except (SolverError,ValueError):state='unavailable'
+            result.append({'type':'execution_environment','name':'DAYAN隔离求解镜像','state':state})
+        elif name == "language_model":
             state = "requires_configuration"
             if check_configuration:
                 from .llm_client import configured
@@ -313,6 +320,7 @@ def save_checkpoint(model: Any, t: float, rng: np.random.Generator,
         "model_id": getattr(model, "model_id", "?"),
         "protocol": protocol,
         "t": round(float(t), 9),
+        "t_exact": float(t),
         "rng_state": rng.bit_generator.state,
         "parameters": params,
         "model_snapshot": _jsonable(snap),
@@ -326,11 +334,16 @@ def save_checkpoint(model: Any, t: float, rng: np.random.Generator,
 
 
 def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=False):
-    """Continue a supported full fixed-step snapshot; never rerun its earlier history."""
+    """Continue a supported full snapshot; never rerun its earlier history."""
     executing_source=assert_loaded_source()
     validate_run_arguments(steps, dt, 0)
+    if chk.get('protocol')=='managed_program':
+        from .program_runtime import resume_program
+        return resume_program(chk,steps,dt,capture_state=capture_state,with_initial=with_initial,
+                              source_version=executing_source)
     from .limits import validate_compute,frame_stride
-    validate_compute(steps,parameters=chk.get('parameters'))
+    from .scaling import FrameRetention
+    validate_compute(steps,parameters=chk.get('parameters'),array=str(chk.get("model_id","")).startswith("USR"))
     sample_stride=frame_stride(steps,1,chk.get('parameters'))
     if not chk.get("resumable") or chk.get("protocol") != "fixed_step":
         raise ValueError("该检查点不可续算：缺少完整模型状态/恢复协议。可回放已保存观测。")
@@ -344,11 +357,13 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
         raise ValueError(f"此检查点下一步对应一个观测间隔，要求 dt={fixed_dt}")
     model = cls(**(chk.get("parameters") or {}))
     model.restore(copy.deepcopy(chk["model_snapshot"]))
+    array = getattr(model,"_array",None)
+    retention = FrameRetention(steps,1) if capture_state and array is not None else None
     rng = getattr(model, "rng", None) or getattr(model,'rng_',None)
     if not isinstance(rng, np.random.Generator):
         rng = np.random.default_rng()
         rng.bit_generator.state = chk["rng_state"]
-    start = t = float(chk["t"])
+    start = t = float(chk.get("t_exact", chk["t"]))
     eff_dt = dt * getattr(model, "dt_scale", 1.0)
     horizon = start + steps*eff_dt
     rows, frames, applied = [], [], []
@@ -359,10 +374,15 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
     def capture():
         row = {"sim_t": round(t, 9), **copy.deepcopy(model.observe())}
         rows.append(_jsonable(row))
-        if capture_state and (iterations%sample_stride==0 or t>=horizon-1e-12):
+        stride = retention.stride if retention else sample_stride
+        if capture_state and (iterations%stride==0 or t>=horizon-1e-12 or (retention and iterations<=1)):
             from .stateframe import state_frame_of, _aggregate_frame
             frame = state_frame_of(model, t) or _aggregate_frame(model, t)
-            frames.append({**_jsonable(copy.deepcopy(frame)), "run_id": run_id})
+            frame = {**_jsonable(copy.deepcopy(frame)), "run_id": run_id}
+            if retention:
+                retention.append(frame, iterations, t>=horizon-1e-12)
+            else:
+                frames.append(frame)
     if with_initial:
         capture()
     while t < horizon - 1e-12:
@@ -382,7 +402,7 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
         if pending and t + 1e-12 < float(pending[0]["at_t"]) < t+step_dt-1e-12:
             step_dt = float(pending[0]["at_t"])-t
         model.step(t, step_dt)
-        t += step_dt
+        t = fixed_step_end(t + step_dt, step_dt, horizon)
         iterations += 1
         capture()
     checkpoint = save_checkpoint(model, t, rng, chk.get("parameters") or {}, protocol)
@@ -390,6 +410,8 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
     checkpoint["pending_interventions"] = pending
     events = [_jsonable(e) for e in getattr(model, "events", []) if isinstance(e, dict) and e.get("sim_t", start) >= start]
     events += [{"etype": "intervention", "sim_t": iv["actual_t"], **iv} for iv in applied]
+    if retention:
+        frames = retention.frames()
     manifest = {"run_id": run_id, "model_id": mid, "protocol": protocol,"source_fingerprint":executing_source,
                 "requested": {"resume_from_t": start, "ticks": steps, "dt": dt},
                 "actual": {"parameters": chk.get("parameters") or {}, "effective_parameters": initial_parameters,
@@ -400,9 +422,15 @@ def resume_from_checkpoint(chk, steps, dt, *, capture_state=False, with_initial=
                 "interventions": applied, "model_definition": getattr(model, "definition", None),
                 "scenario_review": getattr(model,"scenario_review",None),
                 "llm_calls": getattr(model, "llm_audit", []), "state_frame_count": len(frames),
-                'state_every':sample_stride,
+                'state_every':retention.stride if retention else sample_stride,
                 "runtime_version": "2.1", "warnings": [],
                 "finished_at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    if array is not None:
+        manifest["actual"]["entities"] = array.count
+        manifest["scale"] = {**array.profile, "kept_state_frames": len(frames),
+                             "all_steps_archived": bool(capture_state and len(frames)==len(rows)),
+                             "population_storage": "dayan-columns-v1"}
+        manifest["rng"]["draw_order"] = "column-expression-active-index-v1"
     return RunResult(model_id=mid, observations=rows, manifest=manifest, state_frames=frames,
                      events=events, checkpoint=checkpoint)
 
@@ -468,23 +496,25 @@ def run_model_full(mid: str, parameters: dict | None = None,
                    on_step=None,
                    capture_state: bool = False,
                    state_every: int = 1,
-                   data_bindings: list | None = None) -> RunResult:
+                   data_bindings: list | None = None,
+                   full_frames: bool = False, _progress=None) -> RunResult:
     """权威运行入口。返回 RunResult（observations + manifest + issues）。"""
     executing_source=assert_loaded_source()
     from .model_index import resolve
     t_start = time.perf_counter()
     started_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     params_in = dict(parameters or {})
-    from .datasets import bind_parameters
-    bound, data_evidence = bind_parameters(data_bindings,mid)
-    for name, value in bound.items():
-        if name in params_in and params_in[name] != value:
-            raise ValueError(f"参数 {name} 与数据映射值冲突，不能静默覆盖")
-    params_in.update(bound)
     protocol, factory = resolve(mid)
     if protocol is None or factory is None:
         raise KeyError(f"模型 {mid} 无运行工厂")
     cls = factory[1] if isinstance(factory, tuple) else factory
+    from .structured_inputs import prepare_bindings
+    declared = cls.definition.get('input_ports', {}) if protocol == 'managed_program' else {}
+    bound, structured_inputs, data_evidence = prepare_bindings(data_bindings, mid, declared)
+    for name, value in bound.items():
+        if name in params_in and params_in[name] != value:
+            raise ValueError(f"参数 {name} 与数据映射值冲突，不能静默覆盖")
+    params_in.update(bound)
     fixed_dt = getattr(cls,"fixed_dt",None)
 
     sig = _init_signature(mid)
@@ -509,12 +539,41 @@ def run_model_full(mid: str, parameters: dict | None = None,
     validate_run_arguments(ticks, dt, seed)
     if fixed_dt is not None and dt!=fixed_dt:
         raise ValueError(f"{mid} 每步对应一个输入观测间隔，要求 dt={fixed_dt}")
-    from .limits import validate_compute, frame_stride
-    validate_compute(int(ticks), parameters=params_in)
+    if protocol=='managed_program':
+        from .program_runtime import run_program
+        return run_program(mid,cls,parameters=normalized,requested_parameters=params_in,ticks=ticks,dt=dt,seed=seed,
+            experiment=experiment,issues=placement,with_time=with_time,checkpoint_at=checkpoint_at,
+            interventions=interventions,on_step=on_step,capture_state=capture_state,state_every=state_every,
+            data_evidence=data_evidence,full_frames=full_frames,progress=_progress,source_version=executing_source,
+            prepared_inputs=structured_inputs)
+    from .limits import validate_compute, frame_stride, limits, BudgetExceeded
+    from .scaling import ARRAY_KERNEL, FrameRetention
+    is_dsl = mid.startswith("USR") and isinstance(getattr(cls,"definition",None),dict)
+    # Only the DSL's tested full snapshot protocol is enabled for automatic
+    # mid-run recovery here. Other factories retain their existing run behavior.
+    if not is_dsl or protocol != "fixed_step":
+        _progress = None
+    validate_compute(int(ticks), parameters=params_in, array=is_dsl)
     clean, issues = validate_params(mid, normalized, strict=strict)
+    capacity = None
+    retention = None
+    if is_dsl:
+        from .custom_models import population_plan
+        capacity = population_plan(cls.definition, clean)
+    if type(state_every) is not int or state_every < 1:
+        raise ValueError("state_every 必须是正整数")
     if capture_state:
         defaults = {name: meta.get('default') for name, meta in sig.items()}
-        state_every = frame_stride(int(ticks), state_every, {**defaults, **clean})
+        if capacity and capacity["kernel"] == ARRAY_KERNEL:
+            retention = FrameRetention(int(ticks), state_every, full_frames)
+        elif full_frames:
+            count = capacity["entities"] if capacity else max((int(value) for key, value in {**defaults, **clean}.items()
+                     if key in ("n","n_agents","cells","nodes") and isinstance(value, (int,float)) and value > 0), default=1)
+            if (int(ticks)+1)*max(count,1) > limits().entity_frames:
+                raise BudgetExceeded("按原要求保存每一步完整状态超过该执行器归档预算")
+            state_every = 1
+        else:
+            state_every = frame_stride(int(ticks), state_every, {**defaults, **clean})
     issues = placement + issues
 
     # 构造期注入：__init__ 形参真实传参（结构参数在构造时生效）
@@ -537,6 +596,7 @@ def run_model_full(mid: str, parameters: dict | None = None,
     live_observer = frame_observer(mid, n_steps) if capture_state else None
     initialized = False
     state_frames: list[dict] = []
+    frame_steps = []
     checkpoint = None
     observation_index = 0
     initial_effective = {}
@@ -564,6 +624,14 @@ def run_model_full(mid: str, parameters: dict | None = None,
             if name not in allowed:
                 raise ValueError(f"{mid}.{name} 是未声明运行中可变的参数；可用：{sorted(allowed)}")
     applied_ivs: list[dict] = []
+    restored = None
+    elapsed_prior = 0.0
+    if _progress:
+        restored = _progress.load({"model_id": mid, "parameters": clean, "ticks": ticks, "dt": dt, "seed": seed,
+                                  "experiment": experiment, "interventions": interventions or [],
+                                  "data_bindings": data_evidence, "source_fingerprint": executing_source,
+                                  "capture_state": capture_state, "state_every": state_every,
+                                  "full_frames": full_frames, "checkpoint_at": checkpoint_at})
 
     def _fire_iv(t_now: float):
         while iv_pending and \
@@ -593,11 +661,16 @@ def run_model_full(mid: str, parameters: dict | None = None,
             checkpoint = copy.deepcopy(save_checkpoint(model, t_now, rng, clean, protocol))
             checkpoint["model_id"] = mid
             checkpoint["pending_interventions"] = copy.deepcopy(iv_pending)
-        if capture_state and (force or observation_index % state_every == 0):
+        stride = retention.stride if retention else state_every
+        if capture_state and (force or observation_index % stride == 0):
             from .stateframe import state_frame_of, _aggregate_frame
             fr = state_frame_of(model, t_now) or _aggregate_frame(model, t_now)
             captured = _jsonable(copy.deepcopy(fr))
-            state_frames.append(captured)
+            if retention:
+                retention.append(captured, observation_index, observation_index >= n_steps)
+            else:
+                state_frames.append(captured)
+                frame_steps.append(observation_index)
             if live_observer:
                 live_observer(captured, observation_index)
 
@@ -651,28 +724,72 @@ def run_model_full(mid: str, parameters: dict | None = None,
         final_t = 0.0
         n_iter = 0
     else:
-        model.initialize({}, clean, None, None, rng)
-        invalid = model.validate_state()
-        if invalid:
-            raise ValueError(f"初态校验失败: {invalid}")
-        initialized = True
-        _fire_iv(0.0)
-        obs = [copy.deepcopy(model.observe())]
-        times = [0.0]
-        _initial_hook(0.0)
         eff_dt = dt * getattr(model, "dt_scale", 1.0)
-        t = 0.0
-        n_iter = 0
         horizon = n_steps * eff_dt
+        if restored:
+            current = restored["current_checkpoint"]
+            if not current.get("resumable") or current["protocol"] != protocol or current["model_id"] != mid:
+                raise ValueError("计算检查点缺少本模型的完整恢复协议")
+            model.restore(copy.deepcopy(current["model_snapshot"]))
+            restored_rng = getattr(model, "rng", None)
+            if isinstance(restored_rng, np.random.Generator):
+                rng = restored_rng
+            rng.bit_generator.state = current["rng_state"]
+            obs, times = restored["observations"], restored["times"]
+            t, n_iter = float(current.get("t_exact", current["t"])), restored["n_iter"]
+            observation_index = restored["observation_index"]
+            if len(obs) != n_iter + 1 or len(times) != len(obs) or not times or times[-1] != t:
+                raise ValueError("恢复的观测、时钟和步数不一致")
+            if _jsonable(model.observe()) != obs[-1] or model.validate_state():
+                raise ValueError("模型恢复状态与检查点最后观测不一致")
+            initial_effective.update(restored["initial_effective"])
+            iv_pending, applied_ivs = current["pending_interventions"], restored["applied_interventions"]
+            checkpoint = restored["requested_checkpoint"]
+            started_at, elapsed_prior = restored["started_at"], restored["elapsed_seconds"]
+            state_frames, frame_steps = restored["state_frames"], restored["frame_steps"]
+            if retention:
+                retention.restore(restored["retention"], state_frames)
+        else:
+            model.initialize({}, clean, None, None, rng)
+            invalid = model.validate_state()
+            if invalid:
+                raise ValueError(f"初态校验失败: {invalid}")
+            _fire_iv(0.0)
+            obs = [copy.deepcopy(model.observe())]
+            times = [0.0]
+            _initial_hook(0.0)
+            t = 0.0
+            n_iter = 0
+        initialized = True
+
+        def persist_progress(*, force=False):
+            if _progress is None or not (force or _progress.due()):
+                return
+            current = save_checkpoint(model, t, rng, clean, protocol)
+            current.update(model_id=mid, pending_interventions=copy.deepcopy(iv_pending))
+            saved_retention = retention.checkpoint() if retention else None
+            _progress.save(_jsonable({"current_checkpoint": current, "requested_checkpoint": checkpoint,
+                           "n_iter": n_iter, "observation_index": observation_index,
+                           "initial_effective": initial_effective, "applied_interventions": applied_ivs,
+                           "started_at": started_at, "elapsed_seconds": elapsed_prior + time.perf_counter() - t_start,
+                           "retention": saved_retention}), _jsonable(obs), times,
+                           retention.frames() if retention else state_frames,
+                           [step for step, _ in saved_retention["entries"]] if retention else frame_steps,
+                           finished=t >= horizon - 1e-12)
+
+        if not restored:
+            persist_progress(force=True)
         while t < horizon - 1e-12:
             _fire_iv(t)
             step_dt = _step_limit(t, min(eff_dt, horizon - t))
             t += step_dt
             model.step(t - step_dt, step_dt)
+            t = fixed_step_end(t, step_dt, horizon)
             n_iter += 1
             obs.append(copy.deepcopy(model.observe()))
             times.append(t)
             _step_hook(t, model)
+            persist_progress()
         final_t = t
         if iv_pending:
             for iv in iv_pending:
@@ -681,6 +798,7 @@ def run_model_full(mid: str, parameters: dict | None = None,
                                     "applied": False,
                                     "error": "干预时刻超出运行终点，未生效"})
             iv_pending.clear()
+        persist_progress(force=True)
 
     _ev = getattr(model, "events", None)
     try:
@@ -704,15 +822,19 @@ def run_model_full(mid: str, parameters: dict | None = None,
     else:
         obs_out = obs
 
+    if retention:
+        state_frames = retention.frames()
     if capture_state and (not state_frames or not math.isclose(state_frames[-1]['sim_t'],final_t,rel_tol=0,abs_tol=1e-8)):
         _capture(final_t,True)
+        if retention:
+            state_frames = retention.frames()
     if checkpoint_at is None:
         checkpoint = copy.deepcopy(save_checkpoint(model, final_t, rng, clean, protocol))
         checkpoint["model_id"] = mid
         checkpoint["pending_interventions"] = copy.deepcopy(iv_pending)
 
     effect = _effect_probe(model, ctor_kwargs)
-    duration = time.perf_counter() - t_start
+    duration = elapsed_prior + time.perf_counter() - t_start
     finished_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
     seed_str = f"{mid}|{seed}|{time.time_ns()}|{uuid.uuid4().hex}"
@@ -755,7 +877,7 @@ def run_model_full(mid: str, parameters: dict | None = None,
                        if k in ("state_fidelity", "resumable", "t", "note")},
         "events_n": len(events_dump),
         "state_frame_count": len(state_frames),
-        "state_every": state_every if capture_state else None,
+        "state_every": (retention.stride if retention else state_every) if capture_state else None,
         "interventions": applied_ivs,
         "started_at": started_at, "finished_at": finished_at,
         "duration_s": round(duration, 3),
@@ -763,8 +885,29 @@ def run_model_full(mid: str, parameters: dict | None = None,
                      ("unknown", "alias", "coerced", "type_error", "runtime_key")],
         "runtime_version": "2.1",
     }
+    if capacity:
+        actual_count = model.agent_count
+        if actual_count != capacity["entities"]:
+            raise ValueError(f"实际主体数 {actual_count} 与规模预检 {capacity['entities']} 不一致")
+        manifest["scale"] = {**capacity, "entities": actual_count, "kept_state_frames": len(state_frames),
+                             "all_steps_archived": bool(capture_state and len(state_frames) == len(obs_out)),
+                             "population_storage": "dayan-columns-v1" if retention else "entities"}
+        manifest["actual"]["entities"] = actual_count
+        if capacity["kernel"] == ARRAY_KERNEL:
+            manifest["rng"]["draw_order"] = "column-expression-active-index-v1"
+    if _progress:
+        manifest["execution_recovery"] = {"protocol": "full-dsl-state-json-chunks-v1", "resumed": bool(restored),
+                                          "from_step": restored["n_iter"] if restored else 0,
+                                          "original_endpoint": n_steps * dt,
+                                          "previous_active_seconds": elapsed_prior}
+    if full_frames and capture_state and len(state_frames) != len(obs_out):
+        raise ValueError("运行未实现原文要求的逐步完整状态归档")
     from .output_contract import output_contract
     manifest["output_contract"] = output_contract(mid)
+    from .model_method import model_method
+    method = model_method(mid, manifest["model_definition"])
+    if method is not None:
+        manifest["model_method"] = method
     for binding in data_evidence:
         if binding.get('compatibility_status')!='units_verified' or binding.get('scope_status')!='verified':
             manifest['warnings'].append('数据已数值接入，但单位或地区/主体范围尚未完整声明；不据此认定现实政策适用性：'+binding['parameter'])

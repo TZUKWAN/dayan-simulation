@@ -19,9 +19,14 @@ def candidates(request):
     for mid, semantic in registry().items():
         covered=set(semantic['mechanisms'])
         if mid not in ALL_INDEX or not required or not (required & covered):continue
+        context = set(semantic.get("required_mechanisms", []))
+        if not context <= required:
+            continue
         schema=output_contract(mid)
         requested=request.get('metric')
         matches=list(re.finditer(semantic.get('match','(?!)'),text,re.I))
+        if semantic.get("require_match") and not matches and mid not in request["model_ids"]:
+            continue
         missing=sorted(required-covered)
         score=10*len(required & covered)-20*len(missing)+len(matches)
         rows.append({'model_id':mid,'runnable':True,'mechanism':sorted(covered),

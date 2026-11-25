@@ -19,6 +19,12 @@ def intervention_contract(model_id):
                          meta.get("maximum", 1e12), meta["default"], meta.get("unit", ""),
                          meta.get("type") == "int")
                 for name, meta in getattr(cls, "parameter_schema", {}).items() if meta.get("mutable")]
+    if mid == "NET122":
+        from .models.spatial_audit import GreenSubsidyAuditGame
+        return [_control(name, spec["description"], spec["minimum"], spec["maximum"],
+                         spec["default"], integer=spec["type"] == "integer")
+                for name, spec in GreenSubsidyAuditGame.parameter_schema.items()
+                if name in GreenSubsidyAuditGame.policy_parameters]
     if mid in {"NET052", "NET053", "NET-SIR"}:
         return [_control("beta", "传播率", 0, 2, .5, "每仿真时间单位"),
                 _control("gamma", "恢复率", 0, 2, .2, "每仿真时间单位")]

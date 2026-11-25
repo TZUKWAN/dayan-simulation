@@ -68,7 +68,11 @@
       else {clock.start();scheduleAnimation();}
     });
     window.addEventListener('dayan:page', event => {
-      if (event.detail === 'overview') scheduleAnimation();
+      if (event.detail === 'overview' || event.detail === 'replay') scheduleAnimation();
+      else stopAnimation();
+    });
+    window.addEventListener('dayan:display', () => {
+      if (container.checkVisibility()) {onResize();scheduleAnimation();}
       else stopAnimation();
     });
     scheduleAnimation();
@@ -2373,7 +2377,7 @@
   // ============================================================
   // WP7 状态同源沙盘：实体帧驱动渲染（真实模型状态，禁随机漫游）
   // provenance=entity → 主体位置/状态逐帧来自模型计算；
-  // provenance=aggregate → 仅汇总指标驱动的示意动画（HUD 明示，不冒充轨迹）
+  // provenance=aggregate → 用已知模型机制映射汇总观测。
   // ============================================================
   window._vizStateStream = null;
   window._vizStateIdx = -1;
@@ -2390,7 +2394,12 @@
   reduced.addEventListener('change',e=>{window.DAYAN3D.setSmoothing(!e.matches);if(e.matches)stopCameraMotion();});
   function measureWorld(stream) {
     const kind=studioProfile.kind, frames=stream.frames||[], first=frames[0]||{};
-    if(['ring-road','indicators','queue','cohorts'].includes(kind)){
+    const extent=studioStage.userData.extent;
+    if(extent){
+      const heights=first.space?.vertical_bounds?.map(z=>z*DAYAN_SCENE_STUDIO.scaleFor(first))||[0];
+      return heights.flatMap(y=>[-1,1].flatMap(x=>[-1,1].map(z=>new THREE.Vector3(x*extent.width/2,y,z*extent.depth/2))));
+    }
+    if(['ring-road','queue'].includes(kind)){
       const radius=kind==='ring-road'?34:studioStage.userData.radius||24;
       return Array.from({length:48},(_,i)=>{
         const angle=i/48*Math.PI*2;
@@ -2523,6 +2532,7 @@
     if(render&&!isRunning)renderer.render(getScene(),camera);
   }
   function applySceneLayer(object) {
+    if(object.userData.spatialSuppressed){object.visible=false;return;}
     const layer=object.userData.sceneLayer;
     if(layer)object.visible=sceneLayers[layer];
   }
@@ -2567,7 +2577,7 @@
   const displaySamples=new WeakMap();
   let displayPriorities=new Map();
   function displayEntities(frame) {
-    const entities=frame.entities||[];if(entities.length<=3000)return entities;
+    const entities=(frame.entities||[]).filter(e=>DAYAN_SCENE_STUDIO.inSceneSpace(e,frame));if(entities.length<=3000)return entities;
     if(!displaySamples.has(frame)){
       const priority=id=>{
         let value=displayPriorities.get(id);
@@ -2583,7 +2593,9 @@
   }
 
   const instanceColor=new THREE.Color();
-  function syncStateInstances(group,includeColors=true) {
+  function syncStateInstances(group,includeColors=true,time=window._vizNow||0) {
+    const people=group?.userData.people;
+    if(people)DAYAN_SCENE_STUDIO.drawPeople(people,group.userData.meshMap,time,selectedStateEntity,reduced.matches);
     const batch=group?.userData.carBatch;if(!batch)return;
     const map=group.userData.meshMap;
     if(includeColors){
@@ -2605,7 +2617,7 @@
     // 模型坐标 → 场景坐标（按实体类型线性映射，保持真实相对位置）
     if (fr?.space?.bounds?.length === 4) {
       const [x0,y0,x1,y1]=fr.space.bounds, scale=70/Math.max(x1-x0,y1-y0,1e-9);
-      return [(ent.x-(x0+x1)/2)*scale,0.7,((y0+y1)/2-ent.y)*scale];
+      return [(ent.x-(x0+x1)/2)*scale,0.7+(Number.isFinite(ent.z)?ent.z*scale:0),((y0+y1)/2-ent.y)*scale];
     }
     if (ent.type === "car") {
       // 环形道路 → 圆周轨道：cell index 等比映射为角度，速度仍控制颜色
@@ -2633,6 +2645,38 @@
       return [ (ent.x - 1) * 6.0, 0, 0 ];
     }
     return [ ent.x || 0, 0.5, ent.y || 0 ];
+  }
+  function personGround(entity,frame){
+    const floor=studioProfile.kind==='queue'?-.25:.115;
+    return floor+(Number.isFinite(entity.z)?entity.z*DAYAN_SCENE_STUDIO.scaleFor(frame):0);
+  }
+  function adjacentFrames(){
+    const stream=window._vizStateStream,index=window._vizStateIdx;
+    const lookup=frame=>frame?{frame,entities:new Map((frame.entities||[]).map(entity=>[entity.id,entity]))}:null;
+    return {previous:lookup(stream.preview?stream.previousFrame:stream.frames[index-1]),
+      next:lookup(stream.frames[index+1])};
+  }
+  function personDirection(entity,position,neighbor,forward){
+    const other=neighbor?.entities.get(entity.id);
+    if(!Number.isFinite(other?.x)||!Number.isFinite(other?.y)||(other.type==='pedestrian'&&other.state==='exited'))return null;
+    const [x,,z]=stateWorldXY(other,neighbor.frame);
+    const dx=forward?x-position.x:position.x-x, dz=forward?z-position.z:position.z-z;
+    const distance=Math.hypot(dx,dz);
+    return distance>1e-5&&distance<=24?Math.atan2(dx,dz):null;
+  }
+  function applyPerson(model,entity,frame,neighbors) {
+    const ahead=personDirection(entity,model.position,neighbors.next,true);
+    const behind=personDirection(entity,model.position,neighbors.previous,false);
+    const moving=entity.type==='pedestrian'&&Number.isFinite(entity.speed)
+      ? entity.state!=='exited'&&entity.speed>1e-5 : (neighbors.next?ahead:behind)!==null;
+    const info=model.userData;
+    model.position.y=personGround(entity,frame);
+    info.heading=ahead??behind??0;
+    info.pose=DAYAN_SCENE_STUDIO.personPose(entity,studioProfile,moving);
+    info.size=['m','米','meter','metre'].includes(frame.space?.unit)
+      ? THREE.MathUtils.clamp(DAYAN_SCENE_STUDIO.scaleFor(frame),.8,3.3) : 1.25;
+    if(frame.space?.vertical_bounds&&['m','米','meter','metre'].includes(frame.space.unit))
+      info.size=DAYAN_SCENE_STUDIO.scaleFor(frame)*(Number.isFinite(entity.height)?entity.height:1.65)/1.565;
   }
 
   let stateOverlay = null;
@@ -2729,6 +2773,7 @@
   }
 
   function vizApplyFrame(fr) {
+    if(studioProfile.kind==='observations')return;
     const scene = getScene();
     let group = scene.children.find(c => c.userData && c.userData.isStateGroup);
     if (!group) {
@@ -2738,7 +2783,10 @@
     }
     const meshMap = group.userData.meshMap = group.userData.meshMap || new Map();
     const seen = new Set((fr.facilities||[]).map(f=>"fac_"+f.id));
+    let neighbors;
     displayEntities(fr).forEach(ent => {
+      if(ent.type==='age_group'||!Number.isFinite(ent.x)||
+         (!Number.isFinite(ent.y)&&!['ring-road','queue'].includes(studioProfile.kind)))return;
       seen.add(ent.id);
       let m = meshMap.get(ent.id);
       if (!m) {
@@ -2758,6 +2806,16 @@
             group.userData.carBatch=batch;group.add(batch);
           }
           m=new THREE.Object3D();m.userData.instancedCar=true;m.userData.glyph='vehicle';
+        }else if(DAYAN_SCENE_STUDIO.isPerson(ent,studioProfile)){
+          if(!group.userData.people){
+            const batch=DAYAN_SCENE_STUDIO.peopleBatch(group,studioProfile.rich);
+            for(const part of batch.parts)applySceneLayer(part.instances);
+            group.userData.people=batch;
+          }
+          m=new THREE.Object3D();
+          m.userData.person=true;
+          const id=String(ent.id);
+          m.userData.phase=[...id].reduce((value,letter)=>(value*31+letter.charCodeAt(0))%53,0)/53*Math.PI*2;
         }else m = stateMeshFor(ent);
         m.userData.entityId=ent.id;
         meshMap.set(ent.id, m);
@@ -2770,9 +2828,12 @@
         m.position.set(x, y, z);
       }
       m.visible = sceneLayers.entities&&(String(ent.state) !== "exited" || ent.type !== "pedestrian");
-      if(m.userData.cohort){const h=.35+Math.max(0,ent.I||0)/Math.max(1,studioProfile.hi)*12;m.scale.y=h;m.position.y=h/2;const sp=m.userData.cohortLabel;sp.scale.set(9,2.8/h,1);sp.position.y=.5+2.2/h;sp.userData.redraw([String(ent.id),'I = '+Number((ent.I||0).toPrecision(5))]);}
+      if(m.userData.person){
+        neighbors||=adjacentFrames();
+        applyPerson(m,ent,fr,neighbors);
+      }
       const stateColor=DAYAN_SCENE_STUDIO.color(ent,studioProfile);
-      if(m.userData.instancedCar)m.userData.stateColor=stateColor;
+      if(m.userData.instancedCar||m.userData.person)m.userData.stateColor=stateColor;
       if(m.material?.color)m.material.color.set(stateColor);
       m.children.forEach(part=>{if(part.userData.stateColor)part.material.color.set(stateColor);});
       if(studioProfile.kind==='ring-road'&&m.userData.glyph==='vehicle'){
@@ -2785,16 +2846,8 @@
         m.material.color.setHex(ent.state === "busy" ? 0xffb74d : 0x3a4a5a);
       }
     });
-    // Scaled metric pillars are explicitly non-spatial; their labels retain signed actual values.
-    if(!(fr.entities||[]).length){
-      const metrics=Object.entries(fr.aggregates||{}).filter(([k,v])=>k!=="sim_t"&&typeof v==="number"&&Number.isFinite(v)).slice(0,8);
-      metrics.forEach(([name,value],i)=>{
-        const id="metric_"+name;seen.add(id);let m=meshMap.get(id);
-        if(!m){m=DAYAN_SCENE_STUDIO.indicator(group,name,i,metrics.length,window._vizStateStream);meshMap.set(id,m);m.traverse(applySceneLayer);}
-        DAYAN_SCENE_STUDIO.updateIndicator(m,value);
-      });
-    }
-    DAYAN_SCENE_STUDIO.updateStage(studioStage,fr,studioProfile);
+    DAYAN_SCENE_STUDIO.resizeGround(studioStage,fr);
+    DAYAN_SPATIAL.update(studioStage,fr,applySceneLayer);
     updateEntityFX(group, fr);
     meshMap.forEach((m, id) => {
       if (!seen.has(id)) { group.remove(m); disposeDeep(m); meshMap.delete(id); }
@@ -2802,6 +2855,11 @@
     // 设施：出口/道路指示
     (fr.facilities || []).forEach(f => {
       const fid = "fac_" + f.id;
+      if([...(fr.space?.floors||[]),...(fr.space?.connectors||[])].some(geometry=>geometry.id===f.id)){
+        const duplicate=meshMap.get(fid);
+        if(duplicate){group.remove(duplicate);disposeDeep(duplicate);meshMap.delete(fid);}
+        return; // The same actual ID already has its authoritative 3D geometry.
+      }
       if(f.type==='model_facility'){
         let fm=meshMap.get(fid);
         if(!fm){fm=DAYAN_SCENE_STUDIO.facility(f);fm.userData.sceneLayer=f.kind==='road'?'roads':'facilities';fm.traverse(applySceneLayer);group.add(fm);meshMap.set(fid,fm);}
@@ -2844,6 +2902,8 @@
     let box=document.getElementById('sceneLegend');
     if(!box){box=document.createElement('div');box.id='sceneLegend';container.appendChild(box);}
     box.replaceChildren();
+    box.hidden=studioProfile.kind==='observations';
+    if(box.hidden)return;
     const heading=document.createElement('strong');heading.textContent=studioProfile.title;box.appendChild(heading);
     if(studioProfile.kind==='geographic'){
       const bounds=window._vizStateStream?.frames?.[0]?.space?.bounds;
@@ -2855,7 +2915,7 @@
     }
     const items=document.createElement('div');items.className='scene-legend-items';
     DAYAN_SCENE_STUDIO.legend(studioProfile).forEach(item=>{const line=document.createElement('span'),dot=document.createElement('i');dot.style.background='#'+item.color.toString(16).padStart(6,'0');line.appendChild(dot);line.appendChild(document.createTextNode(item.text));items.appendChild(line);});box.appendChild(items);
-    if(!['indicators','cohorts'].includes(studioProfile.kind)){
+    if(studioProfile.kind!=='observations'){
       const label=document.createElement('label');label.className='scene-smoothing';
       const input=document.createElement('input');input.type='checkbox';input.id='sceneSmoothing';input.checked=stateSmoothing;input.addEventListener('change',()=>DAYAN3D.setSmoothing(input.checked));
       label.append(input,document.createTextNode('帧间插值'));label.title='仅在相邻归档位置间做视觉插值；统计、主体详情与导出仍为原始帧。关闭可查看精确状态。';box.appendChild(label);
@@ -2865,7 +2925,7 @@
   let smoothNext=null, smoothPositions=null;
   function interpolateState(t,idx) {
     const frames=window._vizStateStream?.frames,fr=frames?.[idx],next=frames?.[idx+1];
-    if(!stateSmoothing||!next||['indicators','cohorts'].includes(studioProfile.kind))return false;
+    if(!stateSmoothing||!next||studioProfile.kind==='observations')return false;
     const span=next.sim_t-fr.sim_t,alpha=span>0?THREE.MathUtils.clamp((t-fr.sim_t)/span,0,1):0;
     if(!alpha)return false;
     if(smoothNext!==next){smoothNext=next;smoothPositions=new Map((next.entities||[]).map(e=>[e.id,e]));}
@@ -2880,7 +2940,8 @@
       }else{
         const a=stateWorldXY(e,fr),b=stateWorldXY(n,next);
         if(Math.hypot(b[0]-a[0],b[2]-a[2])>24)continue; // No invented path across a teleport/wrap boundary.
-        m.position.set(a[0]+(b[0]-a[0])*alpha,a[1]+(b[1]-a[1])*alpha,a[2]+(b[2]-a[2])*alpha);
+        const fromY=m.userData.person?personGround(e,fr):a[1], toY=m.userData.person?personGround(n,next):b[1];
+        m.position.set(a[0]+(b[0]-a[0])*alpha,fromY+(toY-fromY)*alpha,a[2]+(b[2]-a[2])*alpha);
         if(m.userData.glyph==='vehicle'&&Math.hypot(b[0]-a[0],b[2]-a[2])>1e-6)m.rotation.y=Math.atan2(-(b[2]-a[2]),b[0]-a[0]);
       }
     }
@@ -2917,24 +2978,22 @@
       const prevFr = st.frames[window._vizStateIdx];
       window._vizStateIdx = idx;
       vizApplyFrame(st.frames[idx]);
-      if (prevFr) spawnEventWaves(st, prevFr, st.frames[idx]);
+      if (prevFr&&studioProfile.kind!=='observations') spawnEventWaves(st, prevFr, st.frames[idx]);
       const hud = stateHud();
       if (hud) {
         const f = st.frames[idx];
         const entN = (f.entities || []).length;
-        hud.textContent = (st.preview ? '实时计算取样' : st.partial ? '已核验档案预览' : st.provenance === "entity"
-          ? "◉ 状态同源 · 主体状态来自模型计算"
-          : "△ 汇总数据驱动的示意动画（非主体轨迹）")
+        const source=studioProfile.kind==='observations'?'汇总观测':'场地与主体状态来自模型';
+        hud.textContent = (st.preview ? '实时取样 · ' : st.partial ? '归档预览 · ' : '')+source
           + " · " + (st.model_id || "") + " · sim_t=" + (f.sim_t != null ? (+f.sim_t).toFixed(2) : "?")
           + (st.provenance === "entity" ? " · 实体 " + entN : "");
         if(st.provenance==="entity"&&entN>3000)hud.textContent+=st.partial?' · 视图采样3000':' · 视图采样3000；全量状态可导出';
-        if(st.provenance!=="entity")hud.textContent+=" · 几何体仅为指标概念节点";
         hud.style.borderColor = st.provenance === "entity"
           ? "rgba(0,255,163,.45)" : "rgba(255,183,77,.45)";
       }
     }
     const interpolated=interpolateState(t,idx);
-    if(changed||interpolated)syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup),changed);
+    if(changed||interpolated)syncStateInstances(getScene().children.find(c=>c.userData?.isStateGroup),changed,t);
     if(changed&&hoveredEntity!==null)paintHover(hoveredEntity,null,false);
     if(previous&&followingStateEntity){const mesh=stateEntityMesh(followingStateEntity);if(mesh?.visible){camera.position.add(mesh.position.clone().sub(previous));viewTarget.copy(mesh.position);camera.lookAt(viewTarget);}else followStateEntity('',false);}
   }
@@ -2959,6 +3018,7 @@
     const scene = getScene();
     studioProfile=profile||DAYAN_SCENE_STUDIO.resolve(stream);
     studioStage=DAYAN_SCENE_STUDIO.stage(scene,studioProfile,stream?.frames?.[0]||{});
+    DAYAN_SPATIAL.update(studioStage,stream?.frames?.[0]||{},applySceneLayer);
     scene.traverse(applySceneLayer);
     viewHull=measureWorld(stream);
     renderer.toneMappingExposure=1.05;
@@ -2980,7 +3040,7 @@
     const profile=DAYAN_SCENE_STUDIO.resolve(stream);
     if(window._vizStateStream?.run_id!==stream.run_id){visualizeState(stream,profile);return;}
     const id=selectedStateEntity,following=followingStateEntity,preset=cameraPreset,overview=stateCameraOverview;
-    if(profile.kind!==studioProfile.kind||profile.rich!==studioProfile.rich||['queue','indicators'].includes(profile.kind)){
+    if(profile.kind!==studioProfile.kind||profile.rich!==studioProfile.rich||profile.glyph!==studioProfile.glyph||profile.kind==='queue'){
       const position=camera.position.clone(), target=viewTarget.clone();
       visualizeState(stream,profile);INTRO.active=false;
       stateCameraOverview=overview;cameraPreset=preset;
@@ -3005,11 +3065,13 @@
     if(renderer&&camera)renderer.render(getScene(),camera);
   }
 
-  function preview(reading, first) {
+  function preview(reading, first, previousFrame=null) {
     const frame=reading.frame;
-    const sample={model_id:reading.model_id,frames:[frame],provenance:frame.provenance,preview:true};
-    if (first || !window._vizStateStream?.preview) visualizeState(sample);
-    else window._vizStateStream.frames[0]=frame;
+    const sample={model_id:reading.model_id,frames:[frame],provenance:frame.provenance,preview:true,
+      n_entities_max:reading.entities_total,previousFrame};
+    const profile=DAYAN_SCENE_STUDIO.resolve(sample);
+    if (first || !window._vizStateStream?.preview || profile.kind!==studioProfile?.kind||profile.glyph!==studioProfile?.glyph) visualizeState(sample,profile);
+    else window._vizStateStream=sample;
     DAYAN3D.renderAt(frame.sim_t);
   }
 
@@ -3474,9 +3536,12 @@
       const group=getScene().children.find(c=>c.userData?.isStateGroup);
       let visibleEntities=0;
       for(const mesh of group?.userData.meshMap?.values()||[])if(mesh.userData.entityId!==undefined&&mesh.visible)visibleEntities++;
-      return {drawCalls:render.calls,triangles:render.triangles,geometries:memory.geometries,textures:memory.textures,visibleEntities};
+      return {drawCalls:render.calls,triangles:render.triangles,geometries:memory.geometries,textures:memory.textures,visibleEntities,
+        spatial:studioStage?.userData.spatialFacts||null,
+        referenceGroundSuppressed:studioStage?.userData.ground?(!studioStage.userData.ground.deck.visible&&!studioStage.userData.ground.seams.visible):null};
     },
     followEntity:followStateEntity,
+    entityPose(id){const mesh=stateEntityMesh(id);return mesh?{position:mesh.position.toArray(),rotation:mesh.rotation.toArray(),pose:mesh.userData.pose,visible:mesh.visible}:null;},
     get cameraState(){return {position:camera?.position.toArray(),quaternion:camera?.quaternion.toArray(),aspect:camera?.aspect,fov:camera?.fov,following:followingStateEntity||null};},
     get presentation(){return studioProfile?{...studioProfile,smoothing:stateSmoothing}:null;},
     setSmoothing(enabled){stateSmoothing=!!enabled;const check=document.getElementById('sceneSmoothing');if(check)check.checked=stateSmoothing;window._vizStateIdx=-1;this.renderAt(window.DAYAN_RESULTS?.time||0);},

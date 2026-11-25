@@ -106,6 +106,23 @@ window.__ModuleLoader__.load({
 				h('div', { style: STYLE.hint }, '正在探测本机后端…'));
 		}
 
+		function ChatStatus({ message, onRetry }) {
+			return h('div', { style: STYLE.chatStatus, role: 'status' }, message,
+				onRetry ? h('button', { type: 'button', style: STYLE.collapse, onClick: onRetry }, '重试连接') : null);
+		}
+
+		class NativeChatBoundary extends React.Component {
+			state = { failed: false };
+			static getDerivedStateFromError() { return { failed: true }; }
+			render() { return this.state.failed ? this.props.fallback : this.props.children; }
+		}
+
+		function BoundChat({ kit, connection, workbenchRef }) {
+			React.useLayoutEffect(() => connection.hold(), [connection]);
+			return h(kit.SessionProvider, { session: connection.reference },
+				kit.renderSlot('dayan.chat', { inputContextReady: true, dayanSessionId: connection.sessionId, workbenchRef }));
+		}
+
 		function BackendOffline({ onStart, starting, error, compact }) {
 			return h('div', { style: { ...STYLE.center, ...(compact ? { gap: 10 } : {}) } },
 				h('div', { style: compact ? { fontSize: 28 } : STYLE.logo }, '☰'),
@@ -139,14 +156,24 @@ window.__ModuleLoader__.load({
 				h('circle', { cx: 5.4, cy: 20.6, r: 1.1, fill: 'currentColor' }))));
 
 			// Keep the project's own conversation independent of every ordinary main-view selection.
-            const services = {}, serviceListeners = new Set();let serviceVersion=0;
-            const subscribeServices = callback => {serviceListeners.add(callback);return ()=>serviceListeners.delete(callback);};
-            for (const name of ['sessions']) {
-                ctx.inject([name], scope => {
-                    services[name]=scope[name];serviceVersion++;for(const callback of serviceListeners)callback();
-                    scope.effect(()=>()=>{if(services[name]===scope[name]){delete services[name];serviceVersion++;for(const callback of serviceListeners)callback();}},'dayan: '+name+' lifetime');
-                });
+            const serviceListeners = new Set();
+            let sessionService, serviceVersion = 0;
+            const subscribeServices = callback => {
+                serviceListeners.add(callback);
+                return () => serviceListeners.delete(callback);
+            };
+            function publishSessionService(service) {
+                sessionService = service;
+                serviceVersion += 1;
+                for (const callback of serviceListeners) callback();
             }
+            ctx.inject(['sessions'], scope => {
+                const service = scope.sessions;
+                publishSessionService(service);
+                scope.effect(() => () => {
+                    if (sessionService === service) publishSessionService(undefined);
+                }, 'dayan: sessions lifetime');
+            });
 
 			// main 面板：左 = DSH 原生对话，右 = 工作台 iframe
 			function Panel(props) {
@@ -172,7 +199,11 @@ window.__ModuleLoader__.load({
 
                 const serviceRevision=React.useSyncExternalStore(subscribeServices,()=>serviceVersion,()=>serviceVersion);
                 const [backendConfig,setBackendConfig]=React.useState(null);
-                const conn=connection?.serviceRevision===serviceRevision&&connection?.projectRoot===backendConfig?.projectRoot?connection:null;
+                const projectRoot=backendConfig?.projectRoot;
+                const matching=connection?.serviceRevision===serviceRevision&&connection?.projectRoot===projectRoot?connection:null;
+                const conn=matching?.isCurrent()?matching:null;
+                const connectionError=chatError||(matching&&!conn?'大衍专属对话连接已断开。':null);
+                const retryChat=()=>setRetryConnection(value=>value+1);
                 const backendUrl=backendConfig?.url||BACKEND_URL;
                 const splitStorageKey=backendConfig?.projectRoot?'dayan_pane_split_v1:'+backendConfig.projectRoot.replace(/\\/g,'/').replace(/\/+$/,'').toLowerCase():null;
                 function clampedWidth(percent){
@@ -218,20 +249,19 @@ window.__ModuleLoader__.load({
                 React.useEffect(()=>{
                     let active=true,lease=null;const controller=new AbortController();
                     setConn(null);setChatError(null);
-                    const sessions=services.sessions;
-                    if(!sessions||!backendConfig)return ()=>{active=false;};
+                    const sessions=sessionService;
+                    if(!sessions||!projectRoot)return;
                     (async()=>{
-                        const {openProjectConversation}=await import('/dayan/api/session-binding.js?v=project-session-v2');
+                        const {openProjectConversation}=await import('/dayan/api/session-binding.js?v=project-session-v3');
                         const response=await fetch('/dayan/api/native-session',{cache:'no-store',signal:controller.signal});
                         const result=await response.json();
                         if(!response.ok||!result.ok)throw new Error(result.error||'大衍专属对话身份读取失败');
-                        const opened=await openProjectConversation({sessions,record:result.session,projectRoot:backendConfig.projectRoot,signal:controller.signal});
-                        lease=opened.reference;
-                        if(active)setConn({...opened,projectRoot:backendConfig.projectRoot,serviceRevision});
-                        else lease.release();
+                        lease=await openProjectConversation({sessions,record:result.session,projectRoot,signal:controller.signal});
+                        if(active)setConn({...lease,projectRoot,serviceRevision});
+                        else lease.retire();
                     })().catch(cause=>{if(active&&!controller.signal.aborted)setChatError(String(cause?.message||cause));});
-                    return ()=>{active=false;controller.abort();lease?.release();};
-                },[serviceRevision,backendConfig,retryConnection]);
+                    return ()=>{active=false;controller.abort();lease?.retire();};
+                },[serviceRevision,projectRoot,retryConnection]);
 
 				React.useEffect(() => {
 					let active = true;
@@ -254,12 +284,14 @@ window.__ModuleLoader__.load({
 				};
 
 				const chat = nativeKit?.SessionProvider && nativeKit?.renderSlot && conn
-					? h(nativeKit.SessionProvider, { key: conn.sessionId, session: conn.reference },
-						nativeKit.renderSlot('dayan.chat', { inputContextReady: true, dayanSessionId: conn.sessionId, workbenchRef }))
-					: h('div', { style: STYLE.chatStatus, role: conn ? 'status' : 'alert' },
-						h('div', null, conn ? '正在加载 DSH 原生对话…' : (chatError || '正在连接 DSH 原生会话…')),
-						h('div', { style: STYLE.hint }, '仅连接本项目的大衍研究对话；连接失败不会回退到其他聊天。'),
-                        chatError?h('button',{type:'button',style:STYLE.collapse,onClick:()=>setRetryConnection(n=>n+1)},'重试连接'):null);
+					? h(NativeChatBoundary, {
+						key: conn.sessionId + ':' + serviceRevision + ':' + retryConnection,
+						fallback: h(ChatStatus, { message: '大衍专属对话暂时无法显示。', onRetry: retryChat })
+					}, h(BoundChat, { kit: nativeKit, connection: conn, workbenchRef }))
+					: h(ChatStatus, {
+						message: conn ? '正在加载 DSH 原生对话…' : (connectionError || '正在连接大衍专属对话…'),
+						onRetry: connectionError ? retryChat : null
+					});
 
 				const workbench = backend === 'online'
 					? conn ? h('iframe', {

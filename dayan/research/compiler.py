@@ -71,10 +71,10 @@ def compile_research(text: str, purpose=None, ticks=None, dt=None, seeds=None,
     effective={**request,'parameters':baseline}
     issues.extend(coverage_issues(effective,mid))
     if len(ids)>1:issues.append('多模型实验必须明确每个模型的规约和映射，不能只运行第一个')
-    from ..model_index import ALL_INDEX, resolve
-    if mid and mid not in ALL_INDEX:issues.append(f'{mid} 无运行工厂')
-    if mid in ALL_INDEX:
-        _,factory = resolve(mid)
+    from ..model_index import resolve
+    _, factory = resolve(mid) if mid else (None, None)
+    if mid and factory is None:issues.append(f'{mid} 无运行工厂')
+    if factory is not None:
         cls = factory[1] if isinstance(factory,tuple) else factory
         fixed_dt = getattr(cls,'fixed_dt',None)
         if fixed_dt is not None and dt_explicit and dt!=fixed_dt:
@@ -83,7 +83,7 @@ def compile_research(text: str, purpose=None, ticks=None, dt=None, seeds=None,
             research.assumptions['suggested']=[s for s in research.assumptions['suggested'] if not s.startswith('执行默认dt=')]
             research.assumptions['suggested'].append(f'dt={fixed_dt} 来自模型的观测间隔合同')
             dt = fixed_dt
-    if mid in ALL_INDEX and not any(c['model_id']==mid for c in ranked):
+    if factory is not None and not any(c['model_id']==mid for c in ranked):
         from ..output_contract import output_contract
         ranked.insert(0,{'model_id':mid,'runnable':True,'mechanism':sorted(model_mechanisms(mid)),
                          'reason':'原始需求指定','output_fields':list(output_contract(mid)['fields']),

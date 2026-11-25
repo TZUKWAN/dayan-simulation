@@ -211,60 +211,75 @@
     }):[];
     return {counts:counts.map((n,i)=>[min+(i+.5)*step,n]),width:step,domain:[min,max],sorted,quantiles:[min,q1,quantile(sorted,.5),q3,max],density,bandwidth};
   }
-  function renderProcess(state) {
-    const {frames=[],run_id:runId}=state.stream||{};
-    const typeList=[...new Set(frames.flatMap(f=>(f.entities||[]).map(e=>e.type)))].filter(Boolean);
-    if(!typeList.length){window.DAYAN_NOTICE('当前档案没有可追踪的主体状态。');return;}
-    window.DAYAN_MODAL('主体状态迁移',`<div class="tool-bar"><label>主体类型<select id="processType">${typeList.map(k=>`<option>${esc(k)}</option>`).join('')}</select></label>
+  function processCsvRows(runId, series, flow) {
+    const header=['run_id','previous_t','next_t','scope','group','entity_type','state_field','previous_present','previous_state','next_present','next_state','agents'];
+    return [header,...(flow?.links||[]).map(row=>[runId,flow.from,flow.to,series.scope,series.group,series.type,series.field,
+      row.from.present,row.from.state,row.to.present,row.to.state,row.count])];
+  }
+  let processRequest=0;
+  async function renderProcess(state) {
+    const {run_id:runId}=state.stream||{};
+    if(!runId){window.DAYAN_NOTICE('请先选择一个已保存的运行。');return;}
+    const request=++processRequest, windowSpec=window.DAYAN_ANALYSIS.resolvedWindow(state);
+    window.DAYAN_MODAL('主体状态迁移','<p id="processLoading" class="space-note">正在读取完整归档并按真实 ID 对齐…</p>');
+    const alive=()=>request===processRequest&&document.querySelector('#processLoading')&&document.querySelector('#modalBackdrop')?.classList.contains('open')&&state.stream?.run_id===runId;
+    let history;
+    try {
+      const query=new URLSearchParams({start:windowSpec.from,end:windowSpec.to,exclusive:windowSpec.exclusive});
+      const response=await fetch(`/api/runs/${encodeURIComponent(runId)}/state-transitions?${query}`);
+      history=await response.json();
+      if(!response.ok)throw new Error(history.detail||'状态流读取失败');
+    } catch(error) {
+      if(alive())document.querySelector('#modalBody').innerHTML=empty(error.message);
+      return;
+    }
+    if(!alive())return;
+    if(!history.series.length){document.querySelector('#modalBody').innerHTML=empty(history.unavailable.map(row=>`${row.group}.${row.field}：${row.reason}`).join('；')||'该归档没有实际状态或类别字段；颜色属性不作为状态推断。');return;}
+    const frames=history.times.map(sim_t=>({sim_t}));
+    document.querySelector('#modalBody').innerHTML=`<div class="tool-bar"><label>主体状态<select id="processType">${history.series.map((row,i)=>`<option value="${i}">${esc(row.label+' · '+row.field)}</option>`).join('')}</select></label>
       <label>迁移分界帧<select id="processFrame"></select></label><button class="ws-button" id="exportProcess">状态迁移 CSV</button></div>
-      <p class="space-note">档案 ${esc(runId)} · 只匹配相邻已存帧中的同 ID 主体 · ${frames.length} 帧</p><div class="process-layout"><div id="processArea" class="chart-host"></div><div id="processFlows" class="chart-host"></div></div>`);
+      <p class="space-note">档案 ${esc(runId)} · 当前时间窗 ${frames.length} 个完整归档时点 · 按稳定 ID 对齐，进入、退出、缺失分别计数</p><div class="process-layout"><div id="processArea" class="chart-host"></div><div id="processFlows" class="chart-host"></div></div>`;
     const type=document.querySelector('#processType'), frame=document.querySelector('#processFrame');
     const current=Math.max(1,frames.findLastIndex(f=>f.sim_t<=state.time));
     frame.replaceChildren(...frames.slice(1).map((f,i)=>new Option(`${nfmt(frames[i].sim_t)} → ${nfmt(f.sim_t)}`,i+1)));
     frame.value=current;
-    const stateName=e=>String(e.state ?? '未记录状态');
-    const collect=f=>(f.entities||[]).filter(e=>e.type===type.value);
-    let exports=[];
+    const stateName=value=>value===null?'（缺失状态）':String(value);
+    const selected=()=>history.series[Number(type.value)];
+    const scope=()=>selected().scope==='full_population'?'全部归档主体':'该模型已导出的主体';
+    let exports=[], exportedFlow=null;
     const draw=()=>{
-      const populations=frames.map(f=>{
-        const counts=new Map();
-        for(const e of collect(f)){const k=stateName(e);counts.set(k,(counts.get(k)||0)+1);}
-        return counts;
-      });
+      const populations=selected().snapshots.map(f=>new Map(f.states.map(row=>[JSON.stringify(row.state),row.count])));
       const total=new Map();
       for(const group of populations)for(const [k,v] of group)total.set(k,(total.get(k)||0)+v);
       const ranking=[...total.keys()].sort((a,b)=>total.get(b)-total.get(a));
       const categories=ranking.slice(0,7), other=new Set(ranking.slice(7));
-      const set=other.size?[...categories,'其他记录状态']:categories;
+      const set=other.size?[...categories,null]:categories;
       const stack=Array(frames.length).fill(0);
       const traces=set.map((category,i)=>({
-        label:category,kind:'area',lower:true,color:colors[i%colors.length],
+        label:category===null?'其他记录状态':stateName(JSON.parse(category)),kind:'area',lower:true,color:colors[i%colors.length],
         points:frames.map((f,j)=>{
           const value=i<categories.length?(populations[j].get(category)||0):[...other].reduce((n,k)=>n+(populations[j].get(k)||0),0);
           const begin=stack[j];stack[j]+=value;
           return [f.sim_t,stack[j],`此状态 ${value} 个`,begin];
         }),
       }));
-      plot(document.querySelector('#processArea'),{title:'各类状态的实际数量',xUnit:frames[0]?.space?.time_unit||'模型时间',yUnit:'模型主体数',zero:true,series:traces,
-        note:'堆叠高度表示全部所选类型主体数。悬停显示各状态的独立计数。'});
+      plot(document.querySelector('#processArea'),{title:'各类状态的实际数量',xUnit:state.stream.frames?.[0]?.space?.time_unit||'模型时间',yUnit:'主体数',zero:true,series:traces,
+        note:`堆叠高度来自${scope()}，未从画面样本外推。悬停核对独立计数。`});
       drawFlow();
     };
     function drawFlow() {
       const host=document.querySelector('#processFlows'), i=Number(frame.value);
-      if(!i||!frames[i]){host.innerHTML=empty('需要两个以上相邻归档帧。');exports=[];return;}
-      const old=new Map(collect(frames[i-1]).map(e=>[String(e.id),stateName(e)]));
-      const links=new Map();
-      for(const ent of collect(frames[i]) ){
-        const key=String(ent.id);if(!old.has(key))continue;
-        const a=old.get(key),b=stateName(ent),label=JSON.stringify([a,b]);
-        links.set(label,(links.get(label)||0)+1);
-      }
-      exports=[...links].map(([label,n])=>[...JSON.parse(label),n]);
-      if(!exports.length){host.innerHTML=empty('相邻帧没有可匹配的主体 ID。');return;}
+      exportedFlow=selected().transitions[i-1]||null;
+      document.querySelector('#exportProcess').disabled=!exportedFlow;
+      if(!exportedFlow){host.innerHTML=empty('需要两个以上相邻归档帧。');exports=[];return;}
+      const nodeName=(raw,side)=>raw.present?stateName(raw.state):side===0?'（尚未进入）':'（已退出）';
+      exports=exportedFlow.links.map(row=>[JSON.stringify(row.from),JSON.stringify(row.to),row.count]);
+      if(!exports.length){host.innerHTML=empty('这两个时点没有已归档主体。');return;}
       const side=index=>{
         const counts=new Map();
         for(const row of exports)counts.set(row[index],(counts.get(row[index])||0)+row[2]);
-        const highest=[...counts].sort((a,b)=>b[1]-a[1]).slice(0,7);
+        const highest=[...counts].sort((a,b)=>b[1]-a[1]).slice(0,7)
+          .sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true}));
         const overflow=[...counts].filter(([k])=>!highest.some(([name])=>k===name)).reduce((z,[,v])=>z+v,0);
         if(overflow)highest.push(['其他记录状态',overflow]);
         return highest;
@@ -277,22 +292,20 @@
         const u=left.get(a)||left.get('其他记录状态'),v=right.get(b)||right.get('其他记录状态');
         const size=n*scale,top=u.offset+size/2,bottom=v.offset+size/2;
         u.offset+=size;v.offset+=size;
-        return `<path d="M${x0} ${top} C280 ${top} 350 ${bottom} ${x1} ${bottom}" stroke="${colors[u.idx%colors.length]}" stroke-width="${size}" opacity=".53" fill="none"><title>${esc(a+' → '+b+' · '+n+' 主体')}</title></path>`;
+        return `<path d="M${x0} ${top} C280 ${top} 350 ${bottom} ${x1} ${bottom}" stroke="${colors[u.idx%colors.length]}" stroke-width="${size}" opacity=".53" fill="none"><title>${esc(nodeName(JSON.parse(a),0)+' → '+nodeName(JSON.parse(b),1)+' · '+n+' 主体')}</title></path>`;
       }).join('');
-      const labels=(rows,x,anchor)=>[...rows].map(([k,v])=>`<text ${textAttr} x="${x}" y="${v.y+v.height/2+4}" text-anchor="${anchor}">${esc(k.length>15?k.slice(0,13)+'…':k)}<title>${esc(k)}</title></text>`).join('');
+      const labels=(rows,x,anchor,side)=>[...rows].map(([k,v])=>{const label=k==='其他记录状态'?k:nodeName(JSON.parse(k),side);return `<text ${textAttr} x="${x}" y="${v.y+v.height/2+4}" text-anchor="${anchor}">${esc(label.length>15?label.slice(0,13)+'…':label)}<title>${esc(label)}</title></text>`;}).join('');
       host.innerHTML=`<svg viewBox="0 0 630 260" role="img" aria-label="相邻实际帧的主体状态流向">
-        <rect width="630" height="260" fill="#0d1826"/>${paths}${labels(left,x0-5,'end')}${labels(right,x1+5,'start')}
+        <rect width="630" height="260" fill="#0d1826"/>${paths}${labels(left,x0-5,'end',0)}${labels(right,x1+5,'start',1)}
         <text ${textAttr} x="${x0}" y="18" text-anchor="end">t=${nfmt(frames[i-1].sim_t)}</text><text ${textAttr} x="${x1}" y="18">t=${nfmt(frames[i].sim_t)}</text></svg>
-        <p class="space-note">流带宽度为匹配的主体数量，总计 ${total}。以鼠标停留核对两端状态。未跨中间缺失帧推断路径。</p>`;
+        <p class="space-note">${scope()}：前后匹配 ${exportedFlow.matched}，进入 ${exportedFlow.entered}，退出 ${exportedFlow.exited}；已知状态改变 ${exportedFlow.changed_known}。流带只描述两个时点的端点，不推断期间路径。</p>`;
     }
     type.oninput=draw;
     frame.oninput=drawFlow;
     document.querySelector('#exportProcess').onclick=()=>{
-      const i=Number(frame.value);
-      csv('DAYAN-state-flow.csv',[['run_id','previous_t','next_t','entity_type','previous_state','next_state','agents'],
-        ...exports.map(r=>[runId,frames[i-1].sim_t,frames[i].sim_t,type.value,...r])]);
+      csv('DAYAN-state-flow.csv',processCsvRows(runId,selected(),exportedFlow));
     };
     draw();
   }
-  window.DAYAN_CHARTS={colors,plot,correlationMatrix,distribution,csv,download,quantile,nfmt,mean,range,renderProcess};
+  window.DAYAN_CHARTS={colors,plot,correlationMatrix,distribution,csv,download,quantile,nfmt,mean,range,renderProcess,processCsvRows};
 })();

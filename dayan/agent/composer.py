@@ -18,12 +18,20 @@ def _numeric(observation):
             and isinstance(v, (int, float)) and not isinstance(v, bool) and np.isfinite(v)}
 
 
-def _execute(mid, parameters, ticks, seed, dt, persist, source):
-    rr = run_model_full(mid, parameters=parameters, ticks=ticks, seed=seed,
-                        dt=dt, strict=True, with_time=True, capture_state=persist)
+def _execute(mid, parameters, ticks, seed, dt, persist, source, certify=None, *, interventions=None, data_bindings=None,
+             full_frames=False, checkpoint=None, key="run"):
+    def execute(progress=None):
+        return run_model_full(mid, parameters=parameters, ticks=ticks, seed=seed,
+                              dt=dt, strict=True, with_time=True, capture_state=persist,
+                              interventions=interventions, data_bindings=data_bindings, full_frames=full_frames,
+                              _progress=progress)
     if persist:
-        from ..run_store import get_store
-        get_store().save_run(rr, source)
+        from .build_checkpoint import accepted_run
+        rr = accepted_run(mid, execute, certify, source, checkpoint=checkpoint, key=key)
+    else:
+        rr = execute()
+        if certify:
+            certify(rr)
     return {"model_id": mid, "run_id": rr.manifest["run_id"],
             "params": rr.manifest["requested"]["parameters"], "manifest": rr.manifest,
             "observations": rr.observations, "final": _numeric(rr.observations[-1]),
@@ -38,7 +46,7 @@ def sweep(mid, param, values, ticks=100, seed=None, parameters=None, dt=None,
         raise ValueError("参数扫描至少需要一个值")
     if param not in param_contract(mid)["params"]:
         raise ValueError(f"{mid} 无模型参数 {param}")
-    validate_compute(ticks,runs=len(values),arms=len(values)-1,parameters=parameters)
+    validate_compute(ticks,runs=len(values),arms=len(values)-1,parameters=parameters,array=mid.startswith("USR"))
     from ..research.compiler import _pick_metric
     selected=_pick_metric(mid,field)
     runs = []
@@ -57,16 +65,19 @@ def sweep(mid, param, values, ticks=100, seed=None, parameters=None, dt=None,
             "runs": runs, "table": table}
 
 
-def ensemble(mid, seeds=(0, 1, 2, 3, 4), ticks=100, parameters=None, dt=None, persist=False):
+def ensemble(mid, seeds=(0, 1, 2, 3, 4), ticks=100, parameters=None, dt=None, persist=False, *,
+             certify=None, interventions=None, data_bindings=None, full_frames=False, checkpoint=None):
     """多种子集成：每个数值观测量的均值/标准差/变异系数。"""
     parameters = parameters or {}
     seeds = list(seeds)
     if not seeds or len(set(seeds)) != len(seeds):
         raise ValueError("种子列表必须非空且不重复")
-    validate_compute(ticks,runs=len(seeds),seeds=len(seeds),parameters=parameters)
+    validate_compute(ticks,runs=len(seeds),seeds=len(seeds),parameters=parameters,array=mid.startswith("USR"))
     finals, runs = [], []
     for s in seeds:
-        run = _execute(mid, parameters, ticks, s, dt, persist, "ensemble")
+        run = _execute(mid, parameters, ticks, s, dt, persist, "ensemble", certify,
+                       interventions=interventions, data_bindings=data_bindings, full_frames=full_frames,
+                       checkpoint=checkpoint, key="seed:" + str(s))
         runs.append({"seed": s, **run})
         finals.append(run["final"])
     fields = sorted({k for f in finals for k in f})
@@ -88,8 +99,8 @@ def ensemble(mid, seeds=(0, 1, 2, 3, 4), ticks=100, parameters=None, dt=None, pe
 def compare(mid_a, mid_b, field=None, ticks=100, seed=None, parameters_a=None,
             parameters_b=None, dt=None, persist=False):
     """跨模型对照：共同数值字段的并排终值与方向一致性。"""
-    validate_compute(ticks,runs=2,arms=1,parameters=parameters_a)
-    validate_compute(ticks,parameters=parameters_b)
+    validate_compute(ticks,runs=2,arms=1,parameters=parameters_a,array=mid_a.startswith("USR"))
+    validate_compute(ticks,parameters=parameters_b,array=mid_b.startswith("USR"))
     ra = _execute(mid_a, parameters_a, ticks, seed, dt, persist, "compare")
     rb = _execute(mid_b, parameters_b, ticks, seed, dt, persist, "compare")
     fa, fb = ra["final"], rb["final"]
@@ -142,7 +153,7 @@ def compose(steps, handoff=None, ticks=100, seed=None, record_obs=False, dt=None
     for mid,params in steps:
         count=params.get('ticks',ticks)
         validate_run_arguments(count,.1 if dt is None else dt,0 if seed is None else seed)
-        validate_compute(count,arms=len(steps)-1,parameters=params)
+        validate_compute(count,arms=len(steps)-1,parameters=params,array=mid.startswith("USR"))
         total+=count
     from ..limits import limits,BudgetExceeded
     if total>limits().total_steps:raise BudgetExceeded('流水线总运行步数超过预算')

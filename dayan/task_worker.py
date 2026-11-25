@@ -26,19 +26,26 @@ def frame_observer(model_id, planned_steps):
         return None
     preview_id = uuid.uuid4().hex
     last_at = 0.0
+    previous = None
 
     def capture(frame, step):
-        nonlocal last_at
+        nonlocal last_at, previous
         now = time.monotonic()
         if now - last_at < 0.85:
             return
         last_at = now
+        from .population import playback_frame
+        from .stateframe import population_size
+        total = population_size(frame)
+        current = frame
+        frame = playback_frame(current, previous)
+        previous = current
         entities = frame.get('entities', [])
         facilities = frame.get('facilities', [])
         relations = frame.get('relations', [])
         preview = {
             'preview_id': preview_id, 'model_id': model_id, 'step': step,
-            'requested_steps': planned_steps, 'entities_total': len(entities),
+            'requested_steps': planned_steps, 'entities_total': total,
             'facilities_total': len(facilities), 'relations_total': len(relations),
             'sampled_at': time.time(),
             'frame': {**frame, 'entities': entities[:350], 'facilities': facilities[:250],

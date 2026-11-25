@@ -16,6 +16,9 @@ def source_files():
     for name in ('dayan','src','experiments'):
         paths.extend(p for p in (ROOT/name).rglob('*.py') if '__pycache__' not in p.parts and 'data' not in p.relative_to(ROOT/name).parts)
     if (ROOT/'requirements.txt').is_file():paths.append(ROOT/'requirements.txt')
+    for name in ('Dockerfile', 'requirements.lock', '.dockerignore'):
+        path=ROOT/'dayan'/'solvers'/name
+        if path.is_file():paths.append(path)
     for name in ('dayan_catalog.json','targets.json','calibration_targets.md','model_semantics.json'):
         if (ROOT/'data'/name).is_file():paths.append(ROOT/'data'/name)
     return sorted(paths,key=lambda p:p.relative_to(ROOT).as_posix())

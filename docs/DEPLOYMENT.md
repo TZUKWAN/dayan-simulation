@@ -26,8 +26,9 @@ For a separately stored project, set `DAYAN_DATA_DIR` and `DAYAN_REPORTS_DIR` to
 writable private directories. Existing runs are immutable; clearing history only
 changes visibility. Startup and tests do not rewrite tracked HTML or fixtures.
 
-The opening workspace shows live engine telemetry and research archives. Open
-Simulation Command to switch between conversational and professional modes.
+The opening workspace shows the simulation/research stage and live engine telemetry.
+The second page lists historical runs for replay, analysis and reports; modeling uses
+the native AI conversation and contextual controls without duplicate mode switches.
 The right divider supports drag, arrow keys and double-click reset. Use
 `Ctrl/Cmd+K` to find recorded runs, datasets, and workspaces. The data centre
 offers the World Bank Data360 annual WDI and TIGERweb 2020 spatial presets.

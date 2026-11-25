@@ -1,7 +1,7 @@
 {
  "version": 1,
- "source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
- "python": "3.13.2",
+ "source_fingerprint": "165070c04e0076f36ae0c93228f7c2704da6da5701313d6aba2c4de016c1d492",
+ "python": "3.14.3",
  "probe_ticks": 5,
  "seed": 0,
  "results": {
@@ -11,17 +11,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "vaccine_final": [
-     "object"
-    ],
     "policy_lever": [
      "string"
+    ],
+    "vaccine_final": [
+     "object"
     ],
     "baseline_final": [
      "object"
     ]
    },
-   "duration_s": 1.447,
+   "duration_s": 0.877,
    "observables": []
   },
   "APP002": {
@@ -30,20 +30,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "macro_kmean": [
-     "number"
-    ],
-    "congested_flux": [
-     "number"
-    ],
     "congestion_loss": [
      "number"
     ],
     "free_flow_flux": [
      "number"
+    ],
+    "congested_flux": [
+     "number"
+    ],
+    "macro_kmean": [
+     "number"
     ]
    },
-   "duration_s": 0.462,
+   "duration_s": 0.347,
    "observables": [
     "free_flow_flux",
     "congested_flux",
@@ -61,7 +61,7 @@
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.081,
    "observables": [
     "final_opinion_mean"
    ]
@@ -76,7 +76,7 @@
      "object"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.087,
    "observables": []
   },
   "APP005": {
@@ -85,17 +85,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "nk_fitness": [
+    "garbage_solved": [
      "number"
     ],
     "march_explore": [
      "number"
     ],
-    "garbage_solved": [
+    "nk_fitness": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.088,
    "observables": [
     "march_explore",
     "garbage_solved",
@@ -108,14 +108,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "battle_final": [
+    "arms_race_final": [
      "object"
     ],
-    "arms_race_final": [
+    "battle_final": [
      "object"
     ]
    },
-   "duration_s": 0.294,
+   "duration_s": 0.25,
    "observables": []
   },
   "APP007": {
@@ -124,17 +124,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rasch_corr": [
-     "number"
-    ],
     "bkt_mastery": [
      "number"
     ],
     "pfa_accuracy": [
      "number"
+    ],
+    "rasch_corr": [
+     "number"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.09,
    "observables": [
     "bkt_mastery",
     "rasch_corr",
@@ -147,14 +147,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "queue_final": [
+    "cohort_final": [
      "object"
     ],
-    "cohort_final": [
+    "queue_final": [
      "object"
     ]
    },
-   "duration_s": 0.374,
+   "duration_s": 0.24,
    "observables": []
   },
   "APP009": {
@@ -163,17 +163,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "tax_mtr": [
-     "array"
-    ],
     "conserv": [
      "number"
     ],
     "fiscal_Y": [
      "number"
+    ],
+    "tax_mtr": [
+     "array"
     ]
    },
-   "duration_s": 0.394,
+   "duration_s": 0.241,
    "observables": [
     "fiscal_Y",
     "conserv"
@@ -185,17 +185,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "lm_kurtosis": [
-     "number"
-    ],
     "sfm_final": [
      "object"
     ],
     "zi_efficiency": [
      "number"
+    ],
+    "lm_kurtosis": [
+     "number"
     ]
    },
-   "duration_s": 0.586,
+   "duration_s": 0.341,
    "observables": [
     "lm_kurtosis",
     "zi_efficiency"
@@ -207,14 +207,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "schelling_note": [
-     "string"
-    ],
     "city_final": [
      "object"
+    ],
+    "schelling_note": [
+     "string"
     ]
    },
-   "duration_s": 1.366,
+   "duration_s": 0.759,
    "observables": []
   },
   "APP012": {
@@ -223,17 +223,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "population_total": [
+     "number"
+    ],
     "lambda1": [
      "number"
     ],
     "leecarter_fit": [
      "number"
-    ],
-    "population_total": [
-     "number"
     ]
    },
-   "duration_s": 0.312,
+   "duration_s": 0.243,
    "observables": [
     "population_total",
     "lambda1",
@@ -246,14 +246,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "naming_game": [
+    "language_shift": [
      "object"
     ],
-    "language_shift": [
+    "naming_game": [
      "object"
     ]
    },
-   "duration_s": 0.173,
+   "duration_s": 0.084,
    "observables": []
   },
   "APP014": {
@@ -262,17 +262,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dice_final": [
-     "object"
+    "world3_resources": [
+     "number"
     ],
     "hotelling_price": [
      "number"
     ],
-    "world3_resources": [
-     "number"
+    "dice_final": [
+     "object"
     ]
    },
-   "duration_s": 0.517,
+   "duration_s": 0.329,
    "observables": [
     "world3_resources",
     "hotelling_price"
@@ -291,7 +291,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.133,
+   "duration_s": 0.093,
    "observables": []
   },
   "APP016": {
@@ -300,17 +300,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "human_score": [
-     "number"
-    ],
     "rounds": [
      "number"
     ],
     "human_in_loop_hook": [
      "boolean"
+    ],
+    "human_score": [
+     "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.083,
    "observables": [
     "human_score",
     "rounds"
@@ -329,7 +329,7 @@
      "number"
     ]
    },
-   "duration_s": 0.393,
+   "duration_s": 0.235,
    "observables": [
     "zi_efficiency",
     "mincer_rho_hat"
@@ -341,17 +341,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "final_drift": [
-     "number"
+    "sync_loop": [
+     "boolean"
     ],
     "drift_detected": [
      "boolean"
     ],
-    "sync_loop": [
-     "boolean"
+    "final_drift": [
+     "number"
     ]
    },
-   "duration_s": 0.141,
+   "duration_s": 0.078,
    "observables": [
     "final_drift"
    ]
@@ -365,14 +365,14 @@
     "grad_fd": [
      "number"
     ],
-    "grad_exact": [
-     "number"
-    ],
     "gradient_ok": [
      "boolean"
+    ],
+    "grad_exact": [
+     "number"
     ]
    },
-   "duration_s": 0.144,
+   "duration_s": 0.08,
    "observables": [
     "grad_fd",
     "grad_exact"
@@ -384,11 +384,11 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "scores": [
-     "array"
-    ],
     "rule_respected": [
      "boolean"
+    ],
+    "scores": [
+     "array"
     ],
     "chosen": [
      "string"
@@ -397,7 +397,7 @@
      "string"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.08,
    "observables": []
   },
   "APP021": {
@@ -409,17 +409,17 @@
     "baseline_flux": [
      "number"
     ],
-    "counterfactual_gap": [
-     "number"
-    ],
     "history_diverged": [
      "boolean"
+    ],
+    "counterfactual_gap": [
+     "number"
     ],
     "counterfactual_flux": [
      "number"
     ]
    },
-   "duration_s": 1.313,
+   "duration_s": 0.872,
    "observables": [
     "baseline_flux",
     "counterfactual_flux",
@@ -445,7 +445,7 @@
      "number"
     ]
    },
-   "duration_s": 0.513,
+   "duration_s": 0.318,
    "observables": [
     "constraint_min",
     "n_components_before",
@@ -458,14 +458,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "unhappy_frac": [
+    "segregation": [
      "number"
     ],
-    "segregation": [
+    "unhappy_frac": [
      "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.082,
    "observables": [
     "segregation",
     "unhappy_frac"
@@ -484,7 +484,7 @@
      "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.079,
    "observables": [
     "segregation"
    ]
@@ -495,17 +495,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "gini": [
+    "alive": [
      "number"
     ],
     "inequality_emerged": [
      "boolean"
     ],
-    "alive": [
+    "gini": [
      "number"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.081,
    "observables": [
     "alive",
     "gini"
@@ -517,24 +517,24 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "gini": [
+    "alive": [
      "number"
-    ],
-    "inequality_emerged": [
-     "boolean"
     ],
     "trade_price_mean": [
      "null",
      "number"
     ],
+    "gini": [
+     "number"
+    ],
     "n_trades": [
      "number"
     ],
-    "alive": [
-     "number"
+    "inequality_emerged": [
+     "boolean"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.09,
    "observables": [
     "alive",
     "gini",
@@ -548,16 +548,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "active_frac": [
-     "number"
-    ],
-    "mean_grievance": [
-     "number"
-    ],
-    "arrests": [
-     "number"
-    ],
     "jailed_count": [
+     "number"
+    ],
+    "active_frac": [
      "number"
     ],
     "episodic": [
@@ -565,9 +559,15 @@
     ],
     "violence_frac": [
      "number"
+    ],
+    "arrests": [
+     "number"
+    ],
+    "mean_grievance": [
+     "number"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.088,
    "observables": [
     "violence_frac",
     "active_frac",
@@ -582,14 +582,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "attack_frac": [
-     "number"
-    ],
     "contagion_spread": [
      "boolean"
+    ],
+    "attack_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.08,
    "observables": [
     "attack_frac"
    ]
@@ -600,19 +600,19 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "n_samples": [
+     "number"
+    ],
     "att_near_threshold": [
      "boolean",
      "null"
-    ],
-    "n_samples": [
-     "number"
     ],
     "mean_attendance": [
      "null",
      "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.085,
    "observables": [
     "mean_attendance",
     "n_samples"
@@ -624,19 +624,19 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "near_half": [
-     "boolean",
-     "null"
-    ],
     "mean_ones_share": [
      "null",
      "number"
+    ],
+    "near_half": [
+     "boolean",
+     "null"
     ],
     "n_samples": [
      "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.083,
    "observables": [
     "mean_ones_share",
     "n_samples"
@@ -648,14 +648,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "power_std": [
-     "number"
-    ],
     "hierarchy_emerged": [
      "boolean"
+    ],
+    "power_std": [
+     "number"
     ]
    },
-   "duration_s": 0.974,
+   "duration_s": 0.678,
    "observables": [
     "power_std"
    ]
@@ -669,14 +669,14 @@
     "knowledge_mean": [
      "number"
     ],
-    "exploit_dominates": [
-     "boolean"
-    ],
     "mean_explore": [
      "number"
+    ],
+    "exploit_dominates": [
+     "boolean"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.08,
    "observables": [
     "mean_explore",
     "knowledge_mean"
@@ -688,14 +688,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "solved_frac": [
-     "number"
-    ],
     "flight_prob": [
      "boolean"
+    ],
+    "solved_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.079,
    "observables": [
     "solved_frac"
    ]
@@ -713,7 +713,7 @@
      "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.081,
    "observables": [
     "fitness",
     "genome_std"
@@ -725,14 +725,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mean_fit": [
-     "number"
-    ],
     "explore_decay": [
      "boolean"
+    ],
+    "mean_fit": [
+     "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.083,
    "observables": [
     "mean_fit"
    ]
@@ -743,14 +743,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cascade": [
-     "boolean"
-    ],
     "participation": [
      "number"
+    ],
+    "cascade": [
+     "boolean"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.077,
    "observables": [
     "participation"
    ]
@@ -761,14 +761,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
     "spread": [
      "number"
+    ],
+    "opinions": [
+     "array"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.08,
    "observables": [
     "spread"
    ]
@@ -782,17 +782,17 @@
     "mean": [
      "number"
     ],
-    "opinions": [
-     "array"
-    ],
     "spread": [
      "number"
+    ],
+    "opinions": [
+     "array"
     ],
     "clusters": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.082,
    "observables": [
     "mean",
     "spread",
@@ -805,17 +805,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "max_spread": [
+    "n_clusters": [
      "number"
     ],
     "opinions": [
      "array"
     ],
-    "n_clusters": [
+    "max_spread": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.081,
    "observables": [
     "n_clusters",
     "max_spread"
@@ -830,17 +830,17 @@
     "mean": [
      "number"
     ],
-    "opinions": [
-     "array"
-    ],
     "spread": [
      "number"
+    ],
+    "opinions": [
+     "array"
     ],
     "clusters": [
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.081,
    "observables": [
     "mean",
     "spread",
@@ -853,20 +853,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 1.022,
+   "duration_s": 0.683,
    "observables": [
     "mean",
     "spread",
@@ -882,14 +882,14 @@
     "consensus_value": [
      "null"
     ],
-    "consensus": [
-     "null"
-    ],
     "frac1": [
      "number"
+    ],
+    "consensus": [
+     "null"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.077,
    "observables": [
     "frac1"
    ]
@@ -900,20 +900,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.084,
    "observables": [
     "mean",
     "spread",
@@ -926,20 +926,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.078,
    "observables": [
     "mean",
     "spread",
@@ -952,20 +952,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.08,
    "observables": [
     "mean",
     "spread",
@@ -978,20 +978,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.081,
    "observables": [
     "mean",
     "spread",
@@ -1004,20 +1004,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.08,
    "observables": [
     "mean",
     "spread",
@@ -1030,20 +1030,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.079,
    "observables": [
     "mean",
     "spread",
@@ -1056,10 +1056,13 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "clusters": [
+    "spread": [
      "number"
     ],
-    "spread": [
+    "mean": [
+     "number"
+    ],
+    "clusters": [
      "number"
     ],
     "opinions": [
@@ -1067,12 +1070,9 @@
     ],
     "action_share": [
      "number"
-    ],
-    "mean": [
-     "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.08,
    "observables": [
     "mean",
     "spread",
@@ -1086,20 +1086,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "opinions": [
-     "array"
-    ],
-    "clusters": [
-     "number"
-    ],
     "spread": [
      "number"
     ],
     "mean": [
      "number"
+    ],
+    "opinions": [
+     "array"
+    ],
+    "clusters": [
+     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.078,
    "observables": [
     "mean",
     "spread",
@@ -1112,20 +1112,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "mean": [
+     "number"
+    ],
+    "clusters": [
+     "number"
+    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
-    ],
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
     ]
    },
-   "duration_s": 1.039,
+   "duration_s": 0.682,
    "observables": [
     "mean",
     "spread",
@@ -1138,20 +1138,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "mean": [
+     "number"
+    ],
+    "clusters": [
+     "number"
+    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
-    ],
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.082,
    "observables": [
     "mean",
     "spread",
@@ -1164,20 +1164,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "mean": [
+     "number"
+    ],
+    "clusters": [
+     "number"
+    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
-    ],
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.078,
    "observables": [
     "mean",
     "spread",
@@ -1190,20 +1190,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "mean": [
+     "number"
+    ],
+    "clusters": [
+     "number"
+    ],
     "spread": [
      "number"
     ],
     "opinions": [
      "array"
-    ],
-    "clusters": [
-     "number"
-    ],
-    "mean": [
-     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.08,
    "observables": [
     "mean",
     "spread",
@@ -1216,17 +1216,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "regions": [
+    "n_agents": [
      "number"
     ],
     "regionalization": [
      "boolean"
     ],
-    "n_agents": [
+    "regions": [
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.082,
    "observables": [
     "regions",
     "n_agents"
@@ -1238,14 +1238,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_regions": [
+    "largest": [
      "number"
     ],
-    "largest": [
+    "n_regions": [
      "number"
     ]
    },
-   "duration_s": 0.149,
+   "duration_s": 0.107,
    "observables": [
     "n_regions",
     "largest"
@@ -1261,7 +1261,7 @@
      "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.081,
    "observables": [
     "adopted_frac"
    ]
@@ -1276,7 +1276,7 @@
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.082,
    "observables": [
     "frac1"
    ]
@@ -1294,7 +1294,7 @@
      "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.08,
    "observables": [
     "mean_payoff",
     "behavior_frac"
@@ -1310,7 +1310,7 @@
      "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.079,
    "observables": [
     "elite_behavior_frac"
    ]
@@ -1325,7 +1325,7 @@
      "number"
     ]
    },
-   "duration_s": 1.045,
+   "duration_s": 0.716,
    "observables": [
     "learner_frac"
    ]
@@ -1340,7 +1340,7 @@
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.097,
    "observables": [
     "skill"
    ]
@@ -1351,17 +1351,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "norm_survives": [
-     "boolean"
-    ],
     "mean_norm": [
      "number"
     ],
     "between_group_var": [
      "number"
+    ],
+    "norm_survives": [
+     "boolean"
     ]
    },
-   "duration_s": 0.114,
+   "duration_s": 0.085,
    "observables": [
     "mean_norm",
     "between_group_var"
@@ -1383,7 +1383,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.087,
    "observables": [
     "culture",
     "gene"
@@ -1395,14 +1395,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "ethnocentrism_share": [
-     "number"
-    ],
     "dominant": [
      "boolean"
+    ],
+    "ethnocentrism_share": [
+     "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.082,
    "observables": [
     "ethnocentrism_share"
    ]
@@ -1416,14 +1416,14 @@
     "converged": [
      "boolean"
     ],
-    "institution": [
+    "culture": [
      "number"
     ],
-    "culture": [
+    "institution": [
      "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.079,
    "observables": [
     "institution",
     "culture"
@@ -1445,7 +1445,7 @@
      "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.08,
    "observables": [
     "distinct_words",
     "aligned_agents",
@@ -1465,7 +1465,7 @@
      "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.076,
    "observables": [
     "X_frac",
     "Y_frac"
@@ -1477,14 +1477,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "share_a": [
-     "number"
-    ],
     "bilingual_stationary": [
      "boolean"
+    ],
+    "share_a": [
+     "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.08,
    "observables": [
     "share_a"
    ]
@@ -1502,7 +1502,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.087,
    "observables": [
     "compositional"
    ]
@@ -1513,17 +1513,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 1.04,
+   "duration_s": 0.684,
    "observables": [
     "entropy"
    ]
@@ -1534,17 +1534,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.083,
    "observables": [
     "entropy"
    ]
@@ -1555,17 +1555,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.078,
    "observables": [
     "entropy"
    ]
@@ -1576,17 +1576,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.08,
    "observables": [
     "entropy"
    ]
@@ -1597,17 +1597,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.08,
    "observables": [
     "entropy"
    ]
@@ -1618,17 +1618,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.09,
    "observables": [
     "entropy"
    ]
@@ -1639,17 +1639,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.091,
    "observables": [
     "entropy"
    ]
@@ -1660,17 +1660,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.085,
    "observables": [
     "entropy"
    ]
@@ -1681,17 +1681,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.092,
    "observables": [
     "entropy"
    ]
@@ -1702,17 +1702,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq_hist_shape": [
-     "array"
-    ],
     "entropy": [
      "number"
+    ],
+    "freq_hist_shape": [
+     "array"
     ],
     "freq": [
      "array"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.09,
    "observables": [
     "entropy"
    ]
@@ -1723,17 +1723,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq": [
-     "array"
-    ],
     "entropy": [
      "number"
     ],
     "freq_hist_shape": [
      "array"
+    ],
+    "freq": [
+     "array"
     ]
    },
-   "duration_s": 1.031,
+   "duration_s": 0.776,
    "observables": [
     "entropy"
    ]
@@ -1744,17 +1744,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq": [
-     "array"
-    ],
     "entropy": [
      "number"
     ],
     "freq_hist_shape": [
      "array"
+    ],
+    "freq": [
+     "array"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.082,
    "observables": [
     "entropy"
    ]
@@ -1765,17 +1765,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq": [
-     "array"
-    ],
     "entropy": [
      "number"
     ],
     "freq_hist_shape": [
      "array"
+    ],
+    "freq": [
+     "array"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.084,
    "observables": [
     "entropy"
    ]
@@ -1786,17 +1786,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq": [
-     "array"
-    ],
     "entropy": [
      "number"
     ],
     "freq_hist_shape": [
      "array"
+    ],
+    "freq": [
+     "array"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.09,
    "observables": [
     "entropy"
    ]
@@ -1807,17 +1807,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "freq": [
-     "array"
-    ],
     "entropy": [
      "number"
     ],
     "freq_hist_shape": [
      "array"
+    ],
+    "freq": [
+     "array"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.09,
    "observables": [
     "entropy"
    ]
@@ -1835,7 +1835,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.088,
    "observables": []
   },
   "BEH065": {
@@ -1844,20 +1844,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "estate": [
-     "number"
-    ],
-    "nucleolus_approx": [
-     "array"
-    ],
     "claims": [
      "array"
     ],
+    "estate": [
+     "number"
+    ],
     "efficiency": [
      "null"
+    ],
+    "nucleolus_approx": [
+     "array"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.084,
    "observables": [
     "estate"
    ]
@@ -1868,20 +1868,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "same_type_optimal": [
-     "boolean"
+    "utility_mixed": [
+     "number"
     ],
     "utility_same_type_grouping": [
      "number"
     ],
-    "utility_mixed": [
-     "number"
-    ],
     "partition_sizes": [
      "object"
+    ],
+    "same_type_optimal": [
+     "boolean"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.093,
    "observables": [
     "utility_same_type_grouping",
     "utility_mixed"
@@ -1893,17 +1893,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "product": [
-     "number"
+    "symmetric": [
+     "null"
     ],
     "solution": [
      "array"
     ],
-    "symmetric": [
-     "null"
+    "product": [
+     "number"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.085,
    "observables": [
     "product"
    ]
@@ -1914,17 +1914,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "finite_offer": [
-     "number"
-    ],
     "limit_share1": [
      "number"
     ],
     "converged": [
      "boolean"
+    ],
+    "finite_offer": [
+     "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.086,
    "observables": [
     "limit_share1",
     "finite_offer"
@@ -1936,18 +1936,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
-     "null",
-     "number"
-    ],
     "n_rounds": [
      "number"
     ],
     "score_vs_alld": [
      "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 1.053,
+   "duration_s": 0.775,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -1960,18 +1960,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
-     "null",
-     "number"
-    ],
     "n_rounds": [
      "number"
     ],
     "score_vs_alld": [
      "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.08,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -1984,18 +1984,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
-     "null",
-     "number"
-    ],
     "n_rounds": [
      "number"
     ],
     "score_vs_alld": [
      "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.079,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -2008,18 +2008,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
-     "null",
-     "number"
-    ],
     "n_rounds": [
      "number"
     ],
     "score_vs_alld": [
      "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.077,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -2032,18 +2032,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
-     "null",
-     "number"
-    ],
     "n_rounds": [
      "number"
     ],
     "score_vs_alld": [
      "number"
+    ],
+    "coop_rate": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.082,
    "observables": [
     "score_vs_alld",
     "coop_rate",
@@ -2059,18 +2059,18 @@
     "coop_image_frac": [
      "number"
     ],
+    "encounters": [
+     "number"
+    ],
     "cooperation_rate": [
      "null",
      "number"
     ],
     "mean_image": [
      "number"
-    ],
-    "encounters": [
-     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.08,
    "observables": [
     "mean_image",
     "coop_image_frac",
@@ -2084,14 +2084,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
+    "rep_pos_share": [
      "number"
     ],
-    "rep_pos_share": [
+    "coop_rate": [
      "number"
     ]
    },
-   "duration_s": 0.111,
+   "duration_s": 0.083,
    "observables": [
     "coop_rate",
     "rep_pos_share"
@@ -2103,14 +2103,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
+    "rep_pos_share": [
      "number"
     ],
-    "rep_pos_share": [
+    "coop_rate": [
      "number"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.087,
    "observables": [
     "coop_rate",
     "rep_pos_share"
@@ -2122,14 +2122,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "coop_rate": [
+    "rep_pos_share": [
      "number"
     ],
-    "rep_pos_share": [
+    "coop_rate": [
      "number"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.081,
    "observables": [
     "coop_rate",
     "rep_pos_share"
@@ -2141,19 +2141,19 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "norm_evolved": [
-     "boolean",
-     "null"
+    "n_samples": [
+     "number"
     ],
     "mean_vengeance": [
      "null",
      "number"
     ],
-    "n_samples": [
-     "number"
+    "norm_evolved": [
+     "boolean",
+     "null"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.083,
    "observables": [
     "mean_vengeance",
     "n_samples"
@@ -2165,19 +2165,19 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "meta_norm_stronger": [
-     "boolean",
-     "null"
+    "n_samples": [
+     "number"
     ],
     "mean_vengeance": [
      "null",
      "number"
     ],
-    "n_samples": [
-     "number"
+    "meta_norm_stronger": [
+     "boolean",
+     "null"
     ]
    },
-   "duration_s": 0.984,
+   "duration_s": 0.7,
    "observables": [
     "mean_vengeance",
     "n_samples"
@@ -2193,7 +2193,7 @@
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.084,
    "observables": [
     "frac1"
    ]
@@ -2204,18 +2204,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rounds": [
-     "number"
-    ],
     "coordination_rate": [
      "null",
+     "number"
+    ],
+    "rounds": [
      "number"
     ],
     "convention_1_share": [
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.078,
    "observables": [
     "convention_1_share",
     "coordination_rate",
@@ -2228,14 +2228,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "err_vs_star": [
-     "number"
-    ],
     "freq": [
      "array"
+    ],
+    "err_vs_star": [
+     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.079,
    "observables": [
     "err_vs_star"
    ]
@@ -2256,7 +2256,7 @@
      "array"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.078,
    "observables": [
     "entropy"
    ]
@@ -2277,7 +2277,7 @@
      "array"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.09,
    "observables": [
     "entropy"
    ]
@@ -2298,7 +2298,7 @@
      "array"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.089,
    "observables": [
     "entropy"
    ]
@@ -2319,7 +2319,7 @@
      "array"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.082,
    "observables": [
     "entropy"
    ]
@@ -2340,7 +2340,7 @@
      "array"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.084,
    "observables": [
     "entropy"
    ]
@@ -2361,7 +2361,7 @@
      "array"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.085,
    "observables": [
     "entropy"
    ]
@@ -2379,7 +2379,7 @@
      "array"
     ]
    },
-   "duration_s": 1.047,
+   "duration_s": 0.69,
    "observables": [
     "best_arm_share"
    ]
@@ -2397,7 +2397,7 @@
      "array"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.08,
    "observables": [
     "best_arm_share"
    ]
@@ -2415,7 +2415,7 @@
      "array"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.078,
    "observables": [
     "best_arm_share"
    ]
@@ -2426,10 +2426,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "best_arm_share": [
+    "posterior_opp0": [
      "number"
     ],
-    "posterior_opp0": [
+    "best_arm_share": [
      "number"
     ],
     "br_share": [
@@ -2439,7 +2439,7 @@
      "array"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.085,
    "observables": [
     "best_arm_share",
     "posterior_opp0",
@@ -2459,7 +2459,7 @@
      "array"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.08,
    "observables": [
     "best_arm_share"
    ]
@@ -2477,7 +2477,7 @@
      "object"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.077,
    "observables": []
   },
   "BEH095": {
@@ -2486,15 +2486,15 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "retrieval_freq": [
+     "object"
+    ],
     "dominant": [
      "null",
      "string"
-    ],
-    "retrieval_freq": [
-     "object"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.082,
    "observables": []
   },
   "BEH096": {
@@ -2506,14 +2506,14 @@
     "impasse_count": [
      "number"
     ],
-    "solved": [
-     "boolean"
-    ],
     "state": [
      "string"
+    ],
+    "solved": [
+     "boolean"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.088,
    "observables": [
     "impasse_count"
    ]
@@ -2524,17 +2524,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "implicit_Q": [
+     "array"
+    ],
     "explicit_rules": [
      "array"
     ],
     "rule_extracted": [
      "boolean"
-    ],
-    "implicit_Q": [
-     "array"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.083,
    "observables": []
   },
   "BEH098": {
@@ -2543,14 +2543,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "belief_X": [
+    "belief_Y": [
      "array"
     ],
-    "belief_Y": [
+    "belief_X": [
      "array"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.1,
    "observables": []
   },
   "BEH099": {
@@ -2566,7 +2566,7 @@
      "number"
     ]
    },
-   "duration_s": 1.023,
+   "duration_s": 0.829,
    "observables": [
     "n_emotions"
    ]
@@ -2577,15 +2577,15 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "needs": [
+     "object"
+    ],
     "behavior": [
      "null",
      "string"
-    ],
-    "needs": [
-     "object"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.085,
    "observables": []
   },
   "BEH101": {
@@ -2594,15 +2594,15 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "need": [
+     "number"
+    ],
     "strategy": [
      "null",
      "string"
-    ],
-    "need": [
-     "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.089,
    "observables": [
     "need"
    ]
@@ -2616,14 +2616,14 @@
     "mean_rt": [
      "number"
     ],
-    "speed_accuracy_tradeoff": [
-     "boolean"
-    ],
     "accuracy": [
      "number"
+    ],
+    "speed_accuracy_tradeoff": [
+     "boolean"
     ]
    },
-   "duration_s": 0.134,
+   "duration_s": 0.125,
    "observables": [
     "mean_rt",
     "accuracy"
@@ -2635,14 +2635,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "behavior_rate": [
-     "number"
-    ],
     "tpb_structure": [
      "boolean"
+    ],
+    "behavior_rate": [
+     "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.087,
    "observables": [
     "behavior_rate"
    ]
@@ -2669,7 +2669,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.086,
    "observables": [
     "loss_aversion"
    ]
@@ -2680,17 +2680,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "w_curve": [
-     "array"
-    ],
     "small_p_overweight": [
      "boolean"
+    ],
+    "w_curve": [
+     "array"
     ],
     "large_p_underweight": [
      "boolean"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.084,
    "observables": []
   },
   "BEH106": {
@@ -2699,20 +2699,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "u_equal": [
+     "number"
+    ],
     "inequality_averse": [
      "boolean"
     ],
     "u_disadvantageous": [
      "number"
     ],
-    "u_equal": [
-     "number"
-    ],
     "u_advantageous": [
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.082,
    "observables": [
     "u_equal",
     "u_advantageous",
@@ -2725,14 +2725,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "conflict": [
+    "claim_actual_gap": [
      "number"
     ],
-    "claim_actual_gap": [
+    "conflict": [
      "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.084,
    "observables": [
     "conflict",
     "claim_actual_gap"
@@ -2744,14 +2744,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "reciprocal_pair": [
-     "boolean"
-    ],
     "kindness": [
      "array"
+    ],
+    "reciprocal_pair": [
+     "boolean"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.087,
    "observables": []
   },
   "BEH109": {
@@ -2760,14 +2760,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "winner": [
-     "number"
-    ],
     "actions": [
      "object"
+    ],
+    "winner": [
+     "number"
     ]
    },
-   "duration_s": 0.976,
+   "duration_s": 0.737,
    "observables": [
     "winner"
    ]
@@ -2778,17 +2778,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "distribution_head": [
-     "array"
+    "below_50": [
+     "boolean"
     ],
     "winning_number": [
      "number"
     ],
-    "below_50": [
-     "boolean"
+    "distribution_head": [
+     "array"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.087,
    "observables": [
     "winning_number"
    ]
@@ -2802,14 +2802,14 @@
     "q_row": [
      "array"
     ],
-    "mixed_tendency": [
-     "boolean"
-    ],
     "q_col": [
      "array"
+    ],
+    "mixed_tendency": [
+     "boolean"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.096,
    "observables": []
   },
   "BEH112": {
@@ -2818,17 +2818,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "greedy_actions": [
-     "array"
-    ],
     "last_reward": [
      "number"
     ],
     "learned_right": [
      "boolean"
+    ],
+    "greedy_actions": [
+     "array"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.101,
    "observables": [
     "last_reward"
    ]
@@ -2839,17 +2839,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "greedy_actions": [
-     "array"
-    ],
     "last_reward": [
      "number"
     ],
     "learned_right": [
      "boolean"
+    ],
+    "greedy_actions": [
+     "array"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.112,
    "observables": [
     "last_reward"
    ]
@@ -2860,17 +2860,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "greedy_actions": [
-     "array"
+    "recent_reward": [
+     "number"
     ],
     "learned_right": [
      "boolean"
     ],
-    "recent_reward": [
-     "number"
+    "greedy_actions": [
+     "array"
     ]
    },
-   "duration_s": 0.62,
+   "duration_s": 0.582,
    "observables": [
     "recent_reward"
    ]
@@ -2881,17 +2881,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "greedy_actions": [
-     "array"
+    "recent_reward": [
+     "number"
     ],
     "learned_right": [
      "boolean"
     ],
-    "recent_reward": [
-     "number"
+    "greedy_actions": [
+     "array"
     ]
    },
-   "duration_s": 0.57,
+   "duration_s": 0.502,
    "observables": [
     "recent_reward"
    ]
@@ -2902,17 +2902,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "greedy_actions": [
-     "array"
+    "recent_reward": [
+     "number"
     ],
     "learned_right": [
      "boolean"
     ],
-    "recent_reward": [
-     "number"
+    "greedy_actions": [
+     "array"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.091,
    "observables": [
     "recent_reward"
    ]
@@ -2923,17 +2923,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "greedy_actions": [
-     "array"
+    "recent_reward": [
+     "number"
     ],
     "learned_right": [
      "boolean"
     ],
-    "recent_reward": [
-     "number"
+    "greedy_actions": [
+     "array"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.089,
    "observables": [
     "recent_reward"
    ]
@@ -2944,17 +2944,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "greedy_actions": [
-     "array"
+    "recent_reward": [
+     "number"
     ],
     "learned_right": [
      "boolean"
     ],
-    "recent_reward": [
-     "number"
+    "greedy_actions": [
+     "array"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.089,
    "observables": [
     "recent_reward"
    ]
@@ -2965,17 +2965,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "greedy_actions": [
+     "array"
+    ],
     "learned_right": [
      "boolean"
     ],
     "recent_reward": [
      "number"
-    ],
-    "greedy_actions": [
-     "array"
     ]
    },
-   "duration_s": 0.953,
+   "duration_s": 0.71,
    "observables": [
     "recent_reward"
    ]
@@ -2986,17 +2986,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "greedy_actions": [
+     "array"
+    ],
     "learned_right": [
      "boolean"
     ],
     "recent_reward": [
      "number"
-    ],
-    "greedy_actions": [
-     "array"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.088,
    "observables": [
     "recent_reward"
    ]
@@ -3014,7 +3014,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.085,
    "observables": [
     "mu"
    ]
@@ -3032,7 +3032,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.083,
    "observables": [
     "mu"
    ]
@@ -3050,7 +3050,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.08,
    "observables": [
     "mu"
    ]
@@ -3068,7 +3068,7 @@
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.083,
    "observables": [
     "coop_rate"
    ]
@@ -3086,7 +3086,7 @@
      "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.087,
    "observables": [
     "coop_rate"
    ]
@@ -3104,7 +3104,7 @@
      "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.088,
    "observables": [
     "coop_rate"
    ]
@@ -3122,7 +3122,7 @@
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.092,
    "observables": [
     "coop_rate"
    ]
@@ -3140,7 +3140,7 @@
      "number"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.086,
    "observables": [
     "coop_rate"
    ]
@@ -3261,17 +3261,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "evidence": [
-     "array"
-    ],
     "retrieval_2hop": [
      "boolean"
+    ],
+    "evidence": [
+     "array"
     ],
     "query": [
      "string"
     ]
    },
-   "duration_s": 0.159,
+   "duration_s": 0.143,
    "observables": []
   },
   "BEH135": {
@@ -3290,7 +3290,7 @@
      "string"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.082,
    "observables": []
   },
   "BEH136": {
@@ -3299,17 +3299,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "converged": [
+     "boolean"
+    ],
     "gap": [
      "number"
     ],
     "positions": [
      "array"
-    ],
-    "converged": [
-     "boolean"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.078,
    "observables": [
     "gap"
    ]
@@ -3320,14 +3320,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "depersonalized": [
-     "boolean"
-    ],
     "mean_within_var": [
      "number"
+    ],
+    "depersonalized": [
+     "boolean"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.083,
    "observables": [
     "mean_within_var"
    ]
@@ -3345,7 +3345,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.079,
    "observables": []
   },
   "CPL001": {
@@ -3388,7 +3388,7 @@
      "number"
     ]
    },
-   "duration_s": 0.145,
+   "duration_s": 0.141,
    "observables": [
     "total"
    ]
@@ -3399,14 +3399,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "p_min": [
-     "number"
-    ],
     "p": [
      "array"
+    ],
+    "p_min": [
+     "number"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.084,
    "observables": [
     "p_min"
    ]
@@ -3417,14 +3417,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "err": [
-     "number"
-    ],
     "x": [
      "array"
+    ],
+    "err": [
+     "number"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.077,
    "observables": [
     "err"
    ]
@@ -3442,7 +3442,7 @@
      "number"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.078,
    "observables": [
     "total"
    ]
@@ -3453,17 +3453,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "tick": [
-     "number"
-    ],
     "x": [
      "array"
     ],
     "total": [
      "number"
+    ],
+    "tick": [
+     "number"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.076,
    "observables": [
     "total",
     "tick"
@@ -3475,14 +3475,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "err": [
-     "number"
-    ],
     "x": [
      "array"
+    ],
+    "err": [
+     "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.078,
    "observables": [
     "err"
    ]
@@ -3493,20 +3493,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "poll_intensity": [
-     "number"
+    "x": [
+     "array"
     ],
     "err": [
      "number"
     ],
-    "x": [
-     "array"
+    "poll_intensity": [
+     "number"
     ],
     "pollution": [
      "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.076,
    "observables": [
     "pollution",
     "err",
@@ -3526,7 +3526,7 @@
      "array"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.076,
    "observables": [
     "err"
    ]
@@ -3537,20 +3537,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "walras": [
-     "number"
-    ],
     "cheap_expands": [
      "boolean"
     ],
-    "converged": [
-     "boolean"
+    "walras": [
+     "number"
     ],
     "p": [
      "array"
+    ],
+    "converged": [
+     "boolean"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.076,
    "observables": [
     "walras"
    ]
@@ -3564,14 +3564,14 @@
     "energy_tax": [
      "number"
     ],
-    "Y": [
-     "array"
-    ],
     "substitution": [
      "boolean"
+    ],
+    "Y": [
+     "array"
     ]
    },
-   "duration_s": 0.936,
+   "duration_s": 0.673,
    "observables": [
     "energy_tax"
    ]
@@ -3582,17 +3582,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "converged": [
-     "boolean"
-    ],
     "walras_excess": [
      "number"
+    ],
+    "converged": [
+     "boolean"
     ],
     "p": [
      "array"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.076,
    "observables": [
     "walras_excess"
    ]
@@ -3603,17 +3603,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "K": [
-     "number"
-    ],
     "converged": [
      "boolean"
+    ],
+    "K": [
+     "number"
     ],
     "K_star": [
      "number"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.078,
    "observables": [
     "K",
     "K_star"
@@ -3625,14 +3625,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "spillover": [
-     "boolean"
-    ],
     "K_final": [
      "array"
+    ],
+    "spillover": [
+     "boolean"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.078,
    "observables": []
   },
   "ECO014": {
@@ -3648,7 +3648,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.079,
    "observables": []
   },
   "ECO015": {
@@ -3657,14 +3657,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "k_star": [
+    "k": [
      "number"
     ],
-    "k": [
+    "k_star": [
      "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.084,
    "observables": [
     "k",
     "k_star"
@@ -3676,17 +3676,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "k_star": [
+    "k": [
      "number"
     ],
-    "k": [
+    "k_star": [
      "number"
     ],
     "c": [
      "number"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.086,
    "observables": [
     "k",
     "c",
@@ -3709,7 +3709,7 @@
      "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.077,
    "observables": [
     "k",
     "g_theory",
@@ -3726,7 +3726,7 @@
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.081,
    "observables": [
     "A"
    ]
@@ -3740,26 +3740,26 @@
     "employment_max": [
      "number"
     ],
-    "employment_min": [
+    "cycle_active": [
+     "boolean"
+    ],
+    "employment": [
      "number"
     ],
     "wage_share_min": [
      "number"
     ],
-    "cycle_active": [
-     "boolean"
+    "employment_min": [
+     "number"
     ],
     "wage_share_max": [
      "number"
     ],
     "wage_share": [
      "number"
-    ],
-    "employment": [
-     "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.082,
    "observables": [
     "wage_share",
     "employment",
@@ -3778,14 +3778,14 @@
     "Y": [
      "number"
     ],
-    "gap": [
+    "K": [
      "number"
     ],
-    "K": [
+    "gap": [
      "number"
     ]
    },
-   "duration_s": 0.874,
+   "duration_s": 0.719,
    "observables": [
     "Y",
     "K",
@@ -3808,7 +3808,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.077,
    "observables": [
     "Y",
     "Y_std"
@@ -3820,17 +3820,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "Y_first20": [
+     "array"
+    ],
     "Y_peak": [
      "number"
     ],
     "persistence": [
      "boolean"
-    ],
-    "Y_first20": [
-     "array"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.08,
    "observables": [
     "Y_peak"
    ]
@@ -3844,17 +3844,17 @@
     "x": [
      "number"
     ],
-    "i": [
-     "number"
+    "taylor_ok": [
+     "boolean"
     ],
     "pi": [
      "number"
     ],
-    "taylor_ok": [
-     "boolean"
+    "i": [
+     "number"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.079,
    "observables": [
     "pi",
     "x",
@@ -3867,20 +3867,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "irf_inflation": [
+     "array"
+    ],
+    "monetary_contraction": [
+     "boolean"
+    ],
     "irf_output": [
      "array"
     ],
     "calibrated_not_estimated": [
      "boolean"
-    ],
-    "monetary_contraction": [
-     "boolean"
-    ],
-    "irf_inflation": [
-     "array"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.076,
    "observables": []
   },
   "ECO025": {
@@ -3889,17 +3889,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "c_rot": [
-     "number"
-    ],
     "rot_more_volatile": [
      "boolean"
     ],
     "c_ric": [
      "number"
+    ],
+    "c_rot": [
+     "number"
     ]
    },
-   "duration_s": 0.077,
+   "duration_s": 0.075,
    "observables": [
     "c_ric",
     "c_rot"
@@ -3911,17 +3911,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mean_illiquid": [
-     "number"
-    ],
     "hand_to_mouth_friction": [
      "boolean"
     ],
     "mean_liquid": [
      "number"
+    ],
+    "mean_illiquid": [
+     "number"
     ]
    },
-   "duration_s": 0.077,
+   "duration_s": 0.082,
    "observables": [
     "mean_liquid",
     "mean_illiquid"
@@ -3933,20 +3933,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "vf_converged": [
+     "boolean"
+    ],
     "vf_last_delta": [
      "number"
-    ],
-    "monotone_consumption": [
-     "boolean"
     ],
     "mean_saving_rate": [
      "number"
     ],
-    "vf_converged": [
+    "monotone_consumption": [
      "boolean"
     ]
    },
-   "duration_s": 0.584,
+   "duration_s": 0.518,
    "observables": [
     "mean_saving_rate",
     "vf_last_delta"
@@ -3958,23 +3958,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "r_market": [
-     "number"
-    ],
     "vf_last_delta": [
-     "number"
-    ],
-    "vf_converged": [
-     "boolean"
-    ],
-    "mean_saving_rate": [
      "number"
     ],
     "monotone_consumption": [
      "boolean"
+    ],
+    "vf_converged": [
+     "boolean"
+    ],
+    "r_market": [
+     "number"
+    ],
+    "mean_saving_rate": [
+     "number"
     ]
    },
-   "duration_s": 5.159,
+   "duration_s": 4.261,
    "observables": [
     "mean_saving_rate",
     "vf_last_delta",
@@ -3987,26 +3987,26 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "r_equilibrium": [
-     "number"
-    ],
     "vf_last_delta": [
-     "number"
-    ],
-    "vf_converged": [
-     "boolean"
-    ],
-    "K_equilibrium": [
-     "number"
-    ],
-    "mean_saving_rate": [
      "number"
     ],
     "monotone_consumption": [
      "boolean"
+    ],
+    "vf_converged": [
+     "boolean"
+    ],
+    "mean_saving_rate": [
+     "number"
+    ],
+    "r_equilibrium": [
+     "number"
+    ],
+    "K_equilibrium": [
+     "number"
     ]
    },
-   "duration_s": 3.586,
+   "duration_s": 2.87,
    "observables": [
     "mean_saving_rate",
     "vf_last_delta",
@@ -4020,17 +4020,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dynamically_inefficient": [
-     "boolean"
+    "savings": [
+     "number"
     ],
     "consumption_loan": [
      "boolean"
     ],
-    "savings": [
-     "number"
+    "dynamically_inefficient": [
+     "boolean"
     ]
    },
-   "duration_s": 0.942,
+   "duration_s": 0.723,
    "observables": [
     "savings"
    ]
@@ -4041,17 +4041,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "k": [
-     "number"
-    ],
     "r": [
      "number"
     ],
     "k_next": [
      "number"
+    ],
+    "k": [
+     "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.091,
    "observables": [
     "k",
     "k_next",
@@ -4064,17 +4064,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "c_theory": [
+     "number"
+    ],
     "c": [
      "number"
     ],
     "W": [
      "number"
-    ],
-    "c_theory": [
-     "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.082,
    "observables": [
     "W",
     "c",
@@ -4090,17 +4090,17 @@
     "end_zero": [
      "boolean"
     ],
-    "age": [
+    "savings": [
      "number"
     ],
     "peak_age": [
      "number"
     ],
-    "savings": [
+    "age": [
      "number"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.076,
    "observables": [
     "age",
     "savings",
@@ -4120,7 +4120,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.08,
    "observables": [
     "buffer_target"
    ]
@@ -4134,16 +4134,16 @@
     "conserv": [
      "number"
     ],
-    "H_h": [
+    "H_g": [
      "number"
     ],
-    "Y": [
+    "H_h": [
      "number"
     ],
     "Y_star": [
      "number"
     ],
-    "H_g": [
+    "Y": [
      "number"
     ]
    },
@@ -4165,20 +4165,20 @@
     "conserv": [
      "number"
     ],
-    "H_h": [
-     "number"
-    ],
-    "Y": [
-     "number"
-    ],
     "H_g": [
      "number"
     ],
     "G": [
      "number"
+    ],
+    "H_h": [
+     "number"
+    ],
+    "Y": [
+     "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.08,
    "observables": [
     "Y",
     "G",
@@ -4193,20 +4193,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "Y": [
+    "bills": [
      "number"
     ],
     "r": [
      "number"
     ],
-    "bills": [
+    "Y": [
      "number"
     ],
     "money": [
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.074,
    "observables": [
     "Y",
     "bills",
@@ -4240,14 +4240,14 @@
     "irf_first": [
      "array"
     ],
-    "irf_err": [
-     "number"
-    ],
     "A_hat": [
      "array"
+    ],
+    "irf_err": [
+     "number"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.078,
    "observables": [
     "irf_err"
    ]
@@ -4258,20 +4258,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "adf_cointegrated": [
-     "number"
-    ],
-    "theta_hat": [
+    "adf_stationary_check": [
      "number"
     ],
     "cointegration_detected": [
      "boolean"
     ],
-    "adf_stationary_check": [
+    "theta_hat": [
+     "number"
+    ],
+    "adf_cointegrated": [
      "number"
     ]
    },
-   "duration_s": 1.077,
+   "duration_s": 0.658,
    "observables": [
     "adf_cointegrated",
     "adf_stationary_check",
@@ -4284,14 +4284,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "p_expansion": [
+    "state_acc": [
      "number"
     ],
-    "state_acc": [
+    "p_expansion": [
      "number"
     ]
    },
-   "duration_s": 0.124,
+   "duration_s": 0.088,
    "observables": [
     "state_acc",
     "p_expansion"
@@ -4303,17 +4303,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "tracks_trend": [
-     "boolean"
-    ],
     "slope_est": [
      "number"
     ],
     "smoothed_last": [
      "number"
+    ],
+    "tracks_trend": [
+     "boolean"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.078,
    "observables": [
     "smoothed_last",
     "slope_est"
@@ -4325,14 +4325,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "factor_corr": [
+    "explained": [
      "number"
     ],
-    "explained": [
+    "factor_corr": [
      "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.076,
    "observables": [
     "factor_corr",
     "explained"
@@ -4351,7 +4351,7 @@
      "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.081,
    "observables": [
     "clustering_ratio"
    ]
@@ -4377,24 +4377,24 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "price": [
-     "number"
-    ],
-    "n_returns": [
-     "number"
-    ],
-    "fundamental": [
+    "vol_ratio": [
+     "null",
      "number"
     ],
     "converge_err": [
      "number"
     ],
-    "vol_ratio": [
-     "null",
+    "price": [
+     "number"
+    ],
+    "fundamental": [
+     "number"
+    ],
+    "n_returns": [
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.079,
    "observables": [
     "price",
     "fundamental",
@@ -4409,7 +4409,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "deviation_std": [
+    "w_trend": [
      "number"
     ],
     "price": [
@@ -4418,11 +4418,11 @@
     "belief_switching": [
      "boolean"
     ],
-    "w_trend": [
+    "deviation_std": [
      "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.08,
    "observables": [
     "price",
     "w_trend",
@@ -4435,6 +4435,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "excess_kurtosis": [
+     "null",
+     "number"
+    ],
     "price": [
      "number"
     ],
@@ -4444,13 +4448,9 @@
     "fat_tails": [
      "boolean",
      "null"
-    ],
-    "excess_kurtosis": [
-     "null",
-     "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.078,
    "observables": [
     "price",
     "excess_kurtosis",
@@ -4463,22 +4463,22 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_samples": [
+    "theory_mean": [
      "number"
     ],
     "mean_share": [
      "null",
      "number"
     ],
-    "theory_mean": [
-     "number"
-    ],
     "share_std": [
      "null",
      "number"
+    ],
+    "n_samples": [
+     "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.088,
    "observables": [
     "mean_share",
     "share_std",
@@ -4492,17 +4492,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "mean_net_worth": [
+     "number"
+    ],
     "defaults_recent": [
      "number"
     ],
     "financial_accelerator": [
      "boolean"
-    ],
-    "mean_net_worth": [
-     "number"
     ]
    },
-   "duration_s": 1.009,
+   "duration_s": 0.702,
    "observables": [
     "mean_net_worth",
     "defaults_recent"
@@ -4514,23 +4514,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "right_skew": [
-     "boolean"
-    ],
-    "size_skew": [
-     "number"
-    ],
     "n_firms": [
      "number"
     ],
     "bankruptcies": [
      "number"
     ],
+    "size_skew": [
+     "number"
+    ],
     "bank_capital": [
      "number"
+    ],
+    "right_skew": [
+     "boolean"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.078,
    "observables": [
     "n_firms",
     "bankruptcies",
@@ -4544,17 +4544,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "productivity_std": [
-     "number"
+    "schumpeterian_gap": [
+     "boolean"
     ],
     "frontier": [
      "number"
     ],
-    "schumpeterian_gap": [
-     "boolean"
+    "productivity_std": [
+     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.079,
    "observables": [
     "frontier",
     "productivity_std"
@@ -4566,17 +4566,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "north_output": [
-     "number"
-    ],
     "credit_allocated": [
      "boolean"
     ],
     "south_output": [
      "number"
+    ],
+    "north_output": [
+     "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.078,
    "observables": [
     "north_output",
     "south_output"
@@ -4588,6 +4588,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "n_trades": [
+     "number"
+    ],
     "alloc_efficiency": [
      "number"
     ],
@@ -4596,12 +4599,9 @@
     ],
     "in_equilibrium_frac": [
      "number"
-    ],
-    "n_trades": [
-     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.08,
    "observables": [
     "n_trades",
     "in_equilibrium_frac",
@@ -4615,14 +4615,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "alloc_efficiency": [
+    "n_trades": [
      "number"
     ],
-    "n_trades": [
+    "alloc_efficiency": [
      "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.076,
    "observables": [
     "n_trades",
     "alloc_efficiency"
@@ -4634,18 +4634,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "book_bids": [
+     "number"
+    ],
     "avg_spread": [
      "null",
      "number"
     ],
     "book_asks": [
      "number"
-    ],
-    "book_bids": [
-     "number"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.078,
    "observables": [
     "book_bids",
     "book_asks",
@@ -4658,17 +4658,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "lambda1": [
-     "number"
-    ],
     "total": [
      "number"
     ],
     "dist": [
      "array"
+    ],
+    "lambda1": [
+     "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.08,
    "observables": [
     "total",
     "lambda1"
@@ -4680,17 +4680,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "lambda1": [
+    "total": [
      "number"
     ],
     "n": [
      "array"
     ],
-    "total": [
+    "lambda1": [
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.08,
    "observables": [
     "total",
     "lambda1"
@@ -4709,7 +4709,7 @@
      "number"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.076,
    "observables": [
     "total",
     "sex_ratio"
@@ -4728,7 +4728,7 @@
      "array"
     ]
    },
-   "duration_s": 0.93,
+   "duration_s": 0.673,
    "observables": [
     "total"
    ]
@@ -4746,7 +4746,7 @@
      "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.082,
    "observables": [
     "resid_ratio"
    ]
@@ -4757,14 +4757,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "resid_ratio": [
-     "number"
-    ],
     "cohort_included": [
      "boolean"
+    ],
+    "resid_ratio": [
+     "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.077,
    "observables": [
     "resid_ratio"
    ]
@@ -4775,17 +4775,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "fit_r2": [
+    "alpha": [
      "number"
     ],
     "beta": [
      "number"
     ],
-    "alpha": [
+    "fit_r2": [
      "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.077,
    "observables": [
     "alpha",
     "beta",
@@ -4808,7 +4808,7 @@
      "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.078,
    "observables": [
     "b",
     "b_hat",
@@ -4821,17 +4821,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "std_age": [
-     "number"
+    "peak_reasonable": [
+     "boolean"
     ],
     "mean_age": [
      "number"
     ],
-    "peak_reasonable": [
-     "boolean"
+    "std_age": [
+     "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.081,
    "observables": [
     "mean_age",
     "std_age"
@@ -4850,7 +4850,7 @@
      "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.076,
    "observables": [
     "peak_age"
    ]
@@ -4864,17 +4864,17 @@
     "inflow": [
      "array"
     ],
-    "od_flows": [
+    "outflow": [
      "array"
     ],
     "total_flow": [
      "number"
     ],
-    "outflow": [
+    "od_flows": [
      "array"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.08,
    "observables": [
     "total_flow"
    ]
@@ -4892,7 +4892,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.075,
    "observables": [
     "row_err"
    ]
@@ -4913,7 +4913,7 @@
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.081,
    "observables": [
     "row_err",
     "col_err"
@@ -4925,17 +4925,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "corr_dist_flow": [
+    "total_flow": [
      "number"
     ],
-    "total_flow": [
+    "corr_dist_flow": [
      "number"
     ],
     "decay": [
      "boolean"
     ]
    },
-   "duration_s": 0.907,
+   "duration_s": 0.779,
    "observables": [
     "corr_dist_flow",
     "total_flow"
@@ -4947,20 +4947,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "gap": [
-     "number"
-    ],
     "expected_u": [
      "number"
     ],
-    "unemp_rate": [
+    "gap": [
      "number"
     ],
     "w_r": [
      "number"
+    ],
+    "unemp_rate": [
+     "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.083,
    "observables": [
     "expected_u",
     "w_r",
@@ -4974,14 +4974,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "pull_dominates": [
-     "boolean"
-    ],
     "migration_prob": [
      "number"
+    ],
+    "pull_dominates": [
+     "boolean"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.077,
    "observables": [
     "migration_prob"
    ]
@@ -4999,7 +4999,7 @@
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.081,
    "observables": [
     "gain"
    ]
@@ -5010,14 +5010,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "stable": [
-     "boolean"
-    ],
     "blocking_pairs": [
      "number"
+    ],
+    "stable": [
+     "boolean"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.082,
    "observables": [
     "blocking_pairs"
    ]
@@ -5028,17 +5028,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "kin_links_alive": [
+    "population": [
      "number"
     ],
     "births": [
      "number"
     ],
-    "population": [
+    "kin_links_alive": [
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.083,
    "observables": [
     "population",
     "births",
@@ -5051,20 +5051,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "log_autocorr": [
+     "number"
+    ],
+    "y": [
+     "number"
+    ],
     "gen_elast": [
      "number"
     ],
     "mean_revert": [
      "boolean"
-    ],
-    "y": [
-     "number"
-    ],
-    "log_autocorr": [
-     "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.079,
    "observables": [
     "y",
     "gen_elast",
@@ -5077,9 +5077,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "stationary_err": [
-     "number"
-    ],
     "converged": [
      "boolean"
     ],
@@ -5088,9 +5085,12 @@
     ],
     "spectral_gap": [
      "number"
+    ],
+    "stationary_err": [
+     "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.078,
    "observables": [
     "spectral_gap",
     "stationary_err"
@@ -5102,18 +5102,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "accepted": [
-     "null",
+    "mean_wage": [
      "number"
     ],
-    "mean_wage": [
+    "accepted": [
+     "null",
      "number"
     ],
     "res_wage": [
      "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.085,
    "observables": [
     "res_wage",
     "accepted",
@@ -5126,17 +5126,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "beveridge": [
-     "array"
-    ],
     "vacancies": [
      "number"
     ],
     "unemployment": [
      "number"
+    ],
+    "beveridge": [
+     "array"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.078,
    "observables": [
     "unemployment",
     "vacancies"
@@ -5158,7 +5158,7 @@
      "array"
     ]
    },
-   "duration_s": 0.884,
+   "duration_s": 0.67,
    "observables": []
   },
   "ECO081": {
@@ -5170,14 +5170,14 @@
     "farmer_skill_mean": [
      "number"
     ],
-    "positive_selection": [
-     "boolean"
-    ],
     "hunter_skill_mean": [
      "number"
+    ],
+    "positive_selection": [
+     "boolean"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.077,
    "observables": [
     "hunter_skill_mean",
     "farmer_skill_mean"
@@ -5192,17 +5192,17 @@
     "invest_late": [
      "number"
     ],
+    "h": [
+     "number"
+    ],
     "invest_early": [
      "number"
     ],
     "decreasing": [
      "boolean"
-    ],
-    "h": [
-     "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.078,
    "observables": [
     "h",
     "invest_early",
@@ -5218,14 +5218,14 @@
     "rho": [
      "number"
     ],
-    "rho_hat": [
+    "err": [
      "number"
     ],
-    "err": [
+    "rho_hat": [
      "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.079,
    "observables": [
     "rho",
     "rho_hat",
@@ -5245,7 +5245,7 @@
      "array"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.079,
    "observables": []
   },
   "ECO085": {
@@ -5254,14 +5254,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "steady_entry_exit": [
-     "boolean"
-    ],
     "exit_rate": [
      "number"
+    ],
+    "steady_entry_exit": [
+     "boolean"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.076,
    "observables": [
     "exit_rate"
    ]
@@ -5272,14 +5272,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "exporter_share": [
-     "number"
-    ],
     "cutoff_selection": [
      "boolean"
+    ],
+    "exporter_share": [
+     "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.077,
    "observables": [
     "exporter_share"
    ]
@@ -5290,20 +5290,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "log_skew": [
-     "number"
-    ],
-    "log_std": [
-     "number"
-    ],
     "mean": [
      "number"
     ],
     "size_cv": [
      "number"
+    ],
+    "log_std": [
+     "number"
+    ],
+    "log_skew": [
+     "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.082,
    "observables": [
     "mean",
     "log_skew",
@@ -5321,7 +5321,7 @@
      "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.08,
    "observables": [
     "item_b_corr"
    ]
@@ -5339,7 +5339,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.075,
    "observables": [
     "mean_a"
    ]
@@ -5350,17 +5350,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "guess_visible": [
+     "boolean"
+    ],
     "low_theta_acc": [
      "number"
     ],
     "c_mean": [
      "number"
-    ],
-    "guess_visible": [
-     "boolean"
     ]
    },
-   "duration_s": 0.963,
+   "duration_s": 0.688,
    "observables": [
     "c_mean",
     "low_theta_acc"
@@ -5394,17 +5394,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "sequence_model": [
+    "better_than_chance": [
      "boolean"
     ],
     "pred_accuracy": [
      "number"
     ],
-    "better_than_chance": [
+    "sequence_model": [
      "boolean"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.078,
    "observables": [
     "pred_accuracy"
    ]
@@ -5415,11 +5415,11 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "pfa_valid": [
-     "boolean"
-    ],
     "stepwise_accuracy": [
      "number"
+    ],
+    "pfa_valid": [
+     "boolean"
     ]
    },
    "duration_s": 0.085,
@@ -5443,7 +5443,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.081,
    "observables": [
     "category_curves_sum"
    ]
@@ -5454,17 +5454,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "between_thresholds": [
+     "boolean"
+    ],
     "prob_sum": [
      "number"
     ],
     "partial_credit_peak_theta": [
      "number"
-    ],
-    "between_thresholds": [
-     "boolean"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.079,
    "observables": [
     "partial_credit_peak_theta",
     "prob_sum"
@@ -5476,20 +5476,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "net_monotone": [
-     "boolean"
-    ],
     "mtr_path": [
      "array"
     ],
-    "mtr_nondecreasing": [
+    "net_monotone": [
      "boolean"
     ],
     "mean_tax": [
      "number"
+    ],
+    "mtr_nondecreasing": [
+     "boolean"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.087,
    "observables": [
     "mean_tax"
    ]
@@ -5510,7 +5510,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.077,
    "observables": []
   },
   "ECO098": {
@@ -5519,17 +5519,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "lifetime_earnings_mean": [
+     "number"
+    ],
     "retiree_income_replaced": [
      "boolean"
     ],
     "pension_mean": [
      "number"
-    ],
-    "lifetime_earnings_mean": [
-     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.107,
    "observables": [
     "lifetime_earnings_mean",
     "pension_mean"
@@ -5544,17 +5544,17 @@
     "total_qaly": [
      "number"
     ],
+    "ICER_finite": [
+     "boolean"
+    ],
     "dead": [
      "number"
     ],
     "total_cost": [
      "number"
-    ],
-    "ICER_finite": [
-     "boolean"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.08,
    "observables": [
     "dead",
     "total_cost",
@@ -5567,17 +5567,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "life_years": [
-     "number"
-    ],
     "partitioned_valid": [
      "boolean"
+    ],
+    "life_years": [
+     "number"
     ],
     "QALY": [
      "number"
     ]
    },
-   "duration_s": 0.9,
+   "duration_s": 0.703,
    "observables": [
     "life_years",
     "QALY"
@@ -5589,17 +5589,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_dead": [
+    "total_cost": [
      "number"
     ],
-    "total_cost": [
+    "n_dead": [
      "number"
     ],
     "microsim_vs_cohort": [
      "boolean"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.108,
    "observables": [
     "n_dead",
     "total_cost"
@@ -5611,7 +5611,13 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "population": [
+     "number"
+    ],
     "pollution": [
+     "number"
+    ],
+    "capital": [
      "number"
     ],
     "resources": [
@@ -5619,15 +5625,9 @@
     ],
     "overshoot": [
      "boolean"
-    ],
-    "capital": [
-     "number"
-    ],
-    "population": [
-     "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.08,
    "observables": [
     "population",
     "capital",
@@ -5641,20 +5641,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "housing": [
-     "number"
-    ],
     "population": [
-     "number"
-    ],
-    "jobs_ratio": [
      "number"
     ],
     "firms": [
      "number"
+    ],
+    "housing": [
+     "number"
+    ],
+    "jobs_ratio": [
+     "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.084,
    "observables": [
     "population",
     "firms",
@@ -5668,20 +5668,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "order_var": [
+    "var_up_gt_down": [
+     "boolean"
+    ],
+    "orders": [
      "array"
     ],
     "bullwhip": [
      "number"
     ],
-    "orders": [
+    "order_var": [
      "array"
-    ],
-    "var_up_gt_down": [
-     "boolean"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.081,
    "observables": [
     "bullwhip"
    ]
@@ -5692,14 +5692,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "quality_falls_with_n": [
-     "boolean"
-    ],
     "tradeoff_table": [
      "array"
+    ],
+    "quality_falls_with_n": [
+     "boolean"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.088,
    "observables": []
   },
   "ECO106": {
@@ -5708,17 +5708,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "T": [
+     "number"
+    ],
     "M": [
      "number"
     ],
     "forcing": [
      "number"
-    ],
-    "T": [
-     "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.084,
    "observables": [
     "M",
     "T",
@@ -5731,9 +5731,6 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "K_north": [
-     "number"
-    ],
     "K_south": [
      "number"
     ],
@@ -5742,9 +5739,12 @@
     ],
     "M": [
      "number"
+    ],
+    "K_north": [
+     "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.091,
    "observables": [
     "K_north",
     "K_south",
@@ -5758,20 +5758,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "sector_losses": [
-     "object"
-    ],
     "T": [
-     "number"
-    ],
-    "total": [
      "number"
     ],
     "non_monotone_ag": [
      "boolean"
+    ],
+    "sector_losses": [
+     "object"
+    ],
+    "total": [
+     "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.082,
    "observables": [
     "T",
     "total"
@@ -5783,23 +5783,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dmg_mean_pct": [
-     "number"
-    ],
-    "dmg_p95_pct": [
-     "number"
-    ],
-    "fat_tail": [
-     "boolean"
-    ],
     "T_mean": [
      "number"
     ],
     "T_p95": [
      "number"
+    ],
+    "dmg_mean_pct": [
+     "number"
+    ],
+    "fat_tail": [
+     "boolean"
+    ],
+    "dmg_p95_pct": [
+     "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.079,
    "observables": [
     "T_mean",
     "T_p95",
@@ -5813,23 +5813,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "eq_x2": [
-     "number"
-    ],
     "stable": [
      "boolean"
     ],
-    "x1": [
+    "eq_x2": [
+     "number"
+    ],
+    "x2": [
      "number"
     ],
     "eq_x1": [
      "number"
     ],
-    "x2": [
+    "x1": [
      "number"
     ]
    },
-   "duration_s": 0.927,
+   "duration_s": 0.671,
    "observables": [
     "x1",
     "x2",
@@ -5843,7 +5843,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "inv0": [
+    "N1": [
      "number"
     ],
     "invariant": [
@@ -5852,11 +5852,11 @@
     "N2": [
      "number"
     ],
-    "N1": [
+    "inv0": [
      "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.084,
    "observables": [
     "N1",
     "N2",
@@ -5873,17 +5873,17 @@
     "lin_invariant": [
      "number"
     ],
-    "N2": [
+    "N1": [
      "number"
     ],
-    "N1": [
+    "N2": [
      "number"
     ],
     "lin0": [
      "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.083,
    "observables": [
     "N1",
     "N2",
@@ -5897,20 +5897,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "MSY": [
-     "number"
-    ],
     "B": [
-     "number"
-    ],
-    "B_eq": [
      "number"
     ],
     "B_at_MSY": [
      "number"
+    ],
+    "MSY": [
+     "number"
+    ],
+    "B_eq": [
+     "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.087,
    "observables": [
     "B",
     "MSY",
@@ -5924,23 +5924,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "harvest": [
-     "number"
-    ],
-    "E": [
-     "number"
-    ],
     "B_econ_eq": [
+     "number"
+    ],
+    "net_profit": [
      "number"
     ],
     "B": [
      "number"
     ],
-    "net_profit": [
+    "E": [
+     "number"
+    ],
+    "harvest": [
      "number"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.089,
    "observables": [
     "B",
     "E",
@@ -5968,7 +5968,7 @@
      "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.095,
    "observables": [
     "price",
     "stock",
@@ -5989,7 +5989,7 @@
      "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.084,
    "observables": [
     "frac_state1",
     "state"
@@ -6008,7 +6008,7 @@
      "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.082,
    "observables": [
     "queue",
     "served"
@@ -6020,17 +6020,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "exact": [
+     "number"
+    ],
     "est": [
      "number"
     ],
     "err": [
      "number"
-    ],
-    "exact": [
-     "number"
     ]
    },
-   "duration_s": 0.075,
+   "duration_s": 0.077,
    "observables": [
     "est",
     "exact",
@@ -6043,17 +6043,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "exact": [
+     "number"
+    ],
     "est": [
      "number"
     ],
     "err": [
      "number"
-    ],
-    "exact": [
-     "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.081,
    "observables": [
     "est",
     "exact",
@@ -6073,7 +6073,7 @@
      "number"
     ]
    },
-   "duration_s": 1.019,
+   "duration_s": 0.659,
    "observables": [
     "est",
     "exact"
@@ -6092,7 +6092,7 @@
      "number"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.081,
    "observables": [
     "est",
     "exact"
@@ -6111,7 +6111,7 @@
      "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.087,
    "observables": [
     "est",
     "exact"
@@ -6123,11 +6123,11 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "stable": [
-     "boolean"
-    ],
     "est": [
      "number"
+    ],
+    "stable": [
+     "boolean"
     ]
    },
    "duration_s": 0.083,
@@ -6144,14 +6144,14 @@
     "exact": [
      "number"
     ],
-    "err": [
+    "est": [
      "number"
     ],
-    "est": [
+    "err": [
      "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.081,
    "observables": [
     "est",
     "exact",
@@ -6164,14 +6164,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "note": [
-     "string"
-    ],
     "strong_err": [
      "number"
+    ],
+    "note": [
+     "string"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.082,
    "observables": [
     "strong_err"
    ]
@@ -6186,7 +6186,7 @@
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.078,
    "observables": [
     "n"
    ]
@@ -6201,7 +6201,7 @@
      "number"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.079,
    "observables": [
     "n"
    ]
@@ -6216,7 +6216,7 @@
      "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.076,
    "observables": [
     "n"
    ]
@@ -6234,7 +6234,7 @@
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.074,
    "observables": [
     "events",
     "E"
@@ -6249,17 +6249,17 @@
     "exact": [
      "number"
     ],
-    "err": [
+    "est": [
      "number"
     ],
-    "est": [
+    "err": [
      "number"
     ],
     "se": [
      "number"
     ]
    },
-   "duration_s": 0.926,
+   "duration_s": 0.666,
    "observables": [
     "est",
     "se",
@@ -6276,14 +6276,14 @@
     "exact": [
      "number"
     ],
-    "err": [
+    "est": [
      "number"
     ],
-    "est": [
+    "err": [
      "number"
     ]
    },
-   "duration_s": 0.107,
+   "duration_s": 0.076,
    "observables": [
     "est",
     "exact",
@@ -6299,14 +6299,14 @@
     "exact": [
      "number"
     ],
-    "err": [
+    "est": [
      "number"
     ],
-    "est": [
+    "err": [
      "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.076,
    "observables": [
     "est",
     "exact",
@@ -6345,7 +6345,7 @@
      "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.087,
    "observables": [
     "est",
     "exact"
@@ -6364,7 +6364,7 @@
      "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.081,
    "observables": [
     "est",
     "exact"
@@ -6376,14 +6376,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "naive_diff": [
+    "paired_diff": [
      "number"
     ],
-    "paired_diff": [
+    "naive_diff": [
      "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.081,
    "observables": [
     "paired_diff",
     "naive_diff"
@@ -6402,7 +6402,7 @@
      "number"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.087,
    "observables": [
     "est",
     "exact"
@@ -6414,17 +6414,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean_val": [
-     "number"
-    ],
     "dim": [
      "number"
     ],
     "n_points": [
      "number"
+    ],
+    "mean_val": [
+     "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.076,
    "observables": [
     "n_points",
     "dim",
@@ -6437,17 +6437,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean_val": [
-     "number"
-    ],
     "dim": [
      "number"
     ],
     "n_points": [
      "number"
+    ],
+    "mean_val": [
+     "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.077,
    "observables": [
     "n_points",
     "dim",
@@ -6460,17 +6460,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean_val": [
+    "dim": [
      "number"
     ],
-    "dim": [
+    "mean_val": [
      "number"
     ],
     "n_points": [
      "number"
     ]
    },
-   "duration_s": 0.941,
+   "duration_s": 0.712,
    "observables": [
     "n_points",
     "dim",
@@ -6483,17 +6483,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean_val": [
+    "dim": [
      "number"
     ],
-    "dim": [
+    "mean_val": [
      "number"
     ],
     "n_points": [
      "number"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.079,
    "observables": [
     "n_points",
     "dim",
@@ -6506,17 +6506,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean": [
+    "var": [
      "number"
     ],
     "err": [
      "number"
     ],
-    "var": [
+    "mean": [
      "number"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.094,
    "observables": [
     "mean",
     "var",
@@ -6529,14 +6529,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean": [
+    "std": [
      "number"
     ],
-    "std": [
+    "mean": [
      "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.091,
    "observables": [
     "mean",
     "std"
@@ -6548,14 +6548,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean": [
+    "var": [
      "number"
     ],
-    "var": [
+    "mean": [
      "number"
     ]
    },
-   "duration_s": 0.211,
+   "duration_s": 0.173,
    "observables": [
     "mean",
     "var"
@@ -6567,14 +6567,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mean": [
+    "var": [
      "number"
     ],
-    "var": [
+    "mean": [
      "number"
     ]
    },
-   "duration_s": 0.258,
+   "duration_s": 0.247,
    "observables": [
     "mean",
     "var"
@@ -6593,7 +6593,7 @@
      "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.082,
    "observables": [
     "posterior_mean",
     "trials"
@@ -6609,7 +6609,7 @@
      "number"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.081,
    "observables": [
     "posterior_mean"
    ]
@@ -6627,7 +6627,7 @@
      "number"
     ]
    },
-   "duration_s": 0.157,
+   "duration_s": 0.156,
    "observables": [
     "posterior_mean",
     "posterior_sd"
@@ -6639,17 +6639,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "rounds": [
+     "number"
+    ],
     "posterior_mean": [
      "number"
     ],
     "posterior_sd": [
      "number"
-    ],
-    "rounds": [
-     "number"
     ]
    },
-   "duration_s": 0.209,
+   "duration_s": 0.198,
    "observables": [
     "posterior_mean",
     "posterior_sd",
@@ -6669,7 +6669,7 @@
      "number"
     ]
    },
-   "duration_s": 0.87,
+   "duration_s": 0.698,
    "observables": [
     "posterior_mean",
     "posterior_sd"
@@ -6681,17 +6681,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "log_likelihood_ratio": [
+     "number"
+    ],
     "favors_theta1": [
      "boolean"
     ],
     "classifier_acc_proxy": [
      "number"
-    ],
-    "log_likelihood_ratio": [
-     "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.075,
    "observables": [
     "log_likelihood_ratio",
     "classifier_acc_proxy"
@@ -6710,7 +6710,7 @@
      "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.076,
    "observables": [
     "posterior_mean",
     "posterior_sd"
@@ -6729,7 +6729,7 @@
      "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.078,
    "observables": [
     "theta",
     "dist"
@@ -6751,7 +6751,7 @@
      "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.108,
    "observables": [
     "theta_hat",
     "aux_dist",
@@ -6764,17 +6764,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "theta_sd": [
+    "err": [
      "number"
     ],
     "theta_mean": [
      "number"
     ],
-    "err": [
+    "theta_sd": [
      "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.078,
    "observables": [
     "theta_mean",
     "theta_sd",
@@ -6794,7 +6794,7 @@
      "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.077,
    "observables": [
     "x",
     "target"
@@ -6813,7 +6813,7 @@
      "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.086,
    "observables": [
     "x",
     "target"
@@ -6832,7 +6832,7 @@
      "number"
     ]
    },
-   "duration_s": 0.322,
+   "duration_s": 0.255,
    "observables": [
     "x",
     "target"
@@ -6848,7 +6848,7 @@
      "number"
     ]
    },
-   "duration_s": 0.138,
+   "duration_s": 0.111,
    "observables": [
     "front_size"
    ]
@@ -6862,14 +6862,14 @@
     "rmse": [
      "number"
     ],
-    "rmse_obs": [
-     "number"
-    ],
     "better_than_obs": [
      "boolean"
+    ],
+    "rmse_obs": [
+     "number"
     ]
    },
-   "duration_s": 1.031,
+   "duration_s": 0.722,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6884,14 +6884,14 @@
     "rmse": [
      "number"
     ],
-    "rmse_obs": [
-     "number"
-    ],
     "better_than_obs": [
      "boolean"
+    ],
+    "rmse_obs": [
+     "number"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.079,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6906,17 +6906,17 @@
     "rmse": [
      "null"
     ],
-    "rmse_obs": [
-     "number"
-    ],
     "better_than_obs": [
      "boolean"
+    ],
+    "rmse_obs": [
+     "number"
     ],
     "note": [
      "string"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.078,
    "observables": [
     "rmse_obs"
    ]
@@ -6930,14 +6930,14 @@
     "rmse": [
      "number"
     ],
-    "rmse_obs": [
-     "number"
-    ],
     "better_than_obs": [
      "boolean"
+    ],
+    "rmse_obs": [
+     "number"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.084,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6952,14 +6952,14 @@
     "rmse": [
      "number"
     ],
-    "rmse_obs": [
-     "number"
-    ],
     "better_than_obs": [
      "boolean"
+    ],
+    "rmse_obs": [
+     "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.084,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6974,14 +6974,14 @@
     "rmse": [
      "number"
     ],
-    "rmse_obs": [
-     "number"
-    ],
     "better_than_obs": [
      "boolean"
+    ],
+    "rmse_obs": [
+     "number"
     ]
    },
-   "duration_s": 0.139,
+   "duration_s": 0.085,
    "observables": [
     "rmse_obs",
     "rmse"
@@ -6993,14 +6993,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "theta_mean": [
+    "theta_std": [
      "number"
     ],
-    "theta_std": [
+    "theta_mean": [
      "number"
     ]
    },
-   "duration_s": 3.712,
+   "duration_s": 2.713,
    "observables": [
     "theta_mean",
     "theta_std"
@@ -7019,7 +7019,7 @@
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.08,
    "observables": [
     "est",
     "true_end"
@@ -7035,7 +7035,7 @@
      "array"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.085,
    "observables": []
   },
   "MET052": {
@@ -7044,14 +7044,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "mu_star": [
-     "array"
-    ],
     "rank_ok": [
      "boolean"
+    ],
+    "mu_star": [
+     "array"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.081,
    "observables": []
   },
   "MET053": {
@@ -7060,14 +7060,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "ST": [
+    "S1": [
      "array"
     ],
-    "S1": [
+    "ST": [
      "array"
     ]
    },
-   "duration_s": 0.914,
+   "duration_s": 0.687,
    "observables": []
   },
   "MET054": {
@@ -7080,7 +7080,7 @@
      "array"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.079,
    "observables": []
   },
   "MET055": {
@@ -7093,7 +7093,7 @@
      "array"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.081,
    "observables": []
   },
   "MET056": {
@@ -7106,7 +7106,7 @@
      "array"
     ]
    },
-   "duration_s": 0.076,
+   "duration_s": 0.084,
    "observables": []
   },
   "MET057": {
@@ -7115,17 +7115,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "hi": [
+     "number"
+    ],
     "lo": [
      "number"
     ],
     "sample_mean": [
      "number"
-    ],
-    "hi": [
-     "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.089,
    "observables": [
     "lo",
     "hi",
@@ -7138,17 +7138,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "p_value": [
+    "obs_stat": [
      "number"
     ],
     "inside_95": [
      "boolean"
     ],
-    "obs_stat": [
+    "p_value": [
      "number"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.08,
    "observables": [
     "p_value",
     "obs_stat"
@@ -7160,17 +7160,17 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
+    "ok": [
+     "boolean"
+    ],
     "param_err": [
      "number"
     ],
     "output_mse": [
      "number"
-    ],
-    "ok": [
-     "boolean"
     ]
    },
-   "duration_s": 0.08,
+   "duration_s": 0.078,
    "observables": [
     "param_err",
     "output_mse"
@@ -7182,14 +7182,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "row_err": [
+    "col_err": [
      "number"
     ],
-    "col_err": [
+    "row_err": [
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.08,
    "observables": [
     "row_err",
     "col_err"
@@ -7205,7 +7205,7 @@
      "array"
     ]
    },
-   "duration_s": 0.099,
+   "duration_s": 0.076,
    "observables": []
   },
   "MET062": {
@@ -7214,14 +7214,14 @@
    "ok": true,
    "n_obs": 1,
    "output_types": {
-    "counts": [
-     "object"
-    ],
     "n": [
      "number"
+    ],
+    "counts": [
+     "object"
     ]
    },
-   "duration_s": 0.102,
+   "duration_s": 0.076,
    "observables": [
     "n"
    ]
@@ -7239,7 +7239,7 @@
      "array"
     ]
    },
-   "duration_s": 0.91,
+   "duration_s": 0.683,
    "observables": [
     "unique"
    ]
@@ -7257,7 +7257,7 @@
      "array"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.079,
    "observables": [
     "cost"
    ]
@@ -7268,23 +7268,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "S": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
     "infected_peak_passed": [
      "boolean"
     ],
     "total": [
      "number"
     ],
-    "I": [
-     "number"
-    ],
     "R": [
-     "number"
-    ],
-    "S": [
      "number"
     ]
    },
-   "duration_s": 0.078,
+   "duration_s": 0.081,
    "observables": [
     "S",
     "I",
@@ -7298,7 +7298,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_patterns": [
+    "last_symmetry": [
      "number"
     ],
     "density": [
@@ -7307,14 +7307,14 @@
     "rule": [
      "number"
     ],
-    "last_symmetry": [
+    "n_patterns": [
      "number"
     ],
     "n_steps": [
      "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.079,
    "observables": [
     "rule",
     "density",
@@ -7329,7 +7329,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_patterns": [
+    "last_symmetry": [
      "number"
     ],
     "density": [
@@ -7338,14 +7338,14 @@
     "rule": [
      "number"
     ],
-    "last_symmetry": [
+    "n_patterns": [
      "number"
     ],
     "n_steps": [
      "number"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.079,
    "observables": [
     "rule",
     "density",
@@ -7360,7 +7360,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_patterns": [
+    "last_symmetry": [
      "number"
     ],
     "density": [
@@ -7369,14 +7369,14 @@
     "rule": [
      "number"
     ],
-    "last_symmetry": [
+    "n_patterns": [
      "number"
     ],
     "n_steps": [
      "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.077,
    "observables": [
     "rule",
     "density",
@@ -7391,20 +7391,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cars_conserved": [
-     "boolean"
-    ],
-    "density": [
+    "cars": [
      "number"
     ],
     "rule": [
      "number"
     ],
-    "cars": [
+    "density": [
      "number"
+    ],
+    "cars_conserved": [
+     "boolean"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.081,
    "observables": [
     "rule",
     "cars",
@@ -7424,7 +7424,7 @@
      "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.079,
    "observables": [
     "alive",
     "tick"
@@ -7436,17 +7436,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "excited": [
+     "number"
+    ],
     "wave_active": [
      "boolean"
     ],
     "resting": [
      "number"
-    ],
-    "excited": [
-     "number"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.076,
    "observables": [
     "excited",
     "resting"
@@ -7465,7 +7465,7 @@
      "array"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.077,
    "observables": [
     "diversity"
    ]
@@ -7476,17 +7476,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "lightning_fires": [
+     "number"
+    ],
     "trees_frac": [
      "number"
     ],
     "trees": [
      "number"
-    ],
-    "lightning_fires": [
-     "number"
     ]
    },
-   "duration_s": 0.968,
+   "duration_s": 0.706,
    "observables": [
     "trees",
     "trees_frac",
@@ -7499,20 +7499,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "urban_growth": [
-     "boolean"
-    ],
-    "forest_frac": [
-     "number"
-    ],
     "city_frac": [
      "number"
     ],
     "farm_frac": [
      "number"
+    ],
+    "urban_growth": [
+     "boolean"
+    ],
+    "forest_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.078,
+   "duration_s": 0.088,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7525,20 +7525,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "diffusion_growth": [
-     "boolean"
-    ],
-    "forest_frac": [
-     "number"
-    ],
     "city_frac": [
      "number"
     ],
     "farm_frac": [
      "number"
+    ],
+    "diffusion_growth": [
+     "boolean"
+    ],
+    "forest_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.088,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7551,20 +7551,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "forest_frac": [
+    "city_frac": [
      "number"
     ],
-    "city_frac": [
+    "farm_frac": [
+     "number"
+    ],
+    "forest_frac": [
      "number"
     ],
     "demand_met": [
      "boolean"
-    ],
-    "farm_frac": [
-     "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.089,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7577,8 +7577,11 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "forest_frac": [
+    "city_frac": [
      "number"
+    ],
+    "dynamic_demand": [
+     "boolean"
     ],
     "demand_met": [
      "boolean"
@@ -7586,14 +7589,11 @@
     "farm_frac": [
      "number"
     ],
-    "city_frac": [
+    "forest_frac": [
      "number"
-    ],
-    "dynamic_demand": [
-     "boolean"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.089,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7606,8 +7606,8 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "forest_frac": [
-     "number"
+    "roulette_allocation": [
+     "boolean"
     ],
     "city_frac": [
      "number"
@@ -7615,8 +7615,8 @@
     "farm_frac": [
      "number"
     ],
-    "roulette_allocation": [
-     "boolean"
+    "forest_frac": [
+     "number"
     ]
    },
    "duration_s": 0.083,
@@ -7632,8 +7632,8 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "forest_frac": [
-     "number"
+    "patch_generation": [
+     "boolean"
     ],
     "city_frac": [
      "number"
@@ -7641,11 +7641,11 @@
     "farm_frac": [
      "number"
     ],
-    "patch_generation": [
-     "boolean"
+    "forest_frac": [
+     "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.082,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7658,20 +7658,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "forest_frac": [
+    "city_frac": [
      "number"
     ],
-    "city_frac": [
+    "farm_frac": [
      "number"
     ],
     "markov_ca_coupled": [
      "boolean"
     ],
-    "farm_frac": [
+    "forest_frac": [
      "number"
     ]
    },
-   "duration_s": 0.096,
+   "duration_s": 0.083,
    "observables": [
     "city_frac",
     "farm_frac",
@@ -7684,17 +7684,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "occupied_frac": [
+    "total": [
      "number"
     ],
-    "total": [
+    "occupied_frac": [
      "number"
     ],
     "spreading": [
      "boolean"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.081,
    "observables": [
     "occupied_frac",
     "total"
@@ -7706,14 +7706,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "mean_degree": [
+    "n_edges": [
      "number"
     ],
-    "n_edges": [
+    "mean_degree": [
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.082,
    "observables": [
     "mean_degree",
     "n_edges"
@@ -7725,17 +7725,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n": [
+    "m": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "m": [
+    "n": [
      "number"
     ]
    },
-   "duration_s": 1.321,
+   "duration_s": 0.893,
    "observables": [
     "n",
     "m",
@@ -7748,20 +7748,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_components": [
-     "number"
-    ],
-    "n": [
+    "m": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "m": [
+    "n_components": [
+     "number"
+    ],
+    "n": [
      "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.085,
    "observables": [
     "n",
     "m",
@@ -7775,17 +7775,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "m": [
+     "number"
+    ],
     "directed": [
      "boolean"
     ],
     "n": [
      "number"
-    ],
-    "m": [
-     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.083,
    "observables": [
     "n",
     "m"
@@ -7797,20 +7797,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_components": [
-     "number"
-    ],
-    "n": [
+    "m": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "m": [
+    "n_components": [
+     "number"
+    ],
+    "n": [
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.077,
    "observables": [
     "n",
     "m",
@@ -7824,20 +7824,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_components": [
-     "number"
-    ],
-    "n": [
+    "m": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "m": [
+    "n_components": [
+     "number"
+    ],
+    "n": [
      "number"
     ]
    },
-   "duration_s": 0.131,
+   "duration_s": 0.077,
    "observables": [
     "n",
     "m",
@@ -7851,14 +7851,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "clustering": [
+    "n_edges": [
      "number"
     ],
-    "n_edges": [
+    "clustering": [
      "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.079,
    "observables": [
     "n_edges",
     "clustering"
@@ -7870,20 +7870,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_components": [
-     "number"
-    ],
-    "n": [
+    "m": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "m": [
+    "n_components": [
+     "number"
+    ],
+    "n": [
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.08,
    "observables": [
     "n",
     "m",
@@ -7900,14 +7900,14 @@
     "n_edges": [
      "number"
     ],
-    "tail_slope": [
+    "mean_degree": [
      "number"
     ],
-    "mean_degree": [
+    "tail_slope": [
      "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.093,
    "observables": [
     "n_edges",
     "mean_degree",
@@ -7920,20 +7920,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_components": [
-     "number"
-    ],
-    "n": [
+    "m": [
      "number"
     ],
     "mean_degree": [
      "number"
     ],
-    "m": [
+    "n_components": [
+     "number"
+    ],
+    "n": [
      "number"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.078,
    "observables": [
     "n",
     "m",
@@ -7947,17 +7947,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "mean_degree": [
+     "number"
+    ],
     "fitness_effect": [
      "boolean"
     ],
     "n": [
      "number"
-    ],
-    "mean_degree": [
-     "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.084,
    "observables": [
     "n",
     "mean_degree"
@@ -7969,6 +7969,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "n_components": [
+     "number"
+    ],
     "mean_degree": [
      "number"
     ],
@@ -7977,12 +7980,9 @@
     ],
     "n": [
      "number"
-    ],
-    "n_components": [
-     "number"
     ]
    },
-   "duration_s": 1.447,
+   "duration_s": 0.902,
    "observables": [
     "n",
     "m",
@@ -7996,17 +7996,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "edges": [
+     "number"
+    ],
     "soft_connection": [
      "boolean"
     ],
     "n": [
      "number"
-    ],
-    "edges": [
-     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.092,
    "observables": [
     "n",
     "edges"
@@ -8018,17 +8018,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "edges": [
+     "number"
+    ],
     "hidden_metric": [
      "boolean"
     ],
     "n": [
      "number"
-    ],
-    "edges": [
-     "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.081,
    "observables": [
     "n",
     "edges"
@@ -8040,6 +8040,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "n_components": [
+     "number"
+    ],
     "mean_degree": [
      "number"
     ],
@@ -8048,12 +8051,9 @@
     ],
     "n": [
      "number"
-    ],
-    "n_components": [
-     "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.08,
    "observables": [
     "n",
     "m",
@@ -8067,6 +8067,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "n_components": [
+     "number"
+    ],
     "mean_degree": [
      "number"
     ],
@@ -8075,12 +8078,9 @@
     ],
     "n": [
      "number"
-    ],
-    "n_components": [
-     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.083,
    "observables": [
     "n",
     "m",
@@ -8094,17 +8094,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "edges": [
+     "number"
+    ],
     "degree_correction": [
      "boolean"
     ],
     "n": [
      "number"
-    ],
-    "edges": [
-     "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.077,
    "observables": [
     "n",
     "edges"
@@ -8116,17 +8116,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n": [
-     "number"
-    ],
     "edges": [
      "number"
     ],
     "mixed_membership": [
      "boolean"
+    ],
+    "n": [
+     "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.088,
    "observables": [
     "n",
     "edges"
@@ -8138,20 +8138,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "generator_fallback": [
-     "string"
-    ],
-    "n": [
+    "n_communities_detected": [
      "number"
     ],
     "benchmark_valid": [
      "boolean"
     ],
-    "n_communities_detected": [
+    "generator_fallback": [
+     "string"
+    ],
+    "n": [
      "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.084,
    "observables": [
     "n",
     "n_communities_detected"
@@ -8163,6 +8163,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "n_components": [
+     "number"
+    ],
     "mean_degree": [
      "number"
     ],
@@ -8171,12 +8174,9 @@
     ],
     "n": [
      "number"
-    ],
-    "n_components": [
-     "number"
     ]
    },
-   "duration_s": 0.112,
+   "duration_s": 0.109,
    "observables": [
     "n",
     "m",
@@ -8190,17 +8190,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n": [
-     "number"
-    ],
     "edges": [
      "number"
     ],
     "latent_distance": [
      "boolean"
+    ],
+    "n": [
+     "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.082,
    "observables": [
     "n",
     "edges"
@@ -8212,17 +8212,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "edges": [
+     "number"
+    ],
     "cluster_recovery": [
      "boolean"
     ],
     "n": [
      "number"
-    ],
-    "edges": [
-     "number"
     ]
    },
-   "duration_s": 0.933,
+   "duration_s": 0.663,
    "observables": [
     "n",
     "edges"
@@ -8234,20 +8234,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_nodes": [
-     "number"
-    ],
     "sampler_mixed": [
      "boolean"
+    ],
+    "edges": [
+     "number"
     ],
     "triangles": [
      "number"
     ],
-    "edges": [
+    "n_nodes": [
      "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.084,
    "observables": [
     "edges",
     "triangles",
@@ -8263,14 +8263,14 @@
     "temporal_dependence": [
      "boolean"
     ],
-    "reciprocity": [
+    "stability": [
      "number"
     ],
-    "stability": [
+    "reciprocity": [
      "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.09,
    "observables": [
     "stability",
     "reciprocity"
@@ -8292,7 +8292,7 @@
      "number"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.086,
    "observables": [
     "formations",
     "dissolutions",
@@ -8312,7 +8312,7 @@
      "number"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.084,
    "observables": [
     "density",
     "reciprocity"
@@ -8324,17 +8324,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "behavior_consensus": [
-     "number"
-    ],
     "reciprocity": [
      "number"
     ],
     "density": [
      "number"
+    ],
+    "behavior_consensus": [
+     "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.086,
    "observables": [
     "density",
     "reciprocity",
@@ -8357,7 +8357,7 @@
      "number"
     ]
    },
-   "duration_s": 0.113,
+   "duration_s": 0.111,
    "observables": [
     "n_events",
     "recip_rate"
@@ -8376,7 +8376,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.079,
+   "duration_s": 0.077,
    "observables": []
   },
   "NET046": {
@@ -8385,14 +8385,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_active_mean": [
+    "n_edges_aggregated": [
      "number"
     ],
-    "n_edges_aggregated": [
+    "n_active_mean": [
      "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.076,
    "observables": [
     "n_edges_aggregated",
     "n_active_mean"
@@ -8404,14 +8404,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "simplices": [
-     "number"
-    ],
     "higher_order": [
      "boolean"
+    ],
+    "simplices": [
+     "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.078,
    "observables": [
     "simplices"
    ]
@@ -8422,20 +8422,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "m": [
-     "number"
-    ],
     "mean_degree": [
      "number"
     ],
-    "n_components": [
+    "m": [
      "number"
     ],
     "n": [
      "number"
+    ],
+    "n_components": [
+     "number"
     ]
    },
-   "duration_s": 1.292,
+   "duration_s": 0.879,
    "observables": [
     "n",
     "m",
@@ -8449,17 +8449,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "n_edges": [
-     "number"
+    "intersection_defined": [
+     "boolean"
     ],
     "n_nodes": [
      "number"
     ],
-    "intersection_defined": [
-     "boolean"
+    "n_edges": [
+     "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.084,
    "observables": [
     "n_nodes",
     "n_edges"
@@ -8471,10 +8471,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "edges": [
+    "bottom_nodes": [
      "number"
     ],
-    "bottom_nodes": [
+    "edges": [
      "number"
     ],
     "top_nodes": [
@@ -8494,14 +8494,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
+    "I": [
      "number"
     ],
-    "I": [
+    "S": [
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.081,
    "observables": [
     "S",
     "I"
@@ -8513,17 +8513,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "I_star": [
+     "number"
+    ],
     "I": [
      "number"
     ],
     "I_frac": [
      "number"
-    ],
-    "I_star": [
-     "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.08,
    "observables": [
     "I",
     "I_frac",
@@ -8536,23 +8536,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "number"
-    ],
-    "I": [
+    "R": [
      "number"
     ],
     "total": [
      "number"
     ],
+    "I": [
+     "number"
+    ],
     "infected_peak_passed": [
      "boolean"
     ],
-    "R": [
+    "S": [
      "number"
     ]
    },
-   "duration_s": 0.119,
+   "duration_s": 0.081,
    "observables": [
     "S",
     "I",
@@ -8566,17 +8566,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "number"
-    ],
     "R": [
      "number"
     ],
     "I": [
      "number"
+    ],
+    "S": [
+     "number"
     ]
    },
-   "duration_s": 0.12,
+   "duration_s": 0.091,
    "observables": [
     "S",
     "I",
@@ -8589,23 +8589,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "number"
-    ],
-    "I": [
-     "number"
-    ],
-    "total": [
+    "R": [
      "number"
     ],
     "E": [
      "number"
     ],
-    "R": [
+    "total": [
+     "number"
+    ],
+    "I": [
+     "number"
+    ],
+    "S": [
      "number"
     ]
    },
-   "duration_s": 0.122,
+   "duration_s": 0.081,
    "observables": [
     "S",
     "E",
@@ -8620,20 +8620,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "number"
-    ],
-    "E": [
-     "number"
-    ],
     "R": [
      "number"
     ],
     "I": [
      "number"
+    ],
+    "E": [
+     "number"
+    ],
+    "S": [
+     "number"
     ]
    },
-   "duration_s": 0.104,
+   "duration_s": 0.08,
    "observables": [
     "S",
     "E",
@@ -8647,10 +8647,7 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "number"
-    ],
-    "I": [
+    "R": [
      "number"
     ],
     "D": [
@@ -8659,11 +8656,14 @@
     "E": [
      "number"
     ],
-    "R": [
+    "I": [
+     "number"
+    ],
+    "S": [
      "number"
     ]
    },
-   "duration_s": 0.115,
+   "duration_s": 0.079,
    "observables": [
     "S",
     "E",
@@ -8678,23 +8678,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "number"
-    ],
-    "I": [
+    "A": [
      "number"
     ],
     "E": [
      "number"
     ],
-    "R": [
+    "I": [
      "number"
     ],
-    "A": [
+    "S": [
+     "number"
+    ],
+    "R": [
      "number"
     ]
    },
-   "duration_s": 1.104,
+   "duration_s": 0.707,
    "observables": [
     "S",
     "E",
@@ -8709,17 +8709,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
+    "I": [
      "number"
     ],
-    "I": [
+    "S": [
      "number"
     ],
     "R": [
      "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.08,
    "observables": [
     "S",
     "I",
@@ -8732,10 +8732,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
+    "I": [
      "number"
     ],
-    "I": [
+    "S": [
      "number"
     ],
     "V": [
@@ -8745,7 +8745,7 @@
      "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.082,
    "observables": [
     "S",
     "V",
@@ -8759,20 +8759,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "array"
-    ],
-    "I": [
-     "array"
-    ],
     "S_total": [
      "number"
     ],
-    "R": [
-     "array"
-    ],
     "R_total": [
      "number"
+    ],
+    "age_matrix": [
+     "boolean"
+    ],
+    "I": [
+     "array"
     ],
     "E_total": [
      "number"
@@ -8780,8 +8777,11 @@
     "I_total": [
      "number"
     ],
-    "age_matrix": [
-     "boolean"
+    "S": [
+     "array"
+    ],
+    "R": [
+     "array"
     ]
    },
    "duration_s": 0.084,
@@ -8798,10 +8798,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "city2_I": [
+    "city3_I": [
      "number"
     ],
-    "city3_I": [
+    "city2_I": [
      "number"
     ],
     "city1_I": [
@@ -8811,7 +8811,7 @@
      "number"
     ]
    },
-   "duration_s": 0.084,
+   "duration_s": 0.082,
    "observables": [
     "city0_I",
     "city1_I",
@@ -8825,60 +8825,10 @@
    "ok": true,
    "n_obs": 9,
    "output_types": {
-    "S": [
-     "number"
-    ],
     "I": [
      "number"
     ],
-    "R": [
-     "number"
-    ]
-   },
-   "duration_s": 0.092,
-   "observables": [
-    "S",
-    "I",
-    "R"
-   ]
-  },
-  "NET064": {
-   "model_id": "NET064",
-   "protocol": "fixed_step",
-   "ok": true,
-   "n_obs": 6,
-   "output_types": {
     "S": [
-     "number"
-    ],
-    "I": [
-     "number"
-    ],
-    "conserv": [
-     "number"
-    ],
-    "R": [
-     "number"
-    ]
-   },
-   "duration_s": 0.089,
-   "observables": [
-    "S",
-    "I",
-    "R",
-    "conserv"
-   ]
-  },
-  "NET064_jump": {
-   "model_id": "NET064_jump",
-   "protocol": "demo",
-   "ok": true,
-   "n_obs": 2,
-   "output_types": {
-    "S": [
-     "number"
-    ],
-    "I": [
      "number"
     ],
     "R": [
@@ -8892,23 +8842,73 @@
     "R"
    ]
   },
+  "NET064": {
+   "model_id": "NET064",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "I": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ],
+    "conserv": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.077,
+   "observables": [
+    "S",
+    "I",
+    "R",
+    "conserv"
+   ]
+  },
+  "NET064_jump": {
+   "model_id": "NET064_jump",
+   "protocol": "demo",
+   "ok": true,
+   "n_obs": 2,
+   "output_types": {
+    "I": [
+     "number"
+    ],
+    "S": [
+     "number"
+    ],
+    "R": [
+     "number"
+    ]
+   },
+   "duration_s": 0.078,
+   "observables": [
+    "S",
+    "I",
+    "R"
+   ]
+  },
   "NET065": {
    "model_id": "NET065",
    "protocol": "fixed_step",
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "gen_curve": [
+     "array"
+    ],
     "susceptible": [
      "number"
     ],
     "infected_gen": [
      "number"
-    ],
-    "gen_curve": [
-     "array"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.077,
    "observables": [
     "infected_gen",
     "susceptible"
@@ -8920,20 +8920,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "S": [
+     "number"
+    ],
     "stages": [
      "array"
     ],
-    "S": [
+    "R": [
      "number"
     ],
     "I_total": [
      "number"
-    ],
-    "R": [
-     "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.08,
    "observables": [
     "S",
     "I_total",
@@ -8953,7 +8953,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.914,
+   "duration_s": 0.66,
    "observables": []
   },
   "NET068": {
@@ -8962,23 +8962,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "prev_h": [
+     "number"
+    ],
+    "endemic": [
+     "boolean"
+    ],
     "Iv": [
      "number"
     ],
     "prev_v": [
      "number"
     ],
-    "endemic": [
-     "boolean"
-    ],
     "Ih": [
-     "number"
-    ],
-    "prev_h": [
      "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.078,
    "observables": [
     "Ih",
     "Iv",
@@ -8992,20 +8992,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "S": [
-     "number"
+    "pair_approximation": [
+     "boolean"
     ],
     "I": [
      "number"
     ],
-    "pair_approximation": [
-     "boolean"
+    "S": [
+     "number"
     ],
     "R": [
      "number"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.079,
    "observables": [
     "S",
     "I",
@@ -9018,14 +9018,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "ebcm_solved": [
-     "boolean"
-    ],
     "final_size_frac": [
      "number"
+    ],
+    "ebcm_solved": [
+     "boolean"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.075,
    "observables": [
     "final_size_frac"
    ]
@@ -9043,7 +9043,7 @@
      "boolean"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.089,
    "observables": [
     "infected_cells"
    ]
@@ -9054,17 +9054,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "adaptive_coevolution": [
-     "boolean"
-    ],
     "infected_frac": [
      "number"
+    ],
+    "adaptive_coevolution": [
+     "boolean"
     ],
     "rewires": [
      "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.078,
    "observables": [
     "infected_frac",
     "rewires"
@@ -9083,7 +9083,7 @@
      "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.077,
    "observables": [
     "alive"
    ]
@@ -9101,7 +9101,7 @@
      "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.081,
    "observables": [
     "adopted",
     "frac"
@@ -9113,14 +9113,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "F_theory": [
+    "adopted_frac": [
      "number"
     ],
-    "adopted_frac": [
+    "F_theory": [
      "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.09,
    "observables": [
     "adopted_frac",
     "F_theory"
@@ -9136,7 +9136,7 @@
      "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.081,
    "observables": [
     "n"
    ]
@@ -9151,7 +9151,7 @@
      "number"
     ]
    },
-   "duration_s": 1.006,
+   "duration_s": 0.66,
    "observables": [
     "n"
    ]
@@ -9162,11 +9162,11 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cascade_frac": [
-     "number"
-    ],
     "global_cascade": [
      "boolean"
+    ],
+    "cascade_frac": [
+     "number"
     ]
    },
    "duration_s": 0.093,
@@ -9180,14 +9180,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "dose_model_active": [
-     "boolean"
-    ],
     "infected_frac": [
      "number"
+    ],
+    "dose_model_active": [
+     "boolean"
     ]
    },
-   "duration_s": 0.086,
+   "duration_s": 0.085,
    "observables": [
     "infected_frac"
    ]
@@ -9198,20 +9198,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rumor_dies": [
-     "boolean"
-    ],
-    "ignorants": [
-     "number"
-    ],
     "spreaders": [
      "number"
     ],
+    "rumor_dies": [
+     "boolean"
+    ],
     "stiflers": [
+     "number"
+    ],
+    "ignorants": [
      "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.091,
    "observables": [
     "ignorants",
     "spreaders",
@@ -9224,20 +9224,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "rumor_dies": [
-     "boolean"
-    ],
-    "ignorants": [
-     "number"
-    ],
     "spreaders": [
      "number"
     ],
+    "rumor_dies": [
+     "boolean"
+    ],
     "stiflers": [
+     "number"
+    ],
+    "ignorants": [
      "number"
     ]
    },
-   "duration_s": 0.081,
+   "duration_s": 0.082,
    "observables": [
     "ignorants",
     "spreaders",
@@ -9260,7 +9260,7 @@
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.097,
    "observables": [
     "infected",
     "n_triangles"
@@ -9272,14 +9272,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "per_community": [
-     "array"
-    ],
     "overall": [
      "number"
+    ],
+    "per_community": [
+     "array"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.089,
    "observables": [
     "overall"
    ]
@@ -9290,10 +9290,10 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cross_community_exposure": [
+    "overall": [
      "number"
     ],
-    "overall": [
+    "cross_community_exposure": [
      "number"
     ]
    },
@@ -9309,20 +9309,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "p=0.35": [
+    "p=0.25": [
      "object"
     ],
     "p_critical": [
      "number"
     ],
-    "p=0.15": [
+    "p=0.35": [
      "object"
     ],
-    "p=0.25": [
+    "p=0.15": [
      "object"
     ]
    },
-   "duration_s": 0.437,
+   "duration_s": 0.322,
    "observables": [
     "p_critical"
    ]
@@ -9333,20 +9333,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "p_critical_approx": [
-     "number"
-    ],
-    "p=0.3": [
+    "p=0.4": [
      "number"
     ],
     "p=0.5": [
      "number"
     ],
-    "p=0.4": [
+    "p_critical_approx": [
+     "number"
+    ],
+    "p=0.3": [
      "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.082,
    "observables": [
     "p=0.3",
     "p=0.4",
@@ -9363,14 +9363,14 @@
     "max_core": [
      "number"
     ],
-    "core_dist": [
-     "object"
-    ],
     "hub_has_high_core": [
      "boolean"
+    ],
+    "core_dist": [
+     "object"
     ]
    },
-   "duration_s": 1.284,
+   "duration_s": 1.02,
    "observables": [
     "max_core"
    ]
@@ -9388,7 +9388,7 @@
      "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.085,
    "observables": [
     "active_frac"
    ]
@@ -9399,17 +9399,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "cascade_happened": [
-     "boolean"
+    "failed_edges": [
+     "number"
     ],
     "largest_component_frac": [
      "number"
     ],
-    "failed_edges": [
-     "number"
+    "cascade_happened": [
+     "boolean"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.097,
    "observables": [
     "failed_edges",
     "largest_component_frac"
@@ -9421,20 +9421,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "alive_a": [
-     "number"
+    "catastrophic": [
+     "boolean"
     ],
-    "failed_b": [
+    "alive_a": [
      "number"
     ],
     "failed_a": [
      "number"
     ],
-    "catastrophic": [
-     "boolean"
+    "failed_b": [
+     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.086,
    "observables": [
     "alive_a",
     "failed_a",
@@ -9450,17 +9450,17 @@
     "clearing_payments": [
      "array"
     ],
-    "clearing_feasible": [
-     "boolean"
-    ],
     "total_paid": [
      "number"
     ],
     "total_debt": [
      "number"
+    ],
+    "clearing_feasible": [
+     "boolean"
     ]
    },
-   "duration_s": 0.106,
+   "duration_s": 0.086,
    "observables": [
     "total_debt",
     "total_paid"
@@ -9482,7 +9482,7 @@
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.08,
    "observables": [
     "n_defaults"
    ]
@@ -9503,7 +9503,7 @@
      "number"
     ]
    },
-   "duration_s": 0.144,
+   "duration_s": 0.09,
    "observables": [
     "debt_rank_pct"
    ]
@@ -9514,17 +9514,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "price": [
-     "number"
-    ],
     "fire_sale_spiral": [
      "boolean"
+    ],
+    "price": [
+     "number"
     ],
     "n_defaults": [
      "number"
     ]
    },
-   "duration_s": 0.123,
+   "duration_s": 0.085,
    "observables": [
     "price",
     "n_defaults"
@@ -9539,14 +9539,14 @@
     "flux": [
      "number"
     ],
-    "total": [
+    "k_mean": [
      "number"
     ],
-    "k_mean": [
+    "total": [
      "number"
     ]
    },
-   "duration_s": 0.127,
+   "duration_s": 0.082,
    "observables": [
     "total",
     "k_mean",
@@ -9562,14 +9562,14 @@
     "queue": [
      "number"
     ],
-    "total": [
+    "k_mean": [
      "number"
     ],
-    "k_mean": [
+    "total": [
      "number"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.081,
    "observables": [
     "total",
     "k_mean",
@@ -9585,14 +9585,14 @@
     "k_mean": [
      "number"
     ],
-    "v_std": [
+    "v_mean": [
      "number"
     ],
-    "v_mean": [
+    "v_std": [
      "number"
     ]
    },
-   "duration_s": 0.987,
+   "duration_s": 0.75,
    "observables": [
     "k_mean",
     "v_std",
@@ -9605,17 +9605,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.105,
+   "duration_s": 0.093,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9628,17 +9628,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.083,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9651,17 +9651,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.083,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9674,17 +9674,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.082,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9697,17 +9697,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.086,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9720,17 +9720,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.081,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9743,17 +9743,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.083,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9766,17 +9766,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "min_gap": [
+     "number"
+    ],
     "v_mean": [
      "number"
     ],
     "v_std": [
      "number"
-    ],
-    "min_gap": [
-     "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.084,
    "observables": [
     "v_mean",
     "min_gap",
@@ -9789,17 +9789,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "density": [
+    "flux": [
      "number"
     ],
-    "flux": [
+    "density": [
      "number"
     ],
     "n_cars": [
      "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.079,
    "observables": [
     "n_cars",
     "density",
@@ -9815,20 +9815,20 @@
     "empty": [
      "number"
     ],
-    "n_east": [
+    "cars": [
      "number"
     ],
-    "cars": [
+    "n_north": [
      "number"
     ],
     "mobility": [
      "number"
     ],
-    "n_north": [
+    "n_east": [
      "number"
     ]
    },
-   "duration_s": 0.969,
+   "duration_s": 0.667,
    "observables": [
     "n_east",
     "n_north",
@@ -9850,7 +9850,7 @@
      "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.078,
    "observables": [
     "n_cars",
     "flux"
@@ -9862,17 +9862,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "delay": [
+    "queue": [
      "number"
     ],
-    "queue": [
+    "delay": [
      "number"
     ],
     "served": [
      "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.078,
    "observables": [
     "queue",
     "served",
@@ -9885,23 +9885,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "total_cost": [
+     "number"
+    ],
+    "cost2": [
+     "number"
+    ],
     "cost1": [
      "number"
     ],
     "f1": [
      "number"
     ],
-    "cost2": [
-     "number"
-    ],
     "cost_gap": [
-     "number"
-    ],
-    "total_cost": [
      "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.078,
    "observables": [
     "f1",
     "cost1",
@@ -9916,23 +9916,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "total_cost": [
+     "number"
+    ],
+    "cost2": [
+     "number"
+    ],
     "cost1": [
      "number"
     ],
     "f1": [
      "number"
     ],
-    "cost2": [
-     "number"
-    ],
     "cost_gap": [
-     "number"
-    ],
-    "total_cost": [
      "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.079,
    "observables": [
     "f1",
     "cost1",
@@ -9950,17 +9950,17 @@
     "v_std": [
      "number"
     ],
-    "changes": [
+    "v_mean": [
      "number"
     ],
     "min_gap": [
      "number"
     ],
-    "v_mean": [
+    "changes": [
      "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.077,
    "observables": [
     "min_gap",
     "v_std",
@@ -9977,17 +9977,17 @@
     "min_separation": [
      "number"
     ],
+    "evacuated": [
+     "number"
+    ],
     "in_bounds": [
      "boolean"
     ],
     "alive": [
      "number"
-    ],
-    "evacuated": [
-     "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.079,
    "observables": [
     "evacuated",
     "alive",
@@ -10003,17 +10003,17 @@
     "min_separation": [
      "number"
     ],
+    "evacuated": [
+     "number"
+    ],
     "in_bounds": [
      "boolean"
     ],
     "alive": [
      "number"
-    ],
-    "evacuated": [
-     "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.081,
    "observables": [
     "evacuated",
     "alive",
@@ -10029,17 +10029,17 @@
     "min_separation": [
      "number"
     ],
+    "evacuated": [
+     "number"
+    ],
     "in_bounds": [
      "boolean"
     ],
     "alive": [
      "number"
-    ],
-    "evacuated": [
-     "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.081,
    "observables": [
     "evacuated",
     "alive",
@@ -10052,17 +10052,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "arrived": [
-     "number"
-    ],
     "collisions": [
      "number"
     ],
     "alive": [
      "number"
+    ],
+    "arrived": [
+     "number"
     ]
    },
-   "duration_s": 0.093,
+   "duration_s": 0.084,
    "observables": [
     "arrived",
     "alive",
@@ -10075,17 +10075,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "alive": [
+    "collisions": [
      "number"
     ],
-    "collisions": [
+    "alive": [
      "number"
     ],
     "arrived": [
      "number"
     ]
    },
-   "duration_s": 1.132,
+   "duration_s": 0.707,
    "observables": [
     "arrived",
     "alive",
@@ -10098,17 +10098,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "alive": [
+    "collisions": [
      "number"
     ],
-    "collisions": [
+    "alive": [
      "number"
     ],
     "arrived": [
      "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.085,
    "observables": [
     "arrived",
     "alive",
@@ -10121,20 +10121,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "at_exit": [
-     "number"
-    ],
-    "total": [
-     "number"
-    ],
     "steps": [
      "number"
     ],
     "max_remaining": [
      "number"
+    ],
+    "at_exit": [
+     "number"
+    ],
+    "total": [
+     "number"
     ]
    },
-   "duration_s": 0.09,
+   "duration_s": 0.079,
    "observables": [
     "at_exit",
     "total",
@@ -10148,17 +10148,173 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "total": [
+    "arrived": [
      "number"
     ],
-    "arrived": [
+    "total": [
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.095,
    "observables": [
     "arrived",
     "total"
+   ]
+  },
+  "NET121": {
+   "model_id": "NET121",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "alive": [
+     "number"
+    ],
+    "waiting": [
+     "number"
+    ],
+    "moving": [
+     "number"
+    ],
+    "fallen": [
+     "number"
+    ],
+    "local_conflicts": [
+     "number"
+    ],
+    "in_bounds": [
+     "boolean"
+    ],
+    "aid_completed": [
+     "number"
+    ],
+    "min_separation": [
+     "number"
+    ],
+    "evacuated": [
+     "number"
+    ],
+    "assisted": [
+     "number"
+    ],
+    "yielding": [
+     "number"
+    ]
+   },
+   "duration_s": 0.087,
+   "observables": [
+    "evacuated",
+    "alive",
+    "min_separation",
+    "moving",
+    "waiting",
+    "fallen",
+    "assisted",
+    "aid_completed",
+    "yielding",
+    "local_conflicts"
+   ]
+  },
+  "NET122": {
+   "model_id": "NET122",
+   "protocol": "fixed_step",
+   "ok": true,
+   "n_obs": 6,
+   "output_types": {
+    "audit_coverage": [
+     "number"
+    ],
+    "lax_fraud_detected": [
+     "number"
+    ],
+    "audit_feedback": [
+     "number"
+    ],
+    "green_cells": [
+     "number"
+    ],
+    "stable_mcs": [
+     "number"
+    ],
+    "green_share": [
+     "number"
+    ],
+    "audited_cells": [
+     "number"
+    ],
+    "fraud_detected": [
+     "number"
+    ],
+    "lax_share": [
+     "number"
+    ],
+    "strict_share": [
+     "number"
+    ],
+    "feedback_samples": [
+     "number"
+    ],
+    "n_cells": [
+     "number"
+    ],
+    "audit_active": [
+     "boolean"
+    ],
+    "farm_switches": [
+     "number"
+    ],
+    "distance_to_ideal": [
+     "number"
+    ],
+    "strict_cells": [
+     "number"
+    ],
+    "feedback_lax": [
+     "number"
+    ],
+    "regulator_switches": [
+     "number"
+    ],
+    "audit_target": [
+     "number"
+    ],
+    "fraud_share": [
+     "number"
+    ],
+    "feedback_lax_fraud": [
+     "number"
+    ],
+    "audit_institutions": [
+     "number"
+    ],
+    "lax_detected": [
+     "number"
+    ]
+   },
+   "duration_s": 0.086,
+   "observables": [
+    "n_cells",
+    "audit_institutions",
+    "audited_cells",
+    "strict_cells",
+    "green_cells",
+    "audit_target",
+    "audit_coverage",
+    "strict_share",
+    "lax_share",
+    "green_share",
+    "fraud_share",
+    "lax_detected",
+    "fraud_detected",
+    "lax_fraud_detected",
+    "audit_feedback",
+    "feedback_samples",
+    "feedback_lax",
+    "feedback_lax_fraud",
+    "regulator_switches",
+    "farm_switches",
+    "stable_mcs",
+    "distance_to_ideal"
    ]
   },
   "SYS001": {
@@ -10174,7 +10330,7 @@
      "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.079,
    "observables": [
     "queue",
     "served"
@@ -10186,6 +10342,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "n_service_starts": [
+     "number"
+    ],
     "n_arrived": [
      "number"
     ],
@@ -10197,12 +10356,9 @@
     ],
     "Wq_sim": [
      "number"
-    ],
-    "n_service_starts": [
-     "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.078,
    "observables": [
     "Wq_sim",
     "Wq_erlangc",
@@ -10217,20 +10373,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "total": [
+    "blocked": [
      "number"
     ],
-    "B_sim": [
+    "total": [
      "number"
     ],
     "B_formula": [
      "number"
     ],
-    "blocked": [
+    "B_sim": [
      "number"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.075,
    "observables": [
     "B_formula",
     "B_sim",
@@ -10244,17 +10400,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "reneged": [
+     "number"
+    ],
     "total": [
      "number"
     ],
     "drop_frac": [
      "number"
-    ],
-    "reneged": [
-     "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.078,
    "observables": [
     "reneged",
     "total",
@@ -10267,26 +10423,26 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "in_service": [
+    "reneged": [
+     "number"
+    ],
+    "served": [
      "number"
     ],
     "arrived": [
      "number"
     ],
-    "started": [
+    "in_service": [
      "number"
     ],
-    "reneged": [
+    "started": [
      "number"
     ],
     "waiting": [
      "number"
-    ],
-    "served": [
-     "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.66,
    "observables": [
     "arrived",
     "started",
@@ -10309,7 +10465,7 @@
      "number"
     ]
    },
-   "duration_s": 0.117,
+   "duration_s": 0.087,
    "observables": [
     "L",
     "L_little"
@@ -10321,24 +10477,24 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "Wq_sim": [
-     "null",
+    "n_waiting": [
      "number"
     ],
-    "n_service_starts": [
+    "Wq_sim": [
+     "null",
      "number"
     ],
     "n_arrived": [
      "number"
     ],
-    "n_waiting": [
+    "n_service_starts": [
      "number"
     ],
     "Wq_md1": [
      "number"
     ]
    },
-   "duration_s": 0.968,
+   "duration_s": 0.078,
    "observables": [
     "Wq_sim",
     "Wq_md1",
@@ -10353,24 +10509,24 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "Wq_sim": [
-     "null",
+    "n_waiting": [
      "number"
     ],
-    "n_service_starts": [
+    "Wq_sim": [
+     "null",
      "number"
     ],
     "n_arrived": [
      "number"
     ],
-    "n_waiting": [
+    "n_service_starts": [
      "number"
     ],
     "Wq_md1": [
      "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.078,
    "observables": [
     "Wq_sim",
     "Wq_md1",
@@ -10392,7 +10548,7 @@
      "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.076,
    "observables": [
     "Wq_sim",
     "Wq_kingman"
@@ -10414,7 +10570,7 @@
      "array"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.077,
    "observables": []
   },
   "SYS011": {
@@ -10423,17 +10579,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "X_sim": [
+    "X_mva": [
      "number"
     ],
     "n": [
      "array"
     ],
-    "X_mva": [
+    "X_sim": [
      "number"
     ]
    },
-   "duration_s": 0.082,
+   "duration_s": 0.08,
    "observables": [
     "X_mva",
     "X_sim"
@@ -10455,7 +10611,7 @@
      "array"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.076,
    "observables": [
     "rho"
    ]
@@ -10466,17 +10622,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "W_high": [
+    "W_low": [
      "null"
     ],
     "priority_holds": [
      "boolean"
     ],
-    "W_low": [
+    "W_high": [
      "null"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.078,
    "observables": []
   },
   "SYS014": {
@@ -10485,18 +10641,18 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "W_high": [
-     "null",
-     "number"
+    "W_low": [
+     "null"
     ],
     "priority_holds": [
      "boolean"
     ],
-    "W_low": [
-     "null"
+    "W_high": [
+     "null",
+     "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.08,
    "observables": [
     "W_high"
    ]
@@ -10507,20 +10663,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "total_tokens": [
+     "number"
+    ],
+    "fired": [
+     "number"
+    ],
     "enabled": [
      "number"
     ],
     "marking": [
      "array"
-    ],
-    "fired": [
-     "number"
-    ],
-    "total_tokens": [
-     "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.667,
    "observables": [
     "fired",
     "total_tokens",
@@ -10533,17 +10689,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "fired": [
+     "number"
+    ],
     "per_color": [
      "object"
     ],
     "marking": [
      "object"
-    ],
-    "fired": [
-     "number"
     ]
    },
-   "duration_s": 0.088,
+   "duration_s": 0.077,
    "observables": [
     "fired"
    ]
@@ -10554,20 +10710,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "fired": [
+    "total_tokens": [
      "number"
     ],
-    "marking": [
-     "array"
-    ],
-    "total_tokens": [
+    "fired": [
      "number"
     ],
     "enabled": [
      "number"
+    ],
+    "marking": [
+     "array"
     ]
    },
-   "duration_s": 0.96,
+   "duration_s": 0.078,
    "observables": [
     "fired",
     "total_tokens",
@@ -10587,7 +10743,7 @@
      "array"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.076,
    "observables": [
     "fired"
    ]
@@ -10605,7 +10761,7 @@
      "array"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.083,
    "observables": [
     "fired"
    ]
@@ -10616,20 +10772,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "fired": [
+    "total_tokens": [
      "number"
     ],
-    "marking": [
-     "array"
-    ],
-    "total_tokens": [
+    "fired": [
      "number"
     ],
     "enabled": [
      "number"
+    ],
+    "marking": [
+     "array"
     ]
    },
-   "duration_s": 0.098,
+   "duration_s": 0.076,
    "observables": [
     "fired",
     "total_tokens",
@@ -10645,14 +10801,14 @@
     "expected": [
      "number"
     ],
-    "events": [
+    "clock": [
      "number"
     ],
-    "clock": [
+    "events": [
      "number"
     ]
    },
-   "duration_s": 0.092,
+   "duration_s": 0.077,
    "observables": [
     "events",
     "clock",
@@ -10665,6 +10821,9 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "processed": [
+     "number"
+    ],
     "queued": [
      "number"
     ],
@@ -10673,12 +10832,9 @@
     ],
     "conserv": [
      "number"
-    ],
-    "processed": [
-     "number"
     ]
    },
-   "duration_s": 0.085,
+   "duration_s": 0.08,
    "observables": [
     "generated",
     "processed",
@@ -10692,17 +10848,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "expected_total": [
-     "number"
-    ],
     "events_per_atom": [
      "array"
+    ],
+    "expected_total": [
+     "number"
     ],
     "total": [
      "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.084,
    "observables": [
     "total",
     "expected_total"
@@ -10714,23 +10870,23 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "completed": [
-     "number"
-    ],
     "queued": [
-     "number"
-    ],
-    "workers": [
      "number"
     ],
     "arrived": [
      "number"
     ],
+    "completed": [
+     "number"
+    ],
     "conserv": [
+     "number"
+    ],
+    "workers": [
      "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.076,
    "observables": [
     "workers",
     "arrived",
@@ -10752,7 +10908,7 @@
      "number"
     ]
    },
-   "duration_s": 0.101,
+   "duration_s": 0.66,
    "observables": [
     "total",
     "max"
@@ -10764,17 +10920,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "jumps": [
+    "regime": [
      "number"
     ],
-    "regime": [
+    "jumps": [
      "number"
     ],
     "stock": [
      "number"
     ]
    },
-   "duration_s": 0.087,
+   "duration_s": 0.078,
    "observables": [
     "stock",
     "regime",
@@ -10787,14 +10943,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "visit_freq": [
+    "pi_analytic": [
      "array"
     ],
-    "pi_analytic": [
+    "visit_freq": [
      "array"
     ]
    },
-   "duration_s": 1.097,
+   "duration_s": 0.078,
    "observables": []
   },
   "SYS028": {
@@ -10803,17 +10959,17 @@
    "ok": true,
    "n_obs": 2,
    "output_types": {
+    "state": [
+     "number"
+    ],
     "pi_stationary": [
      "array"
     ],
     "pi_sim": [
      "array"
-    ],
-    "state": [
-     "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.078,
    "observables": [
     "state"
    ]
@@ -10831,7 +10987,7 @@
      "number"
     ]
    },
-   "duration_s": 0.118,
+   "duration_s": 0.076,
    "observables": [
     "state",
     "transitions"
@@ -10843,14 +10999,14 @@
    "ok": true,
    "n_obs": 9,
    "output_types": {
-    "E_analytic": [
+    "n": [
      "number"
     ],
-    "n": [
+    "E_analytic": [
      "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.081,
    "observables": [
     "n",
     "E_analytic"
@@ -10862,17 +11018,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "count": [
+    "E": [
      "number"
     ],
-    "E": [
+    "count": [
      "number"
     ],
     "var_theory": [
      "number"
     ]
    },
-   "duration_s": 0.109,
+   "duration_s": 0.077,
    "observables": [
     "count",
     "E",
@@ -10892,7 +11048,7 @@
      "number"
     ]
    },
-   "duration_s": 0.108,
+   "duration_s": 0.081,
    "observables": [
     "count",
     "E_integral"
@@ -10904,17 +11060,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "E_analytic": [
-     "number"
-    ],
     "extinct": [
      "boolean"
+    ],
+    "E_analytic": [
+     "number"
     ],
     "alive": [
      "number"
     ]
    },
-   "duration_s": 0.103,
+   "duration_s": 0.08,
    "observables": [
     "alive",
     "E_analytic"
@@ -10926,14 +11082,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "E_S": [
+    "S": [
      "number"
     ],
-    "S": [
+    "E_S": [
      "number"
     ]
    },
-   "duration_s": 0.116,
+   "duration_s": 0.092,
    "observables": [
     "S",
     "E_S"
@@ -10952,7 +11108,7 @@
      "number"
     ]
    },
-   "duration_s": 0.132,
+   "duration_s": 0.681,
    "observables": [
     "x",
     "stationary_var"
@@ -10974,7 +11130,7 @@
      "number"
     ]
    },
-   "duration_s": 0.135,
+   "duration_s": 0.076,
    "observables": [
     "x",
     "theta"
@@ -10996,7 +11152,7 @@
      "number"
     ]
    },
-   "duration_s": 0.973,
+   "duration_s": 0.079,
    "observables": [
     "S",
     "v",
@@ -11009,14 +11165,14 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "x": [
+    "var_theory": [
      "number"
     ],
-    "var_theory": [
+    "x": [
      "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.078,
    "observables": [
     "x",
     "var_theory"
@@ -11038,7 +11194,7 @@
      "number"
     ]
    },
-   "duration_s": 0.083,
+   "duration_s": 0.076,
    "observables": [
     "S",
     "n",
@@ -11051,20 +11207,20 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "E_Z_do_X2": [
+    "do_effect": [
      "number"
     ],
-    "do_effect": [
+    "n_conditioned": [
+     "number"
+    ],
+    "E_Z_do_X2": [
      "number"
     ],
     "E_Z_given_X2": [
      "null"
-    ],
-    "n_conditioned": [
-     "number"
     ]
    },
-   "duration_s": 0.091,
+   "duration_s": 0.079,
    "observables": [
     "n_conditioned",
     "E_Z_do_X2",
@@ -11077,17 +11233,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
-    "diff_from_factual": [
-     "number"
-    ],
     "Y_cf_expect": [
      "number"
     ],
     "Z_counterfactual": [
      "number"
+    ],
+    "diff_from_factual": [
+     "number"
     ]
    },
-   "duration_s": 0.089,
+   "duration_s": 0.079,
    "observables": [
     "Z_counterfactual",
     "Y_cf_expect",
@@ -11107,7 +11263,7 @@
      "number"
     ]
    },
-   "duration_s": 0.094,
+   "duration_s": 0.082,
    "observables": [
     "loglik",
     "viterbi_acc"
@@ -11123,7 +11279,7 @@
      "number"
     ]
    },
-   "duration_s": 0.1,
+   "duration_s": 0.086,
    "observables": [
     "filter_acc"
    ]
@@ -11137,14 +11293,14 @@
     "rmse_post": [
      "number"
     ],
-    "rmse_prior": [
+    "P_final": [
      "number"
     ],
-    "P_final": [
+    "rmse_prior": [
      "number"
     ]
    },
-   "duration_s": 0.097,
+   "duration_s": 0.082,
    "observables": [
     "rmse_prior",
     "rmse_post",
@@ -11157,17 +11313,17 @@
    "ok": true,
    "n_obs": 6,
    "output_types": {
+    "mean_filter_err": [
+     "number"
+    ],
     "final_P_rain": [
      "number"
     ],
     "filter_acc": [
      "number"
-    ],
-    "mean_filter_err": [
-     "number"
     ]
    },
-   "duration_s": 0.095,
+   "duration_s": 0.666,
    "observables": [
     "mean_filter_err",
     "filter_acc",

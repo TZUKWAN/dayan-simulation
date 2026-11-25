@@ -17,6 +17,13 @@ REGION_MAP = {
 }
 
 PRESETS = [
+    {"preset_id":"park_visit_speeds", "theme":"旅游景区步行",
+     "title":"开放实测 · 景区日常游客步速", "connector":"park_visit_speeds", "params_template":{},
+     "placeholders":{}, "topics":["景区", "游客", "旅游", "踩踏", "步速"],
+     "evidence":{"reference":"https://doi.org/10.5281/zenodo.20748587", "field":"avg_speed_mps", "unit":"m/s",
+                 "input_role":"input", "reference_aggregate":"mean",
+                 "use":"日常访问平均步速可用于疏散模型的目标步速参考，事故行为和场地仍须独立核验"},
+     "acceptance":"核对发布哈希、已分析样本与步速口径"},
     {"preset_id": "pop_employment_wb", "theme": "人口与就业",
      "title": "世界银行 人口/就业指标（国家级，年度）",
      "connector": "worldbank",

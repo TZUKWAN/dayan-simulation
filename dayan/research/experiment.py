@@ -79,7 +79,7 @@ def _agg(values: list[float]) -> dict:
 
 
 def run_experiment(spec: ExperimentSpec, strict: bool = True,
-                   persist: bool = False) -> ExperimentResult:
+                   persist: bool = False,*,on_run=None) -> ExperimentResult:
     """执行实验：基线 + 各臂 × 各 seed（配对随机流）。"""
     from .specs import ExperimentSpec as _ES  # noqa: F401  (类型引用)
     result = ExperimentResult(spec=spec)
@@ -112,6 +112,7 @@ def run_experiment(spec: ExperimentSpec, strict: bool = True,
                 with_time=True,
                 interventions=arm["interventions"], capture_state=persist,
                 data_bindings=spec.data_bindings)
+            if on_run is not None:on_run(rr,arm,int(seed))
             if persist:
                 from ..run_store import get_store
                 get_store().save_run(rr, "experiment_run", spec.title + " · " + arm["label"])

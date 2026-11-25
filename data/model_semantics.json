@@ -1,6 +1,95 @@
 {
   "scope": "Manually mapped source mechanisms and units, not calibration or validity evidence. Other models remain searchable through source output contracts.",
   "models": {
+    "MET-MM1": {"mechanisms": ["排队资源"], "match": "M/M/1(?![0-9])|单服务台|单窗口", "require_match": true, "description": "指数到达与服务、单服务器的事件日历模型", "primary_metric": "queue", "clock": "event_time", "model_kind": "agents", "recommended_run": {"ticks": 2000, "dt": 0.1, "seed": 42}, "limitations": ["同质指数等待与处理时间，单台服务，无抢占与优先级。"]},
+    "SYS035": {"mechanisms": ["OU均值回复"], "match": "Ornstein[– -]Uhlenbeck|OU过程|OU\\s*均值回复|均值回复的?随机微分方程", "description": "Ornstein–Uhlenbeck 单变量均值回复扩散过程", "primary_metric": "x", "clock": "model_time", "model_kind": "stocks", "recommended_run": {"ticks": 1000, "dt": 0.05, "seed": 42}, "limitations": ["常系数单变量SDE。此处提供执行模型与理论平稳方差，现实数据校准另行设计。"]},
+    "NET122": {
+     "mechanisms": [
+      "演化博弈",
+      "网格局部交互",
+      "农业补贴审计"
+     ],
+     "match": "(?:农(?:业|户|林)|涉农).{0,28}(?:绿色补贴|审计|欺诈)|绿色补贴|国家审计|基层监管",
+     "description": "农业绿色补贴审计：一个审计机关、每格一个基层监管员和一个农户，采用周期网格、角色独立更新及同类邻域收益模仿",
+     "model_kind": "agents",
+     "primary_metric": "green_share",
+     "clock": "monte_carlo_step",
+     "required_mechanisms": [
+      "农业补贴审计"
+     ],
+     "method_evidence": "https://xbbjb.nau.edu.cn/sjyjjyj/article/pdf/20260205006",
+     "recommended_run": {
+      "ticks": 4000,
+      "dt": 1,
+      "seed": 42
+     },
+     "outputs": {
+      "green_share": {
+       "unit": "fraction",
+       "scope": "all_lattice_farms",
+       "label": "绿色生产率"
+      },
+      "fraud_share": {
+       "unit": "fraction",
+       "scope": "all_lattice_farms",
+       "label": "绿色欺诈率"
+      },
+      "strict_share": {
+       "unit": "fraction",
+       "scope": "all_lattice_regulators",
+       "label": "积极监管率"
+      },
+      "lax_share": {
+      "unit": "fraction",
+      "scope": "all_lattice_regulators",
+      "label": "监管松懈率"
+     },
+     "audit_target": {
+       "unit": "fraction",
+       "scope": "lattice",
+       "label": "审计目标覆盖率"
+      },
+      "audit_coverage": {
+       "unit": "fraction",
+       "scope": "lattice",
+       "label": "实际审计覆盖率"
+      },
+      "audited_cells": {
+       "unit": "cell",
+       "scope": "lattice",
+       "label": "本轮审计格数"
+      },
+      "lax_detected": {
+       "unit": "cell",
+       "scope": "audited_cells",
+       "label": "发现监管松懈"
+      },
+      "fraud_detected": {
+       "unit": "cell",
+       "scope": "audited_cells",
+       "label": "发现绿色欺诈"
+      },
+      "lax_fraud_detected": {
+       "unit": "cell",
+       "scope": "audited_cells",
+       "label": "发现松懈与欺诈并存"
+      }
+     },
+     "limitations": [
+      "参数来自论文的场景设定，尚无对应区域的个体审计记录、成本微观数据或独立外部校准。",
+      "表2与式(1)对未审计且积极监管时的农户欺诈处罚有分歧，默认按表2。公开描述未给出代码级抽样、并列最高收益与历史初始化细节。",
+      "采用单轮支付和公开的局部模仿规则。数值轨迹须独立核对，不能直接继承论文图示的收敛结果。",
+      "局部只模仿已有策略。某策略消失后模型无自发突变。一个元胞 对应 一户与一名基层监管者。",
+      "本模型支持整数蒙特卡洛步、固定周期网格。暂未提供实际行政区/村落地理拓扑或状态检查点续跑。"
+     ],
+     "execution_notes": [
+      "用 reviewed_run 运行原始需求。模型的日期、地区与净效果必须有实际证据才可写入结论。季节或年份不等于 MCS。",
+      "默认 100×100，每格一名监管员和一户。审计强度是中央决策，审计覆盖层中的 1 表示该元胞实际选中。固定 dt=1，推荐 4000 步，种子42。",
+      "neighbors=4/8；audit_mode=0/1/2 分别是风险导向、分散随机、中心集中；同类主体根据同一真实局部邻域的历史收益与策略进行选择。原文未要求特定参数时可使用表4情况6默认值。",
+      "每一步先确定实际审计，计算单轮支付，再同步更新监管与农业策略并记录三个空间层。起点审计层为初态抽查计划。看见趋势与新策略需要使用同一 run_id。",
+      "检查比例与数量守恒，以及网格逐格状态与同一时点观测一致。方案检验不要预设绿色生产率或积极监管率必然提升。用实际轨迹分析。"
+     ]
+    },
     "NET052": {"mechanisms": ["疾病传播"], "match": "SIS|重复感染|可再感染", "description": "SIS易感-感染，无免疫退出", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "fraction", "scope": "population"}}, "inputs": {"i0": {"unit":"fraction","scope":"population"}}},
     "NET053": {"mechanisms": ["疾病传播"], "match": "(?<![A-Za-z])SIR(?![A-Za-z])|永久免疫|康复免疫", "description": "SIR易感-感染-康复", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "person", "scope": "population"}}},
     "NET055": {"mechanisms": ["疾病传播"], "match": "SEIR|潜伏期|潜伏仓", "description": "SEIR增加潜伏仓", "primary_metric": "I", "clock": "user_defined", "outputs": {"I": {"unit": "person", "scope": "population"}}},
@@ -19,6 +108,8 @@
     "NET110": {"mechanisms": ["交通分配"], "match": "Wardrop|用户均衡|UE", "description": "Wardrop用户均衡路径分配", "clock": "iteration", "outputs": {"total_cost": {"unit": "model_cost", "scope": "same_traffic_network"}}},
     "NET111": {"mechanisms": ["交通分配"], "match": "系统最优|SO", "description": "系统最优路径分配", "clock": "iteration", "outputs": {"total_cost": {"unit": "model_cost", "scope": "same_traffic_network"}}},
     "NET113": {"mechanisms": ["人群疏散"], "match": "社会力|Social.Force|行人|疏散", "description": "二维房间出口社会力行人", "primary_metric": "evacuated", "clock": "second"},
+    "NET114": {"mechanisms": ["人群疏散"], "match": "踩踏|景区|疏散|接触|拥挤", "description": "二维单出口行人社会力与局部接触排斥模型", "model_kind": "agents", "scene_features": ["room", "exit"], "primary_metric": "evacuated", "clock": "second", "inputs": {"v_des": {"unit": "m/s"}, "n": {"unit": "person"}}, "outputs": {"evacuated": {"unit": "person"}, "alive": {"unit": "person"}, "min_separation": {"unit": "m"}}, "limitations": ["场地是参数化二维空间；接触排斥是几何距离代理，未导出身体受力"], "incident_gaps": ["没有失稳倒地和倒地连锁状态", "没有伤害计算或事故校准数据"], "execution_notes": ["顶层 dt 是实际积分步长，单位为模型秒，覆盖构造器默认值。引擎每步保存观测并按状态预算保存空间帧。", "用运行种子初始化房间内部的随机位置和零速度。场地、人数、出口和人员分布默认为模型假设。", "更新速度和位置、判断离场后记录累计疏散、在场人数和最小行人间距。离场行人不进入当前位置和步速分布。", "最小行人间距是几何量。在场人数少于2时缺失，按有效样本统计。其适用范围是间距描述。"]},
+    "NET121": {"mechanisms": ["人群疏散", "倒地处置"], "match": "景区|拥挤|踩踏|倒地|疏散", "description": "虚拟景区步道安全演练，包含局部相互作用、演练倒地、周围避让、协助和离场", "model_kind": "agents", "scene_features": ["room", "exit"], "primary_metric": "evacuated", "clock": "second", "inputs": {"v_des": {"unit": "m/s"}, "n": {"unit": "person"}}, "outputs": {"evacuated": {"unit": "person"}, "alive": {"unit": "person"}, "min_separation": {"unit": "m"}, "fallen": {"unit": "person"}, "assisted": {"unit": "person"}, "aid_completed": {"unit": "person"}, "local_conflicts": {"unit": "pairs"}, "yielding": {"unit": "person"}}, "execution_notes": ["倒地作为预定的演练事件，随机种子选定现场参与者，设计参数均按虚拟训练假设标明。", "倒地与协助期间暂时停留，周围行人按距离减速避让。随后恢复移动并继续离场，进入人群趋势和空间帧。", "顶层 dt 是固定积分步长。运行时长要覆盖事件、协助和后续疏散观察窗口。", "公开日常景区步速可为 v_des 提供模型输入。场地、事件和响应时长由虚拟演练设定。"], "limitations": ["演练倒地由预定事件触发，现场接触以几何排斥表示。适用范围为避让和救助过程。", "人体失稳发生条件、连锁倒地、伤害严重度及真实事故校准未覆盖。"], "incident_exercise": true, "recommended_run": {"ticks": 2400, "dt": 0.05}},
     "ECO001": {"mechanisms": ["投入产出"], "match": "Leontief|投入产出|产业关联", "description": "Leontief数量投入产出", "clock": "iteration"},
     "ECO015": {"mechanisms": ["经济增长"], "match": "Solow|索洛", "description": "Solow资本积累", "primary_metric": "k", "clock": "model_time", "outputs": {"k": {"unit": "capital/worker", "scope": "representative_worker"}}},
     "ECO017": {"mechanisms": ["经济增长"], "match": "AK|内生增长", "description": "AK线性内生增长", "clock": "model_time", "inputs": {"k0": {"unit": "capital/worker", "scope": "representative_worker"}}},

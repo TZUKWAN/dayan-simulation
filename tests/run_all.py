@@ -5,6 +5,7 @@ unselected external suites are explicitly SKIP, never counted as passed.
 """
 from __future__ import annotations
 import argparse
+import ast
 import json
 import os
 import re
@@ -15,6 +16,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[1]
 SUITE_TIMEOUT_S = 180
@@ -31,17 +33,41 @@ def category(name):
     return 'unit'
 
 
+def python_framework(path):
+    """Preserve executable legacy suites; collect function/class suites with pytest."""
+    try:
+        module=ast.parse(path.read_text(encoding='utf-8-sig'))
+    except (OSError,SyntaxError,UnicodeError):
+        return 'script'  # Let the real interpreter report the source error.
+    for node in module.body:
+        if isinstance(node,ast.If):
+            guard=list(ast.walk(node.test))
+            if (any(isinstance(item,ast.Name) and item.id=='__name__' for item in guard)
+                    and any(isinstance(item,ast.Constant) and item.value=='__main__' for item in guard)):
+                return 'script'
+    functions=(ast.FunctionDef,ast.AsyncFunctionDef)
+    if any(isinstance(node,functions) and node.name.startswith('test_') for node in module.body):
+        return 'pytest'
+    if any(isinstance(node,ast.ClassDef) and node.name.startswith('Test')
+           and any(isinstance(item,functions) and item.name.startswith('test_') for item in node.body)
+           for node in module.body):
+        return 'pytest'
+    return 'script'
+
+
 def discover(root=ROOT):
     paths = sorted((root/'tests').rglob('test_*.py'))+sorted((root/'tests').rglob('*.test.mjs'))
     return [{'name':p.stem,'path':p.relative_to(root).as_posix(),'timeout_s':600 if p.stem=='test_model_probe_all' else SUITE_TIMEOUT_S,
-             'runtime':'node' if p.suffix=='.mjs' else 'python','category':category(p.stem)}
+             'runtime':'node' if p.suffix=='.mjs' else 'python','category':category(p.stem),
+             'framework':'node' if p.suffix=='.mjs' else python_framework(p)}
             for p in paths if '__pycache__' not in p.parts]
 
 
 SUITES = [s['name'] for s in discover()]
 
 
-def judge_suite(name, returncode, stdout, stderr, duration_s, timed_out=False, missing=False):
+def judge_suite(name, returncode, stdout, stderr, duration_s, timed_out=False, missing=False,
+                pytest_report=None):
     output = (stdout or '')+(stderr or '')
     reasons = []
     if missing: reasons.append('套件文件不存在')
@@ -63,6 +89,11 @@ def judge_suite(name, returncode, stdout, stderr, duration_s, timed_out=False, m
         passed += int(node_pass.group(1)) if node_pass else 0
         skipped += int(node_skip.group(1)) if node_skip else 0
         if node_fail and int(node_fail.group(1)): reasons.append('Node失败断言')
+    if pytest_report is not None:
+        # Counts come from the actual child process report, never marker text.
+        passed,skipped=pytest_report['passed'],pytest_report['skipped']
+        if pytest_report.get('error'): reasons.append(pytest_report['error'])
+        if pytest_report.get('failures') or pytest_report.get('errors'): reasons.append('pytest失败或错误')
     if passed+skipped == 0 and not reasons: reasons.append('未发现执行或明确跳过的断言（空跑）')
     verdict = 'FAIL' if reasons else 'PASS' if passed else 'SKIP'
     return {'suite':name,'verdict':verdict,'reasons':reasons,'passed':passed,
@@ -70,8 +101,20 @@ def judge_suite(name, returncode, stdout, stderr, duration_s, timed_out=False, m
             'excerpt':output[-2500:] if verdict=='FAIL' else ''}
 
 
+def pytest_counts(path):
+    try:
+        cases=list(ElementTree.parse(path).getroot().iter('testcase'))
+    except (OSError,ElementTree.ParseError) as exc:
+        return {'passed':0,'skipped':0,'error':'pytest实际JUnit报告缺失或损坏：'+str(exc)}
+    failed=sum(case.find('failure') is not None for case in cases)
+    errors=sum(case.find('error') is not None for case in cases)
+    skipped=sum(case.find('skipped') is not None for case in cases)
+    passed=sum(not any(case.find(tag) is not None for tag in ('failure','error','skipped')) for case in cases)
+    return {'passed':passed,'skipped':skipped,'failures':failed,'errors':errors,'testcases':len(cases)}
+
+
 def _snapshot(target):
-    for directory in ('dayan','src','tests','experiments','plugins','site','assets'):
+    for directory in ('dayan','src','tests','experiments','plugins','site','assets','scripts'):
         if (ROOT/directory).is_dir():
             shutil.copytree(ROOT/directory,target/directory,
                 ignore=shutil.ignore_patterns('__pycache__','node_modules','data','config.json','*.pyc'))
@@ -107,7 +150,13 @@ def run_suite(suite, root, output, timeout=SUITE_TIMEOUT_S, online=False, llm=Fa
     path = root/suite['path']
     if not path.exists(): return judge_suite(suite['name'],None,'','',0,missing=True)
     node = shutil.which('node')
-    command = [sys.executable,str(path)] if suite['runtime']=='python' else [node or 'node','--test','--test-reporter=tap',str(path)]
+    framework=suite.get('framework') or (python_framework(path) if suite['runtime']=='python' else 'node')
+    junit=(work/'pytest-results.xml').resolve() if framework=='pytest' else None
+    if junit is not None:
+        junit.unlink(missing_ok=True)  # Never accept a previous invocation's report.
+        command=[sys.executable,'-m','pytest',str(path),'-q','--color=no','--junitxml',str(junit)]
+    else:
+        command = [sys.executable,str(path)] if suite['runtime']=='python' else [node or 'node','--test','--test-reporter=tap',str(path)]
     proc = None; timed_out = False
     try:
         proc = subprocess.Popen(command,cwd=root,env=env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
@@ -123,8 +172,11 @@ def run_suite(suite, root, output, timeout=SUITE_TIMEOUT_S, online=False, llm=Fa
         stdout,stderr,code = '',str(exc),-1
     (work/'stdout.log').write_text(stdout,encoding='utf-8')
     (work/'stderr.log').write_text(stderr,encoding='utf-8')
-    result = judge_suite(suite['name'],code,stdout,stderr,time.perf_counter()-started,timed_out=timed_out)
-    result.update(category=suite['category'],runtime=suite['runtime'],logs=str(work))
+    report=pytest_counts(junit) if junit is not None else None
+    result = judge_suite(suite['name'],code,stdout,stderr,time.perf_counter()-started,
+                         timed_out=timed_out,pytest_report=report)
+    result.update(category=suite['category'],runtime=suite['runtime'],framework=framework,logs=str(work))
+    if report is not None: result.update(pytest_report=report,junit=str(junit))
     return result
 
 

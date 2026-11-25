@@ -418,6 +418,13 @@ class DayanModel:
 
 
 # ================= 统一编排器 =================
+def fixed_step_end(next_t, step_dt, horizon):
+    """At archive precision a floating-point remainder is not a separate update."""
+    if 0 < horizon - next_t <= min(5e-10, step_dt * 1e-8):
+        return horizon
+    return next_t
+
+
 def simulate(model: DayanModel, horizon: float = 100.0, dt: float = 1.0,
              context: dict | None = None, parameters: dict | None = None,
              population: Any = None, topology: Any = None,
@@ -470,7 +477,7 @@ def simulate(model: DayanModel, horizon: float = 100.0, dt: float = 1.0,
                 before_step(t, model)
             step_dt = limited_dt(t)
             model.step(t, step_dt)
-            t += step_dt
+            t = fixed_step_end(t + step_dt, step_dt, horizon)
             clocks.sim_time = t
             clocks.optim_iter += 1
             emit(t)

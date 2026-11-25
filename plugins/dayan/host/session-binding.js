@@ -8,11 +8,15 @@ function pathKey(value) {
   return process.platform === 'win32' ? path.toLowerCase() : path;
 }
 
+export function projectScopeKey(profileDir, projectRoot) {
+  return createHash('sha256').update(pathKey(profileDir) + '\0' + pathKey(projectRoot)).digest('hex');
+}
+
 export function reserveProjectSession({ dataDir, projectRoot, profileDir }) {
   if (!profileDir) throw new Error('DSH profile identity unavailable; refusing to bind another conversation');
   const project = pathKey(projectRoot), profile = pathKey(profileDir);
   const profileKey = createHash('sha256').update(profile).digest('hex');
-  const key = createHash('sha256').update(profile + '\0' + project).digest('hex');
+  const key = projectScopeKey(profileDir, projectRoot);
   const directory = join(dataDir, 'integrations', 'dsh', 'project_sessions');
   mkdirSync(directory, { recursive: true });
   const filename = join(directory, key + '.json');

@@ -21,6 +21,7 @@ from .models.pedestrian import (CentrifugalModel, ContactEvacModel,  # noqa: F40
                                 FloorFieldModel, ORCAModel,
                                 OptimalStepsModel, RVOModel,
                                 SocialForceModel, VOModel)
+from .models.crowd_response import CrowdResponseModel
 from .models import eco_models as ECO_A
 from .models import eco_demog as ECO_B
 from .models import eco_flagship_lite as ECO_C
@@ -60,7 +61,7 @@ for mid, cls in {
     "NET113": SocialForceModel, "NET114": ContactEvacModel,
     "NET115": CentrifugalModel, "NET116": VOModel, "NET117": RVOModel,
     "NET118": ORCAModel, "NET119": FloorFieldModel,
-    "NET120": OptimalStepsModel,
+    "NET120": OptimalStepsModel, "NET121": CrowdResponseModel,
 }.items():
     _FIXED_STEP[mid] = cls
 
@@ -224,14 +225,13 @@ ALL_INDEX.update(_DEMO)
 
 def resolve(mid):
     """返回 (protocol, factory) 或 (None, None)。"""
-    if str(mid).startswith("USR") and mid not in _FIXED_STEP:
+    if str(mid).startswith("USR"):
         from .custom_models import factory as custom_factory
         try:
-            cls = custom_factory(mid)
+            cls=custom_factory(mid)
+            return cls.clock_type, cls
         except FileNotFoundError:
             return None, None
-        _FIXED_STEP[mid] = cls
-        ALL_INDEX[mid] = cls
     if mid in MET_DEMOS:
         return "demo", ("met_demo", mid)
     if mid in _DEMO:
@@ -243,7 +243,7 @@ def resolve(mid):
     return None, None
 
 
-def run_model(mid, parameters=None, ticks=200, dt=0.1, seed=0):
+def run_model(mid, parameters=None, ticks=200, dt=None, seed=0):
     """兼容入口：委托统一运行层 dayan.runtime.run_model_full
     （单次初始化、参数合同、派生随机流、RunManifest）。"""
     from .runtime import run_model_full
@@ -409,3 +409,7 @@ ALL_INDEX.update(_DEMO)
 from .models.evacuation_coupled import RoadEvacuationModel
 _FIXED_STEP["CPL001"] = RoadEvacuationModel
 ALL_INDEX["CPL001"] = RoadEvacuationModel
+
+from .models.spatial_audit import GreenSubsidyAuditGame
+_FIXED_STEP["NET122"] = GreenSubsidyAuditGame
+ALL_INDEX["NET122"] = GreenSubsidyAuditGame

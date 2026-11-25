@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
+  "source_fingerprint": "165070c04e0076f36ae0c93228f7c2704da6da5701313d6aba2c4de016c1d492",
   "scope": "20 distinct reviewed model factories; one compatibility alias",
   "reviews": [
     {
@@ -255,5 +255,586 @@
         "https://tigerweb.geo.census.gov/arcgis/rest/services/Census2020/tigerWMS_PhysicalFeatures/MapServer"
       ]
     }
-  ]
+  ],
+  "prior_source_fingerprint": "4ac7cdb7f3904bed2fe24f13094da1dfa04fe127b6120454aad5152fa2218767",
+  "transport_recheck": {
+    "changed_python_sources": [
+      "dayan/access.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "workbench_recheck": {
+    "prior_source_fingerprint": "63b1935d860cf98e0bff289e18bad739d5e179d35b9064373d05ad18dd6294ae",
+    "changed_python_sources": [
+      "dayan/report_gen.py",
+      "dayan/run_store.py",
+      "dayan/server.py",
+      "dayan/task_manager.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "harness_recheck": {
+    "prior_source_fingerprint": "8a4ea88c890cb1be9e426c1cd386dc55829c5938938eb64030e63dedc2ebba23",
+    "changed_python_sources": [
+      "dayan/agent/model_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/custom_models.py",
+      "dayan/research/native_contract.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "physical_scene_recheck": {
+    "prior_source_fingerprint": "7e929691a2eac380aefb95922ee85904e5a158db53045f8892af8d24ba42d13a",
+    "changed_python_sources": [
+      "dayan/agent/model_tools.py",
+      "dayan/custom_models.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "model_design_recheck": {
+    "prior_source_fingerprint": "f655cd5d74b82d9261aa00092a2ecfc88bd98e95875a6a7c0d8861fb0d7dae74",
+    "changed_python_sources": [
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/research/integration_events.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py"
+    ],
+    "mechanism_test": "tests/test_vnext_models.py",
+    "identical_mechanism_observations": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "coupled_model": "CPL001",
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "native_harness_recheck": {
+    "prior_source_fingerprint": "34481b61fad2fa1260749b3486603bfba8306457f57de4027b2815fa618257d8",
+    "changed_execution_sources": [
+      "data/dayan_catalog.json",
+      "data/model_semantics.json",
+      "dayan/agent/data_tools.py",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/collection/connectors.py",
+      "dayan/collection/presets.py",
+      "dayan/datasets.py",
+      "dayan/models/pedestrian.py",
+      "dayan/report_gen.py",
+      "dayan/research/integration_events.py",
+      "dayan/research/native_contract.py",
+      "dayan/research/requirements.py",
+      "dayan/research_charts.py",
+      "dayan/server.py",
+      "dayan/task_manager.py",
+      "dayan/view_analysis.py"
+    ],
+    "identical_direct_model_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "scenario_report_recheck": {
+    "prior_source_fingerprint": "d42bc4d9fec360f9db5c0bfb2c24ca1d6823f570ce726f3a20a457d5c499c52c",
+    "changed_execution_sources": [
+      "data/dayan_catalog.json",
+      "data/model_semantics.json",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/datasets.py",
+      "dayan/model_index.py",
+      "dayan/model_method.py",
+      "dayan/models/crowd_response.py",
+      "dayan/report_evidence.py",
+      "dayan/report_gen.py",
+      "dayan/research/native_contract.py",
+      "dayan/research/requirements.py",
+      "dayan/research_charts.py",
+      "dayan/runtime.py",
+      "dayan/view_analysis.py"
+    ],
+    "identical_direct_model_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "identical_alias": {
+      "NET-SIR": "NET053"
+    }
+  },
+  "research_rigor_recheck": {
+    "prior_source_fingerprint": "4297044c23de1b38c20e8852bb8218d36d95b1dd6355540877799a65c11e4610",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/agent/composer.py",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/agent/verification.py",
+      "dayan/core.py",
+      "dayan/model_method.py",
+      "dayan/models/crowd_response.py",
+      "dayan/report_evidence.py",
+      "dayan/report_gen.py",
+      "dayan/research/native_contract.py",
+      "dayan/research/requirements.py",
+      "dayan/runtime.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py",
+      "dayan/view_analysis.py"
+    ]
+  },
+  "report_visuals_recheck": {
+    "prior_source_fingerprint": "ae865303e86c9a107176a0c250a7e702e833d07c7a84690b291825348356c733",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/datasets.py",
+      "dayan/report_evidence.py",
+      "dayan/report_gen.py",
+      "dayan/report_spatial_charts.py",
+      "dayan/report_stock_graph.py",
+      "dayan/research_charts.py",
+      "dayan/server.py",
+      "dayan/view_analysis.py"
+    ]
+  },
+  "history_management_recheck": {
+    "prior_source_fingerprint": "2a97bb277fc15650d452df8e8dc817a5fdd83cd4e8e6dc6ffd8ce37c3c9fe372",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/access.py",
+      "dayan/history_records.py",
+      "dayan/run_store.py",
+      "dayan/server.py"
+    ]
+  },
+  "phased_harness_recheck": {
+    "prior_source_fingerprint": "4ef7a483b98efd167061be8ca345bf8b21d144a2439a38defa278f330a75910f",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "data/dayan_catalog.json",
+      "data/model_semantics.json",
+      "dayan/agent/composer.py",
+      "dayan/agent/model_design.py",
+      "dayan/agent/model_prompts.py",
+      "dayan/agent/model_tools.py",
+      "dayan/agent/scenario_tools.py",
+      "dayan/agent/tools.py",
+      "dayan/agent/verification.py",
+      "dayan/custom_models.py",
+      "dayan/engine_capabilities.py",
+      "dayan/grid_neighborhood.py",
+      "dayan/lattice.py",
+      "dayan/model_index.py",
+      "dayan/model_method.py",
+      "dayan/models/spatial_audit.py",
+      "dayan/output_contract.py",
+      "dayan/policies.py",
+      "dayan/report_gen.py",
+      "dayan/report_spatial_charts.py",
+      "dayan/research/requirements.py",
+      "dayan/research/semantics.py",
+      "dayan/run_store.py",
+      "dayan/scene_contract.py",
+      "dayan/server.py",
+      "dayan/stateframe.py",
+      "dayan/view_analysis.py"
+    ]
+  },
+  "prompt_runtime_contract_recheck": {
+    "prior_source_fingerprint": "7713bff30600c3d840946570cf50ca9e626c7ce434cb9d7a1aa8f537e556f1ae",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/agent/model_prompts.py",
+      "dayan/scene_contract.py"
+    ]
+  },
+  "phased_plan_and_resume_recheck": {
+    "prior_source_fingerprint": "d1079cbbe4e7f1f9c90c9db386a1f6aa1a127f2cb5a02a0c4657da39712ecf95",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/agent/model_prompts.py",
+      "dayan/agent/verification.py"
+    ]
+  },
+  "research_memory_recheck": {
+    "prior_source_fingerprint": "d04a8bb6142fb7a58aea50eadbbca4bdf24a55f8789d95f78e390cc47d147f29",
+    "identical_direct_mechanism_evidence": [
+      "BEH001",
+      "BEH005",
+      "BEH016",
+      "BEH018",
+      "ECO001",
+      "ECO015",
+      "ECO017",
+      "ECO019",
+      "NET052",
+      "NET053",
+      "NET055",
+      "NET061",
+      "NET106",
+      "NET113",
+      "SYS002",
+      "SYS003",
+      "SYS006",
+      "SYS007",
+      "SYS024"
+    ],
+    "identical_coupled_observations": {
+      "base_sha256": "37849d435a39faecd8f86a57d3dbc2910158372b9c3dc83849bae80dde887d96",
+      "second_seed_sha256": "87f1a8f0acecc5de20a83fe91a511f1dd5e31ea6e092107ac7fca019f2c879ee",
+      "variant_sha256": "4e297cc23d85f5e9b258c0641fc52199ad71c1fe0784ffd6c883dd9f2290d05f"
+    },
+    "changed_execution_sources": [
+      "dayan/research/model_memory.py"
+    ]
+  }
 }

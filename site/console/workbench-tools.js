@@ -192,7 +192,7 @@
       ['calibration','数据校准',cal?`实际执行 ${cal.n_evaluated} 组`:s?.training_dataset?.dataset_id||'选择数据与阈值','train'],
       ['calibration','独立验证',cal?(cjkStatus[cal.status]||cal.status):'检查独立留出','test'],
       ['calibration','结果解释',s?.run_id?'查看误差与研究报告':'待生成证据','explain']];
-    host.innerHTML=flow.map(([tab,label,value,key])=>`<button data-lab-flow="${tab}" data-phase="${key}" ${key==='test'&&cal?`data-state="${esc(cal.status)}"`:''}><b>${label}</b><span title="${esc(value)}">${esc(value)}</span></button>`).join('');
+    host.innerHTML=flow.map(([,label,value,key])=>`<div data-phase="${key}" ${key==='test'&&cal?`data-state="${esc(cal.status)}"`:''}><b>${label}</b><span title="${esc(value)}">${esc(value)}</span></div>`).join('');
   }
   function labTab(tab) {
     labStage=tab;
@@ -267,7 +267,6 @@
     labTab(stages.some(([id])=>id===last)?last:'contract');
     $('#labQuestion').value=preference('dayan_lab_question_vnext',undefined,true)||'';
     paintLabFlow();
-    $('#labFlow').onclick=e=>{const b=e.target.closest('[data-lab-flow]');if(b)labTab(b.dataset.labFlow);};
     window.addEventListener('dayan:study',e=>{labStudy=e.detail;paintLabFlow();});
     $('#labQuestion').oninput=()=>{
       preference('dayan_lab_question_vnext',$('#labQuestion').value,true); prepared=null;$('#labExecute').disabled=$('#labNext').disabled=true;paintLabFlow();
@@ -342,86 +341,427 @@
     $('#researchQuestionInput').focus();
   }
 
-  async function outputs() {
+  let outputRows=[], outputOffset=0, outputQuery=0, outputTimer, outputRevision=0;
+  let selectedOutput, openHistoryTab, historyPlaybackReady, reportRequest;
+  let historyEdit, lastDeleted;
+  const archiveTypes={run:'单次运行',experiment:'配对实验',analysis:'组合分析',study:'验证研究',legacy:'早期记录'};
+  const pageSize=30;
+
+  function initOutputs() {
     const host=$('#replayList');
-    if(!host.dataset.ready) {
-      host.dataset.ready='true';
-      host.innerHTML=`<div class="tool-bar"><label class="search-control">搜索归档<input id="outputSearch" type="search" placeholder="研究问题、模型或运行 ID"></label><label>档案类型<select id="outputKind">${options([['run','运行'],['experiment','配对实验'],['analysis','扫描与组合'],['study','研究验证']],'全部类型')}</select></label><button class="ws-button" id="refreshOutputs">刷新档案</button><button class="ws-button" id="legacyOutputs">旧观测与标记</button></div>
-      <div class="output-layout">${panel('归档目录','<div id="outputRows"></div>','archive-library')}${panel('档案与证据预览','<div id="outputDetail"></div>','archive-reader')}</div>`;
-      $('#outputSearch').oninput=()=>paintOutputs();
-      $('#outputKind').onchange=()=>paintOutputs();
-      $('#refreshOutputs').onclick=()=>outputs().catch(e=>window.DAYAN_NOTICE(e.message));
-      $('#legacyOutputs').onclick=async()=>{
-        host.dataset.ready='';outputSelection=null;
-        await window.DAYAN_RESULTS.loadReplay();
-        const b=document.createElement('button');b.className='ws-button';b.textContent='返回研究档案索引';b.onclick=outputs;host.prepend(b);
-      };
-    }
-    const [h,s]=await Promise.all([api('/api/history?metadata_only=true&limit=60'),api('/api/research/studies')]);
-    outputRows=[...s.studies.map(v=>({kind:'study',run_id:v.study_id,created_at:v.created_at,model_id:v.model_id,intent:v.question,status:v.calibration?.status||v.phase,parent:v.parent_study_id})),
-      ...h.entries].sort((a,b)=>(b.created_at||'').localeCompare(a.created_at||''));
-    paintOutputs();
-    if(!outputSelection&&document.body.dataset.page==='replay'){
-      const latest=outputRows.find(r=>r.kind==='study'&&r.status!=='prepared')||outputRows[0];
-      if(latest)await outputDetail(latest);
-    }
-  }
-  let outputRows=[],outputRevision=0,outputSelection=null;
-  const archiveTypes={run:'单次运行',experiment:'配对实验',analysis:'分析归档',study:'验证研究'};
-  function paintOutputs() {
-    if(!$('#outputRows'))return;
-    const q=$('#outputSearch').value.toLowerCase().trim(),kind=$('#outputKind').value;
-    const rows=outputRows.filter(r=>(!kind||r.kind===kind)&&`${r.run_id} ${r.intent} ${r.model_id}`.toLowerCase().includes(q));
-    $('#outputRows').innerHTML=rows.length?`<div class="output-rows">${rows.map(r=>`<button class="archive-row" data-output="${esc(r.run_id)}" data-kind="${esc(r.kind)}" aria-pressed="${r.run_id===outputSelection}"><span><b>${esc(archiveTypes[r.kind])}</b><time>${esc(date(r.created_at))}</time></span><strong>${esc(r.intent||r.model_id||r.run_id)}</strong><small title="${esc(r.run_id)}">${esc(r.model_id||'研究')} · ${esc(r.run_id)}</small>${r.status?`<span class="state-pill" data-state="${esc(r.status==='pass'?'passed':r.status)}">${esc(cjkStatus[r.status]||r.status)}</span>`:''}</button>`).join('')}</div>`:empty('没有匹配档案。');
-    for(const b of $('#outputRows').querySelectorAll('[data-output]'))b.onclick=()=>outputDetail(rows.find(r=>r.run_id===b.dataset.output)).catch(e=>showError('#outputDetail',e));
-    if(!$('#outputDetail').innerHTML)$('#outputDetail').innerHTML=empty('选择档案查看版本、数据与下载。');
-  }
-  async function outputDetail(row) {
-    const revision=++outputRevision;
-    outputSelection=row.run_id;
-    for(const b of $('#outputRows').querySelectorAll('[data-output]'))b.setAttribute('aria-pressed',String(b.dataset.output===outputSelection));
-    const host=$('#outputDetail');host.innerHTML=empty('读取并核验档案…');
-    const id=slug(row.run_id), isStudy=row.kind==='study';
-    if(isStudy) {
-      const {study,reports}=await api('/api/research/studies/'+id);
-      if(revision!==outputRevision)return;
-      const status=study.calibration?.status||study.phase;
-      const nextVersions=outputRows.filter(r=>r.parent===study.study_id);
-      host.innerHTML=`<header class="archive-title"><span>验证研究 · ${esc(study.model_id)}</span><h3>${esc(study.question)}</h3><span class="state-pill" data-state="${esc(status==='pass'?'passed':status||study.phase)}">${esc(cjkStatus[status]||study.phase)}</span></header>
-        <div class="archive-evidence-chain"><button data-open-dataset="${esc(study.training_dataset.dataset_id)}">校准输入 <b>数据版本 ↗</b></button><button data-graph-model="${esc(study.model_id)}">模型 <b>${esc(study.model_id)} ↗</b></button>${study.run_id?`<button data-open-run="${esc(study.run_id)}">模型运行 <b>同源回放 ↗</b></button>`:''}</div>
-        ${study.predictions?.length?'<div id="outputPreview" class="chart-host"></div>':''}
-        <dl class="fact-list"><dt>研究 ID</dt><dd><code>${esc(study.study_id)}</code></dd><dt>版本关系</dt><dd class="tag-row">${study.parent_study_id?`<button data-output-version="${esc(study.parent_study_id)}">上游规约 ↗</button>`:'原始规约'}${nextVersions.map(v=>`<button data-output-version="${esc(v.run_id)}">后续研究 ${esc(v.run_id)} ↗</button>`).join('')}</dd>
-        <dt>采集 / 训练快照</dt><dd><code>${esc(study.collection_id)} / ${esc(study.training_dataset.dataset_id)}</code></dd><dt>研究哈希</dt><dd><code>${esc(study.artifact_sha256)}</code></dd><dt>训练数据哈希</dt><dd><code>${esc(study.training_dataset.sha256)}</code></dd></dl>
-        <div class="tag-row">${(study.source_pages||[]).map(p=>ref(p.url,'原始来源')).join('')}</div><div class="space-actions"><button class="ws-button" data-study="${esc(study.study_id)}">打开研究</button>${study.run_id?`<button class="ws-button" data-open-run="${esc(study.run_id)}">回放对应模型</button>`:''}</div>
-        <div class="tag-row">${(reports||[]).map(r=>r.error?`<span>${esc(r.label+' · '+r.error)}</span>`:ref(r.file,r.label)+' '+ref(r.bundle_url,'复现包')).join('')}</div>`;
-      if($('#outputPreview')){
-        const stride=Math.max(1,Math.ceil((study.records.length-1)/6));
-        const xTicks=study.records.filter((_,i)=>i%stride===0||i===study.records.length-1).map(({date})=>[date,String(date)]);
-        const rmse=study.calibration?.holdout?.rmse;
-        window.DAYAN_CHARTS.plot($('#outputPreview'),{title:'归档研究 · 观测与模型',xUnit:'年度',yUnit:study.unit,xTicks,
-          events:study.holdout?.length?[{x:study.holdout[0].date,label:'独立留出开始'}]:[],series:[{label:'实际观测',points:study.records.map(r=>[r.date,r.value])},{label:'模型预测',dashed:true,points:study.predictions.map(r=>[r.date,r.predicted])}],
-          note:Number.isFinite(rmse)?`留出 RMSE ${rmse.toPrecision(6)} · 事前阈值 ${study.tolerance} ${study.unit}`:''});
+    if(host.dataset.ready)return;
+    host.dataset.ready='true';
+    host.innerHTML='<div class="tool-bar history-filter"><label class="search-control">搜索历史<input id="outputSearch" type="search" placeholder="名称、研究问题或编号"></label>'
+      +'<label>日期<input id="outputDate" type="date"></label></div><p class="space-status" id="outputStatus" role="status"></p>'
+      +'<div id="outputRows" class="history-rows"></div><button class="ws-button" id="moreOutputs" hidden>加载更早记录</button>'
+      +'<details class="tool-detail history-legacy"><summary>回放标记</summary><div id="legacyHistory"></div></details>';
+    const refresh=()=>{
+      clearTimeout(outputTimer);
+      ++outputQuery;
+      outputTimer=setTimeout(()=>readOutputs().catch(e=>showError('#outputStatus',e)),200);
+    };
+    $('#outputSearch').oninput=refresh;
+    $('#outputDate').onchange=refresh;
+    $('#moreOutputs').onclick=()=>readOutputs(true).catch(e=>showError('#outputStatus',e));
+    $('#outputRows').onclick=e=>{
+      const action=e.target.closest('[data-history-action]');
+      if(action){
+        const row=outputRows.find(item=>item.run_id===action.dataset.historyId);
+        if(row)openHistoryManage(row,action);
+        return;
       }
-      for(const b of host.querySelectorAll('[data-output-version]'))b.onclick=()=>{
-        const version=b.dataset.outputVersion;
-        outputDetail(outputRows.find(r=>r.run_id===version)||{run_id:version,kind:'study'}).catch(e=>showError('#outputDetail',e));
-      };
+      const hit=e.target.closest('[data-output]');
+      const row=hit&&outputRows.find(item=>item.run_id===hit.dataset.output);
+      if(row) showOutput(row).catch(e=>showError('#historyLoading',e));
+    };
+    $('.history-legacy').ontoggle=e=>{
+      if(e.target.open)window.DAYAN_RESULTS.paintBookmarks($('#legacyHistory'));
+    };
+    $('#historyDetailActions').onclick=e=>{
+      const action=e.target.closest('[data-history-action]');
+      if(action&&selectedOutput)openHistoryManage(selectedOutput.row,action);
+    };
+    $('#historyManageForm').onsubmit=e=>{e.preventDefault();saveHistoryChange();};
+    $('#historyUseAuto').onclick=()=>saveHistoryChange(true);
+    $('#historyManageCancel').onclick=()=>$('#historyManage').close();
+    $('#historyManage').oncancel=e=>{if($('#historyManageApply').disabled)e.preventDefault();};
+    $('#historyManage').onclose=()=>historyEdit?.trigger.focus({preventScroll:true});
+    $('#historyName').oninput=()=>write('#historyManageError','');
+    $('#historyBack').onclick=()=>{
+      const id=selectedOutput?.row.run_id;
+      leaveHistory();
+      [...$('#outputRows').querySelectorAll('[data-output]')].find(b=>b.dataset.output===id)?.focus({preventScroll:true});
+      window.dispatchEvent(new Event('resize'));
+    };
+    $('.history-tabs').onclick=e=>{
+      const tab=e.target.closest('[data-history-tab]');
+      if(tab)selectHistoryTab(tab.dataset.historyTab);
+    };
+    $('.history-tabs').onkeydown=e=>{
+      if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+      const tabs=[...e.currentTarget.querySelectorAll('[role=tab]')].filter(tab=>!tab.hidden);
+      if(tabs.length<2)return;
+      e.preventDefault();
+      const next=tabs.find(tab=>tab.dataset.historyTab!==openHistoryTab);
+      next.click();next.focus();
+    };
+  }
+
+  function historyDate() {
+    const day=$('#outputDate').value;
+    if(!day)return {};
+    const start=new Date(day+'T00:00:00'), end=new Date(start);
+    end.setDate(start.getDate()+1);
+    return {after:start.toISOString(),before:end.toISOString()};
+  }
+
+  async function readOutputs(append=false) {
+    const revision=++outputQuery, dateRange=historyDate();
+    const search=$('#outputSearch').value.trim();
+    const query=new URLSearchParams({metadata_only:'true',workbench:'true',limit:String(pageSize),offset:String(append?outputOffset:0),search,...dateRange});
+    $('#moreOutputs').disabled=true;
+    if(!append)write('#outputStatus','读取历史记录…');
+    try{
+      const history=await api('/api/history?'+query);
+      if(revision!==outputQuery)return;
+      outputOffset=append?outputOffset+history.entries.length:history.entries.length;
+      const base=append?outputRows:[];
+      outputRows=[...new Map([...base,...history.entries].map(row=>[row.run_id,row])).values()];
+      paintOutputs();
+      paintHistoryStatus();
+      $('#moreOutputs').hidden=history.entries.length<pageSize;
+    } finally {if(revision===outputQuery)$('#moreOutputs').disabled=false;}
+  }
+
+  function historyActions(row) {
+    const key=esc(row.run_id);
+    return '<details class="control-menu history-actions" name="history-manage"><summary class="ws-button" aria-label="管理 '+esc(row.title)+'">⋯</summary>'
+      +'<div class="control-menu-panel"><button type="button" class="ws-button" data-history-action="rename" data-history-id="'+key+'">重命名</button>'
+      +'<button type="button" class="ws-button history-danger" data-history-action="delete" data-history-id="'+key+'">删除记录</button></div></details>';
+  }
+
+  function paintOutputs() {
+    $('#outputRows').innerHTML=outputRows.map(row=>'<div class="history-record"><button class="archive-row" data-output="'+esc(row.run_id)+'" data-kind="'+esc(row.kind)+'">'
+      +'<strong>'+esc(row.title)+'</strong><span>'+esc([archiveTypes[row.kind],row.model_id,row.status?cjkStatus[row.status]||row.status:''].filter(Boolean).join(' · '))+'</span>'
+      +'<time datetime="'+esc(row.created_at||'')+'">'+esc(date(row.created_at))+'</time></button>'+historyActions(row)+'</div>').join('')||empty('没有匹配的历史记录。');
+  }
+
+  function paintHistoryHeading(row) {
+    write('#historyTitle',row.title);
+    write('#historyIdentity',[archiveTypes[row.kind],row.model_id,date(row.created_at),row.run_id].filter(Boolean).join(' · '));
+    $('#historyDetailActions').innerHTML=historyActions(row);
+  }
+
+  function openHistoryManage(row, button) {
+    const action=button.dataset.historyAction;
+    const dialog=$('#historyManage');
+    if(dialog.open)return;
+    const menu=button.closest('details');
+    historyEdit={row,action,trigger:menu.querySelector('summary')};
+    menu.open=false;
+    const deleting=action==='delete';
+    write('#historyManageTitle',deleting?'删除历史记录':'重命名记录');
+    write('#historyManageText',deleting?'将「'+row.title+'」从历史记录删除？关联归档仍可用于回放与报告。':'自动名称  '+row.automatic_title);
+    write('#historyManageError','');
+    $('#historyNameField').hidden=$('#historyName').disabled=deleting;
+    $('#historyName').value=row.title;
+    $('#historyUseAuto').hidden=deleting||!row.title_is_custom;
+    const apply=$('#historyManageApply');
+    apply.classList.toggle('history-delete-apply',deleting);
+    write('#historyManageApply',deleting?'删除记录':'保存名称');
+    dialog.showModal();
+    if(deleting)$('#historyManageCancel').focus();
+    else{$('#historyName').focus();$('#historyName').select();}
+  }
+
+  function paintHistoryStatus(message='') {
+    const status=$('#outputStatus');
+    const removed=lastDeleted;
+    status.textContent=message||(removed?'已删除「'+removed.title+'」':'');
+    if(!removed)return;
+    const undo=document.createElement('button');
+    undo.type='button';
+    undo.className='ws-button history-undo';
+    undo.textContent='撤销删除';
+    undo.onclick=async()=>{
+      undo.disabled=true;
+      try {
+        await api('/api/history/'+slug(removed.run_id)+'/restore',{},'POST');
+      } catch(error) {
+        window.DAYAN_NOTICE(error.message);
+        undo.disabled=false;
+        return;
+      }
+      if(lastDeleted===removed)lastDeleted=null;
+      document.dispatchEvent(new Event('dayan:history-change'));
+      await readOutputs().catch(error=>paintHistoryStatus(error.message));
+      window.DAYAN_NOTICE('已恢复「'+removed.title+'」');
+    };
+    status.append(undo);
+  }
+
+  async function saveHistoryChange(useAutomatic=false) {
+    const {row,action}=historyEdit;
+    const apply=$('#historyManageApply'), cancel=$('#historyManageCancel'), reset=$('#historyUseAuto');
+    if(apply.disabled)return;
+    const deleting=action==='delete';
+    const title=useAutomatic?null:$('#historyName').value.trim();
+    if(!deleting&&title===''){write('#historyManageError','输入记录名称后再保存。');return;}
+    apply.disabled=cancel.disabled=reset.disabled=true;
+    let changed;
+    try {
+      const route='/api/history/'+slug(row.run_id);
+      const response=deleting?await api(route,undefined,'DELETE'):await api(route,{title},'PATCH');
+      changed=response.record;
+    } catch(error) {
+      write('#historyManageError',error.message);
+      return;
+    } finally {
+      apply.disabled=cancel.disabled=reset.disabled=false;
+    }
+    $('#historyManage').close();
+    if(deleting){
+      lastDeleted=row;
+      outputRows=outputRows.filter(item=>item.run_id!==row.run_id);
+      if(selectedOutput?.row.run_id===row.run_id)leaveHistory();
+    } else {
+      for(const item of outputRows)if(item.run_id===row.run_id)Object.assign(item,changed);
+      if(selectedOutput?.row.run_id===row.run_id){
+        Object.assign(selectedOutput.row,changed);
+        paintHistoryHeading(selectedOutput.row);
+      }
+      window.DAYAN_NOTICE('名称已保存');
+    }
+    paintOutputs();
+    document.dispatchEvent(new Event('dayan:history-change'));
+    await readOutputs().catch(error=>paintHistoryStatus(error.message));
+    if(!selectedOutput){
+      const savedButton=[...document.querySelectorAll('[data-output]')].find(item=>item.dataset.output===row.run_id);
+      (savedButton||$('#outputSearch')).focus({preventScroll:true});
+    }
+  }
+
+  function leaveHistory() {
+    if(!selectedOutput)return;
+    ++outputRevision;
+    selectedOutput=null;
+    historyPlaybackReady=false;
+    reportRequest=null;
+    const surface=$('#simulationSurface');
+    $('#pageOverview').append(surface);
+    surface.hidden=false;
+    $('#historyDetail').hidden=true;
+    $('#historyHeading').hidden=$('#replayList').hidden=false;
+    window.DAYAN_RESULTS.endHistory();
+  }
+
+  function selectHistoryTab(name) {
+    openHistoryTab=name;
+    for(const tab of document.querySelectorAll('[data-history-tab]')){
+      const active=tab.dataset.historyTab===name;
+      tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;
+    }
+    $('#historyPlayback').hidden=name!=='playback';
+    $('#historyReport').hidden=name!=='report';
+    if(name==='report'){
+      window.DAYAN_RESULTS.setPlaying(false);
+      const revision=outputRevision;
+      if(!reportRequest)reportRequest=readHistoryReport(selectedOutput).catch(error=>{
+        if(revision!==outputRevision)return;
+        const host=$('#outputDetail');
+        host.replaceChildren(Object.assign(document.createElement('p'),{textContent:error.message}));
+        const retry=Object.assign(document.createElement('button'),{className:'ws-button',textContent:'重试读取报告'});
+        retry.onclick=()=>{reportRequest=null;selectHistoryTab('report');};host.append(retry);
+      });
+    } else {
+      requestAnimationFrame(()=>{
+        window.dispatchEvent(new Event('resize'));
+        if(historyPlaybackReady)window.DAYAN_RESULTS.paint();
+      });
+    }
+    window.dispatchEvent(new Event('dayan:display'));
+  }
+
+  async function showOutput(row) {
+    const revision=++outputRevision;
+    selectedOutput={row};
+    historyPlaybackReady=false;reportRequest=null;
+    window.DAYAN_RESULTS.beginHistory();
+    $('#historyHeading').hidden=$('#replayList').hidden=true;
+    $('#historyDetail').hidden=false;
+    $('#historyPlaybackTab').hidden=false;
+    $('#historyReportTab').hidden=row.kind==='legacy';
+    $('#historyReportTab').disabled=true;
+    paintHistoryHeading(row);
+    write('#historyLoading','正在校验归档…');
+    const surface=$('#simulationSurface');
+    surface.hidden=true;
+    $('#historyPlayback').append(surface);
+    selectHistoryTab('playback');
+    window.scrollTo(0,0);
+    $('#historyBack').focus({preventScroll:true});
+    try{
+      let legacy;
+      if(row.kind==='study'){
+        selectedOutput.study=await api('/api/research/studies/'+slug(row.run_id));
+        if(revision!==outputRevision)return;
+        selectedOutput.runId=selectedOutput.study.study.run_id;
+      } else if(row.kind==='legacy'){
+        legacy=await api('/api/history/'+slug(row.run_id)+'/legacy');
+      } else {
+        selectedOutput.runId=row.run_id;
+        if(row.kind==='run'){
+          const relation=await api('/api/research/for_run/'+slug(row.run_id));
+          if(revision!==outputRevision)return;
+          if(relation.study)selectedOutput.study=await api('/api/research/studies/'+slug(relation.study.study_id));
+        }
+      }
+      if(revision!==outputRevision)return;
+      $('#historyReportTab').disabled=false;
+      if(!legacy&&!selectedOutput.runId){
+        $('#historyPlaybackTab').hidden=true;
+        selectHistoryTab('report');
+        return;
+      }
+      surface.hidden=false;
+      $('#sceneEmptyState').hidden=false;
+      const context={history:true,userRequested:true};
+      const restored=legacy?await window.DAYAN_RESULTS.showResult('run',{...legacy,
+        legacy_time_is_index:(legacy.observations||[]).some(point=>!Number.isFinite(point.sim_t))},
+        {...context,replaying:true,question:row.title,intent:'旧记录观测回放'}):
+        await window.DAYAN_RESULTS.restore(selectedOutput.runId,context);
+      if(revision!==outputRevision)return;
+      if(!restored)throw new Error('未能还原该记录的运行状态。');
+      historyPlaybackReady=true;
+      write('#historyLoading',legacy?'旧格式记录仅供观测回放。':'');
+      window.dispatchEvent(new Event('dayan:display'));
+    } catch(error){
+      if(revision!==outputRevision)return;
+      surface.hidden=true;
+      write('#historyLoading','读取失败 · '+error.message);
+    }
+  }
+
+  function reportDownloads(markup, exportReport) {
+    const host=$('#outputDetail');
+    host.innerHTML=markup;
+    const button=$('#downloadHistoryReport');
+    if (!button) return;
+    button.onclick=async()=>{
+      button.disabled=true;
+      write('#reportJobStatus','正在生成该归档的 Word 报告…');
+      try{
+        const url=await exportReport();
+        if(!button.isConnected)return;
+        $('#reportJobStatus').innerHTML=ref(url,'下载已生成的 Word 报告');
+        const link=$('#reportJobStatus a');
+        if(link){button.hidden=true;link.download='';link.click();}
+      }catch(error){if(button.isConnected)write('#reportJobStatus','报告未生成 · '+error.message);}
+      finally{button.disabled=false;}
+    };
+  }
+
+  function reportFigureGallery(figures) {
+    const groups=new Map();
+    for(const figure of figures||[]){
+      if(!/^\/reports\/research_[a-z0-9_]+\.png$/.test(figure.url))continue;
+      if(!groups.has(figure.section))groups.set(figure.section,[]);
+      groups.get(figure.section).push(figure);
+    }
+    return [...groups].map(([section,items])=>
+      '<section class="report-figure-section"><h4>'+esc(section)+'</h4><div class="report-figure-grid">'
+      +items.map(figure=>{
+        const height=Math.round(740/figure.aspect);
+        const size=Number.isFinite(height)&&height>0?' width="740" height="'+height+'"':'';
+        return '<figure><a href="'+esc(figure.url)+'" target="_blank" rel="noopener" aria-label="放大查看'+esc(figure.title)+'">'
+          +'<img src="'+esc(figure.url)+'" alt="'+esc(figure.title)+'"'+size+' loading="lazy" decoding="async"></a>'
+          +'<figcaption><strong>图 '+esc(figure.number)+'　'+esc(figure.title)+'</strong><p>'+esc(figure.caption)
+          +'</p></figcaption></figure>';
+      }).join('')+'</div></section>').join('');
+  }
+
+  async function readHistoryReport(entry) {
+    const revision=outputRevision;
+    const host=$('#outputDetail');
+    host.innerHTML=empty('正在核对与该记录对应的报告…');
+    const downloadButton='<button class="ws-button ws-primary" id="downloadHistoryReport">生成 Word 报告</button><span id="reportJobStatus" role="status"></span>';
+    if(entry.study){
+      const {study,reports}=entry.study, cal=study.calibration, status=cal?.status||study.phase;
+      const saved=(reports||[]).filter(report=>report.file);
+      const heading='<header class="report-heading"><h3>研究分析报告</h3><span class="state-pill" data-state="'+esc(status==='pass'?'passed':status)+'">'+esc(cjkStatus[status]||status)+'</span></header>';
+      const summary=cal?'<dl class="report-facts"><div><dt>独立测试 RMSE</dt><dd>'+esc(cal.holdout?.rmse?.toPrecision(6)??'—')+'</dd></div>'
+        +'<div><dt>事前阈值</dt><dd>'+esc(study.tolerance)+' '+esc(study.unit)+'</dd></div><div><dt>独立观测</dt><dd>'+esc(study.holdout?.length||0)+'</dd></div></dl>'
+        +'<p>'+esc(cal.interpretation?.interpretation_text||cal.interpretation_text||'')+'</p><div id="outputPreview" class="chart-host"></div>':'<p>研究合同已归档，等待校准和独立验证。</p>';
+      const links=saved.map(report=>'<a class="ws-button" href="'+esc(report.file)+'" download>'+esc(report.label)+'</a>').join('');
+      reportDownloads(heading+summary+'<details class="tool-detail"><summary>数据、模型与验证依据</summary>'
+        +'<dl class="fact-list"><dt>研究问题</dt><dd>'+esc(study.question)+'</dd><dt>地区和时期</dt><dd>'+esc(study.contract.country+' · '+study.contract.date)+'</dd>'
+        +'<dt>研究与运行</dt><dd><code>'+esc(study.study_id+' / '+(study.run_id||'待运行'))+'</code></dd>'
+        +'<dt>数据版本</dt><dd><button data-open-dataset="'+esc(study.training_dataset.dataset_id)+'">'+esc(study.training_dataset.dataset_id)+'</button></dd>'
+        +'<dt>模型</dt><dd><button data-graph-model="'+esc(study.model_id)+'">'+esc(study.model_id)+'</button></dd></dl>'
+        +'<div class="tag-row">'+(study.source_pages||[]).map(page=>ref(page.url,'原始来源')).join('')+'</div><p>'
+        +esc(Array.isArray(study.limitations)?study.limitations.join('；'):study.limitations||'')+'</p></details>'
+        +'<div class="space-actions report-downloads">'+links+(entry.runId&&!saved.some(report=>report.kind==='academic')?downloadButton:'')
+        +(saved[0]?'<a href="'+esc(saved[0].bundle_url)+'" download>下载复现包</a>':'')+'</div>',
+        async()=>{const report=await api('/api/tools/research_report',{arguments:{study_id:study.study_id,kind:'academic'}});return report.payload.file;});
+      if(cal && study.predictions?.length)window.DAYAN_CHARTS.plot($('#outputPreview'),{title:'实际观测与模型预测',xUnit:'年度',yUnit:study.unit,
+        events:study.holdout?.length?[{x:study.holdout[0].date,label:'独立测试开始'}]:[],
+        series:[{label:'实际观测',points:study.records.map(r=>[r.date,r.value])},{label:'模型预测',dashed:true,points:study.predictions.map(r=>[r.date,r.predicted])}]});
       return;
     }
-    const r=await api('/api/runs/'+id);
+    const {row}=entry, archive=await api('/api/runs/'+slug(row.run_id));
     if(revision!==outputRevision)return;
-    const m=r.manifest||r.runs?.[0]?.manifest;
-    const source=m?.code_version||m?.source_fingerprint;
-    const observations=Array.isArray(r.observations)?r.observations:r.observations?.['基线']?.[0]||(r.analysis?.runs||r.analysis?.stages)?.[0]?.observations||[];
-    const metric=[m?.output_contract?.primary_metric,r.experiment_spec?.primary_metric,r.analysis?.metric,...Object.keys(observations[0]||{})].find(k=>k&&k!=='sim_t'&&observations.some(o=>Number.isFinite(o[k])));
-    host.innerHTML=`<header class="archive-title"><span>${esc(archiveTypes[row.kind])} · ${esc(row.model_id)}</span><h3>${esc(r.request_text||row.intent||row.model_id)}</h3></header>${metric?'<div id="outputPreview" class="chart-host"></div>':''}<dl class="fact-list"><dt>归档 ID</dt><dd><code>${esc(row.run_id)}</code></dd><dt>模型</dt><dd>${esc(row.model_id)}</dd>
-      <dt>源码版本</dt><dd><code>${esc(source||'在子运行清单中')}</code></dd><dt>已绑定数据</dt><dd class="tag-row">${(m?.data_bindings||[]).map(b=>`<button data-open-dataset="${esc(b.dataset_id)}" title="${esc(b.sha256)}">${esc(b.dataset_id)} ↗</button>`).join('')||'本档案未声明外部输入'}</dd>
-      <dt>归档文件</dt><dd>${Object.entries(r.files||{}).map(([key,digest])=>`<code class="hash-line" title="${esc(digest)}">${esc(key)} · ${esc(digest.slice(0,12))}</code>`).join('')}</dd></dl>
-      <div class="space-actions"><button class="ws-button" data-open-run="${esc(row.run_id)}">回放</button><button class="ws-button" id="analyzeOutput">分析</button><a class="ws-button" href="/api/runs/${id}/bundle.zip" download>下载研究包</a>${row.kind==='run'?`<a class="ws-button" href="/api/runs/${id}/observations.csv" download>观测 CSV</a>`:''}</div>`;
+    const run=row.kind==='run'?archive:archive.runs?.find(item=>item.arm==='基线')||archive.runs?.[0];
+    if(!run)throw new Error('这条归档没有可核验的具体运行。');
+    const request={model_id:run.model_id||row.model_id, ...(row.kind==='experiment'?{experiment_id:row.run_id}:{}), ...(row.kind==='analysis'?{analysis_id:row.run_id}:{})};
+    const reportRoute='/api/runs/'+slug(run.run_id)+'/report?';
+    const {facts}=await api(reportRoute+new URLSearchParams(request));
+    if(revision!==outputRevision)return;
+    if(facts.run_id!==run.run_id)throw new Error('报告与当前归档的运行标识不一致。');
+    const view=facts.view_analysis, content=facts.content, metric=view.metric_info, period=view.window;
+    const format=window.DAYAN_ANALYSIS.fmt;
+    const entries=[['观察指标',metric.name||view.metric],['观测点',facts.n_observations],['分析窗口',format(period.from)+' 至 '+format(period.to)]];
+    const numbers=entries.map(([label,value])=>'<div><dt>'+esc(label)+'</dt><dd>'+esc(value)+'</dd></div>').join('');
+    const comparison=view.comparisons?.length?'<table class="workbench-table report-comparison"><thead><tr><th>方案</th><th>基线</th><th>均值差</th><th>配对种子</th></tr></thead><tbody>'
+      +view.comparisons.map(group=>'<tr><td>'+esc(group.group)+'</td><td>'+esc(group.baseline)+'</td><td>'+format(group.difference)+'</td><td>'
+        +(group.paired_n?group.paired_n+' 个配对种子':'—')+'</td></tr>').join('')+'</tbody></table>':'';
+    const files='<a class="ws-button" href="/api/runs/'+slug(row.run_id)+'/bundle.zip" download>下载复现包</a>';
+    const coverage=facts.manifest.scenario_review?.coverage;
+    const scope=coverage?.status==='partial'?
+      '<p><strong>原需求部分覆盖</strong> · '+esc(coverage.gaps.join('；'))+'</p>':'';
+    const question=archive.request_text?.trim()||content.background;
+    const questionFact=question&&question!==row.title?'<dt>原始需求</dt><dd>'+esc(question)+'</dd>':'';
+    reportDownloads('<header class="report-heading"><h3>'+esc(content.title)+'</h3>'+downloadButton+'</header><dl class="report-facts">'+numbers+'</dl>'
+      +scope+'<p>'+esc(content.abstract)+'</p>'+comparison
+      +'<div id="reportFigures" aria-busy="true"><p class="report-figure-status" role="status">正在生成归档图表…</p></div>'
+      +'<section class="report-findings"><h4>过程与结果</h4><p>'+esc(content.analysis)+'</p></section>'
+      +'<h4>结论与适用范围</h4><p>'+esc(content.conclusion)+'</p><p>'+esc(content.limitations)+'</p>'
+      +'<details class="tool-detail"><summary>数据与模型依据</summary><dl class="fact-list"><dt>归档 / 运行</dt><dd><code>'+esc(row.run_id+' / '+run.run_id)+'</code></dd>'
+      +questionFact
+      +'<dt>模型版本</dt><dd><code>'+esc(facts.manifest.code_version||facts.manifest.source_fingerprint||'未记录')+'</code></dd>'
+      +'<dt>输入数据</dt><dd>'+((facts.manifest.data_bindings||[]).map(binding=>'<button data-open-dataset="'+esc(binding.dataset_id)+'">'+esc(binding.dataset_id)+'</button>').join(' ')||'该运行未绑定外部数据')+'</dd></dl></details>'
+      +'<div class="report-downloads space-actions">'+files+'<button class="ws-button" id="analyzeOutput">展开图表分析</button></div>',
+      async()=>{const response=await api('/api/report',{...request,run_id:run.run_id,primary_metric:view.metric});return response.url;});
     $('#analyzeOutput').onclick=()=>window.DAYAN_ANALYTICS.open(row.run_id);
-    if(metric)window.DAYAN_CHARTS.plot($('#outputPreview'),{title:'归档观测预览',xUnit:m?.model_definition?.time_unit||'模型时间',yUnit:m?.output_contract?.fields?.[metric]?.unit||metric,
-      series:[{label:row.kind==='run'?window.DAYAN_ANALYSIS.label(metric):'首个归档运行 · '+window.DAYAN_ANALYSIS.label(metric),points:observations.map(o=>[o.sim_t,o[metric]])}]});
+    const gallery=$('#reportFigures');
+    try {
+      const preview=await api(reportRoute+new URLSearchParams({...request,primary_metric:view.metric,figure_preview:'true'}));
+      if(revision!==outputRevision)return;
+      if(preview.facts.run_id!==run.run_id)throw new Error('图表与当前归档的运行标识不一致。');
+      gallery.innerHTML=reportFigureGallery(preview.facts.view_analysis.figures);
+      gallery.hidden=!gallery.firstElementChild;
+    } catch(error) {
+      if(revision!==outputRevision)return;
+      gallery.firstElementChild.textContent='图表预览暂不可用 · '+error.message;
+    } finally {
+      gallery.removeAttribute('aria-busy');
+    }
+  }
+
+  function outputs() {
+    initOutputs();
+    if (selectedOutput) return Promise.resolve();
+    return readOutputs();
   }
   const modules={models:()=>models(),lab:()=>lab(),replay:()=>outputs(),analytics:()=>window.DAYAN_ANALYTICS.load()};
-  window.DAYAN_TOOLS={load(name){return modules[name]?.();},openModel,openStudy,useCollection};
+  window.DAYAN_TOOLS={load(name){return modules[name]?.();},openModel,openStudy,useCollection,leaveHistory};
 })();

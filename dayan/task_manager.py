@@ -23,7 +23,8 @@ from .collection.storage import atomic_json, file_lock, read_json
 ROOT=Path(__file__).resolve().parents[1]
 TARGETS={'api_run','api_experiment','api_agent','api_ai_chat','api_report',
          'api_state_stream','api_resume','api_custom_model','api_dataset_collect','api_dataset_import',
-         'api_run_preset','api_render_collection_reports','api_platform_tool','api_prepare_bundle'}
+         'api_run_preset','api_render_collection_reports','api_platform_tool','api_prepare_bundle','api_entity_trace',
+         'api_population_query','api_state_transitions'}
 _managers={}
 _manager_lock=threading.Lock()
 
@@ -53,6 +54,7 @@ class TaskManager:
     def __init__(self,base=None,cap=None):
         self.base=Path(base or data_root()).resolve();self.base.mkdir(parents=True,exist_ok=True)
         self.directory=self.base/'tasks';self.directory.mkdir(exist_ok=True)
+        self.explicit_cap=cap is not None
         self.cap=cap or limits();self.lock=threading.RLock();self.queue=deque();self.active={}
         self.owner=None;self._ensure_owner()
         self.closed=False;self._disk_at=0.;self._disk_bytes=0
@@ -97,9 +99,16 @@ class TaskManager:
             self._disk_at=time.monotonic()
         return self._disk_bytes
 
+    def _wall_budget(self,target,arguments):
+        from .limits import AUTHORING_TOOLS,authoring_wall_seconds
+        if not self.explicit_cap and target=='api_platform_tool' and arguments.get('tool_name') in AUTHORING_TOOLS:
+            return authoring_wall_seconds()
+        return self.cap.wall_seconds
+
     def submit(self,target,arguments,*,preview=False):
         if target not in TARGETS:raise ValueError('未知受管操作')
-        validate_envelope(arguments)
+        # The envelope bounds transport. Actual model-specific allocation is validated in the worker.
+        validate_envelope(arguments, array=True)
         if len(json.dumps(arguments,ensure_ascii=False).encode())>self.cap.body_bytes:
             raise ValueError('任务请求超过大小预算')
         with self.lock:
@@ -114,7 +123,8 @@ class TaskManager:
             atomic_json(path/'request.json',{'target':target,'arguments':arguments,
                         'source_fingerprint':source_fingerprint(),'preview':preview})
             atomic_json(path/'status.json',{'job_id':jid,'status':'queued','stages':['已入队，等待有界工作进程'],
-                'result':None,'ts':time.time(),'target':target,'limits':vars(self.cap)})
+                'result':None,'ts':time.time(),'target':target,
+                'limits':{**vars(self.cap),'wall_seconds':self._wall_budget(target,arguments)}})
             self.queue.append(jid)
         return jid
 
@@ -132,18 +142,28 @@ class TaskManager:
         if row['status']=='done' and (path/'result.json').exists():row['result']=_read(path/'result.json')['value']
         return row
 
-    def snapshot(self):
+    def snapshot(self, native_session=None):
         """Bounded public view of the live queue, without task inputs or results."""
         with self.lock:
             jobs = []
             for jid in (*self.active, *self.queue):
                 path = self._path(jid)
                 row = _read(path / 'status.json')
+                native = {}
+                if native_session is not None:
+                    if row['target'] != 'api_platform_tool':
+                        continue
+                    arguments = _read(path / 'request.json')['arguments']
+                    body = arguments['body']
+                    if body.get('origin') != 'dsh' or body.get('session_id') != native_session:
+                        continue
+                    native = {'tool': arguments['tool_name'], 'question': str(body.get('original_text', ''))[:4000]}
                 progress_path = path / 'progress.json'
                 stages = _read(progress_path).get('stages', []) if progress_path.exists() else []
                 jobs.append({key: row.get(key) for key in ('job_id', 'target', 'status', 'ts')}
-                            | {'stage': (stages or row.get('stages') or [''])[-1]})
-            return {'jobs': jobs, 'running': len(self.active), 'queued': len(self.queue),
+                            | {'stage': (stages or row.get('stages') or [''])[-1]} | native)
+            return {'jobs': jobs, 'running': sum(row['status'] == 'running' for row in jobs),
+                    'queued': sum(row['status'] == 'queued' for row in jobs),
                     'concurrent_limit': self.cap.concurrent, 'queue_limit': self.cap.queued}
 
     def cancel(self,jid,reason='cancelled'):
@@ -158,8 +178,8 @@ class TaskManager:
             atomic_json(self._path(jid)/'status.json',row)
         return row
 
-    async def execute(self,target,arguments):
-        jid=self.submit(target,arguments)
+    async def execute(self,target,arguments,*,preview=False):
+        jid=self.submit(target,arguments,preview=preview)
         try:
             while True:
                 row=self.get(jid)
@@ -177,16 +197,18 @@ class TaskManager:
 
     def _start(self,jid):
         path=self._path(jid)
+        row=self.get(jid)
         env={**os.environ,'DAYAN_TASK_WORKER':'1','DAYAN_TASK_DIR':str(path),
              'DAYAN_DATA_DIR':str(self.base),'PYTHONPATH':str(ROOT),'PYTHONIOENCODING':'utf-8',
              'OPENBLAS_NUM_THREADS':'1','OMP_NUM_THREADS':'1','MKL_NUM_THREADS':'1'}
+        env['DAYAN_AUTHORING_WALL_SECONDS']=str(row['limits']['wall_seconds'])
         # A worker inherits credentials in its environment, never in a command line.
         log=(path/'worker.log').open('wb')
         try:
             process=subprocess.Popen([sys.executable,'-m','dayan.task_worker',str(path)],cwd=ROOT,env=env,
                  stdout=log,stderr=subprocess.STDOUT,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
         finally:log.close()
-        row=self.get(jid);row.update(status='running',pid=process.pid,started_at=time.time())
+        row.update(status='running',pid=process.pid,started_at=time.time())
         atomic_json(path/'status.json',row)
         self.active[jid]={'process':process,'started':time.monotonic(),'row':row}
 
@@ -224,7 +246,7 @@ class TaskManager:
                     cpu=sum(sum(p.cpu_times()[:2]) for p in processes)
                     if memory>self.cap.memory_bytes:reason='memory_bytes'
                     elif cpu>self.cap.cpu_seconds:reason='cpu_seconds'
-                    elif time.monotonic()-current['started']>self.cap.wall_seconds:reason='wall_timeout'
+                    elif time.monotonic()-current['started']>current['row']['limits']['wall_seconds']:reason='wall_timeout'
                     elif self._disk()>self.cap.data_bytes:reason='data_disk_quota'
                     elif sum(p.stat().st_size for p in self._path(jid).rglob('*') if p.is_file())>self.cap.job_bytes:reason='job_disk_quota'
                 except psutil.NoSuchProcess:continue
@@ -277,11 +299,16 @@ def managed_endpoint(fn):
         if fn.__name__ in ('api_agent','api_run'):
             asynchronous=values['req'].get('async_job',False) is True
             values['req']['async_job']=False
-        if fn.__name__=='api_experiment':
+        if fn.__name__ in ('api_experiment','api_platform_tool'):
             asynchronous=values['body'].pop('async_job',False) is True
+        native_run = (fn.__name__ == 'api_platform_tool' and values['body'].get('origin') == 'dsh'
+                      and re.fullmatch(r'[A-Za-z0-9_-]{1,120}', str(values['body'].get('session_id') or ''))
+                      and values['tool_name'] in ('run', 'reviewed_run', 'build_model', 'resume', 'experiment', 'ensemble',
+                                                  'sweep', 'compare', 'compose', 'research_calibrate','research_finalize'))
         try:
-            if asynchronous:return {'job_id':get_manager().submit(fn.__name__,values,preview=True)}
-            return await get_manager().execute(fn.__name__,values)
+            if asynchronous:return {'job_id':get_manager().submit(fn.__name__,values,
+                preview=bool(native_run) if fn.__name__=='api_platform_tool' else True)}
+            return await get_manager().execute(fn.__name__,values,preview=bool(native_run))
         except QueueFull as exc:raise HTTPException(429,str(exc))
         except ValueError as exc:raise HTTPException(413,str(exc))
     wrapper.__signature__=signature

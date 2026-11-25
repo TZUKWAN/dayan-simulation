@@ -3,7 +3,7 @@
  "version": 1,
  "generated": "2026-11-07",
  "source": "DAYAN_社会仿真模型级方法论清单与平台实现规范.docx v1.0 (检索截止2026-11-07)",
- "count": 557,
+ "count": 559,
  "models": [
   {
    "model_id": "BEH001",
@@ -7035,7 +7035,7 @@
   },
   {
    "model_id": "NET114",
-   "name": "含身体接触与摩擦的疏散社会力",
+   "name": "含身体接触排斥的疏散社会力",
    "prefix": "NET",
    "kind": "空间/网络/传播模型",
    "chapter": "第四章",
@@ -7200,6 +7200,38 @@
    "layer": "模型层",
    "historical_status": "基准通过",
    "historical_notes": "家族引擎实现+解析/结构基准通过（见 tests/test_dayan_*）"
+  },
+  {
+   "model_id": "NET121",
+   "name": "景区步道拥挤应急演练",
+   "prefix": "NET",
+   "kind": "人群安全与疏散主体模型",
+   "chapter": "第四章",
+   "domain": "空间、网络、传播、级联与交通",
+   "status": "仅登记",
+   "status_levels": [
+    "仅登记",
+    "原型可跑",
+    "基准通过",
+    "数据校准",
+    "留出验证",
+    "生产可用"
+   ],
+   "source_refs": [
+    "https://doi.org/10.1103/PhysRevE.51.4282",
+    "https://www.hse.gov.uk/event-safety/incidents-and-emergencies.htm"
+   ],
+   "license": null,
+   "clock_type": "fixed_step",
+   "time_unit": "模型秒",
+   "invariants": [
+    "在场与已离场人数守恒",
+    "演练状态按倒地、协助和恢复顺序变化"
+   ],
+   "reference_cases": [],
+   "backend": "native",
+   "notes": "虚拟场地的安全响应演练。真实事故外推须独立验证。",
+   "layer": "模型层"
   },
   {
    "model_id": "NET120",
@@ -15637,10 +15669,44 @@
     "dayan/models/evacuation_coupled.py"
    ],
    "notes": "登记不代表现实校准；实际输入/运行/验证见逐次研究证据。"
+  },
+  {
+   "model_id": "NET122",
+   "name": "农业绿色补贴审计三方 CA–ABM",
+   "prefix": "NET",
+   "kind": "空间演化博弈",
+   "chapter": "第四章",
+   "domain": "空间、网络、传播、级联与交通",
+   "status": "仅登记",
+   "status_levels": [
+    "仅登记",
+    "原型可跑",
+    "基准通过",
+    "数据校准",
+    "留出验证",
+    "生产可用"
+   ],
+   "source_refs": [
+    "https://xbbjb.nau.edu.cn/sjyjjyj/article/pdf/20260205006"
+   ],
+   "license": null,
+   "clock_type": "fixed_step",
+   "time_unit": "蒙特卡洛步（MCS）",
+   "invariants": [
+    "每格恰有一户及一名监管员",
+    "实际审计掩码与覆盖率一致",
+    "监管与农业策略只能模仿同类局部邻居"
+   ],
+   "reference_cases": [
+    "论文表2、表4与式(2)、式(3)"
+   ],
+   "backend": "native",
+   "notes": "依据公开机制独立实现，采用论文情景参数，独立观测校准及论文轨迹复现见具体研究证据。",
+   "layer": "模型层"
   }
  ],
  "counts": {
-  "模型层": 483,
+  "模型层": 485,
   "应用层": 22,
   "软件层": 52
  },

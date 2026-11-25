@@ -22,6 +22,10 @@ def source_inventory():
     for name in ('requirements.txt','requirements-dev.txt','requirements-ui.txt','README.md','dayan/config.example.json',
                  'data/model_semantics.json','data/dayan_catalog.json','data/targets.json','data/calibration_targets.md'):
         if (ROOT/name).is_file():paths.add(ROOT/name)
+    for name in ('Dockerfile','requirements.lock','.dockerignore'):
+        path=ROOT/'dayan'/'solvers'/name
+        if path.is_file():paths.add(path)
+    if (ROOT/'scripts/build_solver_image.py').is_file():paths.add(ROOT/'scripts/build_solver_image.py')
     # Packaged report fonts and licenses are part of rendering reproducibility.
     for p in (ROOT/'assets/fonts').rglob('*'):
         if p.is_file():paths.add(p)

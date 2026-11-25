@@ -146,9 +146,10 @@ class ExperimentSpec:
         from ..limits import validate_compute
         try:
             validate_compute(self.ticks, runs=max(1,len(self.seeds))*(len(self.arms)+1),
-                             seeds=len(self.seeds), arms=len(self.arms), parameters=self.baseline_params)
+                             seeds=len(self.seeds), arms=len(self.arms), parameters=self.baseline_params,
+                             array=self.model_id.startswith("USR") if self.model_id else False)
             for arm in self.arms:
-                validate_compute(self.ticks, parameters=arm.get('params'))
+                validate_compute(self.ticks, parameters=arm.get('params'),array=self.model_id.startswith("USR") if self.model_id else False)
         except ValueError as exc:
             issues.append(str(exc))
         if not self.seeds:

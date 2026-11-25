@@ -7,7 +7,20 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 
 
+def check_repository_hygiene(root=ROOT):
+    """Inspect the index too: ignore rules alone cannot stop a forced staging."""
+    tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=root).decode('utf-8').split('\0')
+    private_roots = ('.claude/', '.codex/', '.agents/', '.dsh/', 'dayan_runtime_data/')
+    private = [name for name in tracked if name and (
+        name.startswith(private_roots) or name.rsplit('/', 1)[-1] == '.workbench-token'
+        or name == 'dayan/config.json' or name == '.env'
+        or name.startswith('.env.') and name != '.env.example')]
+    if private:
+        raise RuntimeError('Private runtime/configuration files are staged or tracked: ' + ', '.join(private))
+
+
 def main():
+    check_repository_hygiene()
     count=0
     for directory in ('dayan','src','experiments','tests'):
         for path in (ROOT/directory).rglob('*.py'):

@@ -18,6 +18,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 LIMIT = 10 * 1024 * 1024
+DATA_ROLES = ('input', 'initialization', 'exogenous_input', 'mechanism_estimation',
+              'calibration', 'validation', 'holdout', 'test', 'background',
+              'roads', 'population', 'source_snapshot')
 
 
 def _public_addresses(host):
@@ -84,24 +87,9 @@ def _reject_constant(value):
     raise ValueError(f"数据包含非有限数字 {value}")
 
 
-def _parse(raw, format):
-    text = raw.decode("utf-8-sig")
-    if format == "csv":
-        reader = csv.DictReader(io.StringIO(text))
-        if not reader.fieldnames or len(set(reader.fieldnames)) != len(reader.fieldnames):
-            raise ValueError("CSV需要非重复的字段标题")
-        rows = list(reader)
-        if any(None in row for row in rows):
-            raise ValueError("CSV列数不一致")
-        return rows
-    if format not in ("json", "geojson", "osm"):
-        raise ValueError("支持CSV、JSON、GeoJSON和OSM JSON")
-    data = json.loads(text, parse_constant=_reject_constant)
-    if format == "geojson" and (not isinstance(data, dict) or data.get("type") != "FeatureCollection"):
-        raise ValueError("GeoJSON需要FeatureCollection")
-    if format == "osm" and (not isinstance(data, dict) or not isinstance(data.get("elements"), list)):
-        raise ValueError("OSM JSON缺少elements")
-    return data
+def _parse(raw, format, parse_options=None):
+    from .dataset_parsing import parse_file
+    return parse_file(raw, format, parse_options, limit=LIMIT)[0]
 
 
 def _rows(data, path=""):
@@ -116,13 +104,16 @@ def dataset_dir():
     return Path(os.environ.get("DAYAN_DATA_DIR", ROOT / "data")) / "datasets"
 
 
-def ingest(raw, *, name, format, source, license="unknown", role="input", metadata=None):
+def ingest(raw, *, name, format, source, license="unknown", role="input", metadata=None, parse_options=None):
     if not isinstance(raw, bytes) or not raw or len(raw) > LIMIT:
         raise ValueError("输入文件须为1字节至10MiB")
-    data = _parse(raw, format)
+    from .dataset_parsing import parse_file
+    data, parsing = parse_file(raw, format, parse_options, limit=LIMIT)
     sha = hashlib.sha256(raw).hexdigest()
     definition = {"name": name, "format": format, "source": source,
                   "license": license, "role": role, "metadata": metadata or {}}
+    if parse_options is not None:
+        definition['parse_options'] = parse_options
     identity = hashlib.sha256(raw + json.dumps(definition, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     dataset_id = "DS-" + identity[:24]
     directory = dataset_dir() / dataset_id
@@ -135,7 +126,7 @@ def ingest(raw, *, name, format, source, license="unknown", role="input", metada
     try:
         (stage / "original").write_bytes(raw)
         (stage / "data.json").write_text(json.dumps(data, ensure_ascii=False, allow_nan=False), encoding="utf-8")
-        meta = {**definition, "dataset_id": dataset_id, "sha256": sha, "bytes": len(raw),
+        meta = {**definition, "dataset_id": dataset_id, "sha256": sha, "bytes": len(raw), 'parsing': parsing,
                 "retrieved_at": datetime.now(timezone.utc).isoformat(),
                 "data_sha256": hashlib.sha256((stage / "data.json").read_bytes()).hexdigest(),
                 "provenance_note": "来源描述不自动证明数据准确、适用或已校准；许可unknown须自行核验"}
@@ -170,55 +161,79 @@ def summary(record):
     return result
 
 
-def fetch(url, *, name="远程数据", format="json", license="unknown", role="input"):
+def fetch(url, *, name="远程数据", format="json", license="unknown", role="input", parse_options=None):
+    from .dataset_parsing import file_format
+    file_format(format)  # Reject an unknown parser before making a network request.
     _public_url(url)
     request = urllib.request.Request(url, headers={"User-Agent": "DAYAN-Research-Workbench/2.1", "Accept": "application/json,text/csv,*/*"})
     with public_opener().open(request, timeout=45) as response:
         raw = response.read(LIMIT + 1)
         return ingest(raw, name=name, format=format, source=response.geturl(), license=license,
-                      role=role, metadata={"requested_url": url, "content_type": response.headers.get("Content-Type"),
+                      role=role, parse_options=parse_options, metadata={"requested_url": url, "content_type": response.headers.get("Content-Type"),
                                            "last_modified": response.headers.get("Last-Modified")})
 
 
-def import_file(path, *, name=None, format="csv", license="unknown", role="input"):
+def import_file(path, *, name=None, format="csv", license="unknown", role="input", parse_options=None):
     actual = (ROOT / path).resolve() if not Path(path).is_absolute() else Path(path).resolve()
-    if not actual.is_relative_to(ROOT) or actual.suffix.lower() not in (".csv", ".json", ".geojson"):
-        raise ValueError("只导入当前项目内的CSV/JSON/GeoJSON数据文件")
+    if not actual.is_relative_to(ROOT) or actual.suffix.lower() not in (".csv", ".tsv", ".txt", ".dat", ".zip", ".json", ".jsonl", ".geojson"):
+        raise ValueError("只导入当前项目内的文本表格/JSON/GeoJSON/ZIP数据文件，不执行内容")
     if actual.stat().st_size > LIMIT:
         raise ValueError("输入文件超过10MiB")
     return ingest(actual.read_bytes(), name=name or actual.name, format=format,
-                  source=str(actual), license=license, role=role)
+                  source=str(actual), license=license, role=role, parse_options=parse_options)
 
 
-def analyze(dataset_id, path="",filters=None,order_by=None):
-    record = load(dataset_id)
+def selected_rows(record, path="", filters=None, order_by=None):
     rows = _rows(record["data"], path)
     if filters:
         rows=[r for r in rows if all(r.get(k)==v for k,v in filters.items())]
     if order_by:
         if any(order_by not in r for r in rows):raise ValueError('排序字段缺失')
         rows=sorted(rows,key=lambda r:r[order_by])
+    return rows
+
+
+def analyze(dataset_id, path="",filters=None,order_by=None):
+    record = load(dataset_id)
+    rows = selected_rows(record, path, filters, order_by)
     fields = sorted(set().union(*(row.keys() for row in rows))) if rows else []
-    numeric = {}
+    numeric, profiles = {}, {}
     for field in fields:
         values = []
         missing = 0
+        types, distinct = {}, set()
+        absent, nulls, blanks = 0, 0, 0
         for row in rows:
+            absent += field not in row
             value = row.get(field)
+            nulls += field in row and value is None
+            blank = isinstance(value,str) and not value.strip()
+            blanks += blank
+            if field in row:
+                typename = type(value).__name__
+                types[typename] = types.get(typename,0)+1
+            if value is not None and not blank:
+                distinct.add(json.dumps(value,sort_keys=True,ensure_ascii=False,allow_nan=False))
             try:
                 value = float(value)
                 if not math.isfinite(value):
                     raise ValueError("非有限数字")
                 values.append(value)
-            except (TypeError, ValueError):
+            except (TypeError, ValueError, OverflowError):
                 missing += 1
+        profiles[field] = {'source_types':types, 'absent':absent, 'null':nulls, 'blank_string':blanks,
+                           'distinct_nonempty':len(distinct), 'numeric_cast_failures':missing,
+                           'identity_comparison':'原始类型与值；不把文字001和1合并'}
         if values:
             numeric[field] = {"n": len(values), "missing_or_non_numeric": missing,
                               "min": min(values), "max": max(values),
                               "mean": sum(values)/len(values), "sum": sum(values),
                               "first": values[0], "last": values[-1]}
     return {"dataset_id": dataset_id, "sha256": record["sha256"], "path": path,
-            "n_rows": len(rows), "fields": fields, "numeric": numeric}
+            "n_rows": len(rows), "fields": fields, "numeric": numeric, 'field_profiles':profiles,
+            'verification_scope':{'source_integrity':'hash_verified', 'cross_dataset_links':'not_checked',
+                'source_dictionary':'not_verified_by_numeric_summary',
+                'guidance':'numeric仅为可转为浮点的值摘要，不改变原数据。ID范围重叠不能证明逐个端点匹配；结构绑定按完整原ID集合核对外键。文字类别不因不能转数字而被认定为缺失，参照field_profiles与源字典。'}}
 
 
 def bind_parameters(bindings,model_id=None):
@@ -270,15 +285,19 @@ def bind_parameters(bindings,model_id=None):
         if meta.get('scope') and source_scope!=meta['scope']:
             raise ValueError('源地区/主体范围声明与数据元数据不一致')
         if source_scope and target_scope and source_scope!=target_scope:
-            raise ValueError('源数据与模型的地区/主体范围不一致')
+            raise ValueError('源数据与模型的地区/主体范围不一致：source_scope='+repr(source_scope)
+                +'，target_scope='+repr(target_scope)+'。这些字段只写地区/群体标识，不是模型变量、年份或初值用途；须核实际范围后填一致的标识，不能用删范围要求或改标签冒充已匹配。用于独立外部参考且确未声明目标范围时可不填target_scope，按原话保留使用假设')
         if parameter in params:
             raise ValueError("一个参数不能由多个数据映射覆盖")
         params[parameter] = value
         evidence.append({**binding, "resolved_value": value, "sha256": stats["sha256"],
                          "source": record['source'],'source_unit':source_unit,'target_unit':target_unit,
+                         "records_used":stats["n_rows"],"license":record.get("license"),
+                         **{key:meta[key] for key in ('reference','collection_id','method') if key in meta},
                          'compatibility_status':status,'source_scope':source_scope,'target_scope':target_scope,
                          'role':record['role'],'frequency':meta.get('frequency'),
-                         'scope_status':'verified' if source_scope and target_scope else 'not_declared'})
+                         'scope_status':'declared_match' if source_scope and target_scope else 'not_declared',
+                         'scope_verification':'matching_declared_labels_not_source_row_membership'})
     return params, evidence
 
 

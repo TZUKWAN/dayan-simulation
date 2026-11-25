@@ -17,28 +17,69 @@
   }
   function status(value) {const el=$('#researchStatus'); if(el)el.textContent=value;}
   function announce(value) {if(window.DAYAN_NOTICE)window.DAYAN_NOTICE(value); status(value);}
+  async function showDesign(designId, bound=false) {
+    const sessionQuery=bound?'?session_id='+encodeURIComponent(nativeSession):'';
+    const record=await request('/api/model-designs/'+encodeURIComponent(designId)+sessionQuery);
+    const list=values=>values?.length?`<ul>${values.map(value=>`<li>${esc(value)}</li>`).join('')}</ul>`:'';
+    const section=(title,body,open=false)=>body?`<details ${open?'open':''}><summary>${title}</summary>${body}</details>`:'';
+    const latest=Object.fromEntries(record.stages.map(stage=>[stage.step,stage.output]));
+    const plan=latest.plan,idea=latest.concept,revision=latest.revision,review=record.review||latest.review;
+    const fields=[['关键机制','mechanisms'],['状态和参数','variables'],['数据与校准','data'],['边界与假设','assumptions'],['局限','limitations'],['观测量','observables'],['验收方法','verification']];
+    const scene=typeof plan?.scene==='object'?list(Object.entries(plan.scene).map(([key,value])=>`${key} · ${typeof value==='string'?value:JSON.stringify(value)}`)):plan?`<p>${esc(plan.scene)}</p>`:'';
+    const planDetails=plan?scene+fields.map(([title,key])=>`<strong>${title}</strong>${list(plan[key])}`).join(''):'';
+    const tables=plan?section('原文覆盖与验收',plan.coverage.map(item=>`<blockquote>${esc(item.quote)}</blockquote><p>${esc(item.implementation)}<br>${esc(item.test)}</p>`).join('')):'';
+    const issues=latest.critique?.map(item=>{
+      const resolution=revision?.resolutions.find(entry=>entry.id===item.id);
+      return `${item.problem} ${resolution?.change||item.fix}`;
+    });
+    const scope=record.execution?.coverage;
+    const label=record.status==='approved'?(scope?.status==='partial'?'可执行范围已审查 · 原需求部分覆盖':'方案审查通过'):
+      record.status==='blocked'?'方案需要修正':record.status==='pending'?'审查已保存，等待续接':'方案审查中';
+    const conclusion=review?.approved?list(review.checks.map(item=>`${item.quote} · ${item.evidence}`)):list(review?.issues||[record.error].filter(Boolean));
+    window.DAYAN_MODAL('建模记录',`<div class="design-review"><strong>${label}</strong><blockquote>${esc(record.request)}</blockquote>
+      ${section('建模思路',idea?`<p>${esc(idea.approach)}</p>${list(idea.assumptions)}`:'')}
+      ${section('缺陷与修正',(revision?`<p>${esc(revision.approach)}</p>`:'')+list(issues),record.status==='blocked')}${section('实施方案',planDetails,record.status==='approved')}
+      ${tables}${section('当前场景缺口',list(scope?.gaps),true)}${section('独立审查',conclusion,record.status==='blocked')}</div>`);
+  }
   function connectNative(panel) {
     const banner=document.createElement('div');
     banner.id='nativeContextBar';
-    banner.textContent=nativeSession?'DSH 原生会话已连接 · 此工作台只同步当前会话真实结果':'DSH原生会话尚未连接';
+    banner.className='native-context';banner.hidden=true;
+    const detail=document.createElement('button');detail.className='ws-button';banner.append(detail);
+    function showNotice(notice) {
+      banner.hidden=!notice;
+      if(!notice)return;
+      detail.textContent=notice.label;detail.dataset.state=notice.state;
+      detail.onclick=()=>{
+        if(notice.designId&&(!notice.error||notice.label==='方案需修正')){
+          showDesign(notice.designId,true).catch(error=>announce(error.message));
+        }else window.DAYAN_MODAL(notice.label,`<div class="design-review"><p>${esc(notice.error)}</p></div>`);
+      };
+    }
     $('#pageOverview')?.prepend(banner);
     window.DAYAN_NATIVE_BRIDGE={draft(text){
       if(!nativeSession){announce('DSH原生会话尚未连接，请等待连接完成后重试。');return;}
       window.parent.postMessage({type:'dayan:native-draft',sessionId:nativeSession,text},query.get('parent_origin')||location.origin);
       announce('草稿已交给DSH原生输入框，请在左侧发送。');
     }};
-    if(!nativeSession)return;
+    if(!nativeSession){showNotice({label:'对话未连接',state:'failed',error:'DSH 尚未绑定当前对话。'});return;}
 
     const key='dayan_native_workspace_vnext:'+nativeSession;
-    let checkpoint={after:0,target:null,page:null}, following=false, ready=false;
+    let checkpoint={after:0,target:null,page:null}, following=false, ready=false, timer, checkedIdleArchive=false;
     try{checkpoint={...checkpoint,...JSON.parse(sessionStorage.getItem(key)||'null')};}catch{}
+    delete checkpoint.banner;
     const save=()=>{try{sessionStorage.setItem(key,JSON.stringify(checkpoint));}catch{}};
     const view=window.DAYAN_RESULTS;
+    if(checkpoint.target?.kind==='dataset'){
+      view.datasetFocus=checkpoint.target.id;
+      checkpoint.target=null;
+    }
     window.addEventListener('dayan:result',e=>{
+      if (view.context?.history || view.context?.idleArchive) return;
       const id=view.payload?.experiment_id||view.payload?.analysis_id||e.detail;
       if(id){checkpoint.target={kind:'record',id};if(ready)save();}
     });
-    window.addEventListener('dayan:page',e=>{if(ready){checkpoint.page=e.detail;save();}});
+    window.addEventListener('dayan:page',e=>{if(ready&&e.detail==='overview'){checkpoint.page=e.detail;save();}});
     const open=async({kind,id,restoreRun})=>{
       if(kind==='record'&&!await view.restore(id))return;
       if(kind==='study'){panel.open=true;await showStudy(id,restoreRun);}
@@ -47,18 +88,32 @@
       checkpoint.target={kind,id,restoreRun};
     };
     const follow=async()=>{
-      if(following||document.hidden)return;
+      if(following||document.hidden||document.body.dataset.page!=='overview')return;
+      clearTimeout(timer);
       following=true;
+      let interval=1500;
       try{
         const r=await request('/api/integrations/dsh/events?session_id='+encodeURIComponent(nativeSession)+'&after='+checkpoint.after);
+        if(document.body.dataset.page!=='overview')return;
+        const jobs=r.active_jobs||[];
+        if(jobs.length)interval=680;
+        try{await view.observeNative(jobs);}catch(e){status('暂时未能读取任务采样：'+e.message);}
         for(const event of r.events){
-          banner.textContent=`DSH实际工具 ${event.tool} · ${event.ok?'已执行':'未完成'}${event.validation_pass===false?' · 留出未通过':''}`;
-          if(!event.ok)status(event.error||'原生工具执行未完成');
-          else{
-            const record=event.experiment_id||event.analysis_id||event.run_id;
+          if(document.body.dataset.primaryPage!=='overview')break;
+          if(event.status==='revision_required'){
+            checkpoint.notice={label:'方案需修订',state:'failed',designId:event.design_id,error:event.error};
+          }else if(!event.ok&&!['search_models','get_capabilities','validate_model'].includes(event.tool)){
+            const label=event.tool==='design_model'&&event.design_id?'方案需修正':event.tool==='build_model'?'建模未完成':'执行未完成';
+            checkpoint.notice={label,state:'failed',designId:event.design_id,error:event.error||'工具未返回可用结果'};
+          }else if(event.ok){
+            const record=event.tool==='report_run'?null:event.experiment_id||event.analysis_id||event.run_id;
+            if(event.design_id&&event.status==='pending')checkpoint.notice={label:'任务待续接',state:'pending',designId:event.design_id};
+            else if(event.design_id&&event.status==='approved')checkpoint.notice={label:'方案已审查',state:'approved',designId:event.design_id};
+            if(record||event.study_id||event.dataset_id||event.collection_id)checkpoint.notice=null;
+            if(event.validation_pass===false)checkpoint.notice={label:'留出检验未通过',state:'failed',error:event.error||'具体指标见该研究的验证结果。'};
             if(event.study_id)await open({kind:'study',id:event.study_id,restoreRun:!!event.run_id});
             else if(record)await open({kind:'record',id:record});
-            else if(event.dataset_id)await open({kind:'dataset',id:event.dataset_id});
+            else if(event.dataset_id)view.datasetFocus=event.dataset_id;
             else if(event.collection_id){
               await open({kind:'collection',id:event.collection_id});
               status(`真实采集 ${event.n_records??'?'} 条 · ${event.artifact_role||'待检查'} · ${event.status||''} · ${event.collection_id}；需显式绑定后才进入模型。`);
@@ -66,25 +121,35 @@
             if(event.file)$('#studyReportLinks')?.insertAdjacentHTML('beforeend',`<a href="${esc(event.file)}" download>下载原生AI本次报告</a>`);
           }
           checkpoint.after=event.seq;
-          checkpoint.banner=banner.textContent;
           save();
         }
-      }catch(e){banner.textContent='原生结果同步未完成：'+e.message;}
-      finally{following=false;}
+        showNotice(checkpoint.notice);
+        if(!checkedIdleArchive&&!jobs.length&&!checkpoint.target&&!view.runs.length&&!view.hasPendingView()
+          &&document.body.dataset.page==='overview'){
+          const history=await request('/api/history?metadata_only=true&limit=30');
+          checkedIdleArchive=true;
+          const latest=history.entries.find(row=>row.complete&&row.run_id);
+          if(latest&&!view.runs.length&&!view.hasPendingView()&&document.body.dataset.page==='overview'){
+            const shown=await view.restore(latest.run_id,{idleArchive:true});
+            if(shown&&view.context.idleArchive&&document.body.dataset.page==='overview')view.seek(view.end);
+          }
+        }
+      }catch(e){showNotice({label:'同步暂时中断',state:'failed',error:e.message});}
+      finally{following=false;if(!document.hidden)timer=setTimeout(follow,interval);}
     };
     async function resume(){
       try{
         if(!query.has('run')&&!query.has('study')&&checkpoint.target){
           await open(checkpoint.target);
-          if(checkpoint.page)switchPage(checkpoint.page,false);
-          if(checkpoint.banner)banner.textContent=checkpoint.banner;
         }
+        showNotice(checkpoint.notice);
       }catch(e){
         checkpoint={after:0,target:null,page:null};
-        banner.textContent='正在从会话记录重新同步：'+e.message;
+        showNotice({label:'会话记录正在恢复',state:'failed',error:e.message});
       }
-      ready=true;save();follow();window.setInterval(follow,2000);
+      ready=true;save();follow();
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)follow();});
+      window.addEventListener('dayan:page',e=>{if(e.detail==='overview')follow();});
     }
     queueMicrotask(resume);
   }
@@ -177,8 +242,11 @@
   }
   async function showStudy(id,restore=false,accepted=()=>true) {
     const revision=++studyRevision;
+    window.DAYAN_STUDY_FACTS=null;
+    window.dispatchEvent(new CustomEvent('dayan:study-facts'));
     const r=await request('/api/research/studies/'+encodeURIComponent(id));if(revision!==studyRevision||!accepted())return;
     const s=r.study;currentStudy=id;window.DAYAN_STUDY=s;
+    if(s.protocol?.version==='dayan-model-study-v1')return showModelStudy(s,r.reports||[],restore);
     const cal=s.calibration, host=$('#researchEvidence');if(!host)return;
     window.dispatchEvent(new CustomEvent('dayan:study',{detail:s}));
     paintDiagnostics(s);
@@ -205,9 +273,64 @@
     status(cal?`归档验证结论 · ${outcome}`:'研究合同已准备，可执行校准和独立测试。');
     return s;
   }
+  async function showModelStudy(study,reports,restore) {
+    const p=study.protocol,s=study.state,e=p.evaluation,host=$('#researchEvidence');if(!host)return;
+    const labels={running:'研究计算中',complete:'研究求值完成',failed:'研究检验未通过',invalidated:'研究合同已失效',
+      passed_declared_checks:'通过事前声明检查',failed_predeclared_tolerance:'误差未达到事前标准',
+      failed_predeclared_diagnostics:'数值诊断未通过',passed_declared_checks_with_reused_holdout:'留出已有使用记录',
+      evaluated_without_full_acceptance_thresholds:'已求值，缺少完整事前验收标准'};
+    const value=x=>Number.isFinite(x)?x.toPrecision(5):'尚无评分';
+    const summary={kind:'model_study',study_id:s.study_id,question:p.question,model_id:e.model.model_id,
+      run_id:s.selected_run?.run_id,status:s.status,conclusion:s.conclusion};
+    window.DAYAN_STUDY=summary;window.dispatchEvent(new CustomEvent('dayan:study',{detail:summary}));
+    let bar=$('#studyValidationBar');
+    if(!bar){bar=document.createElement('div');bar.id='studyValidationBar';$('#pageOverview')?.prepend(bar);}
+    const outcome=labels[s.conclusion]||labels[s.status]||s.status;
+    bar.dataset.state=s.status;bar.innerHTML=`<strong>${esc(outcome)}</strong><span>${esc(e.model.definition.name)} · ${s.trials.length} 次实际求值</span>`;
+    const selected=s.selection;
+    const stages=[['训练',s.training?.find(r=>r.candidate===selected?.candidate),'training'],
+      ['验证',s.validation?.find(r=>r.candidate===selected?.candidate),'validation'],['留出',s.holdout,'holdout']];
+    host.innerHTML=`<strong>${esc(p.question)}</strong><p>${esc(outcome)}${selected?' · 所选参数 '+esc(Object.entries(selected.parameters).map(([k,v])=>k+' = '+v).join('，')):''}</p>
+      <div class="research-time-roles">${stages.map(([name,result,role])=>`<div data-role="${role}"><b>${name}</b><span>标准化均方损失 ${esc(value(result?.loss))}</span><span>事前阈值 ${esc(p.max_loss[role]??'未声明')}</span></div>`).join('')}</div>
+      <p>${s.selected_run?'大屏显示所选参数的一次实际状态运行；重复波动由研究报告另列。':'模型基线是中间结果，所选参数的完整状态尚未归档。'}</p>
+      <details><summary>数据与检验依据</summary><p>${esc(e.targets.sources.map(row=>row.source).join('；'))}</p><p>固定前向三分区；每个候选独立实际求值。${p.diagnostics?.length?`已声明 ${p.diagnostics.length} 项数值与机制诊断。`:'未声明数值与机制诊断。'}</p><p>拟合误差不证明领域机制、参数可识别或政策因果。</p><code>${esc(s.study_id)}</code></details>
+      ${summary.run_id?'<button type="button" id="openStudyRun">查看所选模型实际运行</button>':''}<div id="studyReportLinks"></div>`;
+    if(summary.run_id){$('#openStudyRun').onclick=()=>window.DAYAN_RESULTS?.restore(summary.run_id);if(restore)await window.DAYAN_RESULTS?.restore(summary.run_id);}
+    $('#studyDiagnostics')?.remove();
+    const report=reports.find(row=>row.status!=='integrity_failed'&&row.file);
+    for(const row of reports){
+      const link=document.createElement(row.file?'a':'p');link.textContent=row.file?'下载研究报告':row.error||'报告文件校验失败';
+      if(row.file){link.href=row.file;link.download='';}$('#studyReportLinks').append(link);
+    }
+    if(report){
+      const section=document.createElement('section');section.id='studyDiagnostics';section.dataset.studyId=s.study_id;
+      const figures=(report.figure_assets||[]).filter(row=>/^figure_\d+\.png$/.test(row.file));
+      const base=report.file.slice(0,report.file.lastIndexOf('/')+1);
+      section.innerHTML=`<div class="study-caption"><b>同源研究分析</b><span>${esc(outcome)}</span></div><div class="study-chart-grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,620px),1fr))">${figures.map(row=>`<article class="panel"><div class="panel-head"><h2>${esc(row.title)}</h2></div><a href="${esc(base+row.file)}" target="_blank" rel="noopener"><img loading="lazy" style="width:100%;height:auto" src="${esc(base+row.file)}" alt="${esc(row.title)}"></a><p style="font-size:14px;line-height:1.6;padding:0 14px">${esc(row.caption)}</p></article>`).join('')}</div>`;
+      $('#pageOverview .workspace-grid')?.after(section);
+      if(report.facts_url) {
+        const revision=studyRevision;
+        try {
+          const facts=await request(report.facts_url);
+          if(revision===studyRevision&&window.DAYAN_STUDY?.study_id===s.study_id
+            &&facts.study_id===s.study_id&&facts.result_run?.run_id===summary.run_id
+            &&facts.evidence_sha256===report.evidence_sha256) {
+            window.DAYAN_STUDY_FACTS=facts;
+            window.dispatchEvent(new CustomEvent('dayan:study-facts'));
+          }
+        } catch(error) {section.dataset.factsError=String(error.message);}
+      }
+    }
+    const button=$('#calibrateStudy');if(button){button.hidden=s.status!=='running'&&!!s.selected_run;button.disabled=s.status==='invalidated';button.textContent=s.status==='running'?'继续研究计算':'生成所选模型实际状态';}
+    for(const b of document.querySelectorAll('[data-study-report]')){
+      b.hidden=b.dataset.studyReport!=='academic';b.disabled=s.status==='running'||s.status==='invalidated'||(!s.selected_run&&!!s.holdout);
+    }
+    status(outcome);return summary;
+  }
   function boot() {
-    const style=document.createElement('style');style.textContent=`.preset-form,#studyForm{display:grid;gap:7px;padding:8px 0}.preset-form label,#studyForm label{display:grid;gap:3px;font-size:11px}.preset-form input,#studyForm input,#studyForm textarea,#studyForm select{box-sizing:border-box;max-width:100%;width:100%;padding:5px;background:#101c29;border:1px solid #40536a;color:#d5e9ef}.research-scroll{max-height:260px;overflow:auto}.research-scroll table{width:100%;font-size:10px;border-collapse:collapse}.research-scroll td{border-bottom:1px solid #314254;padding:5px}.research-task{padding:8px 0;border-bottom:1px solid #314254}.research-task p,.research-note,#researchEvidence{font-size:11px;line-height:1.5}.research-task small{overflow-wrap:anywhere}#researchEvidence pre{white-space:pre-wrap;word-break:break-all;font-size:10px}#researchStatus{font-size:11px;line-height:1.5;white-space:pre-wrap}.research-error{color:#ffb380}#studyReportLinks a{display:inline-block;margin:6px}.dsh-native-embed #aiDrawer,.dsh-native-embed [data-rail-tab="ai"]{display:none!important}.dsh-native-embed.mode-simple #operationRail{display:none!important}.dsh-native-embed.mode-simple #commandShell{grid-template-columns:minmax(0,1fr)!important}.dsh-native-embed #assistantButton,.dsh-native-embed .ai-fab{display:none!important}@media(min-width:581px) and (max-width:1100px){.dsh-native-embed .analysis-column{grid-template-columns:minmax(0,1fr)}}#nativeContextBar{padding:6px 12px;font-size:11px;color:#9cc8dc;border-bottom:1px solid #314254}`;document.head.append(style);
+    const style=document.createElement('style');style.textContent=`.preset-form,#studyForm{display:grid;gap:7px;padding:8px 0}.preset-form label,#studyForm label{display:grid;gap:3px;font-size:11px}.preset-form input,#studyForm input,#studyForm textarea,#studyForm select{box-sizing:border-box;max-width:100%;width:100%;padding:5px;background:#101c29;border:1px solid #40536a;color:#d5e9ef}.research-scroll{max-height:260px;overflow:auto}.research-scroll table{width:100%;font-size:10px;border-collapse:collapse}.research-scroll td{border-bottom:1px solid #314254;padding:5px}.research-task{padding:8px 0;border-bottom:1px solid #314254}.research-task p,.research-note,#researchEvidence{font-size:11px;line-height:1.5}.research-task small{overflow-wrap:anywhere}#researchEvidence pre{white-space:pre-wrap;word-break:break-all;font-size:10px}#researchStatus{font-size:11px;line-height:1.5;white-space:pre-wrap}.research-error{color:#ffb380}#studyReportLinks a{display:inline-block;margin:6px}`;document.head.append(style);
     const host=$('#proConsole');if(!host)return;
+    $('#modelDesignButton').onclick=event=>showDesign(event.currentTarget.dataset.designId).catch(error=>announce(error.message));
     const panel=document.createElement('details');panel.id='researchPanel';panel.innerHTML=`<summary>真实数据建模与独立验证</summary><form id="studyForm"><label>原始研究问题（地区、指标、年份、模型）<textarea id="researchQuestionInput" required rows="3"></textarea></label><label>完整采集批次<input id="researchCollection" required placeholder="collection_id"></label><label>描述性模型<select id="researchFamily"><option value="linear">线性趋势</option><option value="exponential">指数趋势</option><option value="logistic">Logistic 增长</option></select></label><label>参数网格 JSON<textarea id="researchGrid" required rows="2" placeholder='例如 {"slope":[-0.5,0,0.5]}'></textarea></label><label>事前 RMSE 阈值（原单位）<input id="researchTolerance" type="number" min="0" step="any" required></label><label>末尾独立测试年份<input id="researchHoldout" type="number" min="1" value="2" required></label><label>训练与测试之间的验证年份（0 为两段）<input id="researchValidation" type="number" min="0" value="0" required></label><label>进入验证的训练排序前几名<input id="researchSelection" type="number" min="1" max="30" value="3" required></label><button>保存研究合同</button></form><button id="calibrateStudy" disabled>执行校准与独立测试</button><p><button data-study-report="academic" disabled>学术报告</button> <button data-study-report="data_quality" disabled>数据质量报告</button> <button data-study-report="policy" disabled>政策适用性简报</button></p><div id="researchStatus" role="status">填写原始问题和已完成的实际采集批次。</div><div id="researchEvidence"></div><details><summary>已保存研究</summary><div id="studyHistory"></div><button id="refreshStudies">刷新研究列表</button></details>`;
     const form=panel.querySelector('#studyForm'), editor=document.createElement('details');
     editor.id='studyEditor';editor.open=!currentStudy;editor.innerHTML='<summary>新建研究合同</summary>';
@@ -216,7 +339,7 @@
     $('#refreshSources').onclick=()=>loadSources(true);
     mountSpatialSource();
     $('#studyForm').onsubmit=async e=>{e.preventDefault();const button=e.currentTarget.querySelector('button');button.disabled=true;status('校验国家、指标、时期、单位与数据角色…');try{const r=await tool('research_create',{question:$('#researchQuestionInput').value,collection_id:$('#researchCollection').value,model_family:$('#researchFamily').value,param_grid:JSON.parse($('#researchGrid').value),tolerance:Number($('#researchTolerance').value),holdout_years:Number($('#researchHoldout').value),validation_years:Number($('#researchValidation').value),selection_top:Number($('#researchSelection').value)});await showStudy(r.payload.study_id);}catch(error){status('合同未建立：'+error.message);}finally{button.disabled=false;}};
-    $('#calibrateStudy').onclick=async()=>{const button=$('#calibrateStudy');button.disabled=true;status('使用统一仿真引擎实际评估参数网格…');try{const r=await tool('research_calibrate',{study_id:currentStudy});await showStudy(r.payload.study_id);}catch(e){status('校准未完成：'+e.message);button.disabled=false;}};
+    $('#calibrateStudy').onclick=async()=>{const button=$('#calibrateStudy');button.disabled=true;status('使用统一仿真引擎实际评估参数网格…');try{let r=await tool('research_calibrate',{study_id:currentStudy});if(currentStudy?.startsWith('MS-')){while(r.payload.next_action&&r.payload.next_action.action!=='research_report'){const next=r.payload.next_action;r=await tool(next.action,next.arguments);}}await showStudy(r.payload.study_id);}catch(e){status('校准未完成：'+e.message);button.disabled=false;}};
     for(const button of panel.querySelectorAll('[data-study-report]'))button.onclick=async()=>{
       const id=currentStudy;button.disabled=true;status('核对研究版本并生成同源报告…');
       try{
@@ -232,7 +355,9 @@
     if(currentStudy)showStudy(currentStudy).catch(e=>status(e.message));
     window.addEventListener('dayan:page', e=>{
       const s=window.DAYAN_STUDY, selected=window.DAYAN_RESULTS?.runs[window.DAYAN_RESULTS.selected]?.run_id;
-      if(s&&(e.detail==='lab'||e.detail==='overview'&&selected===s.run_id))paintDiagnostics(s);
+      if(s&&(e.detail==='lab'||e.detail==='overview'&&selected===s.run_id)){
+        if(s.kind==='model_study')showStudy(s.study_id).catch(error=>status(error.message));else paintDiagnostics(s);
+      }
     });
     if(query.get('embed')==='dsh') {
       document.body.classList.add('dsh-native-embed');
@@ -297,7 +422,7 @@
     button.onclick=()=>{switchPage('lab'); document.querySelector('[data-lab-tab=calibration]')?.click();};
     parent.prepend(button);
     host.append(panel);panel.open=true;
-    if(window.DAYAN_STUDY)paintDiagnostics(window.DAYAN_STUDY);
+    if(window.DAYAN_STUDY&&window.DAYAN_STUDY.kind!=='model_study')paintDiagnostics(window.DAYAN_STUDY);
   }
   window.DAYAN_RESEARCH={loadSources,showStudy,associateRun,clearContext,mount};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();

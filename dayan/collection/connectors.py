@@ -348,7 +348,7 @@ def ilostat_bulk(params: dict, budget: int) -> Iterator[Page]:
 
 
 # ============ 文献 / 事件 / 文本 ============
-def crossref(params: dict, budget: int) -> Iterator[Page]:
+def crossref(params: dict, budget: int, *, timeout=75) -> Iterator[Page]:
     """Crossref works 检索（polite pool 带 mailto）。"""
     q = {"query": params["query"], "rows": str(params.get("rows", 50)),
          "offset": str((params.get("_cursor") or {}).get("offset", 0))}
@@ -360,7 +360,7 @@ def crossref(params: dict, budget: int) -> Iterator[Page]:
     total = None
     while budget > 0:
         url = base + urllib.parse.urlencode(q)
-        raw, _ = _get(url)
+        raw, _ = _get(url, timeout=timeout)
         data = json.loads(raw).get("message", {})
         items = data.get("items") or []
         total = data.get("total-results")
@@ -382,7 +382,7 @@ def crossref(params: dict, budget: int) -> Iterator[Page]:
         budget -= 1
 
 
-def openalex(params: dict, budget: int) -> Iterator[Page]:
+def openalex(params: dict, budget: int, *, timeout=75) -> Iterator[Page]:
     """OpenAlex works 检索（mailto polite pool）。"""
     q = {"search": params["search"], "per-page": str(params.get("per_page", 50))}
     if params.get("mailto"):
@@ -395,7 +395,7 @@ def openalex(params: dict, budget: int) -> Iterator[Page]:
     end_page = page + budget
     while page < end_page:
         url = base + urllib.parse.urlencode(q) + f"&page={page}"
-        raw, _ = _get(url)
+        raw, _ = _get(url, timeout=timeout)
         data = json.loads(raw)
         total = data.get("meta", {}).get("count")
         records = [{
@@ -643,8 +643,15 @@ def ckan_search(params: dict, budget: int) -> Iterator[Page]:
         budget -= 1
 
 
-def _file_page(url, format, *, provenance=None, archive_member=None):
-    raw, final = _get(url)
+def _file_page(url, format, *, provenance=None, archive_member=None, download_cap=DEFAULT_PAGE_CAP,
+               member_only=False, archive_md5=None, retry_url=None, parse_options=None):
+    raw, final = _get(url, cap=download_cap, headers={'Accept-Encoding':'identity'} if archive_md5 else None)
+    if archive_md5:
+        import hashlib
+        if hashlib.md5(raw).hexdigest()!=archive_md5 and retry_url:
+            raw,final=_get(retry_url,cap=download_cap,headers={'Accept-Encoding':'identity'})
+        if hashlib.md5(raw).hexdigest()!=archive_md5:
+            raise ValueError("公开数据包与发布者校验和不一致")
     format = str(format).lower().removesuffix(".zip")
     payload = raw
     provenance = dict(provenance or {})
@@ -654,9 +661,8 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
         with zipfile.ZipFile(io.BytesIO(raw)) as archive:
             members=archive.infolist()
             if len(members)>200: raise ValueError("压缩包条目超过200，须缩小资源")
-            candidates=[m for m in members if not m.is_dir() and m.filename.lower().endswith("."+format)]
-            if archive_member:
-                candidates=[m for m in candidates if m.filename==archive_member]
+            candidates=[m for m in members if not m.is_dir() and
+                        (m.filename==archive_member if archive_member else m.filename.lower().endswith("."+format))]
             if len(candidates)!=1:
                 raise ValueError("压缩包须明确唯一数据文件archive_member；可选："+str([m.filename for m in candidates[:12]]))
             member=candidates[0]
@@ -666,16 +672,20 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
             if len(payload)>DEFAULT_PAGE_CAP: raise ValueError("解压数据超过16MiB")
             provenance.update(archive_member=member.filename,payload_sha256=hashlib.sha256(payload).hexdigest(),
                               archive_note="仅内存读取指定表格；不提取文件，不执行内容")
+            if member_only:
+                provenance.update(archive_sha256=hashlib.sha256(raw).hexdigest(), archive_bytes=len(raw))
+                raw = payload
+    elif member_only:
+        raise ValueError("数据源未返回约定的公开压缩包")
     if payload.lstrip().lower().startswith((b"<!doctype html", b"<html")):
         raise ValueError("实际返回HTML，不能将门户/登录页当表格资源")
-    if format == "csv":
-        reader = csv.DictReader(io.StringIO(payload.decode("utf-8-sig")))
-        if not reader.fieldnames or len(set(reader.fieldnames)) != len(reader.fieldnames):
-            raise ValueError("CSV缺少唯一字段标题")
-        records = list(reader)
-        if any(None in r for r in records):
-            raise ValueError("CSV列数不一致")
+    if format in ("csv", "tsv"):
+        from ..dataset_parsing import parse_table
+        records, parsing = parse_table(payload, parse_options, format=format)
+        provenance['parsing'] = parsing
     elif format in ("json", "geojson", "jsonl"):
+        if parse_options:
+            raise ValueError('此采集器的parse_options仅用于CSV/TSV表格')
         if format == "jsonl":
             records = [json.loads(line) for line in payload.decode("utf-8-sig").splitlines() if line.strip()]
         else:
@@ -683,11 +693,14 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
             if isinstance(data, list):
                 records = data
             elif isinstance(data, dict) and data.get("type") == "FeatureCollection":
-                records = [{**f.get("properties", {}), "geometry": f.get("geometry")} for f in data["features"]]
+                # Preserve feature identity and the original properties namespace.
+                # A property named id/geometry must not overwrite the GeoJSON envelope.
+                records = [{**(f.get("properties") or {}), 'geometry': f.get('geometry'),
+                            'geojson_feature': f} for f in data['features']]
             else:
                 records = data.get("data") if isinstance(data, dict) else None
     else:
-        raise ValueError("仅下载并解析CSV/JSON/JSONL/GeoJSON，不执行脚本或自动解包")
+        raise ValueError("仅下载并解析CSV/TSV/JSON/JSONL/GeoJSON，不执行脚本或自动解包")
     if not isinstance(records, list) or not all(isinstance(r, dict) for r in records):
         raise ValueError("资源必须是可解析的表格记录，目录/HTML/错误响应不能当作数据")
     if len(records) > 100000:
@@ -699,7 +712,39 @@ def _file_page(url, format, *, provenance=None, archive_member=None):
 
 def resource_file(params, budget):
     yield _file_page(params["url"], params["format"], provenance={
-        "source_id": params.get("source_id"), "license": params.get("license", "unknown")},archive_member=params.get("archive_member"))
+        "source_id": params.get("source_id"), "license": params.get("license", "unknown")},
+        archive_member=params.get("archive_member"), parse_options=params.get('parse_options'))
+
+
+def park_visit_speeds(params, budget):
+    """A public ordinary-visit walking-speed sample. No tracks or geometry are imported."""
+    import math
+
+    if set(params) - {"_cursor"}:
+        raise ValueError("该数据版本固定，不接受覆盖来源或字段")
+    page = _file_page(
+        "https://zenodo.org/records/20748587/files/theme-park-visitor-movement-v1.0.0.zip?download=1",
+        "csv", archive_member="kbf/tables/visits.csv", download_cap=36_000_000, member_only=True,
+        archive_md5="ad19abbe1636a0cbda4bf0e153f524ab",
+        retry_url="https://zenodo.org/api/records/20748587/files/theme-park-visitor-movement-v1.0.0.zip/content",
+        provenance={"source_id":"zenodo", "license":"CC-BY-4.0", "reference":"https://doi.org/10.5281/zenodo.20748587",
+                    "units":{"avg_speed_mps":"m/s"}, "scope":"ordinary_theme_park_visits",
+                    "method":"按发布者 analyzed=1 选行，仅保留日常访问平均步速。步速用于输入参考，不代表无干扰自由速度或事故数据。"},
+    )
+    rows = []
+    for row in page.records:
+        if row.get("analyzed") != "1":
+            continue
+        speed = float(row["avg_speed_mps"])
+        if not math.isfinite(speed) or speed <= 0:
+            raise ValueError("来源标记已分析的样本含无效步速")
+        rows.append({"avg_speed_mps":speed})
+    if not rows:
+        raise ValueError("发布表内没有可用的实测步速")
+    page.meta["provenance"]["published_rows"] = len(page.records)
+    page.records = rows
+    page.meta["total"] = len(rows)
+    yield page
 
 
 def huggingface_file(params, budget):
@@ -753,10 +798,11 @@ CONNECTORS = {
     "huggingface_datasets": huggingface_datasets,
     "web_page": web_page,
     "resource_file": resource_file, "huggingface_file": huggingface_file, "ckan_resource": ckan_resource,
+    "park_visit_speeds": park_visit_speeds,
 }
 
 CONNECTOR_SOURCE = {   # 连接器 → 主要来源（可一对多）
-    "huggingface_file": "huggingface",
+    "huggingface_file": "huggingface", "park_visit_speeds": "zenodo",
     "worldbank": "wb_indicators", "worldbank_data360":"wb_data360", "eurostat_jsonstat": "eurostat",
     "unsdg": "unsdg", "who_gho": "who_gho", "unesco_uis": "unesco_uis",
     "us_census": "us_census", "oecd_sdmx": "oecd_sdmx",

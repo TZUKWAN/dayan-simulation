@@ -277,7 +277,7 @@
   }
   async function recent() {
     const h=await api('/api/history?metadata_only=true&limit=60'),select=$('#analyticsPick'),previous=select.value;
-    select.replaceChildren(new Option('选择已保存的运行或实验',''),...h.entries.map(r=>new Option(`${r.model_id||''} · ${r.intent||r.kind} · ${r.run_id}`,r.run_id)));
+    select.replaceChildren(new Option('选择已保存的运行或实验',''),...h.entries.map(r=>new Option(`${r.title||r.model_id} · ${r.run_id}`,r.run_id)));
     if(h.entries.some(r=>r.run_id===previous))select.value=previous;
     return h.entries;
   }

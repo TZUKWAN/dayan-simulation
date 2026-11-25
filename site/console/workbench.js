@@ -59,6 +59,7 @@
     write('#connectionStatus', '引擎在线');
     $('#connectionStatus').dataset.state = 'online';
     $('#notificationCount').hidden = !active;
+    $('#notificationButton').hidden = !active || embedded;
     write('#notificationCount', active);
     write('#missionSample', date(sample.sampled_at));
     write('#missionJobs', `${queue.running} / ${queue.queued}`);
@@ -78,7 +79,8 @@
       <div><span>数据卷可用</span><b>${bytes(resources.disk_free_bytes)} GiB</b></div>
       <div><span>引擎已运行</span><b>${number(Math.round(sample.uptime_seconds))} 秒</b></div>
       <div><span>规划器</span><b>${sample.planner === 'configured' ? '语言模型已配置' : '规则规划可用'}</b></div>
-      <div><span>执行源码</span><code title="${esc(sample.revision)}">${esc(sample.revision?.slice(0, 12))}</code></div>
+      <div><span>服务进程版本</span><code title="${esc(sample.loaded_revision||sample.revision)}">${esc((sample.loaded_revision||sample.revision)?.slice(0, 12))}</code></div>
+      ${sample.restart_required?`<div><span>磁盘源码已更新</span><code title="${esc(sample.disk_revision)}">${esc(sample.disk_revision?.slice(0,12))}</code></div><p>服务进程尚未重新加载；实际运行版本以该次归档为准。</p>`:''}
       </div>`;
   }
   async function refreshStatus() {
@@ -88,6 +90,7 @@
       status = null;
       write('#connectionStatus', '引擎连接异常');
       $('#notificationCount').hidden = true;
+      $('#notificationButton').hidden = true;
       $('#connectionStatus').dataset.state = 'error';
       write('#missionSample', '实时状态不可用');
       write('#missionJobs', '—');
@@ -172,10 +175,14 @@
   }
 
   const commandActions = [
+    ...[['仿真现场','overview'],['历史记录','replay'],['模型库','models'],['数据中心','data'],['研究设计','lab'],['实验分析','analytics'],['机制案例','scenarios'],['系统总览','mission']]
+      .map(([label,page]) => [label, () => switchPage(page)]),
+    ['刷新总览', () => {switchPage('mission'); Promise.allSettled([mission(true),refreshStatus()]);}],
     ['仿真指挥 · 向 AI 描述需求', () => window.toggleAIDrawer()],
-    ['专业参数 · 检查或调整模型合同', () => {switchPage('overview'); window.DAYAN_COMMAND.setMode('professional');}],
+    ['参数 · 查看或调整模型参数', () => window.DAYAN_COMMAND.openParameters()],
     ['当前运行 · 播放或暂停', () => {switchPage('overview'); const s = window.DAYAN_RESULTS; if (s.runs.length) s.setPlaying(!s.playing);}],
     ['当前运行 · 研究包', () => {switchPage('overview'); const a = $('#exportBundle'); if (a.href) a.click(); else window.DAYAN_NOTICE('需要完整的运行档案。');}],
+    ['工作台说明', () => $('#helpButton').click()],
     ['切换全屏', () => $('#fullscreen').click()],
   ];
   function palette() {
@@ -189,9 +196,8 @@
     };
     const update = () => {
       const term = query.value.trim().toLowerCase();
-      const pages = [...document.querySelectorAll('[data-nav]')].map(b => [b.title, () => switchPage(b.dataset.nav)]);
       const modelMatches = term ? models.filter(m => `${m.model_id} ${m.name}`.toLowerCase().includes(term)).slice(0,7).map(m => [`${m.model_id} · ${m.name}`, () => openModel(m.model_id)]) : [];
-      const choices = [...pages, ...commandActions].filter(([label]) => !term || label.toLowerCase().includes(term)).concat(modelMatches);
+      const choices = commandActions.filter(([label]) => !term || label.toLowerCase().includes(term)).concat(modelMatches);
       host.replaceChildren();
       for (const [label, perform] of choices) {
         const button = document.createElement('button');
@@ -258,55 +264,41 @@
     window.addEventListener('resize', () => {if (!drag) apply(preferred());});
     apply(preferred());
   }
-  function collapseNavigation(collapsed) {
-    document.body.classList.toggle('nav-collapsed', collapsed);
-    const button = $('#collapseNavigation');
-    button.setAttribute('aria-expanded', String(!collapsed));
-    button.title = collapsed ? '展开导航' : '收起导航';
-    button.setAttribute('aria-label', button.title);
-    button.textContent = collapsed ? '⇥' : '⇤';
-    window.dispatchEvent(new Event('resize'));
-  }
   function notification() {
     const count = status?.queue.jobs.length || 0;
     window.DAYAN_MODAL('任务与通知', `<div class="notification-body">${status ? jobTable(status.queue.jobs) : empty('当前未取得引擎状态。')}<p class="space-note">${count ? '此列表为打开时的队列快照。' : ''}</p><button class="ws-button" data-go="mission">前往运行队列</button></div>`);
   }
-  function navigationIcons() {
-    const paths = {
-      mission:'M4 15h4l2-7 3 10 2-5h5 M3 4h18v16H3z',
-      overview:'M4 10V5h5 M15 5h5v5 M20 14v5h-5 M9 19H4v-5 M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
-      models:'M12 3l8 4.5v9L12 21l-8-4.5v-9z M4 7.5l8 4.5 8-4.5 M12 12v9',
-      lab:'M8 3h8 M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3 M8 14h8',
-      data:'M4 5c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5 M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
-      analytics:'M4 4v16h16 M7 15l4-5 4 2 5-7',
-      replay:'M7 3h10l3 3v15H4V3h3 M14 3v5h6 M8 12h8 M8 16h6',
-    };
-    for(const button of document.querySelectorAll('#systemNavigation [data-nav]')){
-      const icon=button.querySelector('[aria-hidden]');
-      icon.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[button.dataset.nav]}"/></svg>`;
-    }
-  }
   function boot() {
-    navigationIcons();
     resizeRail();
-    collapseNavigation(preference('dayan_nav_vnext') === 'collapsed' || (embedded && !preference('dayan_nav_vnext')));
-    $('#collapseNavigation').onclick = () => {
-      const collapsed = !document.body.classList.contains('nav-collapsed');
-      preference('dayan_nav_vnext', collapsed ? 'collapsed' : 'expanded');
-      collapseNavigation(collapsed);
+    $('#closeResearchDrawer').onclick = () => {
+      const main = document.body.dataset.primaryPage;
+      switchPage(main, false);
+      $(`[data-nav="${main}"]`).focus({preventScroll:true});
     };
-    $('#openPalette').onclick = palette;
     $('#notificationButton').onclick = () => refreshStatus().catch(()=>{}).then(notification);
     document.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {e.preventDefault(); palette();}
+      if (e.key === 'Escape') {
+        const menu = e.target.closest('.control-menu[open]');
+        if (menu) {e.preventDefault(); menu.open = false; menu.querySelector('summary').focus();}
+        else if (!$('#researchDrawer').hidden && !$('.modal-backdrop.open')) $('#closeResearchDrawer').click();
+      }
     });
     document.addEventListener('click', async e => {
+      const activeMenu = e.target.closest('.control-menu');
+      for (const menu of document.querySelectorAll('.control-menu[open]')) {
+        if (menu !== activeMenu || e.target.closest('[data-close-menu]')) {
+          const restoreFocus = menu === activeMenu && menu.contains(document.activeElement);
+          menu.open = false;
+          if (restoreFocus) menu.querySelector('summary').focus({preventScroll:true});
+        }
+      }
       const button = e.target.closest('[data-nav],[data-go],[data-open-run],[data-study],[data-cancel-job],[data-graph-model],[data-open-dataset]');
       if (!button) return;
       const {nav,go,openRun,study,cancelJob,graphModel,openDataset} = button.dataset;
       try {
         if (nav || go) { window.DAYAN_CLOSE_MODAL(); switchPage(nav || go); }
-        if (openRun) await window.DAYAN_RESULTS.restore(openRun);
+        if (openRun) {switchPage('overview');await window.DAYAN_RESULTS.restore(openRun,{userRequested:true});}
         if (study) await window.DAYAN_TOOLS.openStudy(study);
         if (graphModel) {switchPage('models'); await window.DAYAN_TOOLS.openModel(graphModel);}
         if (openDataset) {window.DAYAN_RESULTS.datasetFocus=openDataset;await switchPage('data');}
@@ -319,13 +311,10 @@
         }
       } catch (error) {button.disabled = false; window.DAYAN_NOTICE(error.message);}
     });
-    $('#refreshMission').onclick = () => Promise.allSettled([mission(true),refreshStatus()]);
     document.addEventListener('visibilitychange', () => { clearTimeout(pollTimer); if (!document.hidden) poll(); });
     const params = new URLSearchParams(location.search);
-    const saved = preference('dayan_space_vnext', undefined, true);
-    const initial = embedded || params.has('run') ? 'overview' : Object.hasOwn(pageIds, saved) ? saved : 'mission';
-    switchPage(initial, false);
-    if (initial === 'overview' && !embedded && !params.has('run')) window.DAYAN_COMMAND.restoreDefault();
+    switchPage('overview', false);
+    if (!embedded && !params.has('run')) window.DAYAN_COMMAND.restoreDefault();
     if (!embedded) {
       const input = $('#aiInput');
       input.value = preference('dayan_assistant_draft_vnext',undefined,true) || '';

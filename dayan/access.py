@@ -2,6 +2,7 @@
 
 The local page bootstraps an HttpOnly SameSite cookie. Native DSH reads the same
 private capability file and sends a Bearer header. No secret is put in a URL/HTML.
+The DSH desktop frame uses a separate partitioned cookie.
 """
 from __future__ import annotations
 import hmac
@@ -10,12 +11,14 @@ import os
 import secrets
 import time
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 from starlette.responses import JSONResponse
 from .limits import limits
 
 ROOT=Path(__file__).resolve().parents[1]
 COOKIE='dayan_session'
+DESKTOP_COOKIE='__Host-dayan_dsh_session'
+DESKTOP_ORIGIN='dsh-app://app'
 TOKEN_FILE='.workbench-token'
 
 
@@ -49,6 +52,22 @@ def _loopback(value):
     except ValueError:return False
 
 
+def _desktop_frame_entry(query_string, headers):
+    if headers.get('sec-fetch-mode') != 'navigate' or headers.get('sec-fetch-dest') != 'iframe':
+        return False
+    try:
+        query = parse_qs(query_string.decode('latin-1'), keep_blank_values=True, max_num_fields=16)
+    except ValueError:
+        return False
+    sessions = query.get('dsh_session', [])
+    return (query.get('embed') == ['dsh'] and query.get('parent_origin') == [DESKTOP_ORIGIN]
+            and len(sessions) == 1 and bool(sessions[0]))
+
+
+def _desktop_capability(token):
+    return hmac.digest(token.encode(), b'dayan:dsh-desktop-session:v1', 'sha256').hex()
+
+
 class WorkbenchAccess:
     def __init__(self,app):
         self.app=app;self.active=0
@@ -70,22 +89,34 @@ class WorkbenchAccess:
         origin=headers.get('origin')
         allowed={own}|set(filter(None,os.environ.get('DAYAN_ALLOWED_ORIGINS','').split(',')))
         if origin and origin not in allowed:return await reject(403,'Origin不在明确允许列表')
+        loopback_entry = (path == '/' and method == 'GET' and _loopback(hostname)
+                          and _loopback((scope.get('client') or [''])[0]))
+        desktop_frame = False
         if headers.get('sec-fetch-site')=='cross-site' and not origin:
-            return await reject(403,'拒绝跨站本地工作台访问')
+            desktop_frame = loopback_entry and _desktop_frame_entry(scope['query_string'], headers)
+            if not desktop_frame:
+                return await reject(403,'拒绝跨站本地工作台访问')
         if method=='OPTIONS':
             response=JSONResponse({},status_code=200,headers={
                 'Access-Control-Allow-Origin':origin or own,'Access-Control-Allow-Credentials':'true',
-                'Access-Control-Allow-Methods':'GET, POST, DELETE, OPTIONS',
+                'Access-Control-Allow-Methods':'GET, POST, PATCH, DELETE, OPTIONS',
                 'Access-Control-Allow-Headers':'Content-Type, Authorization','Vary':'Origin'})
             return await response(scope,receive,send)
         protected=(path.startswith('/api/') and path!='/api/health') or path.startswith('/reports/')
-        cookie=''
-        for item in headers.get('cookie','').split(';'):
-            if item.strip().startswith(COOKIE+'='):cookie=item.strip().split('=',1)[1]
-        auth=headers.get('authorization','')
-        candidate=auth[7:] if auth.startswith('Bearer ') else cookie
-        if protected and (not candidate or not hmac.compare_digest(candidate,access_token())):
-            return await reject(401,'需要工作台会话或DSH本机访问令牌')
+        if protected:
+            cookies = dict(item.strip().split('=', 1) for item in headers.get('cookie', '').split(';') if '=' in item)
+            auth = headers.get('authorization', '')
+            bearer = auth.startswith('Bearer ')
+            candidate = auth[7:] if bearer else cookies.get(COOKIE, '')
+            desktop_cookie = cookies.get(DESKTOP_COOKIE) if not bearer and headers.get('sec-fetch-site') == 'same-origin' else None
+            authenticated = False
+            if candidate or desktop_cookie:
+                token = access_token()
+                authenticated = hmac.compare_digest(candidate.encode(), token.encode())
+                if not authenticated and desktop_cookie:
+                    authenticated = hmac.compare_digest(desktop_cookie.encode(), _desktop_capability(token).encode())
+            if not authenticated:
+                return await reject(401,'需要工作台会话或DSH本机访问令牌')
         if protected and self.active>=16:return await reject(429,'并发请求预算已满，请稍后重试')
         body=b''
         if method in ('POST','PUT','PATCH','DELETE'):
@@ -108,11 +139,20 @@ class WorkbenchAccess:
         async def guarded_send(message):
             if message['type']=='http.response.start':
                 extra_headers=[(b'x-content-type-options',b'nosniff'),(b'referrer-policy',b'no-referrer')]
+                response_headers = message.get('headers', [])
                 if protected:extra_headers.append((b'cache-control',b'no-store'))
-                if path=='/' and method=='GET' and _loopback(hostname) and _loopback((scope.get('client') or [''])[0]):
+                if desktop_frame:
+                    # Browser-enforced ancestor check. The query string is not proof of origin.
+                    extra_headers.append((b'content-security-policy', f'frame-ancestors {DESKTOP_ORIGIN}'.encode()))
+                    if message['status'] == 200:
+                        response_headers = [(key, value) for key, value in response_headers if key.lower() != b'cache-control']
+                        extra_headers.append((b'cache-control', b'no-store'))
+                        cookie = f'{DESKTOP_COOKIE}={_desktop_capability(access_token())}; Path=/; HttpOnly; SameSite=None; Secure; Partitioned'
+                        extra_headers.append((b'set-cookie', cookie.encode()))
+                elif loopback_entry:
                     extra_headers.append((b'set-cookie',(COOKIE+'='+access_token()+'; Path=/; HttpOnly; SameSite=Strict').encode()))
                 if origin:extra_headers.extend([(b'access-control-allow-origin',origin.encode()),(b'access-control-allow-credentials',b'true'),(b'vary',b'Origin')])
-                message={**message,'headers':message.get('headers',[])+extra_headers}
+                message={**message,'headers':response_headers+extra_headers}
             await send(message)
         if protected:self.active+=1
         try:return await self.app(scope,replay,guarded_send)

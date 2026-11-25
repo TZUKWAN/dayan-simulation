@@ -36,27 +36,33 @@ def run(base,output,engine='firefox'):
             if not response.ok:raise RuntimeError(str(response.status)+' '+response.text()[:1000])
             return response.json()
         def restore(rid):
-            page.evaluate('(id)=>DAYAN_RESULTS.restore(id)',rid)
+            page.locator('[data-nav=overview]').click()
+            page.evaluate('(id)=>DAYAN_RESULTS.restore(id,{userRequested:true})',rid)
             page.evaluate('DAYAN_RESULTS.setPlaying(false);DAYAN3D.setSmoothing(false)')
+        def open_tool(name):
+            page.keyboard.press('Control+k')
+            expect(page.locator('#paletteQuery')).to_be_focused()
+            page.locator('#paletteQuery').fill(name)
+            page.keyboard.press('Enter')
         try:
             page.goto(base,wait_until='domcontentloaded')
             page.wait_for_function('window.DAYAN_RESULTS && window.DAYAN_COMMAND && window._vizRenderer')
             check('actual WebGL renderer initialized',page.evaluate('!!_vizRenderer.getContext()'))
+            expect(page.locator('#pageOverview')).to_be_visible()
+            open_tool('系统总览')
             expect(page.locator('#missionModels')).not_to_have_text('—',timeout=30000)
             platform=api('/api/workbench/status')
             check('mission control shows measured engine and factory status',
                   platform['resources']['engine_rss_bytes'] > 0 and int(page.locator('#missionModels').inner_text()) >= 497)
-            page.keyboard.press('Control+k')
-            expect(page.locator('#paletteQuery')).to_be_focused()
-            page.locator('#paletteQuery').fill('数据中心')
-            page.keyboard.press('Enter')
+            open_tool('数据中心')
             expect(page.locator('#pageData')).to_be_visible()
-            for space in ('mission','overview','models','lab','data','analytics','replay'):
+            expect(page.locator('#researchDrawer #pageData')).to_be_visible()
+            for space in ('overview','replay'):
                 page.locator(f'[data-nav="{space}"]').click()
                 expect(page.locator(f'[data-nav="{space}"]')).to_have_attribute('aria-current','page')
                 expect(page.locator('[data-workspace-page]:visible')).to_have_count(1)
-            check('keyboard commands and seven routes activate one workspace',True)
-            page.locator('[data-nav="models"]').click()
+            check('two primary pages and contextual research tools are keyboard reachable',page.locator('#systemNavigation [data-nav]').count()==2)
+            open_tool('模型库')
             page.locator('#modelSearch').fill('NET106')
             page.locator('#modelRows [data-model-open="NET106"]').click()
             expect(page.locator('#modelDetail')).to_contain_text('density',timeout=20000)
@@ -69,7 +75,7 @@ def run(base,output,engine='firefox'):
             page.locator('#runModelDetail').click()
             page.wait_for_selector('[data-model-param="density"]')
             contract=api('/api/models/contract/NET106?include_fidelity=false')['contract']
-            check('professional mode exposes every real parameter',set(page.locator('[data-model-param]').evaluate_all('(els)=>els.map(e=>e.dataset.modelParam)'))==set(contract['params']))
+            check('the parameter panel exposes every real parameter',set(page.locator('[data-model-param]').evaluate_all('(els)=>els.map(e=>e.dataset.modelParam)'))==set(contract['params']))
             for key,value in [('cells','80'),('density','.35')]:page.locator('[data-model-param="'+key+'"]').fill(value)
             for selector,value in [('#proTicks','20'),('#proDt','1'),('#proSeed','7')]:page.locator(selector).fill(value)
             page.locator('#proRun').click()
@@ -79,9 +85,11 @@ def run(base,output,engine='firefox'):
             cold=browser.new_page(viewport={'width':1680,'height':1100})
             try:
                 cold.goto(base,wait_until='domcontentloaded')
-                cold.locator(f'#missionHistory [data-open-run="{rid}"]').click()
+                cold.locator('[data-nav=replay]').click()
+                cold.locator('#outputSearch').fill(rid)
+                cold.locator(f'[data-output="{rid}"]').click()
                 cold.wait_for_function('!DAYAN_RESULTS.stream?.partial && DAYAN_RESULTS.stream?.n_frames>0')
-                check('the first scene opened from the overview expands the renderer and its HUD',
+                check('the first scene opened from history expands the renderer and its HUD',
                       cold.evaluate("()=>{const c=document.querySelector('#viz3dContainer canvas').getBoundingClientRect();return c.width>300&&c.height>300&&document.querySelector('#vizStateHud')?.offsetHeight>0;}"))
             finally:
                 cold.close()
@@ -92,11 +100,13 @@ def run(base,output,engine='firefox'):
             by_id={str(m['id']):m for m in meshes};length=next(f['length'] for f in frame['facilities'] if f['type']=='road')
             check('rendered persistent IDs equal archived entity IDs',set(by_id)=={str(e['id']) for e in frame['entities']})
             check('rendered ring positions transform actual saved cells',all(abs(by_id[str(e['id'])]['position'][0]-30*math.cos(e['x']/length*2*math.pi))<1e-8 and abs(by_id[str(e['id'])]['position'][2]-30*math.sin(e['x']/length*2*math.pi))<1e-8 for e in frame['entities']))
+            page.locator('#sceneOptions summary').click()
             page.locator('[data-layer=roadFlow]').click()
             expect(page.locator('#layerReadout')).to_contain_text('整条环路归档通量')
             check('traffic layer visualizes the actual archived whole-road flux',
                   page.evaluate('_vizStateStream.frames[_vizStateIdx].aggregates.flux')==frame['aggregates']['flux'])
             page.locator('[data-layer=flow]').click()
+            page.locator('#sceneOptions summary').click()
             page.locator('#trackAgent').click()
             expect(page.locator('#inspectionRail #inspectorEvidence')).to_contain_text('环路近邻')
             page.locator('#sceneFullscreen').click()
@@ -122,9 +132,11 @@ def run(base,output,engine='firefox'):
             page.evaluate("window._idleClockChanges=0;window._idleClockObserver=new MutationObserver(()=>_idleClockChanges++);_idleClockObserver.observe(document.getElementById('simClock'),{subtree:true,childList:true,characterData:true});")
             page.wait_for_timeout(250)
             check('paused workbench stops repeated chart and clock repaint',page.evaluate('(()=>{_idleClockObserver.disconnect();return _idleClockChanges===0;})()'))
-            page.locator('#entitySelect').select_option(str(frame['entities'][0]['id']))
+            page.locator('#entitySelect').fill(str(frame['entities'][0]['id']))
+            page.locator('#entitySelect').press('Enter')
             page.locator('#focusEntity').click();page.locator('#followEntity').click()
             check('entity selection and camera follow use the same persistent ID',page.evaluate('DAYAN_RESULTS.entityId')==str(frame['entities'][0]['id']) and page.evaluate('DAYAN3D.cameraState.following')==str(frame['entities'][0]['id']))
+            page.locator('#sceneOptions summary').click()
             page.locator('#sceneProcess').click()
             expect(page.locator('#processArea svg')).to_be_visible()
             with page.expect_download() as state_download:
@@ -135,7 +147,12 @@ def run(base,output,engine='firefox'):
             iv=api('/api/run',{'model_id':'NET052','ticks':30,'dt':.1,'seed':7,'interventions':[{'at_t':1.,'params':{'beta':'*0.5'}}]})
             restore(iv['run_id']);page.evaluate('DAYAN_RESULTS.seek(1.5)')
             check('intervention timeline displays one actual event',page.evaluate("DAYAN_RESULTS.events.filter(e=>e.etype==='intervention').length")==1)
-            check('aggregate animation explicitly discloses no individual tracks','示意' in page.locator('#sceneProvenance').inner_text())
+            check('SIS moves data composition to analysis while the scene remains spatial-only',
+                  page.evaluate("""()=>{
+                    const chart=document.querySelector('#structureChart');
+                    return DAYAN3D.presentation.kind==='observations' && chart.dataset.kind==='composition'
+                      && !_scene.children.some(node=>node.userData.isStateGroup);
+                  }"""))
             page.screenshot(path=str(output/'aggregate.png'),full_page=True)
             queue=api('/api/run',{'model_id':'SYS002','ticks':40,'dt':.1,'seed':7})
             restore(queue['run_id']);page.evaluate('DAYAN_RESULTS.seek(DAYAN_RESULTS.end)')
@@ -171,13 +188,13 @@ def run(base,output,engine='firefox'):
             # for a full-page capture can stall Chromium's software compositor.
             page.screenshot(path=str(output/'large.png'),full_page=False)
             ds=api('/api/datasets/import',{'name':'<img src=x onerror="window.UNIT_XSS=1"> security fixture','format':'csv','content':'value\n1\n','source':'explicit browser security fixture; not empirical'})
-            page.locator('[data-nav="data"]').click()
+            open_tool('数据中心')
             expect(page.locator('#showDatasetFixtures')).to_be_visible()
             check('default catalogue hides the verification fixture and offers a localized file chooser',
                   page.locator(f'[data-asset-id="{ds["dataset_id"]}"]').count()==0 and page.locator('#chooseDatasetFile').is_visible())
             page.evaluate('(id)=>DAYAN_RESULTS.openDataManager(id)',ds['dataset_id'])
             check('dataset names render as text without executable markup',page.evaluate('!window.UNIT_XSS') and page.locator('#datasetList img').count()==0)
-            page.locator('[data-nav="lab"]').click()
+            open_tool('研究设计')
             question='运行 NET106，环形道路交通流，ticks=18 dt=1，cells=80 density=0.25'
             page.locator('#labQuestion').fill(question)
             page.locator('#labRequestedMetric').fill('flux')
@@ -193,7 +210,7 @@ def run(base,output,engine='firefox'):
             check('lab preserves the original question through six real paired runs',
                   archive['research_spec']['original_request']==question and len(archive['runs'])==6
                   and archive['analysis']['arms']['较高密度']['paired_diff']['n']==3)
-            page.locator('[data-nav="analytics"]').click()
+            open_tool('实验分析')
             page.locator('#analyticsCurrent').click()
             expect(page.locator(f'[data-remove-archive="{experiment_id}"]')).to_be_visible(timeout=25000)
             expect(page.locator('#analyticsTrend svg')).to_be_visible(timeout=25000)
@@ -227,6 +244,7 @@ def run(base,output,engine='firefox'):
                   any(row['archive_id']==experiment_id and row['metric']=='flux' and row['code_version'] for row in csv_rows))
             page.locator('[data-nav="replay"]').click()
             page.locator(f'[data-output="{experiment_id}"]').click()
+            page.locator('#historyReportTab').click()
             expect(page.locator('#outputDetail')).to_contain_text(experiment_id)
             check('research outputs resolves the same experiment and bundle',page.locator(f'#outputDetail a[href="/api/runs/{experiment_id}/bundle.zip"]').count()==1)
             restore(rid)
@@ -237,14 +255,15 @@ def run(base,output,engine='firefox'):
             density=page.locator('[data-model-param="density"]')
             expect(density).to_have_value('0.35')
             density.fill('0.42')
-            page.locator('[data-nav="lab"]').click();page.locator('[data-nav="overview"]').click()
+            open_tool('研究设计');page.locator('[data-nav="overview"]').click()
             expect(density).to_have_value('0.42')
             page.set_viewport_size({'width':1000,'height':900});page.wait_for_timeout(120)
             check('viewport resize keeps one renderer canvas',page.locator('#viz3dContainer>canvas').count()==1)
-            page.get_by_role('button',name='简易模式',exact=True).click()
-            check('simple mode retains AI interaction',page.locator('#aiInput').is_visible())
+            page.locator('#assistantButton').click()
+            check('one workspace exposes AI and parameters',page.locator('#aiInput').is_visible() and not page.locator('[data-operation-mode]').count())
             page.reload(wait_until='domcontentloaded');page.wait_for_function('DAYAN_RESULTS.runs[0]?.run_id',timeout=30000)
             check('reload restores the saved run without creating a new one',page.evaluate('DAYAN_RESULTS.runs[0].run_id')==rid)
+            page.locator('#openExperiment').click()
             expect(density).to_have_value('0.42')
             check('unsent professional edits survive workspace switches and reload',True)
             check('no uncaught application JavaScript errors',not errors)

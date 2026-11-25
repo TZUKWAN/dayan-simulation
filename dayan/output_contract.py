@@ -19,7 +19,7 @@ PRIMARY_METRICS = {"NET052": "I", "NET053": "I", "NET055": "I",
                    "NET106": "flux", "NET113": "evacuated",
                    "BEH001": "segregation", "BEH018": "mean",
                    "ECO019": "employment", "SYS002": "Wq_sim",
-                   "CPL001": "evacuated","ECO038":"spectral_radius","ECO045":"conditional_variance"}
+                   "CPL001": "evacuated", "NET122": "green_share","ECO038":"spectral_radius","ECO045":"conditional_variance"}
 
 
 def _type(node, names):
@@ -121,9 +121,7 @@ def output_contract(mid, *, reference_results=None):
         raise ValueError(f"{mid} 无运行工厂")
     cls = factory[1] if isinstance(factory, tuple) else factory
     if str(mid).startswith("USR"):
-        from .custom_models import factory as custom_factory
-        definition = custom_factory(mid).definition
-        fields = {name: {"type": "number", "optional": False} for name in definition["observables"]}
+        fields = {name: {"type": "number", "optional": False} for name in cls.definition["observables"]}
         evidence = [{"kind": "validated-custom-definition", "model_id": mid}]
     else:
         fields, evidence = _class_fields(cls)

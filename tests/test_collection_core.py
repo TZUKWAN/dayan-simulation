@@ -52,6 +52,8 @@ class CollectionCore(unittest.TestCase):
         self.assertEqual(first['status'],'partial');self.assertEqual(first['n_records'],1)
         final=self.engine.run_collection('unit_fixture',{},page_budget=1,collection_id=first['collection_id'])
         self.assertEqual(final['status'],'done');self.assertEqual(calls,[0,1])
+        self.assertIsNone(final.get('incomplete_reason'))
+        self.assertIn('预算',first['incomplete_reason'])
         same=self.engine.run_collection('unit_fixture',{},collection_id=first['collection_id'])
         self.assertTrue(same['reused']);self.assertEqual(calls,[0,1])
         for page in final['pages']:

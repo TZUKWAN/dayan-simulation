@@ -3,28 +3,38 @@
 
 /* ---- 页面切换 ---- */
 const pageIds = Object.fromEntries([...document.querySelectorAll("[data-workspace-page]")].map(page => [page.id.slice(4).toLowerCase(), page]));
+const mainPages = new Set(["overview", "replay"]);
 
 function switchPage(name, remember = true) {
   if (!Object.hasOwn(pageIds, name)) return;
   const previous = document.body.dataset.page;
+  const priorMain = document.body.dataset.primaryPage || "overview";
+  const contextual = !mainPages.has(name);
+  const main = contextual ? priorMain : name;
+  const drawer = document.getElementById("researchDrawer");
+  if (contextual && pageIds[name].parentElement !== drawer) drawer.append(pageIds[name]);
+  if (priorMain === "replay" && main !== "replay") window.DAYAN_TOOLS?.leaveHistory();
+  document.body.dataset.primaryPage = main;
   document.body.dataset.page = name;
-  for (const [key, page] of Object.entries(pageIds)) page.hidden = key !== name;
+  drawer.hidden = !contextual;
+  document.getElementById('commandMain').inert = contextual;
+  for (const [key, page] of Object.entries(pageIds)) page.hidden = key !== name && key !== main;
   for (const button of document.querySelectorAll("[data-nav]")) {
-    const active = button.dataset.nav === (name === "scenarios" ? "lab" : name);
+    const active = button.dataset.nav === main;
     button.classList.toggle("active", active);
     if (active) button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   }
-  document.getElementById("systemPath").textContent =
-    document.querySelector("[data-nav][aria-current]")?.title || "研究工作台";
-  if (remember && new URLSearchParams(location.search).get("embed") !== "dsh") {
-    try { sessionStorage.setItem("dayan_space_vnext", name); } catch {}
+  if (remember && !contextual && new URLSearchParams(location.search).get("embed") !== "dsh") {
+    try { sessionStorage.setItem("dayan_space_vnext", main); } catch {}
   }
   if (previous !== name) {
-    if (previous === "overview") window.DAYAN_RESULTS?.setPlaying(false);
-    if (previous) window.scrollTo(0, 0);
+    for (const menu of document.querySelectorAll('.control-menu[open]')) menu.open = false;
+    if (mainPages.has(previous)) window.DAYAN_RESULTS?.setPlaying(false);
+    if (contextual) document.getElementById("closeResearchDrawer").focus({preventScroll:true});
+    else if (previous) window.scrollTo(0, 0);
     window.dispatchEvent(new CustomEvent("dayan:page", {detail: name}));
-    if (name === "overview") requestAnimationFrame(() => {window.dispatchEvent(new Event("resize"));window.DAYAN_RESULTS?.paint();});
+    if (!contextual) requestAnimationFrame(() => {window.dispatchEvent(new Event("resize"));window.DAYAN_RESULTS?.paint();});
   }
   const task = window.DAYAN_WORKBENCH?.load(name) || loadPageContent(name);
   return Promise.resolve(task).catch(error => window.DAYAN_NOTICE?.(error.message));

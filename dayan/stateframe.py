@@ -11,6 +11,53 @@ from __future__ import annotations
 
 from typing import Any
 from numbers import Integral,Real
+from math import ceil
+
+
+def validate_lattice(lattice):
+    """Validate dense per-cell binary state without decoding each cell as an entity."""
+    if not isinstance(lattice, dict):
+        raise ValueError("网格状态必须为对象")
+    width, height = lattice.get("width"), lattice.get("height")
+    preview = lattice.get("encoding") == "u8-preview"
+    edge = 224 if preview else 128
+    if any(type(n) is not int or not 1 <= n <= edge for n in (width, height)):
+        raise ValueError(f"网格显示边长须为1至{edge}的整数")
+    if preview:
+        source_width, source_height, stride = (lattice.get(k) for k in ("source_width","source_height","block_side"))
+        if any(type(n) is not int or n < 1 for n in (source_width, source_height, stride)) or (
+                ceil(source_width/stride), ceil(source_height/stride)) != (width,height):
+            raise ValueError("网格预览的区域和显示尺寸不一致")
+    layers = lattice.get("layers")
+    if not isinstance(layers, list) or not 1 <= len(layers) <= 3:
+        raise ValueError("网格须包含1至3个编码层")
+    ids = set()
+    for layer in layers:
+        if not isinstance(layer, dict):
+            raise ValueError("网格层必须为对象")
+        key, values, states = layer.get("id"), layer.get("values"), layer.get("states")
+        if not isinstance(key, str) or not key or key in ids:
+            raise ValueError("网格层标识缺失或重复")
+        if not isinstance(layer.get("label"), str) or not layer["label"]:
+            raise ValueError("网格层名称缺失")
+        if not isinstance(states, list) or len(states) != 2 or any(not isinstance(s, str) or not s for s in states):
+            raise ValueError("网格层须说明二元状态含义")
+        if preview:
+            import base64
+            if not isinstance(values, str) or len(values) != 4*ceil(width*height/3) or len(
+                    base64.b64decode(values, validate=True)) != width*height:
+                raise ValueError("网格预览编码与显示尺寸不符")
+        elif not isinstance(values, str) or len(values) != width * height or values.count("0") + values.count("1") != len(values):
+            raise ValueError("网格编码与网格尺寸或二元状态不符")
+        ids.add(key)
+
+
+def has_spatial_state(frame):
+    return bool(frame.get("entities") or frame.get("lattice") or frame.get("population"))
+
+
+def population_size(frame):
+    return (frame.get("population") or {}).get("count", len(frame.get("entities") or []))
 
 
 def state_frame_of(model: Any, t: float) -> dict | None:
@@ -21,13 +68,22 @@ def state_frame_of(model: Any, t: float) -> dict | None:
     fr = fn()
     if fr is None:
         return None
+    return validate_state_frame(fr, t)
+
+
+def validate_state_frame(fr, t, *, exact_time=False):
+    """Shared validation for native hooks and decoded managed-solver frames."""
     if not isinstance(fr, dict) or "entities" not in fr:
         raise ValueError("模型state_frame()未满足实体帧合同")
     fr = dict(fr)
     import math
-    if 'sim_t' in fr and (not isinstance(fr['sim_t'],(int,float)) or not math.isclose(fr['sim_t'],t,rel_tol=0,abs_tol=1e-8)):
+    from .population_groups import is_grouped, validate_groups, validate_preview
+    grouped = is_grouped(fr.get('population'))
+    exact_time = grouped or exact_time
+    if 'sim_t' in fr and (not isinstance(fr['sim_t'],(int,float)) or
+                          (fr['sim_t'] != t if exact_time else not math.isclose(fr['sim_t'],t,rel_tol=0,abs_tol=1e-8))):
         raise ValueError('模型状态帧时间与执行时钟不一致')
-    fr['sim_t']=round(float(t),9)
+    fr['sim_t']=float(t) if exact_time else round(float(t),9)
     entities=fr['entities']
     if not isinstance(entities,list):raise ValueError('状态帧entities须为列表')
     from .limits import limits
@@ -42,7 +98,27 @@ def state_frame_of(model: Any, t: float) -> dict | None:
         for coordinate in ('x','y','z'):
             if coordinate in entity and (isinstance(entity[coordinate],bool) or not isinstance(entity[coordinate],Real) or not math.isfinite(entity[coordinate])):
                 raise ValueError('状态帧坐标须为有限数值')
-    fr["provenance"] = "entity"
+    if "lattice" in fr:
+        validate_lattice(fr["lattice"])
+    if grouped:
+        validate_groups(fr['population'])
+        validate_preview(fr['population'], entities)
+    elif "population" in fr:
+        population = fr["population"]
+        count = population.get("count")
+        columns = population.get("columns")
+        grid = population.get("grid")
+        if (population.get("format") != "dayan-columns-v1" or type(count) is not int
+                or not 1 <= count <= limits().array_entities or not isinstance(columns,dict)
+                or not 1 <= len(columns) <= 16 or population.get("color_by") not in columns):
+            raise ValueError("实际全量主体列不满足归档合同")
+        if grid and (grid.get("rows", 0)*grid.get("columns", 0) != count
+                     or fr.get("lattice", {}).get("source_width") != grid.get("columns")
+                     or fr.get("lattice", {}).get("source_height") != grid.get("rows")):
+            raise ValueError("网格预览与实际主体列的尺寸不一致")
+        if any(type(entity["id"]) is not int or not 0 <= entity["id"] < count for entity in entities):
+            raise ValueError("主体预览必须引用实际归档主体编号")
+    fr["provenance"] = "lattice" if "lattice" in fr else "entity"
     return fr
 
 
